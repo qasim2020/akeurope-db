@@ -5,6 +5,7 @@ const exphbs = require('express-handlebars');
 const mongoose = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
 const path = require('path');
+const { router } = require('./routes/authRoutes');
 
 require('dotenv').config();
 mongoose();
@@ -41,4 +42,5 @@ app.get('/', (req, res) => {
 });
 
 const PORT = 3000;
-app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
+app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));module.exports = router;
+

@@ -1,7 +1,4 @@
 const User = require('../models/User');
-const bcrypt = require('bcryptjs');
-const nodemailer = require('nodemailer');
-const crypto = require('crypto');
 const checkValidForm = require('../modules/checkValidForm');
 require('dotenv').config();
 
@@ -53,46 +50,18 @@ exports.register = async (req, res) => {
 exports.login = async (req, res) => {
   const { email, password } = req.body;
   const user = await User.findOne({ email });
+  console.log(user);
   if (user && (await user.comparePassword(password))) {
     req.session.user = user;
-    res.redirect('/');
+    res.status(200).send("login successful");
   } else {
-    res.redirect('/login');
+    res.status(400).send("User not found/ Credentials are wrong!");
   }
 };
 
 // Logout Controller
 exports.logout = (req, res) => {
   req.session.destroy((err) => {
-    if (err) console.error(err);
-    res.redirect('/login');
-  });
-};
-
-// Forgot Password Controller
-exports.forgotPassword = async (req, res) => {
-  const { email } = req.body;
-  const user = await User.findOne({ email });
-  if (!user) return res.redirect('/forgot-password');
-
-  const token = crypto.randomBytes(20).toString('hex');
-  user.resetPasswordToken = token;
-  user.resetPasswordExpires = Date.now() + 3600000;
-  await user.save();
-
-  const transporter = nodemailer.createTransport({
-    service: 'Gmail',
-    auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
-  });
-
-  const mailOptions = {
-    to: user.email,
-    from: process.env.EMAIL_USER,
-    subject: 'Password Reset',
-    text: `You are receiving this because you requested a password reset. Please click on the following link, or paste into your browser to complete: http://localhost:3000/reset/${token}`,
-  };
-
-  transporter.sendMail(mailOptions, (err) => {
     if (err) console.error(err);
     res.redirect('/login');
   });
