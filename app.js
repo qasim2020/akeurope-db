@@ -4,6 +4,8 @@ const flash = require('connect-flash');
 const exphbs = require('express-handlebars');
 const mongoose = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
+const adminRoutes = require('./routes/adminRoutes');
+const projectRoutes = require('./routes/projectRoutes');
 const path = require('path');
 const { router } = require('./routes/authRoutes');
 
@@ -31,14 +33,13 @@ app.use('/static', express.static(path.join(__dirname, 'static')));
 
 // Use authentication routes
 app.use(authRoutes);
+app.use(adminRoutes);
+app.use(projectRoutes);
 
 // Home route
 app.get('/', (req, res) => {
-  if (req.session.user) {
-    res.render('home', { email: req.session.user.email });
-  } else {
-    res.redirect('/login');
-  }
+  
+  res.redirect('/login');
 });
 
 const PORT = 3000;

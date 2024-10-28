@@ -5,8 +5,9 @@ const { forgotPassword } = require('../controllers/forgotPassword');
 const { resetPassword } = require('../controllers/resetPassword');
 const { resetPasswordForm } = require('../controllers/resetPasswordForm');
 
-router.get('/register', (req, res) => res.render('register'));
-router.post('/register', authController.register);
+// router.get('/register', (req, res) => res.render('register'));
+// router.post('/register', authController.register);
+
 router.get('/login', (req, res) => res.render('login'));
 router.post('/login', authController.login);
 router.get('/logout', authController.logout);

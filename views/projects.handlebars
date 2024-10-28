@@ -1,0 +1,279 @@
+<!-- Page header -->
+<div class="page-header d-print-none">
+  <div class="container-xl">
+    <div class="row g-2 align-items-center">
+      <div class="col">
+        <!-- Page pre-title -->
+        <div class="page-pretitle">
+          Overview
+        </div>
+        <h2 class="page-title">
+          Showing projects
+        </h2>
+      </div>
+      <!-- Page title actions -->
+      <div class="col-auto ms-auto d-print-none">
+        <div class="btn-list">
+          <a
+            href="#"
+            class="btn btn-primary d-none d-sm-inline-block"
+            data-bs-toggle="modal"
+            data-bs-target="#modal-report"
+          >
+            <!-- Download SVG icon from http://tabler-icons.io/i/plus -->
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="icon"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              stroke-width="2"
+              stroke="currentColor"
+              fill="none"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            ><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path
+                d="M12 5l0 14"
+              /><path d="M5 12l14 0" /></svg>
+            Create new project
+          </a>
+          <a
+            href="#"
+            class="btn btn-primary d-sm-none btn-icon"
+            data-bs-toggle="modal"
+            data-bs-target="#modal-report"
+            aria-label="Create new report"
+          >
+            <!-- Download SVG icon from http://tabler-icons.io/i/plus -->
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="icon"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              stroke-width="2"
+              stroke="currentColor"
+              fill="none"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            ><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path
+                d="M12 5l0 14"
+              /><path d="M5 12l14 0" /></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Page body -->
+<div class="container-xl pt-4">
+  {{> showProjects}}
+</div>
+
+<!-- Modal -->
+<div
+  class="modal modal-blur fade"
+  id="modal-report"
+  tabindex="-1"
+  style="display: none; padding-left: 0px;"
+  aria-modal="true"
+  role="dialog"
+>
+  <div class="modal-dialog modal-lg" role="document" id="create-project">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">New project</h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label">Name</label>
+          <input
+            id="project-name"
+            type="text"
+            class="form-control"
+            name="example-text-input"
+            placeholder="Name of project"
+          />
+        </div>
+
+         <div class="mb-3">
+          <label class="form-label">Slug</label>
+          <input
+            id="project-slug"
+            type="text"
+            class="form-control"
+            name="example-text-input"
+            placeholder="name-of-project"
+          />
+        </div>
+
+        <label class="form-label">Project status</label>
+        <div class="form-selectgroup-boxes row mb-3" id="project-status">
+          <div class="col-lg-6">
+            <label class="form-selectgroup-item">
+              <input
+                type="radio"
+                name="report-type"
+                value="active"
+                class="form-selectgroup-input"
+                checked=""
+              />
+              <span
+                class="form-selectgroup-label d-flex align-items-center p-3"
+              >
+                <span class="me-3">
+                  <span class="form-selectgroup-check"></span>
+                </span>
+                <span class="form-selectgroup-label-content">
+                  <span class="form-selectgroup-title strong mb-1">Active</span>
+                  <span class="d-block text-secondary">Project is editable for
+                    administrators and can be viewed by organizations</span>
+                </span>
+              </span>
+            </label>
+          </div>
+          <div class="col-lg-6">
+            <label class="form-selectgroup-item">
+              <input
+                type="radio"
+                name="report-type"
+                value="inactive"
+                class="form-selectgroup-input"
+              />
+              <span
+                class="form-selectgroup-label d-flex align-items-center p-3"
+              >
+                <span class="me-3">
+                  <span class="form-selectgroup-check"></span>
+                </span>
+                <span class="form-selectgroup-label-content">
+                  <span
+                    class="form-selectgroup-title strong mb-1"
+                  >Inactive</span>
+                  <span class="d-block text-secondary">Project is not published
+                    and can not be edited by administrators</span>
+                </span>
+              </span>
+            </label>
+          </div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Project location</label>
+          <input
+            id="project-location"
+            type="text"
+            class="form-control"
+            name="example-text-input"
+            placeholder="Pakistan etc"
+          />
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <a href="#" class="btn btn-link link-secondary" data-bs-dismiss="modal">
+          Cancel
+        </a>
+        <a href="#" class="btn btn-primary ms-auto" id="save-project">
+          <!-- Download SVG icon from http://tabler-icons.io/i/plus -->
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="icon"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            stroke-width="2"
+            stroke="currentColor"
+            fill="none"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          ><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path
+              d="M12 5l0 14"
+            ></path><path d="M5 12l14 0"></path></svg>
+          Create new project
+        </a>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+
+  $(document).on("click", "#save-project", function(e) {
+
+    console.log($(this));
+    e.preventDefault();
+
+    console.log("form button pressed");
+
+    $("#create-project").find("input").removeClass("is-invalid");
+    $("#create-project").find(".invalid-feedback").remove();
+    $("#create-project").find("span").removeClass("border-red");
+    $("#create-project").find("span").removeClass("rounded-end");
+    $("#create-project").find(".alert").remove();
+
+    let isValid = [];
+    $("#create-project").find("input").each( (key, val) => {
+      if ($(val).val() == "") {
+        $(val).addClass("is-invalid")
+        if ($(val).siblings("span").length > 0) {
+          $(val).siblings("span").after(`<div class="invalid-feedback mb-2">Invalid entry</div> `);
+          $(val).siblings("span").addClass("is-invalid border-red rounded-end");
+        } else {
+          $(val).after(`<div class="invalid-feedback">Invalid entry</div> `);
+        }
+      }
+      isValid.push($(val).val() != "");
+    });
+
+    const name = $("#project-name").val();
+    const slug = $("#project-slug").val();
+    const location = $("#project-location").val();
+    const status = $("#project-status").find("input:checked").val();
+
+    console.log( {
+      name,
+      location,
+      status
+    })
+
+    if (!(isValid.every(val => val === true))) {
+        return false;
+    }
+
+    let currentBtnHTML = $(this).html();
+    $(this).html(`<span class="spinner-border spinner-border-sm me-2" role="status"></span>`);
+
+    $.ajax({
+      url: '/project/create', 
+      type: 'POST',
+      contentType: 'application/json', 
+      data: JSON.stringify({name, status, location, slug}),
+      success: function(response) {
+        $("#save-project").html(currentBtnHTML);
+        $(".modal-footer").append(`
+        <div class="w-100 d-block alert alert-success mt-4" role="alert">
+          <h4 class="alert-title">Project created!</h4>
+          <div class="text-secondary">${response}</div>
+        </div>`);
+        window.location.href = "/projects";
+      },
+      error: function(xhr, status, error) {
+        $("#save-project").html(currentBtnHTML);
+        $(".modal-footer").append(`
+        <div class="w-100 d-block alert alert-danger mt-4" role="alert">
+          <h4 class="alert-title">Could not save.</h4>
+          <div class="text-secondary">${xhr.responseText}</div>
+        </div>`);
+      }
+    });
+  })
+
+</script>

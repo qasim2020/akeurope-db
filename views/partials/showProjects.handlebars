@@ -1,0 +1,28 @@
+<div class="card">
+    <div class="table-responsive">
+      <table class="table table-vcenter card-table">
+        <thead>
+            <tr>
+              <th>Name</th>
+              <th>Slug</th>
+              <th>Location</th>
+              <th>Status</th>
+              <th>Settings</th>
+            </tr>
+        </thead>
+          <tbody>
+            {{#each data.projects}}
+            <tr class="select-project">
+              <td>{{this.name}}</td>
+              <td class="text-secondary">{{this.slug}}</td>
+              <td class="text-secondary">{{this.location}}</td>
+              <td class="text-secondary">{{this.status}}</td>
+              <td> 
+                <a href="/edit-project/{{this._id}}">Edit</a> 
+              </td>
+            </tr>
+            {{/each}}
+          </tbody>
+      </table>
+    </div>
+</div>

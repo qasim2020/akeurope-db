@@ -1,0 +1,48 @@
+
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label">Add custom fields</label>
+          <div class="table-responsive border rounded">
+            <table class="table mb-0 table-vcenter">
+              <thead>
+                <tr>
+                  <th></th>
+                  <th>Name</th>
+                  <th>Type</th>
+                  <th>Options</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="text-center">
+                    <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-trash pointer-cursor"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 7l16 0" /><path d="M10 11l0 6" /><path d="M14 11l0 6" /><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></svg>
+                  </td>
+                  <td>
+                    <input type="text" class="form-control" />
+                  </td>
+                  <td>
+                    <div class="dropdown">
+                      <select class="form-select">
+                        <option value="1">String</option>
+                        <option value="2">Dropdown</option>
+                        <option value="3">Date</option>
+                        <option value="4">Number</option>
+                        <option value="5">Phone Number</option>
+                      </select>
+                    </div>
+                  </td>
+                  <td>
+                    <input type="text" class="form-control">
+                  </td>
+                </tr>
+                <tr>
+                  <td colspan="4" class="text-center">
+                    <button class="btn">Add new field</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>

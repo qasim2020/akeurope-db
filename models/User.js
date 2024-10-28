@@ -5,6 +5,8 @@ const UserSchema = new mongoose.Schema({
   name: String,
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
+  role: { type: String, enum: ['admin', 'user', 'viewer'], default: 'viewer' },
+  invitationStatus: { type: Boolean, default: false },
   resetPasswordToken: String,
   resetPasswordExpires: Date,
 });
