@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Project = require('../models/Project');
+const { attachments } = require("../modules/attachments");
 
 router.get('/projects', async (req, res) => {
   let projects = await Project.find().lean();
@@ -8,7 +9,8 @@ router.get('/projects', async (req, res) => {
   res.render('projects', { 
     layout: "dashboard", 
     data: {
-      projects: projects
+      projects: projects,
+      activeMenu: "allProjects"
     }
   });
 });
@@ -63,5 +65,18 @@ router.post('/project/update/:id', async (req, res) => {
     res.status(500).send(err.toString());
   }
 });
+
+
+router.get('/project/:slug', attachments, async (req,res) => {
+  let project = await Project.findOne({slug: req.params.slug}).lean();
+  res.render('project', {
+    layout: "dashboard",
+    data: {
+      project,
+      projects: req.allProjects,
+      activeMenu: project.slug
+    }
+  })
+})
 
 module.exports = router;

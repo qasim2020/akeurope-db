@@ -335,7 +335,6 @@
     console.log("input chaanged");
     let input = $(this).closest(".accordion-item").find("input").val();
     let type = $(this).closest(".accordion-item").find(".form-select").val();
-    // if (!type) type = "string";
     $(this).closest(".accordion-item").find(".accordion-button").html(`
     Field is <span class="badge bg-azure-lt mx-2">${input}</span>
     with type of <span class="badge bg-blue-lt mx-2">${type}</span>
