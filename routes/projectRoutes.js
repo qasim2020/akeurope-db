@@ -4,7 +4,7 @@ const Project = require('../models/Project');
 
 router.get('/projects', async (req, res) => {
   let projects = await Project.find().lean();
-  // return res.send(projects);
+
   res.render('projects', { 
     layout: "dashboard", 
     data: {
@@ -15,15 +15,14 @@ router.get('/projects', async (req, res) => {
 
 router.post('/project/create', async (req, res) => {
   try {
-    const { name, slug, status, location } = req.body;
-
-    console.log( {name, slug, status, location })
+    const { name, slug, status, location, fields} = req.body;
 
     const project = new Project({
       name,
       slug,
       status,
-      location
+      location,
+      fields
     });
 
     await project.save();
@@ -31,18 +30,38 @@ router.post('/project/create', async (req, res) => {
     res.status(200).send("Saved successfully");
 
   } catch (err) {
-    res.status(500).send(err);
+    console.log(err.toString());
+    res.status(500).send(err.toString());
   }
 });
 
-router.get('/edit-project/:projId', async (req,res) => {
+router.get('/getProject/:projId', async (req,res) => {
   let project = await Project.findOne({_id: req.params.projId}).lean();
-  res.render('projectEdit', {
-    layout: "dashboard", 
-    data: {
-      project: project
+  res.render('partials/editProjectModal', { layout: false, data: {project} });
+});
+
+router.post('/project/update/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, slug, status, location, fields } = req.body;
+
+    // Find and update the project with the given ID
+    const project = await Project.findByIdAndUpdate(
+      id,
+      { name, slug, status, location, fields },
+      { new: true } 
+    );
+
+    if (!project) {
+      return res.status(404).send("Project not found");
     }
-  });
+
+    res.status(200).send("Updated successfully");
+
+  } catch (err) {
+    console.error(err.toString());
+    res.status(500).send(err.toString());
+  }
 });
 
 module.exports = router;

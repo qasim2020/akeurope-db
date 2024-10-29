@@ -18,7 +18,7 @@
               <td class="text-secondary">{{this.location}}</td>
               <td class="text-secondary">{{this.status}}</td>
               <td> 
-                <a href="/edit-project/{{this._id}}">Edit</a> 
+                <a project-id="{{this._id}}" class="edit-project cursor-pointer">Edit</a> 
               </td>
             </tr>
             {{/each}}

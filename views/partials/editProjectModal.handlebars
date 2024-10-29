@@ -1,0 +1,136 @@
+<div class="modal modal-blur fade" id="modal-{{data.project.slug}}" tabindex="-1" style="display: none; padding-left: 0px;" aria-modal="true" role="dialog" projSlug="{{data.project.slug}}" projId="{{data.project._id}}">
+    <div class="modal-dialog modal-lg" role="document" id="edit-project-modal-{{data.project.slug}}">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">New project</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Name</label>
+                    <input type="text" class="form-control project-name" name="example-text-input" placeholder="Name of project" value="{{data.project.name}}" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Slug</label>
+                    <input type="text" class="form-control project-slug" name="example-text-input" placeholder="name-of-project" value="{{data.project.slug}}" />
+                </div>
+
+                <label class="form-label">Project status</label>
+                <div class="form-selectgroup-boxes row mb-3 project-status">
+                    <div class="col-lg-6">
+                        <label class="form-selectgroup-item">
+                            <input type="radio" name="report-type" value="active" class="form-selectgroup-input" {{#if (eq data.project.status "active")}} checked="" {{/if}} />
+                            <span class="form-selectgroup-label d-flex align-items-center p-3">
+                <span class="me-3">
+                  <span class="form-selectgroup-check"></span>
+                            </span>
+                            <span class="form-selectgroup-label-content">
+                  <span class="form-selectgroup-title strong mb-1">Active</span>
+                            <span class="d-block text-secondary">Project is editable for
+                    administrators and can be viewed by organizations</span>
+                            </span>
+                            </span>
+                        </label>
+                    </div>
+                    <div class="col-lg-6">
+                        <label class="form-selectgroup-item">
+                            <input type="radio" name="report-type" value="inactive" class="form-selectgroup-input" {{#if (eq data.project.status "inactive")}} checked="" {{/if}} />
+                            <span class="form-selectgroup-label d-flex align-items-center p-3">
+                <span class="me-3">
+                  <span class="form-selectgroup-check"></span>
+                            </span>
+                            <span class="form-selectgroup-label-content">
+                  <span
+                    class="form-selectgroup-title strong mb-1"
+                  >Inactive</span>
+                            <span class="d-block text-secondary">Project is not published
+                    and can not be edited by administrators</span>
+                            </span>
+                            </span>
+                        </label>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Project location</label>
+                    <input type="text" class="form-control project-location" name="example-text-input" placeholder="Pakistan etc" value="{{data.project.location}}" />
+                </div>
+
+            </div>
+
+            <div class="modal-body">
+              <label class="form-label">Enter project fields</label>
+              <p class="card-subtitle mb-3">Drag and drop the fields to change their order</p>
+              <div class="accordion" id="accordion-{{data.project.slug}}">
+                {{#each data.project.fields}}
+                <div class="accordion-item">
+                  <h2 class="accordion-header d-flex justify-content-between" id="">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{../data.project.slug}}-{{@key}}" aria-expanded="true">
+                        Field is 
+                        <span class="badge bg-blue-lt mx-2">{{this.name}}</span> with type of 
+                        <span class="badge bg-azure-lt mx-2">{{this.type}}</span>
+                    </button>
+                  </h2>
+                  <div id="collapse-{{../data.project.slug}}-{{@key}}" class="accordion-collapse collapse" data-bs-parent="#accordion-{{../data.project.slug}}">
+                    <div class="accordion-body pt-0">
+                      <div class="mb-3">
+                          <label class="form-label">Name</label>
+                          <input id="" type="text" class="form-control" name="example-text-input" placeholder="Field name" value="{{this.name}}" />
+                      </div>
+                      <div class="mb-3">
+                          <label class="form-label">Type</label>
+                          <select class="form-select">
+                            <option {{#if (eq this.type "string")}} selected {{/if}} value="string">String</option>
+                            <option {{#if (eq this.type "number")}} selected {{/if}} value="number">Number</option>
+                            <option {{#if (eq this.type "boolean")}} selected {{/if}} value="boolean">Boolean</option>
+                            <option {{#if (eq this.type "dropdown")}} selected {{/if}} value="dropdown">Dropdown</option>
+                            <option {{#if (eq this.type "date")}} selected {{/if}} value="date">Date (Calendar)</option>
+                            <option {{#if (eq this.type "image")}} selected {{/if}} value="image">Image upload</option>
+                            <option {{#if (eq this.type "file")}} selected {{/if}} value="file">File upload</option>
+                          </select>
+                      </div>
+                      <div class="mb-3 text-center">
+                        <button class="btn btn-outline-danger border delete-project-field">
+                          <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-trash"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 7l16 0" /><path d="M10 11l0 6" /><path d="M14 11l0 6" /><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></svg>
+                          Delete this field
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {{/each}}
+
+            </div>
+            <div class="text-center mt-3">
+              <button class="btn btn-outline-secondary border add-project-field">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                        <path d="M12 5l0 14"></path>
+                        <path d="M5 12l14 0"></path>
+                    </svg>
+                    Add new field
+              </button>
+            </div>
+          </div>
+            <div class="modal-footer">
+                <a href="#" class="btn btn-link link-secondary" data-bs-dismiss="modal">
+                    Cancel
+                </a>
+                <a href="#" class="btn btn-primary ms-auto" onclick="editProject(this)">
+                    <!-- Download SVG icon from http://tabler-icons.io/i/plus -->
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-upload">
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                        <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2" />
+                        <path d="M7 9l5 -5l5 5" />
+                        <path d="M12 4l0 12" />
+                    </svg>
+                    Update project
+                </a>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<button href="#" class="btn btn-primary d-none" id="button-{{data.project._id}}" data-bs-toggle="modal" data-bs-target="#modal-{{data.project.slug}}">

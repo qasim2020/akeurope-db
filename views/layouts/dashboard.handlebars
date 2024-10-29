@@ -32,9 +32,10 @@
   <body >
     <script src="/tabler/js/demo-theme.min.js?1692870487"></script>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/gh/RubaXa/Sortable/Sortable.min.js"></script>
     <div class="page">
       <header class="navbar navbar-expand-md d-print-none d-none d-lg-flex">
-        <div class="container-xl">
+        <div class="d-flex justify-content-end w-100">
           <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar-menu" aria-controls="navbar-menu" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
           </button>
@@ -136,7 +137,7 @@
               </div>
             </div>
             <div class="nav-item dropdown">
-              <a href="#" class="nav-link d-flex lh-1 text-reset p-0" data-bs-toggle="dropdown" aria-label="Open user menu">
+              <a href="#" class="nav-link d-flex lh-1 text-reset pr-4" data-bs-toggle="dropdown" aria-label="Open user menu">
                 <span class="avatar avatar-sm" style="background-image: url(/static/avatars/000m.jpg)"></span>
                 <div class="d-none d-xl-block ps-2">
                   <div>{{name}}</div>
@@ -155,7 +156,7 @@
         </div>
       </header>
       <!-- Sidebar -->
-      <aside class="navbar navbar-vertical navbar-expand-lg navbar-transparent">
+      <aside class="navbar navbar-vertical navbar-expand-lg navbar">
         <div class="container-fluid">
           <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#sidebar-menu" aria-controls="sidebar-menu" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>

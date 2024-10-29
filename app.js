@@ -8,12 +8,13 @@ const adminRoutes = require('./routes/adminRoutes');
 const projectRoutes = require('./routes/projectRoutes');
 const path = require('path');
 const { router } = require('./routes/authRoutes');
+const hbsHelpers = require('./modules/helpers');
 
 require('dotenv').config();
 mongoose();
 
 const app = express();
-app.engine('handlebars', exphbs.engine());
+app.engine('handlebars', exphbs.engine({helpers: hbsHelpers}));
 app.set('view engine', 'handlebars');
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());

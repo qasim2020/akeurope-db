@@ -14,12 +14,7 @@
       <!-- Page title actions -->
       <div class="col-auto ms-auto d-print-none">
         <div class="btn-list">
-          <a
-            href="#"
-            class="btn btn-primary d-none d-sm-inline-block"
-            data-bs-toggle="modal"
-            data-bs-target="#modal-report"
-          >
+          <a href="#" class="btn btn-primary d-none d-sm-inline-block" id="#editProjectModal" data-bs-toggle="modal" data-bs-target="#modal-report" >
             <!-- Download SVG icon from http://tabler-icons.io/i/plus -->
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -71,164 +66,148 @@
 </div>
 
 <!-- Modal -->
-<div
-  class="modal modal-blur fade"
-  id="modal-report"
-  tabindex="-1"
-  style="display: none; padding-left: 0px;"
-  aria-modal="true"
-  role="dialog"
->
-  <div class="modal-dialog modal-lg" role="document" id="create-project">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">New project</h5>
-        <button
-          type="button"
-          class="btn-close"
-          data-bs-dismiss="modal"
-          aria-label="Close"
-        ></button>
-      </div>
-      <div class="modal-body">
-        <div class="mb-3">
-          <label class="form-label">Name</label>
-          <input
-            id="project-name"
-            type="text"
-            class="form-control"
-            name="example-text-input"
-            placeholder="Name of project"
-          />
-        </div>
-
-         <div class="mb-3">
-          <label class="form-label">Slug</label>
-          <input
-            id="project-slug"
-            type="text"
-            class="form-control"
-            name="example-text-input"
-            placeholder="name-of-project"
-          />
-        </div>
-
-        <label class="form-label">Project status</label>
-        <div class="form-selectgroup-boxes row mb-3" id="project-status">
-          <div class="col-lg-6">
-            <label class="form-selectgroup-item">
-              <input
-                type="radio"
-                name="report-type"
-                value="active"
-                class="form-selectgroup-input"
-                checked=""
-              />
-              <span
-                class="form-selectgroup-label d-flex align-items-center p-3"
-              >
-                <span class="me-3">
-                  <span class="form-selectgroup-check"></span>
-                </span>
-                <span class="form-selectgroup-label-content">
-                  <span class="form-selectgroup-title strong mb-1">Active</span>
-                  <span class="d-block text-secondary">Project is editable for
-                    administrators and can be viewed by organizations</span>
-                </span>
-              </span>
-            </label>
-          </div>
-          <div class="col-lg-6">
-            <label class="form-selectgroup-item">
-              <input
-                type="radio"
-                name="report-type"
-                value="inactive"
-                class="form-selectgroup-input"
-              />
-              <span
-                class="form-selectgroup-label d-flex align-items-center p-3"
-              >
-                <span class="me-3">
-                  <span class="form-selectgroup-check"></span>
-                </span>
-                <span class="form-selectgroup-label-content">
-                  <span
-                    class="form-selectgroup-title strong mb-1"
-                  >Inactive</span>
-                  <span class="d-block text-secondary">Project is not published
-                    and can not be edited by administrators</span>
-                </span>
-              </span>
-            </label>
-          </div>
-        </div>
-        <div class="mb-3">
-          <label class="form-label">Project location</label>
-          <input
-            id="project-location"
-            type="text"
-            class="form-control"
-            name="example-text-input"
-            placeholder="Pakistan etc"
-          />
-        </div>
-
-      </div>
-
-      <div class="modal-footer">
-        <a href="#" class="btn btn-link link-secondary" data-bs-dismiss="modal">
-          Cancel
-        </a>
-        <a href="#" class="btn btn-primary ms-auto" id="save-project">
-          <!-- Download SVG icon from http://tabler-icons.io/i/plus -->
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="icon"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            stroke-width="2"
-            stroke="currentColor"
-            fill="none"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          ><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path
-              d="M12 5l0 14"
-            ></path><path d="M5 12l14 0"></path></svg>
-          Create new project
-        </a>
-
-      </div>
-    </div>
-  </div>
-</div>
+{{> emptyProjectModal}}
 
 <script>
 
-  $(document).on("click", "#save-project", function(e) {
+  $(document).on("click", ".edit-project", function(e) {
 
-    console.log($(this));
-    e.preventDefault();
+    const projId = $(this).attr("project-id");
 
-    console.log("form button pressed");
+    const modalExists = $(document).find(`#button-${projId}`).length > 0;
 
-    $("#create-project").find("input").removeClass("is-invalid");
-    $("#create-project").find(".invalid-feedback").remove();
-    $("#create-project").find("span").removeClass("border-red");
-    $("#create-project").find("span").removeClass("rounded-end");
-    $("#create-project").find(".alert").remove();
+    if (modalExists) {
+      return $(`#button-${projId}`).trigger("click");
+    }
+
+    $.ajax({
+      url: `/getProject/${projId}`,
+      type: 'GET',
+      contentType: 'application/json', 
+      success: function(response) {
+        $("footer").before(response);
+        $(`#button-${projId}`).trigger("click");
+          let allAccordions = $(".accordion").length - 1;
+          let el = document.querySelectorAll(".accordion")[allAccordions];
+          new Sortable(el, {
+            animation: 100,
+            group: '.accordion',
+            draggable: '.accordion-item',
+            handle: '.accordion-header',
+            sort: true,
+            filter: '.sortable-disabled',
+            chosenClass: 'active'
+          });
+      },
+      error: function(xhr, status, error) {
+        console.log(error);
+      }
+    });
+
+  })
+
+  let editProject = function(elem) {
+
+    $(elem).closest(".modal").find("input").removeClass("is-invalid");
+    $(elem).closest(".modal").find(".invalid-feedback").remove();
+    $(elem).closest(".modal").find("span").removeClass("border-red");
+    $(elem).closest(".modal").find("span").removeClass("rounded-end");
+    $(elem).closest(".modal").find(".alert").remove();
+    $(elem).closest(".modal").find(".accordion-item").removeClass("bg-red-lt");
 
     let isValid = [];
-    $("#create-project").find("input").each( (key, val) => {
+    $(elem).closest(".modal").find("input").each( (key, val) => {
       if ($(val).val() == "") {
         $(val).addClass("is-invalid")
+        if ($(val).closest(".accordion-item").length > 0) { 
+          $(val).closest(".accordion-item").addClass("bg-red-lt");
+        }
         if ($(val).siblings("span").length > 0) {
           $(val).siblings("span").after(`<div class="invalid-feedback mb-2">Invalid entry</div> `);
           $(val).siblings("span").addClass("is-invalid border-red rounded-end");
         } else {
           $(val).after(`<div class="invalid-feedback">Invalid entry</div> `);
         }
+      } else {
+        $(val).addClass("is-valid");
+      }
+      isValid.push($(val).val() != "");
+    });
+
+    const name = $(elem).closest(".modal").find(".project-name").val();
+    const slug = $(elem).closest(".modal").find(".project-slug").val();
+    const status = $(elem).closest(".modal").find(".project-status input:checked").val();
+    const location = $(elem).closest(".modal").find(".project-location").val();
+    const id = $(elem).closest(".modal").attr("projId");
+
+    const fields = $(elem).closest(".modal").find(".accordion-item").map( (key, val) => {
+      return {
+        name: $(val).find("input:first").val(),
+        type: $(val).find(".form-select").val()
+      }
+    }).get();
+
+    console.log({name, slug, status, location, fields});
+
+
+    if (!(isValid.every(val => val === true))) {
+        return false;
+    }
+
+    let currentBtnHTML = $(elem).html();
+    $(elem).html(`<span class="spinner-border spinner-border-sm me-2" role="status"></span>`);
+   
+    $.ajax({
+      url: `/project/update/${id}`, 
+      type: 'POST',
+      contentType: 'application/json', 
+      data: JSON.stringify({name, status, location, slug, fields}),
+      success: function(response) {
+        $(elem).html(currentBtnHTML);
+        window.location.href = "/projects";
+      },
+      error: function(xhr, status, error) {
+        console.log(xhr);
+        $(elem).html(currentBtnHTML);
+        $(".modal-footer").append(`
+        <div class="w-100 d-block alert alert-danger mt-4" role="alert">
+          <h4 class="alert-title">Could not save.</h4>
+          <div class="text-secondary">${xhr.responseText}</div>
+        </div>`);
+      }
+    }); 
+
+  };
+
+  $(document).on("click", "#save-project", function(e) {
+
+    e.preventDefault();
+
+    console.log("form button pressed");
+
+    $("#create-project").find("input").removeClass("is-invalid");
+    $("#create-project").find("input").removeClass("is-valid");
+    $("#create-project").find(".invalid-feedback").remove();
+    $("#create-project").find("span").removeClass("border-red");
+    $("#create-project").find("span").removeClass("rounded-end");
+    $("#create-project").find(".alert").remove();
+    $("#create-project").closest(".modal").find(".accordion-item").removeClass("bg-red-lt");
+
+    let isValid = [];
+    $("#create-project").find("input").each( (key, val) => {
+      if ($(val).val() == "") {
+        $(val).addClass("is-invalid")
+        if ($(val).closest(".accordion-item").length > 0) { 
+          $(val).closest(".accordion-item").addClass("bg-red-lt");
+        }
+        if ($(val).siblings("span").length > 0) {
+          $(val).siblings("span").after(`<div class="invalid-feedback mb-2">Invalid entry</div> `);
+          $(val).siblings("span").addClass("is-invalid border-red rounded-end");
+        } else {
+          $(val).after(`<div class="invalid-feedback">Invalid entry</div> `);
+        }
+      } else {
+        $(val).addClass("is-valid");
       }
       isValid.push($(val).val() != "");
     });
@@ -238,10 +217,19 @@
     const location = $("#project-location").val();
     const status = $("#project-status").find("input:checked").val();
 
+    const fields = $("#create-project").closest(".modal").find(".accordion-item").map( (key, val) => {
+      console.log({key, val})
+      return {
+        name: $(val).find("input:first").val(),
+        type: $(val).find(".form-select").val()
+      }
+    }).get();
+
     console.log( {
       name,
       location,
-      status
+      status,
+      fields
     })
 
     if (!(isValid.every(val => val === true))) {
@@ -255,17 +243,13 @@
       url: '/project/create', 
       type: 'POST',
       contentType: 'application/json', 
-      data: JSON.stringify({name, status, location, slug}),
+      data: JSON.stringify({name, status, location, slug, fields}),
       success: function(response) {
         $("#save-project").html(currentBtnHTML);
-        $(".modal-footer").append(`
-        <div class="w-100 d-block alert alert-success mt-4" role="alert">
-          <h4 class="alert-title">Project created!</h4>
-          <div class="text-secondary">${response}</div>
-        </div>`);
         window.location.href = "/projects";
       },
       error: function(xhr, status, error) {
+        console.log(xhr);
         $("#save-project").html(currentBtnHTML);
         $(".modal-footer").append(`
         <div class="w-100 d-block alert alert-danger mt-4" role="alert">
@@ -274,6 +258,89 @@
         </div>`);
       }
     });
+
   })
+
+  document.addEventListener('DOMContentLoaded', function() {
+      let el = document.querySelector('.accordion');
+      if (el) {
+          new Sortable(el, {
+            animation: 100,
+            group: '.accordion',
+            draggable: '.accordion-item',
+            handle: '.accordion-header',
+            sort: true,
+            filter: '.sortable-disabled',
+            chosenClass: 'active'
+          });
+      }
+  });
+
+  $(document).on("click", ".add-project-field", function(e) {
+    let projectSlug=$(this).closest(".modal").attr("projSlug");
+    let fieldNo = $(this).closest(".modal-body").find(".accordion-button").length + 1;
+    $('.accordion-button').addClass('collapsed');
+    $('.accordion-collapse').removeClass('show').collapse('hide');
+    $(this).closest(".modal-body").find(".accordion").append(`
+    <div class="accordion-item">
+      <h2 class="accordion-header d-flex justify-content-between" id="">
+        <button class="accordion-button " type="button" data-bs-toggle="collapse" data-bs-target="#collapse-${projectSlug}-${fieldNo}" aria-expanded="true">
+          Field # ${fieldNo}
+        </button>
+      </h2>
+      <div id="collapse-${projectSlug}-${fieldNo}" class="accordion-collapse collapse show" data-bs-parent="#accordion-${projectSlug}">
+        <div class="accordion-body pt-0">
+          <div class="mb-3">
+              <label class="form-label">Name</label>
+              <input id="" type="text" class="form-control" name="example-text-input" placeholder="Field name" value="" />
+          </div>
+          <div class="mb-3">
+              <label class="form-label">Type</label>
+              <select class="form-select">
+                <option value="string">String</option>
+                <option value="number">Number</option>
+                <option value="boolean">Boolean</option>
+                <option value="dropdown">Dropdown</option>
+                <option value="date">Date (Calendar)</option>
+                <option value="image">Image upload</option>
+                <option value="file">File upload</option>
+              </select>
+          </div>
+          <div class="mb-3 text-center">
+            <button class="btn btn-outline-danger border delete-project-field">
+              <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-trash"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 7l16 0" /><path d="M10 11l0 6" /><path d="M14 11l0 6" /><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></svg>
+              Delete this field
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    `);
+  })
+
+
+  $(document).on("click", ".delete-project-field", function(e) {
+    let modal = $(this).closest(".modal");
+    let projectSlug = modal.attr("projSlug");
+    $(this).closest(".accordion-item").remove();
+    modal.find(".accordion-item").each( (key, val) => {
+      $(val).find(".accordion-button").attr({"data-bs-target": `#collapse-${projectSlug}-${key+1}`});
+      $(val).find(".accordion-collapse").attr({id: `collapse-${projectSlug}-${key+1}`})
+    })
+  })
+  
+
+  $(document).on("change keyup", ".accordion-item input, .accordion-item .form-select", function() {
+    console.log("input chaanged");
+    let input = $(this).closest(".accordion-item").find("input").val();
+    let type = $(this).closest(".accordion-item").find(".form-select").val();
+    // if (!type) type = "string";
+    $(this).closest(".accordion-item").find(".accordion-button").html(`
+    Field is <span class="badge bg-azure-lt mx-2">${input}</span>
+    with type of <span class="badge bg-blue-lt mx-2">${type}</span>
+    `);
+  })
+
 
 </script>
