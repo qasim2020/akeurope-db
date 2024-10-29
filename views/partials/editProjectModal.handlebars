@@ -67,7 +67,7 @@
                   <h2 class="accordion-header d-flex justify-content-between" id="">
                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{../data.project.slug}}-{{@key}}" aria-expanded="true">
                         Field is 
-                        <span class="badge bg-blue-lt mx-2">{{this.name}}</span> with type of 
+                        <span class="badge bg-blue-lt mx-2">{{this.actualName}}</span> with type of 
                         <span class="badge bg-azure-lt mx-2">{{this.type}}</span>
                     </button>
                   </h2>
@@ -75,12 +75,13 @@
                     <div class="accordion-body pt-0">
                       <div class="mb-3">
                           <label class="form-label">Name</label>
-                          <input id="" type="text" class="form-control" name="example-text-input" placeholder="Field name" value="{{this.name}}" />
+                          <input id="" type="text" class="form-control" name="example-text-input" placeholder="Field name" value="{{this.actualName}}" />
                       </div>
                       <div class="mb-3">
                           <label class="form-label">Type</label>
                           <select class="form-select">
                             <option {{#if (eq this.type "string")}} selected {{/if}} value="string">String</option>
+                            <option {{#if (eq this.type "textarea")}} selected {{/if}} value="textarea">Long text</option>
                             <option {{#if (eq this.type "number")}} selected {{/if}} value="number">Number</option>
                             <option {{#if (eq this.type "boolean")}} selected {{/if}} value="boolean">Boolean</option>
                             <option {{#if (eq this.type "dropdown")}} selected {{/if}} value="dropdown">Dropdown</option>
@@ -89,6 +90,54 @@
                             <option {{#if (eq this.type "file")}} selected {{/if}} value="file">File upload</option>
                           </select>
                       </div>
+                      {{#if (eq this.type "boolean")}}
+                      <label class="form-label dynamic-options">Select boolean values</label>
+                      <div class="mb-3 dynamic-options">
+
+                          <div class="row g-2" style="margin-bottom:0.5rem">
+                              <div class="col-auto">
+                                  <a href="#" class="btn btn-icon disabled" aria-label="Button">
+                                      <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-check"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l5 5l10 -10" /></svg>
+                                  </a>
+                              </div>
+                              <div class="col">
+                                  <input type="text" data-label="true" class="form-control" placeholder="Active" value="{{this.options.0.value}}">
+                              </div>
+                          </div>
+
+                          <div class="row g-2" style="margin-bottom:0.5rem">
+                              <div class="col-auto">
+                                  <a href="#" class="btn btn-icon disabled" aria-label="Button">
+                                      <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-x"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M18 6l-12 12" /><path d="M6 6l12 12" /></svg>
+                                  </a>
+                              </div>
+                              <div class="col">
+                                  <input type="text" data-label="false" class="form-control" placeholder="Inactive" value="{{this.options.1.value}}">
+                              </div>
+                          </div>
+
+                      </div>
+                      {{/if}}
+                      {{#if (eq this.type "dropdown")}}
+                      <label class="form-label dynamic-options">Add / edit dropdown options</label>
+                      {{#each this.options}}
+                      <div class="mb-3 dynamic-options">
+                          <div class="row g-2">
+                              <div class="col-auto">
+                                  <a href="#" class="btn btn-icon" aria-label="Button" onclick="addOption(this)">
+                                      <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-plus"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 5l0 14" /><path d="M5 12l14 0" /></svg>
+                                  </a>
+                                  <a href="#" class="btn btn-icon" aria-label="Button" onclick="deleteOption(this)">
+                                      <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-trash"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 7l16 0" /><path d="M10 11l0 6" /><path d="M14 11l0 6" /><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></svg>
+                                  </a>
+                              </div>
+                              <div class="col">
+                                  <input type="text" class="form-control" placeholder="Enter your option" value="{{this.value}}">
+                              </div>
+                          </div>
+                      </div>
+                      {{/each}}
+                      {{/if}}
                       <div class="mb-3 text-center">
                         <button class="btn btn-outline-danger border delete-project-field">
                           <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-trash"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 7l16 0" /><path d="M10 11l0 6" /><path d="M14 11l0 6" /><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></svg>

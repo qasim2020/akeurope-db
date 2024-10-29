@@ -1,34 +1,38 @@
-{{#if data.projects}}
-<div class="card">
-    <div class="table-responsive">
-      <table class="table table-vcenter card-table">
-        <thead>
+ {{#if entries.length}}
+      <table border="1" cellpadding="10" cellspacing="0">
+         <thead>
             <tr>
-              <th>Name</th>
-              <th>Slug</th>
-              <th>Location</th>
-              <th>Status</th>
-              <th>Settings</th>
+               {{#each fields}}
+                  <th>{{name}}</th>
+               {{/each}}
             </tr>
-        </thead>
-          <tbody>
-            {{#each data.projects}}
-            <tr class="select-project">
-              <td>{{this.name}}</td>
-              <td class="text-secondary">{{this.slug}}</td>
-              <td class="text-secondary">{{this.location}}</td>
-              <td class="text-secondary">{{this.status}}</td>
-              <td> 
-                <a project-id="{{this._id}}" class="edit-project cursor-pointer">Edit</a> 
-              </td>
-            </tr>
+         </thead>
+         <tbody>
+            {{#each entries}}
+               <tr>
+                  {{#each ../fields as |field|}}
+                     <td>
+                        {{#if (eq field.type "image")}}
+                           <img src="{{lookup ../this field.name}}" alt="{{field.name}}" style="width: 50px; height: auto;">
+                        {{else if (eq field.type "dropdown")}}
+                           <select>
+                              {{#each field.options as |option|}}
+                                 <option value="{{option}}" {{#if (eq option (lookup ../this field.name))}}selected{{/if}}>{{option}}</option>
+                              {{/each}}
+                           </select>
+                        {{else if (eq field.type "date")}}
+                           <span class="badge">{{lookup ../this field.name}}</span>
+                        {{else}}
+                           <input type="text" value="{{lookup ../this field.name}}">
+                        {{/if}}
+                     </td>
+                  {{/each}}
+               </tr>
             {{/each}}
-          </tbody>
+         </tbody>
       </table>
-    </div>
-</div>
-{{else}}
- <div class="container-xl my-auto">
+   {{else}}
+      <div class="container-xl my-auto">
             <div class="empty">
               <div class="empty-img"><svg class="img" xmlns="http://www.w3.org/2000/svg" height="256" fill="none" viewBox="0 0 800 600">
                   <style>
@@ -72,12 +76,11 @@
                 Try adjusting your search or filter to find what you're looking for.
               </p>
               <div class="empty-action">
-                <a href="#" class="btn btn-primary d-none d-sm-inline-block" id="" data-bs-toggle="modal" data-bs-target="#modal-new-project">
+                <a href="#" class="btn btn-primary d-none d-sm-inline-block" id="" data-bs-toggle="modal" data-bs-target="#modal-new-entry">
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M12 5l0 14"></path><path d="M5 12l14 0"></path></svg>
-                  Create your first project
+                  Add your first entry
                 </a>
               </div>
             </div>
           </div>
-
-{{/if}}
+   {{/if}}

@@ -1,3 +1,4 @@
+{{log data}}
 <!-- Page header -->
 <div class="page-header d-print-none">
   <div class="container-xl">
@@ -38,7 +39,7 @@
             </svg>
             Create new entry
           </a>
-          <a href="#" class="btn btn-primary d-sm-none btn-icon" data-bs-toggle="modal" data-bs-target="#modal-report" aria-label="modal-new-entry">
+          <a href="#" class="btn btn-primary d-sm-none btn-icon" data-bs-toggle="modal" data-bs-target="#modal-new-entry" aria-label="modal-new-entry">
             <!-- Download SVG icon from http://tabler-icons.io/i/plus -->
             <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
               <path stroke="none" d="M0 0h24v24H0z" fill="none" />
@@ -53,7 +54,335 @@
 </div>
 <!-- Page body -->
 <div class="container-xl pt-4">
-  {{> showProjects}}
+  {{> showProject}}
 </div>
-<!-- Modal -->
+
+{{> emptyEntryModal}}
+
 {{> editProjectModal}}
+
+
+<script>
+
+
+  function toCamelCase(str) {
+    return str
+        .toLowerCase()                
+        .replace(/[^a-zA-Z0-9]+(.)/g, 
+            (match, chr) => chr.toUpperCase() 
+        );
+    }
+
+function toKebabCase(str) {
+    return str
+        .toLowerCase()                // Convert entire string to lowercase
+        .replace(/[^a-z0-9]+/g, '-')  // Replace non-alphanumeric characters with hyphens
+        .replace(/(^-|-$)/g, '');     // Remove leading or trailing hyphens if any
+}
+
+
+let editProject = function(elem) {
+
+    $(elem).closest(".modal").find("input").removeClass("is-invalid");
+    $(elem).closest(".modal").find(".invalid-feedback").remove();
+    $(elem).closest(".modal").find("span").removeClass("border-red");
+    $(elem).closest(".modal").find("span").removeClass("rounded-end");
+    $(elem).closest(".modal").find(".alert").remove();
+    $(elem).closest(".modal").find(".accordion-item").removeClass("bg-red-lt");
+
+    let isValid = [];
+    $(elem).closest(".modal").find("input").each( (key, val) => {
+      if ($(val).val() == "") {
+        $(val).addClass("is-invalid")
+        if ($(val).closest(".accordion-item").length > 0) { 
+          $(val).closest(".accordion-item").addClass("bg-red-lt");
+        }
+        if ($(val).siblings("span").length > 0) {
+          $(val).siblings("span").after(`<div class="invalid-feedback mb-2">Invalid entry</div> `);
+          $(val).siblings("span").addClass("is-invalid border-red rounded-end");
+        } else {
+          $(val).after(`<div class="invalid-feedback">Invalid entry</div> `);
+        }
+      } else {
+        $(val).addClass("is-valid");
+      }
+      isValid.push($(val).val() != "");
+    });
+
+    const name = $(elem).closest(".modal").find(".project-name").val();
+    const slug = $(elem).closest(".modal").find(".project-slug").val();
+    const status = $(elem).closest(".modal").find(".project-status input:checked").val();
+    const location = $(elem).closest(".modal").find(".project-location").val();
+    const id = $(elem).closest(".modal").attr("projId");
+
+    const fields = $(elem).closest(".modal").find(".accordion-item").map( (key, val) => {
+        let options = [];
+        if ( $(val).find(".dynamic-options").length > 0 ) {
+            $(val).find(".dynamic-options input").each( (key, dynamicField) => {
+                options.push({
+                    label: $(dynamicField).attr("data-label"),
+                    value: $(dynamicField).val()
+                })
+            });
+        }
+        return {
+            name: toCamelCase($(val).find("input:first").val()), 
+            actualName: $(val).find("input:first").val(),
+            type: $(val).find(".form-select").val(),
+            options: options.length > 0 ? options : undefined
+        }
+    }).get();
+
+    if (!(isValid.every(val => val === true))) {
+        return false;
+    }
+
+    let currentBtnHTML = $(elem).html();
+    $(elem).html(`<span class="spinner-border spinner-border-sm me-2" role="status"></span>`);
+   
+    $.ajax({
+      url: `/project/update/${id}`, 
+      type: 'POST',
+      contentType: 'application/json', 
+      data: JSON.stringify({name, status, location, slug, fields}),
+      success: function(response) {
+        $(elem).html(currentBtnHTML);
+        window.location.href = `/project/${toKebabCase(slug)}`;
+      },
+      error: function(xhr, status, error) {
+        console.log(xhr);
+        $(elem).html(currentBtnHTML);
+        $(".modal-footer").append(`
+        <div class="w-100 d-block alert alert-danger mt-4" role="alert">
+          <h4 class="alert-title">Could not save.</h4>
+          <div class="text-secondary">${xhr.responseText}</div>
+        </div>`);
+      }
+    }); 
+
+  };
+
+    document.addEventListener('DOMContentLoaded', function() {
+      let el = document.querySelector('.accordion');
+      if (el) {
+          new Sortable(el, {
+            animation: 100,
+            group: '.accordion',
+            draggable: '.accordion-item',
+            handle: '.accordion-header',
+            sort: true,
+            filter: '.sortable-disabled',
+            chosenClass: 'active'
+          });
+      }
+  });
+
+
+  $(document).on("click", ".add-project-field", function(e) {
+    let projectSlug=$(this).closest(".modal").attr("projSlug");
+    let fieldNo = $(this).closest(".modal-body").find(".accordion-button").length + 1;
+    $('.accordion-button').addClass('collapsed');
+    $('.accordion-collapse').removeClass('show').collapse('hide');
+    $(this).closest(".modal-body").find(".accordion").append(`
+    <div class="accordion-item">
+      <h2 class="accordion-header d-flex justify-content-between" id="">
+        <button class="accordion-button " type="button" data-bs-toggle="collapse" data-bs-target="#collapse-${projectSlug}-${fieldNo}" aria-expanded="true">
+          Field # ${fieldNo}
+        </button>
+      </h2>
+      <div id="collapse-${projectSlug}-${fieldNo}" class="accordion-collapse collapse show" data-bs-parent="#accordion-${projectSlug}">
+        <div class="accordion-body pt-0">
+          <div class="mb-3">
+              <label class="form-label">Name</label>
+              <input id="" type="text" class="form-control" name="example-text-input" placeholder="Field name" value="" />
+          </div>
+          <div class="mb-3">
+              <label class="form-label">Type</label>
+              <select class="form-select">
+                <option value="string">String</option>
+                <option value="textarea">Long text</option>
+                <option value="number">Number</option>
+                <option value="boolean">Boolean</option>
+                <option value="dropdown">Dropdown</option>
+                <option value="date">Date (Calendar)</option>
+                <option value="image">Image upload</option>
+                <option value="file">File upload</option>
+              </select>
+          </div>
+          <div class="mb-3 text-center">
+            <button class="btn btn-outline-danger border delete-project-field">
+              <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-trash"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 7l16 0" /><path d="M10 11l0 6" /><path d="M14 11l0 6" /><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></svg>
+              Delete this field
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    `);
+  })
+
+
+  $(document).on("click", ".delete-project-field", function(e) {
+    let modal = $(this).closest(".modal");
+    let projectSlug = modal.attr("projSlug");
+    $(this).closest(".accordion-item").remove();
+    modal.find(".accordion-item").each( (key, val) => {
+      $(val).find(".accordion-button").attr({"data-bs-target": `#collapse-${projectSlug}-${key+1}`});
+      $(val).find(".accordion-collapse").attr({id: `collapse-${projectSlug}-${key+1}`})
+    })
+  })
+
+
+  $(document).on("change keyup", ".accordion-item input, .accordion-item .form-select", function() {
+    if ($(this).hasClass("form-select")) {
+        addOptions(this);
+    }
+    let input = $(this).closest(".accordion-item").find("input").val();
+    let type = $(this).closest(".accordion-item").find(".form-select").val();
+    $(this).closest(".accordion-item").find(".accordion-button").html(`
+    Field is <span class="badge bg-azure-lt mx-2">${input}</span>
+    with type of <span class="badge bg-blue-lt mx-2">${type}</span>
+    `);
+  })
+
+
+  const addOptions = function (elem) {
+
+    $(elem).closest(".accordion-body").find(".dynamic-options").remove();
+
+    const fieldType = $(elem).val(); 
+
+    let html = "";
+
+    if (fieldType === "boolean") {
+        html += `
+            <label class="form-label dynamic-options">Select boolean values</label>
+            <div class="mb-3 dynamic-options">
+
+                <div class="row g-2" style="margin-bottom:0.5rem">
+                    <div class="col-auto">
+                        <a href="#" class="btn btn-icon disabled" aria-label="Button">
+                            <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-check"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l5 5l10 -10" /></svg>
+                        </a>
+                    </div>
+                    <div class="col">
+                        <input type="text" data-label="true" class="form-control" placeholder="Active">
+                    </div>
+                </div>
+
+                <div class="row g-2" style="margin-bottom:0.5rem">
+                    <div class="col-auto">
+                        <a href="#" class="btn btn-icon disabled" aria-label="Button">
+                            <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-x"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M18 6l-12 12" /><path d="M6 6l12 12" /></svg>
+                        </a>
+                    </div>
+                    <div class="col">
+                        <input type="text" data-label="false" class="form-control" placeholder="Inactive">
+                    </div>
+                </div>
+
+            </div>
+        `;
+    } else if (fieldType === "dropdown") {
+        html += `
+            <label class="form-label dynamic-options">Add / edit dropdown options</label>
+            <div class="mb-3 dynamic-options">
+                <div class="row g-2">
+                    <div class="col-auto">
+                        <a href="#" class="btn btn-icon" aria-label="Button" onclick="addOption(this)">
+                            <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-plus"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 5l0 14" /><path d="M5 12l14 0" /></svg>
+                        </a>
+                        <a href="#" class="btn btn-icon" aria-label="Button" onclick="deleteOption(this)">
+                            <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-trash"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 7l16 0" /><path d="M10 11l0 6" /><path d="M14 11l0 6" /><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></svg>
+                        </a>
+                    </div>
+                    <div class="col">
+                        <input type="text" class="form-control" placeholder="Enter your option">
+                    </div>
+                </div>
+            </div>
+        `;
+    };
+
+    // Append the generated HTML to the appropriate container
+    $(elem).closest(".accordion-body").find(".text-center").before(html); // Adjust the selector to your actual container
+}
+
+const addOption = function (elem) {
+    let html = `
+        <div class="mb-3 dynamic-options">
+            <div class="row g-2">
+                <div class="col-auto">
+                    <a href="#" class="btn btn-icon" aria-label="Button" onclick="addOption(this)">
+                        <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-plus"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 5l0 14" /><path d="M5 12l14 0" /></svg>
+                    </a>
+                    <a href="#" class="btn btn-icon" aria-label="Button" onclick="deleteOption(this)">
+                        <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-trash"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 7l16 0" /><path d="M10 11l0 6" /><path d="M14 11l0 6" /><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></svg>
+                    </a>
+                </div>
+                <div class="col">
+                    <input type="text" class="form-control" placeholder="Enter your option">
+                </div>
+            </div>
+        </div>
+        `;
+    $(elem).closest(".accordion-body").find(".text-center").before(html);
+}
+
+const deleteOption = function (elem) {
+    if ($(elem).closest(".accordion-body").find(".mb-3.dynamic-options").length == 1) {
+        return console.log("can't be deleted as this is the last option");
+    }
+    $(elem).closest(".mb-3").remove();
+}
+
+// Here start creating entries on click of save-entry button
+
+const saveEntry = function(elem) {
+    console.log(elem);
+
+    $(elem).closest(".modal").find("input").removeClass("is-invalid");
+    $(elem).closest(".modal").find(".invalid-feedback").remove();
+    $(elem).closest(".modal").find("span").removeClass("border-red");
+    $(elem).closest(".modal").find("span").removeClass("rounded-end");
+    $(elem).closest(".modal").find(".alert").remove();
+
+    let isValid = [];
+
+    $(elem).closest(".modal").find(".form-control, .form-select").each( (key, val) => {
+      if ($(val).val() == "") {
+        $(val).addClass("is-invalid")
+        if ($(val).siblings("span").length > 0) {
+          $(val).siblings("span").after(`<div class="invalid-feedback mb-2">Invalid entry</div> `);
+          $(val).siblings("span").addClass("is-invalid border-red rounded-end");
+        } else {
+          $(val).after(`<div class="invalid-feedback">Invalid entry</div> `);
+        }
+      } else {
+        $(val).addClass("is-valid");
+      }
+      isValid.push($(val).val() != "");
+    });
+
+    const data = $(elem)
+        .closest(".modal")
+        .find(".form-select, input")
+        .toArray() // Convert jQuery collection to an array
+        .reduce((total, val) => {
+            Object.assign(total, {
+                [$(val).attr("name")]: $(val).val()
+            });
+            return total;
+        }, {});
+
+    console.log(data);
+
+    if (!(isValid.every(val => val === true))) {
+        return false;
+    }
+
+}
+
+
+</script>
