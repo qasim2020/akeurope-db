@@ -14,35 +14,43 @@ cloudinary.config({
 
 router.post('/upload-image', upload.single('image'), async (req, res) => {
     try {
-        // Convert the file to Base64 for upload
-        const imageBase64 = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
+        const imageFile = req.file;
     
-        // Extract the filename without extension to use as a unique identifier in context metadata
-        const fileName = req.file.originalname.split('.')[0];
-    
-        // Search for an existing image with the same original filename in context
-        const existingImage = await cloudinary.search
-            .expression(`folder:${req.body.folderName} AND context.original_filename:${fileName}`)
-            .execute();
-    
-        // If a duplicate exists, delete it
-        if (existingImage.resources.length > 0) {
-            const publicId = existingImage.resources[0].public_id;
-            await cloudinary.uploader.destroy(publicId);  // Delete the existing image
+        // Check if file is provided and is an image
+        if (!imageFile || !imageFile.mimetype.startsWith('image/')) {
+            return res.status(400).json({ message: 'Only image files are allowed.' });
         }
     
-        // Upload the new image with context metadata containing the original filename
+        // Convert the image file to Base64 format for Cloudinary upload
+        const imageBase64 = `data:${imageFile.mimetype};base64,${imageFile.buffer.toString('base64')}`;
+    
+        // Sanitize the filename: remove special characters, spaces, and extra underscores
+        const sanitizedImageName = imageFile.originalname
+            .split('.')[0]                    // Remove the file extension
+            .replace(/[^a-zA-Z0-9]/g, '-')     // Replace non-alphanumeric characters with hyphens
+            .replace(/-+/g, '-')               // Replace multiple hyphens with a single hyphen
+            .toLowerCase();                    // Convert to lowercase for consistency
+    
+        // Create a custom public_id combining entryId and sanitized filename
+        const customPublicId = `${req.body.entryId}-${sanitizedImageName}`;
+    
+        // Attempt to delete any existing image with the same public_id
+        await cloudinary.uploader.destroy(customPublicId, { resource_type: 'image' })
+            .then(result => console.log("Deleted existing image:", result))
+            .catch(error => console.error("Error deleting existing image (if any):", error));
+
+        // Upload the new image with the specified public_id
         const uploadResult = await cloudinary.uploader.upload(imageBase64, {
-            folder: req.body.folderName, 
-            resource_type: "image",
-            context: { original_filename: fileName }  // Store the original filename in context metadata
+            folder: req.body.folderName,
+            public_id: customPublicId,
+            resource_type: 'image',  
         });
     
         // Send the new Cloudinary URL back to the frontend
         res.json({ cloudinaryUrl: uploadResult.secure_url });
     
     } catch (error) {
-        console.error('Error uploading to Cloudinary:', error);
+        console.error('Error uploading image to Cloudinary:', error);
         res.status(500).json({ message: 'Failed to upload image' });
     }
     

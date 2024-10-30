@@ -1,4 +1,3 @@
-{{log data}}
 <!-- Page header -->
 <div class="page-header d-print-none">
   <div class="container-xl">
@@ -379,6 +378,8 @@ const saveEntry = function(elem) {
             return total;
         }, {});
 
+    data.entryId = $(elem).closest(".modal").attr("entryId");
+
     if (!(isValid.every(val => val === true))) {
         return false;
     }
@@ -396,6 +397,75 @@ const saveEntry = function(elem) {
       success: function(response) {
         $(elem).html(currentBtnHTML);
         return console.log("success");
+        window.location.href = `/project/{{data.project.slug}}`;
+      },
+      error: function(xhr, status, error) {
+        console.log(xhr);
+        $(elem).html(currentBtnHTML);
+        $(".modal-footer").append(`
+        <div class="w-100 d-block alert alert-danger mt-4" role="alert">
+          <h4 class="alert-title">Could not save.</h4>
+          <div class="text-secondary">${xhr.responseText}</div>
+        </div>`);
+      }
+    }); 
+
+}
+
+const editEntry = function(elem) {
+
+    $(elem).closest(".modal").find("input").removeClass("is-invalid");
+    $(elem).closest(".modal").find(".invalid-feedback").remove();
+    $(elem).closest(".modal").find("span").removeClass("border-red");
+    $(elem).closest(".modal").find("span").removeClass("rounded-end");
+    $(elem).closest(".modal").find(".alert").remove();
+
+    let isValid = [];
+
+    $(elem).closest(".modal").find(".entry-input").each( (key, val) => {
+      if ($(val).val() == "") {
+        $(val).addClass("is-invalid")
+        if ($(val).siblings("span").length > 0) {
+          $(val).siblings(".invalid-feedback").remove();
+          $(val).siblings("span").after(`<div class="invalid-feedback mb-2">Invalid entry</div> `);
+          $(val).siblings("span").addClass("is-invalid border-red rounded-end");
+          $(val).siblings("input").addClass("is-invalid");
+        } else {
+          $(val).after(`<div class="invalid-feedback">Invalid entry</div> `);
+        }
+      } else {
+        $(val).addClass("is-valid");
+      }
+      isValid.push($(val).val() != "");
+    });
+
+    const data = $(elem)
+        .closest(".modal")
+        .find(".form-select, input, textarea")
+        .toArray() // Convert jQuery collection to an array
+        .reduce((total, val) => {
+            Object.assign(total, {
+                [$(val).attr("name")]: $(val).val()
+            });
+            return total;
+        }, {});
+
+    if (!(isValid.every(val => val === true))) {
+        return false;
+    }
+
+    let currentBtnHTML = $(elem).html();
+    $(elem).html(`<span class="spinner-border spinner-border-sm me-2" role="status"></span>`);
+
+    const entryId = $(elem).closest(".modal").attr("entryId");
+
+    $.ajax({
+      url: `/project/entry/update/{{data.project.slug}}/${entryId}`,
+      type: 'POST',
+      contentType: 'application/json', 
+      data: JSON.stringify(data),
+      success: function(response) {
+        $(elem).html(currentBtnHTML);
         window.location.href = `/project/{{data.project.slug}}`;
       },
       error: function(xhr, status, error) {
@@ -434,6 +504,7 @@ $(document).on('change', ".image-upload input", function(event) {
       var formData = new FormData();
       formData.append('image', event.target.files[0]);
       formData.append('folderName', `akeurope/akeurope_project_entries/{{data.project.slug}}/${inputName}`);
+      formData.append('entryId', $(elem).closest(".modal").attr("entryId"));
 
       $(elem).closest(".image-upload").find(".btn").html(`<span class="spinner-border spinner-border-sm" role="status"></span>`);
 
@@ -490,6 +561,7 @@ $(document).on('change', ".image-upload input", function(event) {
     const formData = new FormData();
     formData.append('pdf', file);
     formData.append('folderName', `akeurope/akeurope_project_entries/{{data.project.slug}}/${inputName}`);
+    formData.append('entryId', $(elem).closest(".modal").attr("entryId"));
 
 
     $(elem).closest(".upload-pdf").find(".btn").html(`<span class="spinner-border spinner-border-sm" role="status"></span>`);
@@ -510,6 +582,32 @@ $(document).on('change', ".image-upload input", function(event) {
             console.log("Error uploading PDF:", error);
         }
     });
+  })
+
+  // Load the edit entry modal
+  $(document).on("click", ".edit-entry", function(e) {
+
+    const entryId = $(this).attr("entry-id");
+
+    const modalExists = $(document).find(`#button-${entryId}`).length > 0;
+
+    if (modalExists) {
+      return $(`#button-${entryId}`).trigger("click");
+    }
+
+    $.ajax({
+      url: `/getEntry/{{data.project.slug}}/${entryId}`,
+      type: 'GET',
+      contentType: 'application/json', 
+      success: function(response) {
+        $("footer").before(response);
+        $(`#button-${entryId}`).trigger("click");
+      },
+      error: function(xhr, status, error) {
+        console.log(error);
+      }
+    });
+
   })
 
 </script>

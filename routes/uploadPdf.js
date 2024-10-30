@@ -15,42 +15,40 @@ cloudinary.config({
 router.post('/upload-pdf', upload.single('pdf'), async (req, res) => {
     try {
         const file = req.file;
-
+    
         // Check if file is provided and is a PDF
         if (!file || file.mimetype !== 'application/pdf') {
             return res.status(400).json({ message: 'Only PDF files are allowed.' });
         }
-
-        // Convert the file to Base64 format for Cloudinary upload
+    
+        // Convert the PDF file to Base64 format for Cloudinary upload
         const pdfBase64 = `data:${file.mimetype};base64,${file.buffer.toString('base64')}`;
-
-        // Extract the filename without extension to use as a unique identifier in context metadata
-        const fileName = file.originalname.split('.')[0];
-
-        // Search for an existing PDF with the same original filename in context
-        const existingFile = await cloudinary.search
-            .expression(`folder:${req.body.folderName} AND context.original_filename:${fileName}`)
-            .execute();
-
-        // If a duplicate exists, delete it
-        if (existingFile.resources.length > 0) {
-            const publicId = existingFile.resources[0].public_id;
-            // await cloudinary.uploader.destroy(publicId);  // Delete the existing file
-            await cloudinary.uploader.destroy(publicId, { resource_type: 'raw' })  // Specify resource_type if file is raw
-                .then(result => console.log("Delete result:", result))
-                .catch(error => console.error("Error deleting file:", error));
-        }
-
-        // Upload the new PDF with context metadata containing the original filename
+    
+        // Sanitize the filename: remove special characters, spaces, and extra underscores
+        const sanitizedFileName = file.originalname
+            .split('.')[0]                    // Remove the file extension
+            .replace(/[^a-zA-Z0-9]/g, '-')     // Replace non-alphanumeric characters with hyphens
+            .replace(/-+/g, '-')               // Replace multiple hyphens with a single hyphen
+            .toLowerCase();                    // Convert to lowercase for consistency
+    
+        // Create a custom public_id combining entryId and sanitized filename
+        const customPublicId = `${req.body.entryId}-${sanitizedFileName}`;
+    
+        // Attempt to delete any existing file with the same public_id
+        await cloudinary.uploader.destroy(customPublicId, { resource_type: 'raw' })
+            .then(result => console.log("Deleted existing file:", result))
+            .catch(error => console.error("Error deleting existing file (if any):", error));
+    
+        // Upload the new PDF with the specified public_id
         const uploadResult = await cloudinary.uploader.upload(pdfBase64, {
             folder: req.body.folderName,
-            resource_type: 'raw',  // Set the resource type to 'raw' for non-image files like PDFs
-            context: { original_filename: fileName }  // Store the original filename in context metadata
+            public_id: customPublicId,
+            resource_type: 'raw',  
         });
-
+    
         // Send the new Cloudinary URL back to the frontend
         res.json({ cloudinaryUrl: uploadResult.secure_url });
-
+    
     } catch (error) {
         console.error('Error uploading PDF to Cloudinary:', error);
         res.status(500).json({ message: 'Failed to upload PDF' });
