@@ -24,19 +24,19 @@ const createDynamicModel = async function(projectName) {
                     fieldType = Boolean;
                     break;
                 case 'dropdown':
-                    fieldType = { type: String, enum: field.options || [] }; // Dropdown with specific options
+                    fieldType = String;
                     break;
                 case 'date':
                     fieldType = Date;
                     break;
                 case 'image':
-                    fieldType = Buffer; // Stores binary data for an image
+                    fieldType = String; 
                     break;
                 case 'file':
-                    fieldType = Buffer; // Stores binary data for a file
+                    fieldType = String; 
                     break;
                 default:
-                    fieldType = String; // Default type if none match
+                    fieldType = String; 
             }
 
             dynamicFields[field.name] = { type: fieldType };

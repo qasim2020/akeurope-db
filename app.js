@@ -6,6 +6,8 @@ const mongoose = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const projectRoutes = require('./routes/projectRoutes');
+const uploadImage = require('./routes/uploadImage');
+const uploadPdf = require('./routes/uploadPdf');
 const path = require('path');
 const { router } = require('./routes/authRoutes');
 const hbsHelpers = require('./modules/helpers');
@@ -36,10 +38,11 @@ app.use('/static', express.static(path.join(__dirname, 'static')));
 app.use(authRoutes);
 app.use(adminRoutes);
 app.use(projectRoutes);
+app.use(uploadImage);
+app.use(uploadPdf);
 
 // Home route
 app.get('/', (req, res) => {
-  
   res.redirect('/login');
 });
 

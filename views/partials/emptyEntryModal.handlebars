@@ -17,11 +17,38 @@
                     </td>
                     <td>
                       {{#if (eq type "image")}}
-                        <input type="file" class="form-control" name="{{name}}" accept="image/*">
+                        <div class="image-upload row text-center bg-secondary-lt justify-content-center d-flex align-items-center border rounded p-3" style="margin: 0 0.5px">
+                          <div class="col-md-6 mb-2 mb-md-0">
+                            <img class="img-thumbnail" src="/static/images/no-image-placement.png" alt="" width="200px" height="45">
+                            <input type="file" class="form-control d-none" name="{{name}}" accept="image/*">
+                            <input type="hidden" class="cloudinaryUrl" name="{{name}}" />
+                          </div>
+                          <div class="col-md-6">
+                            <a class="btn btn-secondary-outline btn-icon" onclick="uploadImage(this)">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-upload">
+                                  <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                  <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2"></path>
+                                  <path d="M7 9l5 -5l5 5"></path>
+                                  <path d="M12 4l0 12"></path>
+                              </svg>
+                            </a>
+                          </div>
+                        </div>
+                      {{else if (eq type "file")}}
+                        <div class="input-group upload-pdf">
+                          <input type="file" class="form-control no-valid" name="{{name}}" accept="application/pdf">
+                          <input type="hidden" class="form-control cloudinaryUrl" name="{{name}}" />
+                          <span class="btn btn-secondary-outline btn-icon" onclick="uploadPdf(this)">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-upload">
+                                <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2"></path>
+                                <path d="M7 9l5 -5l5 5"></path>
+                                <path d="M12 4l0 12"></path>
+                            </svg>
+                          </span>
+                        </div>
                       {{else if (eq type "textarea")}}
                         <textarea rows="5" class="form-control" name="{{name}}" placeholder="Here can be your description" value="Mike">Long text comes here</textarea>
-                      {{else if (eq type "file")}}
-                        <input type="file" class="form-control" name="{{name}}" accept="*/*">
                       {{else if (eq type "dropdown")}}
                         <select class="form-select" name="{{name}}">
                           {{#each options}}

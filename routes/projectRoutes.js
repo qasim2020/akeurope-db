@@ -86,7 +86,7 @@ router.get('/project/:slug', attachments, async (req,res) => {
 
     // Retrieve entries from the dynamic collection using the project schema
     const DynamicModel = await createDynamicModel(project.slug);
-    const entries = await DynamicModel.find();
+    const entries = await DynamicModel.find().lean();
 
     res.render('project', {
       layout: "dashboard",
@@ -104,5 +104,36 @@ router.get('/project/:slug', attachments, async (req,res) => {
   }
 
 })
+
+router.post('/project/entry/:slug', async (req, res) => {
+  try {
+     // Find the project to get the schema fields
+     const project = await Project.findOne({ slug: req.params.slug });
+     if (!project) return res.status(404).json({ error: `Project ${req.params.slug} not found` });
+
+     // Create the dynamic model based on the project schema
+     const DynamicModel = await createDynamicModel(project.slug);
+
+     // Prepare data to match project fields
+     const entryData = {};
+     project.fields.forEach(field => {
+        const fieldName = field.name;
+        const fieldValue = req.body[fieldName];
+
+        // Assign the value only if it exists in req.body
+        if (fieldValue !== undefined) {
+           entryData[fieldName] = fieldValue;
+        }
+     });
+
+     // Save the new entry using the dynamic model
+     const newEntry = new DynamicModel(entryData);
+     await newEntry.save();
+
+     res.status(201).json({ message: 'Entry created successfully', entry: newEntry });
+  } catch (error) {
+     res.status(500).json({ error: 'Error saving entry', details: error.message });
+  }
+});
 
 module.exports = router;

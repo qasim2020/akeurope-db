@@ -340,6 +340,7 @@ const deleteOption = function (elem) {
 // Here start creating entries on click of save-entry button
 
 const saveEntry = function(elem) {
+
     console.log(elem);
 
     $(elem).closest(".modal").find("input").removeClass("is-invalid");
@@ -354,8 +355,10 @@ const saveEntry = function(elem) {
       if ($(val).val() == "") {
         $(val).addClass("is-invalid")
         if ($(val).siblings("span").length > 0) {
+          $(val).siblings(".invalid-feedback").remove();
           $(val).siblings("span").after(`<div class="invalid-feedback mb-2">Invalid entry</div> `);
           $(val).siblings("span").addClass("is-invalid border-red rounded-end");
+          $(val).siblings("input").addClass("is-invalid");
         } else {
           $(val).after(`<div class="invalid-feedback">Invalid entry</div> `);
         }
@@ -367,7 +370,7 @@ const saveEntry = function(elem) {
 
     const data = $(elem)
         .closest(".modal")
-        .find(".form-select, input")
+        .find(".form-select, input, textarea")
         .toArray() // Convert jQuery collection to an array
         .reduce((total, val) => {
             Object.assign(total, {
@@ -376,13 +379,137 @@ const saveEntry = function(elem) {
             return total;
         }, {});
 
-    console.log(data);
-
     if (!(isValid.every(val => val === true))) {
         return false;
     }
 
+    let currentBtnHTML = $(elem).html();
+    $(elem).html(`<span class="spinner-border spinner-border-sm me-2" role="status"></span>`);
+
+    console.log(data);
+    
+    $.ajax({
+      url: "/project/entry/{{data.project.slug}}", 
+      type: 'POST',
+      contentType: 'application/json', 
+      data: JSON.stringify(data),
+      success: function(response) {
+        $(elem).html(currentBtnHTML);
+        return console.log("success");
+        window.location.href = `/project/{{data.project.slug}}`;
+      },
+      error: function(xhr, status, error) {
+        console.log(xhr);
+        $(elem).html(currentBtnHTML);
+        $(".modal-footer").append(`
+        <div class="w-100 d-block alert alert-danger mt-4" role="alert">
+          <h4 class="alert-title">Could not save.</h4>
+          <div class="text-secondary">${xhr.responseText}</div>
+        </div>`);
+      }
+    }); 
+
 }
 
+const uploadImage = function(elem) {
+  console.log("upload image clicked");
+  console.log( $(elem).closest(".image-upload").find("input[type=file]"));
+  $(elem).closest(".image-upload").find("input[type=file]").trigger("click");
+}
+
+$(document).on('change', ".image-upload input", function(event) {
+  console.log("file changed");
+  let elem = $(this);
+  let inputName = $(this).attr("name");
+  if (event.target.files && event.target.files[0]) {
+      var reader = new FileReader();
+      reader.onload = function(e) {
+          $(elem).closest(".image-upload").find("img").attr("src", e.target.result);
+      };
+      
+      // Read the image file as a data URL
+      reader.readAsDataURL(event.target.files[0]);
+
+      // Send the image to the backend
+      var formData = new FormData();
+      formData.append('image', event.target.files[0]);
+      formData.append('folderName', `akeurope/akeurope_project_entries/{{data.project.slug}}/${inputName}`);
+
+      $(elem).closest(".image-upload").find(".btn").html(`<span class="spinner-border spinner-border-sm" role="status"></span>`);
+
+      $.ajax({
+          url: '/upload-image',  // The backend route to handle the upload
+          type: 'POST',
+          data: formData,
+          contentType: false,
+          processData: false,
+          success: function(response) {
+              $(elem).closest(".image-upload").find(".cloudinaryUrl").val(response.cloudinaryUrl);
+              $(elem).closest(".image-upload").find(".btn").html(`
+                <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-check"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l5 5l10 -10" /></svg>
+              `);
+              $(elem).closest(".image-upload").find("img").attr("src", response.cloudinaryUrl);
+          },
+          error: function(error) {
+              $(elem).closest(".image-upload").find(".btn").html(`
+                <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-x"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M18 6l-12 12" /><path d="M6 6l12 12" /></svg>
+              `);
+              console.log("Error uploading image:", error);
+          }
+      });
+    }
+
+  });
+
+  const uploadPdf = function(elem) {
+    console.log("upload pdf clicked");
+    $(elem).closest(".upload-pdf").find("input").trigger("click");
+  }
+
+  $(document).on("change", ".upload-pdf input", function(event) {
+
+    console.log("file upload changed");
+
+    const elem = $(this);
+    const fileInput = $(this)[0];
+    const file = fileInput.files[0];
+    const inputName = $(this).attr("name");
+
+    if (!file) {
+        alert("Please select a PDF file.");
+        return;
+    }
+
+    // Ensure the file type is PDF
+    if (file.type !== 'application/pdf') {
+        alert("Only PDF files are allowed.");
+        return;
+    }
+
+    // Prepare form data to send to backend
+    const formData = new FormData();
+    formData.append('pdf', file);
+    formData.append('folderName', `akeurope/akeurope_project_entries/{{data.project.slug}}/${inputName}`);
+
+
+    $(elem).closest(".upload-pdf").find(".btn").html(`<span class="spinner-border spinner-border-sm" role="status"></span>`);
+    // Send PDF file to the backend via AJAX
+    $.ajax({
+        url: '/upload-pdf',  // Backend route to handle PDF upload
+        type: 'POST',
+        data: formData,
+        contentType: false,
+        processData: false,
+        success: function(response) {
+            $(elem).closest(".upload-pdf").find(".cloudinaryUrl").val(response.cloudinaryUrl);
+            $(elem).closest(".upload-pdf").find(".btn").html(`
+              <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-check"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l5 5l10 -10" /></svg>
+            `);
+        },
+        error: function(error) {
+            console.log("Error uploading PDF:", error);
+        }
+    });
+  })
 
 </script>
