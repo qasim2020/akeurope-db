@@ -2,16 +2,18 @@ const mongoose = require('mongoose');
 const express = require('express');
 const router = express.Router();
 const Project = require('../models/Project');
-const { attachments } = require("../modules/attachments");
+const { authenticate, authorize } = require('../modules/auth');
+const { allProjects } = require("../modules/allProjects");
 const { createDynamicModel } = require("../models/createDynamicModel");
 
-router.get('/projects', async (req, res) => {
+router.get('/projects', authenticate, authorize("viewDashboard"), async (req, res) => {
   let projects = await Project.find().lean();
 
   res.render('projects', { 
     layout: "dashboard", 
     data: {
       projects: projects,
+      layout: req.session.layout,
       activeMenu: "allProjects"
     }
   });
@@ -25,7 +27,7 @@ function toKebabCase(str) {
 }
 
 
-router.post('/project/create', async (req, res) => {
+router.post('/project/create', authenticate, authorize("createProject"), async (req, res) => {
   try {
     const { name, slug, status, location, fields} = req.body;
 
@@ -47,12 +49,78 @@ router.post('/project/create', async (req, res) => {
   }
 });
 
-router.get('/getProject/:projId', async (req,res) => {
+router.get('/getProjectModal/:projId', authenticate, authorize("editProject"), async (req,res) => {
   let project = await Project.findOne({_id: req.params.projId}).lean();
   res.render('partials/editProjectModal', { layout: false, data: {project} });
 });
 
-router.post('/project/update/:id', async (req, res) => {
+
+router.get('/getEntryModal/:slug/:id', authenticate, authorize("editEntry"), allProjects, async (req,res) => {
+
+  try {
+    // Find the project and retrieve the fields array
+    const project = await Project.findOne({ slug: req.params.slug }).lean();
+
+    if (!project) throw new Error(`Project "${req.params.slug}" not found`);
+
+    // Retrieve entries from the dynamic collection using the project schema
+    const DynamicModel = await createDynamicModel(project.slug);
+    const entry = await DynamicModel.findOne({_id: req.params.id}).lean();
+
+    res.render('partials/editEntryModal', {
+      layout: false,
+      data: {
+        project,
+        fields: project.fields, 
+        layout: req.session.layout,
+        entry
+      }
+    })
+
+  } catch (error) {
+      res.status(500).json({ error: 'Error fetching entries', details: error.message });
+  }
+
+})
+
+router.get('/getEntryData/:slug', authenticate, authorize("editEntry"), async (req,res) => {
+  try {
+    const project = await Project.findOne({ slug: req.params.slug }).lean();
+
+    if (!project) throw new Error(`Project "${req.params.slug}" not found`);
+
+    // Retrieve entries from the dynamic collection using the project schema
+    const DynamicModel = await createDynamicModel(project.slug);
+    const entries = await DynamicModel.find().lean();
+    // Render search results page with appropriate partial
+    res.render('partials/showProject', { 
+        layout: false, 
+        data: {
+          entries,
+          fields: project.fields,
+          layout: req.session.layout
+        }
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'An error occurred while fetching entries partial', details: error.message });
+  }
+
+});
+
+
+router.get('/getProjectsData', authenticate, authorize("viewDashboard"), async (req, res) => {
+  let projects = await Project.find().lean();
+
+  res.render('partials/showProjects', { 
+    layout: false,
+    data: {
+      projects: projects,
+      layout: req.session.layout
+    }
+  });
+});
+
+router.post('/project/update/:id', authenticate, authorize("updateProject"), async (req, res) => {
   try {
     const { id } = req.params;
     const { name, slug, status, location, fields } = req.body;
@@ -77,7 +145,8 @@ router.post('/project/update/:id', async (req, res) => {
 });
 
 
-router.get('/project/:slug', attachments, async (req,res) => {
+
+router.get('/project/:slug', authenticate, authorize("viewDashboard"), allProjects, async (req,res) => {
 
   try {
     // Find the project and retrieve the fields array
@@ -97,6 +166,7 @@ router.get('/project/:slug', attachments, async (req,res) => {
         project,
         fields: project.fields, 
         entries, 
+        layout: req.session.layout, 
         newEntryId, 
         projects: req.allProjects,
         activeMenu: project.slug
@@ -109,7 +179,7 @@ router.get('/project/:slug', attachments, async (req,res) => {
 
 })
 
-router.post('/project/entry/:slug', async (req, res) => {
+router.post('/project/entry/:slug', authenticate, authorize("updateEntry"), async (req, res) => {
   try {
      // Find the project to get the schema fields
      const project = await Project.findOne({ slug: req.params.slug });
@@ -151,37 +221,7 @@ router.post('/project/entry/:slug', async (req, res) => {
   }
 });
 
-
-router.get('/getEntry/:slug/:id', attachments, async (req,res) => {
-
-  try {
-    // Find the project and retrieve the fields array
-    const project = await Project.findOne({ slug: req.params.slug }).lean();
-
-    if (!project) throw new Error(`Project "${req.params.slug}" not found`);
-
-    // Retrieve entries from the dynamic collection using the project schema
-    const DynamicModel = await createDynamicModel(project.slug);
-    const entry = await DynamicModel.findOne({_id: req.params.id}).lean();
-
-    res.render('partials/editEntryModal', {
-      layout: false,
-      data: {
-        project,
-        fields: project.fields, 
-        entry, 
-        projects: req.allProjects,
-        activeMenu: project.slug
-      }
-    })
-
-  } catch (error) {
-      res.status(500).json({ error: 'Error fetching entries', details: error.message });
-  }
-
-})
-
-router.post('/project/entry/update/:slug/:id', async (req, res) => {
+router.post('/project/entry/update/:slug/:id', authenticate, authorize("updateEntry"), async (req, res) => {
   try {
     // Find the project to get the schema fields
     const project = await Project.findOne({ slug: req.params.slug });
@@ -210,6 +250,29 @@ router.post('/project/entry/update/:slug/:id', async (req, res) => {
  } catch (error) {
     res.status(500).json({ error: 'Error updating entry', details: error.message });
  }
+});
+
+router.post('/project/entry/delete/:slug', authenticate, authorize("deleteEntry"), async (req, res) => {
+  try {
+    // Find the project to get the schema fields
+    const project = await Project.findOne({ slug: req.params.slug });
+    if (!project) return res.status(404).json({ error: `Project ${req.params.slug} not found` });
+
+    // Create the dynamic model based on the project schema
+    const DynamicModel = await createDynamicModel(project.slug);
+
+    // Prepare data to match project fields
+    console.log(req.body);
+    const updatedEntry = await DynamicModel.deleteOne({_id: req.body.entryId});
+
+    if (!updatedEntry) return res.status(404).json({ error: `Entry with ID ${req.params.id} not found!` });
+
+    res.status(200).json({ message: 'Entry deleted successfully', entry: updatedEntry });
+  } catch (error) {
+      res.status(500).json({ error: 'Error updating entry', details: error.message });
+  }
+
+
 });
 
 module.exports = router;

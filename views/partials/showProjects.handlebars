@@ -1,4 +1,51 @@
 {{#if data.projects}}
+
+  {{#if (eq data.layout "grid")}}
+
+  {{#each data.projects}}
+
+    <div class="card mb-3">
+      <div class="card-header">
+        <h3 class="card-title"><span class="badge bg-blue-lt">{{this.name}}</span></h3>
+      </div>
+      <div class="card-body">
+        <div class="datagrid">
+            <div class="datagrid-item">
+              <div class="datagrid-title">Status</div>
+              <div class="datagrid-content">
+                {{#if (eq this.status "active")}}
+                  <span class="status status-green">Active</span>
+                {{else}}
+                  <span class="status status-red">In active</span>
+                {{/if}}
+              </div>
+            </div>
+            <div class="datagrid-item">
+              <div class="datagrid-title">Slug</div>
+              <div class="datagrid-content">{{this.slug}}</div>
+            </div>
+            <div class="datagrid-item">
+              <div class="datagrid-title">Location</div>
+              <div class="datagrid-content">{{this.location}}</div>
+            </div>
+            <div class="datagrid-item">
+              <div class="datagrid-title">Fields</div>
+              <div class="datagrid-content">
+                {{#each this.fields}}
+                <span class="badge bg-blue-lt mb-1">{{this.actualName}}</span>
+                {{/each}}
+              </div>
+            </div>
+        </div>
+      </div>
+      <div class="card-body">
+        <a project-id="{{this._id}}" class="card-link text-blue edit-project cursor-pointer">Edit</a> 
+      </div>
+    </div>
+
+{{/each}}
+
+{{else}}
 <div class="card">
     <div class="table-responsive">
       <table class="table table-vcenter card-table">
@@ -27,6 +74,8 @@
       </table>
     </div>
 </div>
+{{/if}}
+
 {{else}}
  <div class="container-xl my-auto">
             <div class="empty">

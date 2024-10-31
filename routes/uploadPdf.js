@@ -26,8 +26,7 @@ router.post('/upload-pdf', upload.single('pdf'), async (req, res) => {
     
         // Sanitize the filename: remove special characters, spaces, and extra underscores
         const sanitizedFileName = file.originalname
-            .split('.')[0]                    // Remove the file extension
-            .replace(/[^a-zA-Z0-9]/g, '-')     // Replace non-alphanumeric characters with hyphens
+            .replace(/[^a-zA-Z0-9.]/g, '-')  // Replace non-alphanumeric characters (except periods) with hyphens
             .replace(/-+/g, '-')               // Replace multiple hyphens with a single hyphen
             .toLowerCase();                    // Convert to lowercase for consistency
     

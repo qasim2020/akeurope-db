@@ -5,6 +5,11 @@ const eq = function(a, b) {
     return a === b;
 };
 
+const neq = function(a, b) {
+    return a != b;
+};
+
+
 const inc = function(a) {
     return a + 1;
 };
@@ -22,4 +27,23 @@ const browserDate = function(dateString) {
     return `${year}-${month}-${day}`;
 }
 
-module.exports = { eq , inc, formatDate, browserDate};
+const resizeCloudinaryUrl = function (url, template) {
+    return url.replace('/upload/', `/upload/${template}/`);
+};
+
+const capitalizeFirstLetter = function (str) {
+    if (!str) return ''; // Return empty string if input is empty or undefined
+    return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+const checkInputType = function(input) {
+    if (input == "file") {
+        return "URL of the file"
+    } else if (input == "image") {
+        return "URL of the image"
+    } else {
+        return "String value"
+    }
+}
+
+module.exports = { eq , inc, formatDate, browserDate, resizeCloudinaryUrl, neq, capitalizeFirstLetter, checkInputType};

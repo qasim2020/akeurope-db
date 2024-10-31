@@ -1,0 +1,41 @@
+<div class="page-header d-print-none">
+  <div class="container-xl">
+    <div class="col-lg-7 m-auto">
+        <div class="col text-center">
+            <p class="text-secondary">{{data.project.name}}</p>
+            <h2 class="">Bulk Upload</h2>
+        </div>
+        <div class="card">
+            <div class="card-body">
+                <ul class="steps steps-blue steps-counter my-4">
+                    <li class="step-item">Download Template</li>
+                    <li class="step-item active">Upload File</li>
+                    <li class="step-item">Summary</li>
+                </ul>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <div class="form-label">Upload file</div>
+                    <input type="file" class="form-control">
+                </div>
+            </div>
+            <div class="card-body">
+                <ul class="pagination ">
+                    <li class="page-item page-prev ">
+                        <a href="/uploadExcel/{{data.project.slug}}" class="page-link">
+                            <div class="page-item-subtitle">prev</div>
+                            <div class="page-item-title">Download Template</div>
+                        </a>
+                    </li>
+                    <li class="page-item page-next">
+                        <a class="page-link" href="/uploadExcel/step-2/{{data.project.slug}}">
+                            <div class="page-item-subtitle">next</div>
+                            <div class="page-item-title">Upload File</div>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+  </div>
+</div>

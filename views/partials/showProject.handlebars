@@ -1,7 +1,9 @@
  {{#if data.entries.length}}
 
+{{#if (eq data.layout 'grid')}}
+
  {{#each data.entries as |entry|}}
- <div class="card mb-3">
+ <div class="card mb-3 data-row">
   <div class="card-header">
     <h3 class="card-title"><span class="badge bg-blue-lt">Ser: {{inc @key}}</span></h3>
   </div>
@@ -28,7 +30,7 @@
 
             {{else if (eq this.type "image")}}
               {{#if (lookup entry this.name)}}
-                <img src="{{lookup entry this.name}}" alt="{{this.name}}" class="img-thumbnail" style="max-width: 150px;">
+                <img src="{{resizeCloudinaryUrl (lookup entry this.name) 't_w-250'}}" alt="{{this.name}}" class="img-thumbnail" style="max-width: 150px;">
               {{else}}
                 <span>No image available</span>
               {{/if}}
@@ -51,13 +53,80 @@
     </div>
   </div>
   <div class="card-body">
-    <a href="#" class="card-link text-blue edit-entry" entry-id="{{entry._id}}">Edit</a>
-    <a href="#" class="card-link text-red">Delete</a>
+      <button class="btn text-blue edit-entry cursor-pointer" entry-id="{{entry._id}}">Edit</button>
+      <button class="btn text-red cursor-pointer" entry-id="{{entry._id}}" onclick="deleteEntry(this)">Delete</button>
   </div>
 </div>
 
 
 {{/each}}
+
+{{else}}
+
+<div class="card">
+    <div class="table-responsive">
+      <table class="table table-vcenter card-table table-nowrap">
+        <thead>
+            <tr>
+              {{#each data.fields}}
+              <th>{{this.actualName}}</th>
+              {{/each}}
+              <th></th>
+            </tr>
+        </thead>
+          <tbody>
+            {{#each data.entries as |entry|}}
+            <tr class="data-row">
+              {{#each ../data.fields}}
+
+                {{#if (eq this.type "boolean")}}
+                  {{#if (lookup entry this.name)}}
+                  <td> <span class="status status-green"> {{lookup entry this.name}}</span> </td>
+                  {{else}}
+                  <td> <span class="status status-red"> {{lookup entry this.name}}</span> </td>
+                  {{/if}}
+
+                {{else if (eq this.type "dropdown")}}
+                  <td class="{{#if (neq @key 0)}}text-secondary{{/if}}">{{lookup entry this.name}}</td>
+
+                {{else if (eq this.type "date")}}
+                  <td class="{{#if (neq @key 0)}}text-secondary{{/if}}"> {{formatDate (lookup entry this.name)}} </td>
+
+                {{else if (eq this.type "image")}}
+                  {{#if (lookup entry this.name)}}
+                    <td> 
+                      <img src="{{resizeCloudinaryUrl (lookup entry this.name) 't_w-250'}}" alt="{{this.name}}" class="img-thumbnail" style="max-width: 50px;">
+                    </td>
+                  {{else}}
+                    <td class="{{#if (neq @key 0)}}text-secondary{{/if}}"> <span>No image available</span> </td>
+                  {{/if}}
+
+                {{else if (eq this.type "file")}}
+                  {{#if (lookup entry this.name)}}
+                    <td class="text-secondary"> 
+                      <a href="{{lookup entry this.name}}" target="_blank">Download File</a>
+                    </td>
+                  {{else}}
+                    <td class="{{#if (neq @key 0)}}text-secondary{{/if}}"> <span>No file uploaded</span> </td>
+                  {{/if}}
+
+                {{else}}
+                  <td class="{{#if (neq @key 0)}}text-secondary{{/if}}"> {{lookup entry this.name}} </td>
+                {{/if}}
+
+                {{/each}}
+                <td> 
+                  <button class="btn text-blue edit-entry cursor-pointer" entry-id="{{entry._id}}">Edit</button>
+                  <button class="btn text-red cursor-pointer" entry-id="{{entry._id}}" onclick="deleteEntry(this)">Delete</button>
+                </td>
+              </tr>
+              {{/each}}
+            </tbody>
+      </table>
+    </div>
+</div>
+
+{{/if}}
 
  
    {{else}}

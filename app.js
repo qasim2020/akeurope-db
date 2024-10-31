@@ -8,6 +8,8 @@ const adminRoutes = require('./routes/adminRoutes');
 const projectRoutes = require('./routes/projectRoutes');
 const uploadImage = require('./routes/uploadImage');
 const uploadPdf = require('./routes/uploadPdf');
+const uploadExcel = require('./routes/uploadExcel');
+const updateLayout = require('./routes/updateLayout');
 const path = require('path');
 const { router } = require('./routes/authRoutes');
 const hbsHelpers = require('./modules/helpers');
@@ -40,6 +42,8 @@ app.use(adminRoutes);
 app.use(projectRoutes);
 app.use(uploadImage);
 app.use(uploadPdf);
+app.use(updateLayout);
+app.use(uploadExcel);
 
 // Home route
 app.get('/', (req, res) => {
