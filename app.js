@@ -50,6 +50,6 @@ app.get('/', (req, res) => {
   res.redirect('/login');
 });
 
-const PORT = 2007;
+const PORT = 3007;
 app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));module.exports = router;
 
