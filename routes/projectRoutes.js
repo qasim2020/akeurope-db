@@ -6,7 +6,7 @@ const { authenticate, authorize } = require('../modules/auth');
 const { allProjects } = require("../modules/allProjects");
 const { createDynamicModel } = require("../models/createDynamicModel");
 
-router.get('/projects', authenticate, authorize("viewDashboard"), async (req, res) => {
+router.get('/projects', authenticate, authorize("viewProject"), async (req, res) => {
   let projects = await Project.find().lean();
 
   res.render('projects', { 
@@ -83,7 +83,7 @@ router.get('/getEntryModal/:slug/:id', authenticate, authorize("editEntry"), all
 
 })
 
-router.get('/getEntryData/:slug', authenticate, authorize("editEntry"), async (req,res) => {
+router.get('/getEntryData/:slug', authenticate, authorize("viewEntry"), async (req,res) => {
   try {
     const project = await Project.findOne({ slug: req.params.slug }).lean();
 
@@ -108,7 +108,7 @@ router.get('/getEntryData/:slug', authenticate, authorize("editEntry"), async (r
 });
 
 
-router.get('/getProjectsData', authenticate, authorize("viewDashboard"), async (req, res) => {
+router.get('/getProjectsData', authenticate, authorize("viewProject"), async (req, res) => {
   let projects = await Project.find().lean();
 
   res.render('partials/showProjects', { 
@@ -146,7 +146,7 @@ router.post('/project/update/:id', authenticate, authorize("updateProject"), asy
 
 
 
-router.get('/project/:slug', authenticate, authorize("viewDashboard"), allProjects, async (req,res) => {
+router.get('/project/:slug', authenticate, authorize("viewProject"), allProjects, async (req,res) => {
 
   try {
     // Find the project and retrieve the fields array

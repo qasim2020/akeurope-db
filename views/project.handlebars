@@ -74,7 +74,6 @@
 
 {{> editProjectModal}}
 
-
 <script>
 
   function toCamelCase(str) {
@@ -622,7 +621,7 @@ $(document).on('change', ".image-upload input", function(event) {
         refreshImages();
       },
       error: function(xhr, status, error) {
-        console.log(error);
+        alert(error);
       }
     });
 
@@ -688,7 +687,7 @@ $(document).on('change', ".image-upload input", function(event) {
             $(elem).closest(".data-row").remove();
         },
         error: function(error) {
-            alert("could not delete");
+            alert("Could not delete");
             console.log(error);
         }
       });  

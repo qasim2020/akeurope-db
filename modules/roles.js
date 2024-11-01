@@ -4,6 +4,8 @@ const roles = {
         'inviteUsers', 
         'assignRoles', 
         'viewDashboard', 
+        'viewProject',
+        'viewEntry',
         'createProject', 
         'editProject', 
         'updateProject', 
@@ -15,13 +17,17 @@ const roles = {
     ],
     editor: [
         'viewDashboard', 
+        'viewProject',
+        'viewEntry',
         'createEntry', 
         'editEntry', 
         'updateEntry', 
         'deleteEntry'
     ],
     viewer: [
-        'viewDashboard'
+        'viewDashboard',
+        'viewProject',
+        'viewEntry'
     ]
 };
 
