@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { authenticate, authorize } = require('../modules/auth');
-const { allProjects } = require('../modules/allProjects');
+const { allProjects } = require('../modules/mw-data');
 
 router.get('/dashboard', authenticate, authorize('viewDashboard'), allProjects, (req, res) => res.render('dashboard', {
     layout: "dashboard", 

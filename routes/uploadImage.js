@@ -3,6 +3,7 @@ const router = express.Router();
 const multer = require('multer');
 const cloudinary = require('cloudinary').v2;
 const upload = multer();  // Using multer to handle form-data files
+const {authenticate, authorize} = require("../modules/auth");
 
 require('dotenv').config();
 
@@ -12,7 +13,7 @@ cloudinary.config({
     api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
-router.post('/upload-image', upload.single('image'), async (req, res) => {
+router.post('/upload-image', authenticate, authorize("uploadImage"), upload.single('image'), async (req, res) => {
     try {
         const imageFile = req.file;
     

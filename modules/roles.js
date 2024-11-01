@@ -1,4 +1,3 @@
-// config/roles.js
 const roles = {
     admin: [
         'inviteUsers', 
@@ -13,7 +12,9 @@ const roles = {
         'createEntry', 
         'editEntry', 
         'updateEntry', 
-        'deleteEntry'
+        'deleteEntry',
+        'uploadPdf',
+        'uploadImage'
     ],
     editor: [
         'viewDashboard', 
@@ -22,7 +23,9 @@ const roles = {
         'createEntry', 
         'editEntry', 
         'updateEntry', 
-        'deleteEntry'
+        'deleteEntry',
+        'uploadPdf',
+        'uploadImage'
     ],
     viewer: [
         'viewDashboard',
@@ -31,7 +34,6 @@ const roles = {
     ]
 };
 
-// Helper function to check if a role has a specific permission
 function hasPermission(role, permission) {
     return roles[role]?.includes(permission);
 }

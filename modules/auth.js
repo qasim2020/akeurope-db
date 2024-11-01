@@ -1,11 +1,11 @@
-const { hasPermission } = require('../modules/roles');
+const { roles, hasPermission } = require('../modules/roles');
 
 const authenticate = (req, res, next) => {
   if (req.session.user) {
     req.user = req.session.user;
     return next();
   }
-  return res.status(400).render("error", {heading: "Unauthorized", error: "User is not logged in."});
+  return res.status(404).render("error", {heading: "Unauthorized", error: "User is not logged in."});
 };
 
 const authorize = (permission) => {
@@ -13,9 +13,10 @@ const authorize = (permission) => {
     const userRole = req.user?.role;  // Assuming user's role is stored in req.user
 
     if (!userRole || !hasPermission(userRole, permission)) {
-        return res.status(404).render("error", {heading: "Access denied.", error: "Insufficient permissions!"});
+      return res.status(401).send(`Unauthorized: ${userRole} can't ${permission}`);
     }
 
+    req.userPermissions = roles[userRole] || [];
     next(); 
   };
 };

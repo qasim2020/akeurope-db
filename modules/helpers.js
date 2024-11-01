@@ -46,4 +46,12 @@ const checkInputType = function(input) {
     }
 }
 
-module.exports = { eq , inc, formatDate, browserDate, resizeCloudinaryUrl, neq, capitalizeFirstLetter, checkInputType};
+const findInArray = function(array, item) {
+    if (array && Array.isArray(array) && array.includes(item)) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+module.exports = { eq , inc, formatDate, browserDate, resizeCloudinaryUrl, neq, capitalizeFirstLetter, checkInputType, findInArray};

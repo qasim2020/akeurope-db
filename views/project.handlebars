@@ -25,6 +25,7 @@
           <a href="/uploadExcel/{{data.project.slug}}" class="btn btn-secondary-outline d-md-none btn-icon" onclick="toggleLayout(this)">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-upload"> <path stroke="none" d="M0 0h24v24H0z" fill="none" /> <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2" /> <path d="M7 9l5 -5l5 5" /> <path d="M12 4l0 12" /> </svg>
           </a>
+          {{#if (findInArray data.role "editProject")}}
           <a href="#" class="btn btn-secondary-outline d-none d-md-inline-block" id="#edit-project-{{data.project.slug}}" data-bs-toggle="modal" data-bs-target="#modal-{{data.project.slug}}">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-pencil-plus">
               <path stroke="none" d="M0 0h24v24H0z" fill="none" />
@@ -44,6 +45,8 @@
               <path d="M19 16v6" />
             </svg> 
           </a>
+          {{/if}}
+          {{#if (findInArray data.role "createEntry")}}
           <a href="#" class="btn btn-primary d-none d-md-inline-block" id="#createNewEntry" data-bs-toggle="modal" data-bs-target="#modal-new-entry">
             <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
               <path stroke="none" d="M0 0h24v24H0z" fill="none" />
@@ -60,6 +63,7 @@
               <path d="M5 12l14 0" />
             </svg>
           </a>
+          {{/if}}
         </div>
       </div>
     </div>
@@ -70,9 +74,13 @@
   {{> showProject}}
 </div>
 
+{{#if (findInArray data.role "createEntry")}}
 {{> emptyEntryModal}}
+{{/if}}
 
+{{#if (findInArray data.role "editProject")}}
 {{> editProjectModal}}
+{{/if}}
 
 <script>
 
@@ -161,7 +169,6 @@ let editProject = function(elem) {
         window.location.href = `/project/${toKebabCase(slug)}`;
       },
       error: function(xhr, status, error) {
-        console.log(xhr);
         $(elem).html(currentBtnHTML);
         $(".modal-footer").append(`
         <div class="w-100 d-block alert alert-danger mt-4" role="alert">
@@ -411,7 +418,6 @@ const saveEntry = function(elem) {
         window.location.href = `/project/{{data.project.slug}}`;
       },
       error: function(xhr, status, error) {
-        console.log(xhr);
         $(elem).html(currentBtnHTML);
         $(".modal-footer").append(`
         <div class="w-100 d-block alert alert-danger mt-4" role="alert">
@@ -485,7 +491,6 @@ const editEntry = function(elem) {
         window.location.href = `/project/{{data.project.slug}}`;
       },
       error: function(xhr, status, error) {
-        console.log(xhr);
         $(elem).html(currentBtnHTML);
         $(".modal-footer").append(`
         <div class="w-100 d-block alert alert-danger mt-4" role="alert">
@@ -541,7 +546,7 @@ $(document).on('change', ".image-upload input", function(event) {
               $(elem).closest(".image-upload").find(".btn").html(`
                 <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-x"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M18 6l-12 12" /><path d="M6 6l12 12" /></svg>
               `);
-              console.log("Error uploading image:", error);
+              alert("Error uploading image:", error);
           }
       });
     }
@@ -595,7 +600,7 @@ $(document).on('change', ".image-upload input", function(event) {
             `);
         },
         error: function(error) {
-            console.log("Error uploading PDF:", error);
+            alert("Error uploading PDF:", error);
         }
     });
   })
@@ -621,7 +626,7 @@ $(document).on('change', ".image-upload input", function(event) {
         refreshImages();
       },
       error: function(xhr, status, error) {
-        alert(error);
+        alert(xhr.responseText)
       }
     });
 
@@ -644,8 +649,6 @@ $(document).on('change', ".image-upload input", function(event) {
   let newLayout = '{{data.layout}}' == 'grid' ? 'table' : 'grid'; 
 
   const toggleLayout = function(elem) {
-    // Define the new layout value
-    // Send AJAX request to update session variable
     $.ajax({
       url: '/update-layout',
       method: 'POST',
@@ -669,8 +672,7 @@ $(document).on('change', ".image-upload input", function(event) {
         refreshImages();
       },
       error: function(error) {
-          alert("Failed to update layout.");
-          console.log(error);
+          alert(error.responseText);
       }
     }); 
   }
@@ -687,8 +689,7 @@ $(document).on('change', ".image-upload input", function(event) {
             $(elem).closest(".data-row").remove();
         },
         error: function(error) {
-            alert("Could not delete");
-            console.log(error);
+            alert(error.responseText)
         }
       });  
   }
