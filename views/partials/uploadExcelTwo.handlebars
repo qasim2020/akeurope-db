@@ -1,0 +1,29 @@
+ <div class="card-body">
+    <ul class="steps steps-blue steps-counter my-4">
+        <li class="step-item">Download Template</li>
+        <li class="step-item active">Upload File</li>
+        <li class="step-item">Summary</li>
+    </ul>
+</div>
+<div class="card-body">
+    <div class="mb-3">
+        <div class="form-label">Upload file</div>
+        <input type="file" class="form-control">
+    </div>
+</div>
+<div class="card-body">
+    <ul class="pagination ">
+        <li class="page-item page-prev ">
+            <a href="/uploadExcel/{{data.project.slug}}" class="page-link">
+                <div class="page-item-subtitle">prev</div>
+                <div class="page-item-title">Download Template</div>
+            </a>
+        </li>
+        <li class="page-item page-next">
+            <a class="page-link next" next-link="/uploadExcel/step-3/{{data.project.slug}}">
+                <div class="page-item-subtitle">next</div>
+                <div class="page-item-title">Upload File</div>
+            </a>
+        </li>
+    </ul>
+</div>

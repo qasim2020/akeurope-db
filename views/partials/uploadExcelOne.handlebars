@@ -1,0 +1,41 @@
+<div class="card-body">
+    <ul class="steps steps-blue steps-counter my-4">
+        <li class="step-item active">Download Template</li>
+        <li class="step-item">Upload File</li>
+        <li class="step-item">Summary</li>
+    </ul>
+</div>
+<div class="card-body">
+    <div class="table-responsive mb-3">
+        <table class="table table-vcenter card-table table-nowrap">
+            <tbody>
+                <tr>
+                    <th>Ser</th>
+                    <th>Field Name</th>
+                    <th>Field Type</th>
+                </tr>
+                {{#each data.project.fields}}
+                <tr>
+                    <td>{{inc @key}}</td>
+                    <td><span class="badge bg-blue-lt">{{this.name}}</span></td>
+                    <td>{{checkInputType this.type}}</td>
+                </tr>
+                {{/each}}
+            </tbody>
+        </table>
+    </div>
+    <div class="text-center">
+        <a class="btn btn-primary"> Download template </a>
+    </div>
+</div>
+<div class="card-body">
+    <ul class="pagination ">
+        <li class="page-item page-prev disabled"> </li>
+        <li class="page-item page-next">
+            <a class="page-link next" next-link="/uploadExcel/step-2/{{data.project.slug}}">
+                <div class="page-item-subtitle">next</div>
+                <div class="page-item-title">Upload File</div>
+            </a>
+        </li>
+    </ul>
+</div>
