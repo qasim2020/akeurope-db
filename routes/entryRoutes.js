@@ -6,6 +6,13 @@ const { authenticate, authorize } = require('../modules/auth');
 const { allProjects } = require("../modules/mw-data");
 const { createDynamicModel } = require("../models/createDynamicModel");
 
+// Helper to extract public ID from Cloudinary URL
+function extractCloudinaryPublicId(url) {
+  const parts = url.split('/');
+  const publicIdWithExtension = parts.slice(7).join('/').split('.')[0];
+  return publicIdWithExtension;
+}
+
 router.get('/getEntryModal/:slug/:id', authenticate, authorize("editEntry"), allProjects, async (req,res) => {
 
     try {
@@ -132,29 +139,66 @@ router.post('/project/entry/update/:slug/:id', authenticate, authorize("updateEn
    }
 });
 
-router.post('/project/entry/delete/:slug', authenticate, authorize("deleteEntry"), async (req, res) => {
+// router.post('/project/entry/delete/:slug', authenticate, authorize("deleteEntry"), async (req, res) => {
 
-    try {
-      // Find the project to get the schema fields
-      const project = await Project.findOne({ slug: req.params.slug });
-      if (!project) return res.status(404).json({ error: `Project ${req.params.slug} not found` });
+//     try {
+//       // Find the project to get the schema fields
+//       const project = await Project.findOne({ slug: req.params.slug });
+//       if (!project) return res.status(404).json({ error: `Project ${req.params.slug} not found` });
   
-      // Create the dynamic model based on the project schema
-      const DynamicModel = await createDynamicModel(project.slug);
+//       // Create the dynamic model based on the project schema
+//       const DynamicModel = await createDynamicModel(project.slug);
   
-      // Prepare data to match project fields
-      console.log(req.body);
-      const updatedEntry = await DynamicModel.deleteOne({_id: req.body.entryId});
+//       // Prepare data to match project fields
+//       console.log(req.body);
+//       const updatedEntry = await DynamicModel.deleteOne({_id: req.body.entryId});
   
-      if (!updatedEntry) return res.status(404).json({ error: `Entry with ID ${req.params.id} not found!` });
+//       if (!updatedEntry) return res.status(404).json({ error: `Entry with ID ${req.params.id} not found!` });
   
-      res.status(200).json({ message: 'Entry deleted successfully', entry: updatedEntry });
-    } catch (error) {
-        res.status(500).json({ error: 'Error updating entry', details: error.message });
-    }
+//       res.status(200).json({ message: 'Entry deleted successfully', entry: updatedEntry });
+//     } catch (error) {
+//         res.status(500).json({ error: 'Error updating entry', details: error.message });
+//     }
   
   
+// });
+  
+const cloudinary = require('cloudinary').v2;
+
+router.post('/project/entry/delete/:slug', authenticate, authorize("deleteEntry"), async (req, res) => {
+  try {
+    const project = await Project.findOne({ slug: req.params.slug });
+    if (!project) return res.status(404).json({ error: `Project ${req.params.slug} not found` });
+
+    const DynamicModel = await createDynamicModel(project.slug);
+    const entry = await DynamicModel.findOne({ _id: req.body.entryId });
+
+    if (!entry) return res.status(404).json({ error: `Entry with ID ${req.body.entryId} not found!` });
+
+    // Filter fields for file types "image" or "file"
+    const deletionPromises = project.fields
+      .filter(field => ['image', 'file'].includes(field.type) && entry[field.name])
+      .map(field => {
+        const fileUrl = entry[field.name];
+
+        // Check if URL is hosted on Cloudinary before deleting
+        if (fileUrl.includes("res.cloudinary.com")) {
+          const publicId = extractCloudinaryPublicId(fileUrl); // Helper function to get the Cloudinary public ID
+          return cloudinary.uploader.destroy(publicId, { resource_type: field.type === 'image' ? 'image' : 'raw' });
+        }
+      })
+      .filter(Boolean);  // Remove undefined promises for non-Cloudinary URLs
+
+    // Wait for Cloudinary deletions to complete
+    await Promise.all(deletionPromises);
+
+    // Delete the entry from the database
+    await DynamicModel.deleteOne({ _id: req.body.entryId });
+
+    res.status(200).json({ message: 'Entry and associated Cloudinary files deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ error: 'Error deleting entry or associated files', details: error.message });
+  }
 });
-  
-  
+
 module.exports = router;
