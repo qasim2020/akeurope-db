@@ -26,4 +26,4 @@ Dynamically create projects, where each project has a unique field.
 
 1. Customers
 2. Invoices & Subscriptions
-4. Profile settings, notifications. 
+3. Profile settings, notifications. 
