@@ -1,0 +1,80 @@
+<div class="modal modal-blur fade" id="modal-new-user" tabindex="-1" style="display: none; padding-left: 0px;" aria-modal="true" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">New user</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Full Name</label>
+                    <input id="project-name" type="text" class="form-control" name="name" placeholder="Full Name" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Email</label>
+                    <input id="project-slug" type="email" class="form-control" name="email" placeholder="email@gmail.com" />
+                </div>
+                <label class="form-label">Role</label>
+                <div class="form-selectgroup-boxes row mb-3" id="user-role">
+                    <div class="">
+                        <label class="form-selectgroup-item">
+                        <input type="radio" name="report-type" value="active" class="form-selectgroup-input" checked="" />
+                        <span class="form-selectgroup-label d-flex align-items-center p-3">
+                          <span class="me-3">
+                            <span class="form-selectgroup-check"></span>
+                          </span>
+                          <span class="form-selectgroup-label-content">
+                            <span class="form-selectgroup-title strong mb-1">Viewer</span>
+                            <span class="d-block text-secondary">Can view pages only. Doesn't have edit access to any thing.</span>
+                          </span>
+                        </span>
+                        </label>
+                    </div>
+                    <div class="">
+                        <label class="form-selectgroup-item">
+                          <input type="radio" name="report-type" value="inactive" class="form-selectgroup-input" />
+                          <span class="form-selectgroup-label d-flex align-items-center p-3">
+                              <span class="me-3">
+                                  <span class="form-selectgroup-check"></span>
+                              </span>
+                              <span class="form-selectgroup-label-content">
+                                  <span class="form-selectgroup-title strong mb-1" >Editor</span>
+                                  <span class="d-block text-secondary">Can create, edit, update, bulk upload and delete entries of a project.</span>
+                              </span>
+                          </span>
+                        </label>
+                    </div>
+                    <div class="">
+                        <label class="form-selectgroup-item">
+                          <input type="radio" name="report-type" value="inactive" class="form-selectgroup-input" />
+                          <span class="form-selectgroup-label d-flex align-items-center p-3">
+                              <span class="me-3">
+                                  <span class="form-selectgroup-check"></span>
+                              </span>
+                              <span class="form-selectgroup-label-content">
+                                  <span class="form-selectgroup-title strong mb-1" >Admin</span>
+                                  <span class="d-block text-secondary">Can create projects, customers, administrators and has full access.</span>
+                              </span>
+                          </span>
+                        </label>
+                    </div>
+                </div>
+                
+            </div>
+
+          <div class="modal-footer">
+              <a href="#" class="btn btn-link link-secondary" data-bs-dismiss="modal">
+                Cancel
+              </a>
+              <a href="#" class="btn btn-primary ms-auto" id="save-project">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                      <path d="M12 5l0 14"></path>
+                      <path d="M5 12l14 0"></path>
+                  </svg>
+                  Create user
+              </a>
+          </div>
+      </div>
+  </div>
+</div>

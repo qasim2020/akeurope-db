@@ -5,10 +5,13 @@ const UserSchema = new mongoose.Schema({
   name: String,
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
-  role: { type: String, enum: ['admin', 'user', 'viewer'], default: 'viewer' },
+  role: { type: String, enum: ['admin', 'editor', 'viewer'], default: 'viewer' },
+  status: { type: String, default: 'pending' },
   invitationStatus: { type: Boolean, default: false },
   resetPasswordToken: String,
   resetPasswordExpires: Date,
+  inviteToken: String,
+  inviteExpires: Date
 });
 
 // Hash the password before saving it

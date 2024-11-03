@@ -10,6 +10,8 @@ router.get('/projects', authenticate, authorize("viewProject"), async (req, res)
   res.render('projects', { 
     layout: "dashboard", 
     data: {
+      userName: req.session.user.name,
+      userRole: req.session.user.role.charAt(0).toUpperCase() + req.session.user.role.slice(1),
       projects: projects,
       layout: req.session.layout,
       activeMenu: "allProjects",

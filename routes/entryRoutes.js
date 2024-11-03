@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const express = require('express');
 const router = express.Router();
 const Project = require('../models/Project');
+const cloudinary = require('cloudinary').v2;
 const { authenticate, authorize } = require('../modules/auth');
 const { allProjects } = require("../modules/mw-data");
 const { createDynamicModel } = require("../models/createDynamicModel");
@@ -139,31 +140,6 @@ router.post('/project/entry/update/:slug/:id', authenticate, authorize("updateEn
    }
 });
 
-// router.post('/project/entry/delete/:slug', authenticate, authorize("deleteEntry"), async (req, res) => {
-
-//     try {
-//       // Find the project to get the schema fields
-//       const project = await Project.findOne({ slug: req.params.slug });
-//       if (!project) return res.status(404).json({ error: `Project ${req.params.slug} not found` });
-  
-//       // Create the dynamic model based on the project schema
-//       const DynamicModel = await createDynamicModel(project.slug);
-  
-//       // Prepare data to match project fields
-//       console.log(req.body);
-//       const updatedEntry = await DynamicModel.deleteOne({_id: req.body.entryId});
-  
-//       if (!updatedEntry) return res.status(404).json({ error: `Entry with ID ${req.params.id} not found!` });
-  
-//       res.status(200).json({ message: 'Entry deleted successfully', entry: updatedEntry });
-//     } catch (error) {
-//         res.status(500).json({ error: 'Error updating entry', details: error.message });
-//     }
-  
-  
-// });
-  
-const cloudinary = require('cloudinary').v2;
 
 router.post('/project/entry/delete/:slug', authenticate, authorize("deleteEntry"), async (req, res) => {
   try {

@@ -75,6 +75,8 @@ router.get('/project/:slug', authenticate, authorize("viewProject"), allProjects
     res.render('project', {
       layout: "dashboard",
       data: {
+        userName: req.session.user.name,
+        userRole: req.session.user.role.charAt(0).toUpperCase() + req.session.user.role.slice(1),
         project,
         fields: project.fields, 
         entries, 

@@ -10,6 +10,7 @@ const adminRoutes = require('./routes/adminRoutes');
 const projectRoutes = require('./routes/projectRoutes');
 const entryRoutes = require('./routes/entryRoutes');
 const projectsRoutes = require('./routes/projectsRoutes');
+const usersRoutes = require('./routes/usersRoutes');
 const uploadImage = require('./routes/uploadImage');
 const uploadPdf = require('./routes/uploadPdf');
 const uploadExcel = require('./routes/uploadExcel');
@@ -59,6 +60,7 @@ app.use(uploadPdf);
 app.use(updateLayout);
 app.use(uploadExcel);
 app.use(renderPartial);
+app.use(usersRoutes);
 
 // Home route
 app.get('/', (req, res) => {

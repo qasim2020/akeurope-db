@@ -138,7 +138,7 @@
             </div>
             <div class="nav-item dropdown">
               <a href="#" class="nav-link d-flex lh-1 text-reset pr-4" data-bs-toggle="dropdown" aria-label="Open user menu">
-                <span class="avatar avatar-sm" style="background-image: url(/static/avatars/000m.jpg)"></span>
+                <span class="avatar avatar-sm">{{getFirstTwoLetters data.userName}}</span>
                 <div class="d-none d-xl-block ps-2">
                   <div>{{data.userName}}</div>
                   <div class="mt-1 small text-secondary">{{data.userRole}}</div>
@@ -265,10 +265,10 @@
             </div>
             <div class="nav-item dropdown">
               <a href="#" class="nav-link d-flex lh-1 text-reset p-0" data-bs-toggle="dropdown" aria-label="Open user menu" aria-expanded="false">
-                <span class="avatar avatar-sm" style="background-image: url(/static/avatars/000m.jpg)"></span>
+                <span class="avatar avatar-sm">{{getFirstTwoLetters data.userName}}</span>
                 <div class="d-none d-xl-block ps-2">
-                  <div>Qasim Ali</div>
-                  <div class="mt-1 small text-secondary">Admin</div>
+                  <div>{{data.userName}}</div>
+                  <div class="mt-1 small text-secondary">{{data.userRole}}</div>
                 </div>
               </a>
               <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
@@ -348,7 +348,7 @@
 
 
               <li class="nav-item">
-                <a class="nav-link" href="/administrators" >
+                <a class="nav-link {{#if (eq "users" data.activeMenu)}} bg-azure-lt {{/if}}" href="/users" >
                   <span class="nav-link-icon d-md-none d-lg-inline-block"><!-- Download SVG icon from http://tabler-icons.io/i/checkbox -->
                     <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-device-imac"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 4a1 1 0 0 1 1 -1h16a1 1 0 0 1 1 1v12a1 1 0 0 1 -1 1h-16a1 1 0 0 1 -1 -1v-12z" /><path d="M3 13h18" /><path d="M8 21h8" /><path d="M10 17l-.5 4" /><path d="M14 17l.5 4" /></svg>
                   </span>

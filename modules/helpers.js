@@ -54,4 +54,9 @@ const findInArray = function(array, item) {
     }
 }
 
-module.exports = { eq , inc, formatDate, browserDate, resizeCloudinaryUrl, neq, capitalizeFirstLetter, checkInputType, findInArray};
+const getFirstTwoLetters = function (name) {
+    if (!name) return ''; 
+    return name.slice(0, 2).toUpperCase();
+}
+
+module.exports = { eq , inc, formatDate, browserDate, resizeCloudinaryUrl, neq, capitalizeFirstLetter, checkInputType, findInArray, getFirstTwoLetters};
