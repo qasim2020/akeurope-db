@@ -46,7 +46,7 @@ const createDynamicModel = async function(projectName) {
         const dynamicSchema = new mongoose.Schema(dynamicFields);
 
         // Model name
-        const modelName = project.name;
+        const modelName = project.slug;
 
         // Check if the model already exists
         if (mongoose.models[modelName]) {

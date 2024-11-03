@@ -101,20 +101,30 @@
               </button>
             </div>
           </div>
-            <div class="modal-footer">
-                <a href="#" class="btn btn-link link-secondary" data-bs-dismiss="modal">
-                  Cancel
-                </a>
-                <a href="#" class="btn btn-primary ms-auto" id="save-project">
-                    <!-- Download SVG icon from http://tabler-icons.io/i/plus -->
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                        <path d="M12 5l0 14"></path>
-                        <path d="M5 12l14 0"></path>
-                    </svg>
-                    Create new project
-                </a>
-            </div>
-        </div>
-    </div>
+          <div class="modal-body">
+              <div class="mb-3 primary-field">
+                  <div class="form-label">Select non-repeatable field</div>
+                  <p class="card-subtitle mb-3">This is a unique field in your project that never repeats. It can be an email, id card number, mobile number, or slug etc. </p>
+                  <div class="mb-3 primary-field-selectors">
+                      <span class="badge cursor-pointer" onclick="alert('No field exists. You need to enter a field name first.')">Field # 1</span>
+                  </div>
+                  <input type="text" class="form-control" disabled>
+              </div>
+          </div>
+          <div class="modal-footer">
+              <a href="#" class="btn btn-link link-secondary" data-bs-dismiss="modal">
+                Cancel
+              </a>
+              <a href="#" class="btn btn-primary ms-auto" id="save-project">
+                  <!-- Download SVG icon from http://tabler-icons.io/i/plus -->
+                  <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                      <path d="M12 5l0 14"></path>
+                      <path d="M5 12l14 0"></path>
+                  </svg>
+                  Create new project
+              </a>
+          </div>
+      </div>
+  </div>
 </div>

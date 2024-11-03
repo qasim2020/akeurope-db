@@ -14,7 +14,76 @@
 
 
 <script>
-    $(document).on("click", ".next", function(e) {
+    $(document).on("click", ".next, .prev", function(e) {
         console.log("go to next step");
-    })
+        let url = $(this).attr("data-url");
+
+        $.ajax({
+            url: url, 
+            method: 'GET',
+            success: function(response) {
+                console.log(response);
+                $("#data-container").html(response);
+            },
+            error: function(error) {
+                alert(error.responseText);
+            }
+        }); 
+    });
+
+
+    const uploadExcel = function(elem) {
+
+        const fileInput = $('#excelFile')[0];
+
+        $('#excelFile').removeClass("is-invalid");
+        $(elem).closest(".card").find(".invalid-feedback").removeClass("invalid-feedback");
+
+        if (!fileInput.files.length) {
+            $('#excelFile').addClass("is-invalid");
+            $("#excelFile").after(`<div class="invalid-feedback">No file uploaded</div>`);
+            return;
+        }
+
+        $('#excelFile').addClass("is-valid");
+        const formData = new FormData();
+        formData.append('excelFile', fileInput.files[0]);
+
+        $.ajax({
+            url: '/uploadExcel/{{data.project.slug}}', 
+            type: 'POST',
+            data: formData,
+            processData: false, 
+            contentType: false, 
+            success: function(response) {
+                stepThree(response);
+            },
+            error: function(error) {
+                alert('Error uploading file.');
+                console.error(error);
+            }
+        });
+    };
+
+    const stepThree = function(msg) {
+        $.ajax({
+            url: '/renderPartial',
+            type: 'POST',
+            data: JSON.stringify({
+                partialName: 'uploadExcelThree',  
+                data: {
+                    msg,
+                    slug: '{{data.project.slug}}',
+                    name: '{{data.project.name}}'
+                }
+            }),
+            contentType: 'application/json',
+            success: function(response) {
+                $("#data-container").html(response);
+            },
+            error: function(error) {
+                alert('Error rendering partial:', error);
+            }
+        });
+    }
 </script>

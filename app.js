@@ -1,8 +1,10 @@
 const express = require('express');
 const session = require('express-session');
+const MongoStore = require('connect-mongo');
 const flash = require('connect-flash');
 const exphbs = require('express-handlebars');
 const mongoose = require('./config/db');
+const renderPartial = require('./routes/renderPartial');
 const authRoutes = require('./routes/authRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const projectRoutes = require('./routes/projectRoutes');
@@ -26,11 +28,19 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(
   session({
-    secret: process.env.SESSION_SECRET,
+    secret: process.env.SESSION_SECRET, // Replace with your session secret
     resave: false,
     saveUninitialized: false,
+    store: MongoStore.create({
+      mongoUrl: process.env.MONGO_URI, // Replace with your MongoDB connection string
+      collectionName: 'sessions',      // Optional: customize the collection name
+    }),
+    cookie: {
+      maxAge: 1000 * 60 * 60 * 24, // Optional: set cookie expiration (1 day)
+    }
   })
 );
+
 app.use(flash());
 
 // Serve static files from the Tabler directory
@@ -48,6 +58,7 @@ app.use(uploadImage);
 app.use(uploadPdf);
 app.use(updateLayout);
 app.use(uploadExcel);
+app.use(renderPartial);
 
 // Home route
 app.get('/', (req, res) => {

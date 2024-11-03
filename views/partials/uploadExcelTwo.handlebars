@@ -7,22 +7,22 @@
 </div>
 <div class="card-body">
     <div class="mb-3">
-        <div class="form-label">Upload file</div>
-        <input type="file" class="form-control">
+        <div class="form-label">Upload your excel file</div>
+        <input type="file" class="form-control" id="excelFile" name="excelFile" accept=".xlsx, .xls" />
     </div>
 </div>
 <div class="card-body">
     <ul class="pagination ">
         <li class="page-item page-prev ">
-            <a href="/uploadExcel/{{data.project.slug}}" class="page-link">
+            <a class="page-link prev cursor-pointer" data-url="/uploadExcel/step-1/{{data.project.slug}}">
                 <div class="page-item-subtitle">prev</div>
                 <div class="page-item-title">Download Template</div>
             </a>
         </li>
         <li class="page-item page-next">
-            <a class="page-link next" next-link="/uploadExcel/step-3/{{data.project.slug}}">
+            <a class="page-link cursor-pointer" onclick="uploadExcel(this)">
                 <div class="page-item-subtitle">next</div>
-                <div class="page-item-title">Upload File</div>
+                <div class="page-item-title">Submit</div>
             </a>
         </li>
     </ul>

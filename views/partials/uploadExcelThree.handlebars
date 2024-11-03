@@ -1,0 +1,54 @@
+<div class="card-body">
+    <ul class="steps steps-blue steps-counter my-4">
+        <li class="step-item">Download Template</li>
+        <li class="step-item">Upload File</li>
+        <li class="step-item active">Summary</li>
+    </ul>
+</div>
+<div class="card-body">
+    <div>
+        <h2 class="text-center">{{data.msg.message}}</h2>
+    </div>
+    <div class="table-responsive mb-3">
+        <table class="table table-vcenter card-table table-nowrap">
+            <tbody>
+                <tr>
+                    <td>Created New</td>
+                    <td>{{data.msg.results.createdNew}}</td>
+                </tr>
+                <tr>
+                    <td>Merged</td>
+                    <td>{{data.msg.results.merged}}</td>
+                </tr>
+                <tr>
+                    <td>Errors</td>
+                    <td>
+                        {{#if data.msg.results.errors}}
+                            {{#each data.msg.results.errors}}
+                            <p>{{this}}</p>
+                            {{/each}}
+                        {{else}}
+                        0
+                        {{/if}}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+<div class="card-body">
+    <ul class="pagination ">
+        <li class="page-item page-prev">
+            <a class="page-link prev cursor-pointer" data-url="/uploadExcel/step-2/{{data.slug}}">
+                <div class="page-item-subtitle">Prev</div>
+                <div class="page-item-title">Upload Template</div>
+            </a>
+        </li>
+        <li class="page-item page-next">
+            <a class="page-link cursor-pointer" href="/project/{{data.slug}}">
+                <div class="page-item-subtitle">Exit</div>
+                <div class="page-item-title">{{data.name}}</div>
+            </a>
+        </li>
+    </ul>
+</div>

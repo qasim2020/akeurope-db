@@ -1,4 +1,4 @@
-<div class="card-body">
+ <div class="card-body">
     <ul class="steps steps-blue steps-counter my-4">
         <li class="step-item active">Download Template</li>
         <li class="step-item">Upload File</li>
@@ -6,7 +6,7 @@
     </ul>
 </div>
 <div class="card-body">
-    <div class="table-responsive mb-3">
+     <div class="table-responsive mb-3">
         <table class="table table-vcenter card-table table-nowrap">
             <tbody>
                 <tr>
@@ -17,24 +17,27 @@
                 {{#each data.project.fields}}
                 <tr>
                     <td>{{inc @key}}</td>
+                    {{#if this.primary}}
+                    <td><span class="badge bg-red-lt">{{this.name}}</span></td>
+                    {{else}}
                     <td><span class="badge bg-blue-lt">{{this.name}}</span></td>
-                    <td>{{checkInputType this.type}}</td>
+                    {{/if}}
+                    <td>{{checkInputType this.type}}. {{#if this.primary}} Non repeatable field. {{/if}}</td>
                 </tr>
                 {{/each}}
             </tbody>
         </table>
     </div>
     <div class="text-center">
-        <a class="btn btn-primary"> Download template </a>
+        <a href="/downloadExcelTemplate/{{data.project.slug}}" class="btn btn-primary" download> Download Template</a>
     </div>
 </div>
 <div class="card-body">
     <ul class="pagination ">
-        <li class="page-item page-prev disabled"> </li>
-        <li class="page-item page-next">
-            <a class="page-link next" next-link="/uploadExcel/step-2/{{data.project.slug}}">
+        <li class="page-item page-next ">
+            <a class="page-link next cursor-pointer" data-url="/uploadExcel/step-2/{{data.project.slug}}">
                 <div class="page-item-subtitle">next</div>
-                <div class="page-item-title">Upload File</div>
+                <div class="page-item-title">Upload Template</div>
             </a>
         </li>
     </ul>

@@ -148,9 +148,12 @@ let editProject = function(elem) {
             name: toCamelCase($(val).find("input:first").val()), 
             actualName: $(val).find("input:first").val(),
             type: $(val).find(".form-select").val(),
-            options: options.length > 0 ? options : undefined
+            options: options.length > 0 ? options : undefined,
+            primary: $(elem).closest(".modal").find(".primary-field input").val() == $(val).find("input:first").val()
         }
     }).get();
+
+    if (highlightRepeatingValues($(elem).closest(".modal"))) return;
 
     if (!(isValid.every(val => val === true))) {
         return false;
@@ -180,7 +183,49 @@ let editProject = function(elem) {
 
   };
 
-    document.addEventListener('DOMContentLoaded', function() {
+  function highlightRepeatingValues($container) {
+    const valueCounts = new Map();
+    let hasRepeatingValues = false;
+
+    // First, count occurrences of each input value
+    $container.find(".accordion-item").each((key, val) => {
+      const $input = $(val).find("input:first");
+      const inputValue = $input.val();
+
+      // Update the count of the value in the map
+      if (valueCounts.has(inputValue)) {
+        valueCounts.set(inputValue, valueCounts.get(inputValue) + 1);
+      } else {
+        valueCounts.set(inputValue, 1);
+      }
+    });
+
+    // Highlight the fields with repeating values and check if there are any
+    $container.find(".accordion-item").each((key, val) => {
+      const $input = $(val).find("input:first");
+      const inputValue = $input.val();
+
+      if (valueCounts.get(inputValue) > 1) {
+        hasRepeatingValues = true;
+
+        // Add 'is-invalid' class to the input field
+        $input.addClass("is-invalid");
+
+        // Append an 'invalid-feedback' element if not already present
+        if ($input.next('.invalid-feedback').length === 0) {
+          $input.after('<div class="invalid-feedback">This value is repeated.</div>');
+        }
+
+        // Change the background color of the accordion item
+        $(val).addClass("bg-red-lt");
+      }
+    });
+
+    return hasRepeatingValues;
+  }
+
+
+  document.addEventListener('DOMContentLoaded', function() {
       let el = document.querySelector('.accordion');
       if (el) {
           new Sortable(el, {
@@ -251,11 +296,11 @@ let editProject = function(elem) {
     })
   })
 
-
   $(document).on("change keyup", ".accordion-item input, .accordion-item .form-select", function() {
     if ($(this).hasClass("form-select")) {
         addOptions(this);
     }
+    addPrimaryField(this);
     let input = $(this).closest(".accordion-item").find("input").val();
     let type = $(this).closest(".accordion-item").find(".form-select").val();
     $(this).closest(".accordion-item").find(".accordion-button").html(`
@@ -264,6 +309,23 @@ let editProject = function(elem) {
     `);
   })
 
+  const addPrimaryField = function(elem) {
+    let allFields = $(elem).closest(".modal").find(".accordion-item").map( (key, val) => $(val).find("input:first").val() );
+    let html = ``;
+    allFields.each( (key, val) => {
+      if (val.length > 0) {
+        html += `<span class="badge cursor-pointer me-1" onclick="setPrimaryField(this)">${val}</span>`;
+      }
+    });
+    $(elem).closest(".modal").find(".primary-field-selectors").html(html);
+    $(elem).closest(".modal").find(".primary-field input").removeClass("is-valid").val("");
+  }
+
+  const setPrimaryField = function(elem) {
+    $(elem).siblings().removeClass("bg-blue-lt");
+    $(elem).addClass("bg-blue-lt");
+    $(elem).closest(".primary-field").find("input").val( $(elem).html() );
+  }
 
   const addOptions = function (elem) {
 

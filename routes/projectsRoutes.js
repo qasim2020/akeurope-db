@@ -13,7 +13,7 @@ router.get('/projects', authenticate, authorize("viewProject"), async (req, res)
       projects: projects,
       layout: req.session.layout,
       activeMenu: "allProjects",
-      roles: req.userPermissions
+      role: req.userPermissions
     }
   });
 });

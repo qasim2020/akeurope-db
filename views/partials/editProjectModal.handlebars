@@ -8,12 +8,12 @@
             <div class="modal-body">
                 <div class="mb-3">
                     <label class="form-label">Name</label>
-                    <input type="text" class="form-control project-name" name="example-text-input" placeholder="Name of project" value="{{data.project.name}}" />
+                    <input type="text" class="form-control project-name" name="example-text-input" placeholder="Name of project" value="{{data.project.name}}"/>
                 </div>
 
                 <div class="mb-3">
                     <label class="form-label">Slug</label>
-                    <input type="text" class="form-control project-slug" name="example-text-input" placeholder="name-of-project" value="{{data.project.slug}}" />
+                    <input type="text" class="form-control project-slug" name="example-text-input" placeholder="name-of-project" value="{{data.project.slug}}" disabled/>
                 </div>
 
                 <label class="form-label">Project status</label>
@@ -161,6 +161,24 @@
                     Add new field
               </button>
             </div>
+          </div>
+          <div class="modal-body">
+              <div class="mb-3 primary-field">
+                  <div class="form-label">Select non-repeatable field</div>
+                  <p class="card-subtitle mb-3">This is a unique field in your project that never repeats. It can be an email, id card number, mobile number, or slug etc. </p>
+                  <div class="mb-3 primary-field-selectors">
+                        {{#each data.project.fields}}
+                        <span class="badge cursor-pointer {{#if this.primary}} bg-blue-lt {{/if}}" onclick="setPrimaryField(this)">{{this.actualName}}</span>
+                        {{/each}}
+                  </div>
+                  <input type="text" class="form-control" disabled
+                    {{#each data.project.fields}}
+                        {{#if this.primary}}
+                            value="{{this.actualName}}"
+                        {{/if}}
+                    {{/each}}
+                  >
+              </div>
           </div>
             <div class="modal-footer">
                 <a href="#" class="btn btn-link link-secondary" data-bs-dismiss="modal">

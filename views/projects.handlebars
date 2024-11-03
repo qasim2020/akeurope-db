@@ -137,12 +137,12 @@
             name: toCamelCase($(val).find("input:first").val()), 
             actualName: $(val).find("input:first").val(),
             type: $(val).find(".form-select").val(),
-            options: options.length > 0 ? options : undefined
+            options: options.length > 0 ? options : undefined,
+            primary: $(elem).closest(".modal").find(".primary-field input").val() == $(val).find("input:first").val()
         }
     }).get();
 
-    console.log({name, slug, status, location, fields});
-
+    if (highlightRepeatingValues($(elem).closest(".modal"))) return;
 
     if (!(isValid.every(val => val === true))) {
         return false;
@@ -203,6 +203,16 @@
       isValid.push($(val).val() != "");
     });
 
+    $("#create-project").find(".accordion-item").each( (key,val) => {
+      console.log($(val).find("input:first").val());
+    })
+
+    if (highlightRepeatingValues($("#create-project"))) return;
+
+    if (!(isValid.every(val => val === true))) {
+        return false;
+    };
+
     const name = $("#project-name").val();
     const slug = $("#project-slug").val();
     const location = $("#project-location").val();
@@ -222,7 +232,8 @@
             name: toCamelCase($(val).find("input:first").val()), 
             actualName: $(val).find("input:first").val(),
             type: $(val).find(".form-select").val(),
-            options: options.length > 0 ? options : undefined
+            options: options.length > 0 ? options : undefined,
+            primary: $("#create-project").closest(".modal").find(".primary-field input").val() == $(val).find("input:first").val()
         }
     }).get();
 
@@ -232,10 +243,6 @@
       status,
       fields
     })
-
-    if (!(isValid.every(val => val === true))) {
-        return false;
-    }
 
     let currentBtnHTML = $(this).html();
     $(this).html(`<span class="spinner-border spinner-border-sm me-2" role="status"></span>`);
@@ -260,6 +267,48 @@
     });
 
   })
+
+  function highlightRepeatingValues($container) {
+    const valueCounts = new Map();
+    let hasRepeatingValues = false;
+
+    // First, count occurrences of each input value
+    $container.find(".accordion-item").each((key, val) => {
+      const $input = $(val).find("input:first");
+      const inputValue = $input.val();
+
+      // Update the count of the value in the map
+      if (valueCounts.has(inputValue)) {
+        valueCounts.set(inputValue, valueCounts.get(inputValue) + 1);
+      } else {
+        valueCounts.set(inputValue, 1);
+      }
+    });
+
+    // Highlight the fields with repeating values and check if there are any
+    $container.find(".accordion-item").each((key, val) => {
+      const $input = $(val).find("input:first");
+      const inputValue = $input.val();
+
+      if (valueCounts.get(inputValue) > 1) {
+        hasRepeatingValues = true;
+
+        // Add 'is-invalid' class to the input field
+        $input.addClass("is-invalid");
+
+        // Append an 'invalid-feedback' element if not already present
+        if ($input.next('.invalid-feedback').length === 0) {
+          $input.after('<div class="invalid-feedback">This value is repeated.</div>');
+        }
+
+        // Change the background color of the accordion item
+        $(val).addClass("bg-red-lt");
+      }
+    });
+
+    return hasRepeatingValues;
+  }
+
 
   document.addEventListener('DOMContentLoaded', function() {
       let el = document.querySelector('.accordion');
@@ -336,6 +385,7 @@
     if ($(this).hasClass("form-select")) {
         addOptions(this);
     }
+    addPrimaryField(this);
     let input = $(this).closest(".accordion-item").find("input").val();
     let type = $(this).closest(".accordion-item").find(".form-select").val();
     $(this).closest(".accordion-item").find(".accordion-button").html(`
@@ -344,6 +394,23 @@
     `);
   })
 
+  const addPrimaryField = function(elem) {
+    let allFields = $(elem).closest(".modal").find(".accordion-item").map( (key, val) => $(val).find("input:first").val() );
+    let html = ``;
+    allFields.each( (key, val) => {
+      if (val.length > 0) {
+        html += `<span class="badge cursor-pointer me-1" onclick="setPrimaryField(this)">${val}</span>`;
+      }
+    });
+    $(elem).closest(".modal").find(".primary-field-selectors").html(html);
+    $(elem).closest(".modal").find(".primary-field input").removeClass("is-valid").val("");
+  }
+
+  const setPrimaryField = function(elem) {
+    $(elem).siblings().removeClass("bg-blue-lt");
+    $(elem).addClass("bg-blue-lt");
+    $(elem).closest(".primary-field").find("input").val( $(elem).html() );
+  }
 
   const addOptions = function (elem) {
 
