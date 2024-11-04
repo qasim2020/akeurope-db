@@ -3,48 +3,47 @@ const checkValidForm = require('../modules/checkValidForm');
 require('dotenv').config();
 
 
-// Register Controller
-exports.register = async (req, res) => {
-  const { name, email, password } = req.body;
+// // Register Controller
+// exports.register = async (req, res) => {
 
-  console.log({name, email, password});
+//   const { name, email, password } = req.body;
 
-  let check = [];
+//   let check = [];
 
-  if (!checkValidForm.isValidEmail(email)) {
-    check.push({elem: "#email", msg: "Invalid email"});
-  }
+//   if (!checkValidForm.isValidEmail(email)) {
+//     check.push({elem: "#email", msg: "Invalid email"});
+//   }
 
-  const user = await User.findOne({email});
+//   const user = await User.findOne({email});
 
-  if (user) {
-    check.push({elem: "other", msg: "User is already registered. Please <a href='/login'>login</a> or use <a href='/forgot-password'>forgot password</a> page to reset your password" });
-    res.status(400).send(check);
-    return false;
-  }
+//   if (user) {
+//     check.push({elem: "other", msg: "User is already registered. Please <a href='/login'>login</a> or use <a href='/forgot-password'>forgot password</a> page to reset your password" });
+//     res.status(400).send(check);
+//     return false;
+//   }
 
-  if (!checkValidForm.isValidName(name)) {
-    check.push({elem: "#name", msg: "Name contains only letters and spaces and is at least three characters long"});
-  }
+//   if (!checkValidForm.isValidName(name)) {
+//     check.push({elem: "#name", msg: "Name contains only letters and spaces and is at least three characters long"});
+//   }
 
 
-  if (!checkValidForm.isStrongPassword(password)) {
-    check.push({elem: "#password", msg: "Password should be minimum 8 characters, at least one uppercase letter, one lowercase letter, one number, and one special character"});
-  }
+//   if (!checkValidForm.isStrongPassword(password)) {
+//     check.push({elem: "#password", msg: "Password should be minimum 8 characters, at least one uppercase letter, one lowercase letter, one number, and one special character"});
+//   }
 
-  if (check.length > 0) {
-    res.status(400).send(check);
-    return false;
-  }
+//   if (check.length > 0) {
+//     res.status(400).send(check);
+//     return false;
+//   }
 
-  try {
-    const user = new User({ email, password });
-    await user.save();
-    res.status(200).send("Registration successful");
-  } catch (error) {
-    res.status(401).send(error);
-  }
-};
+//   try {
+//     const user = new User({ name, email, password });
+//     await user.save();
+//     res.status(200).send("Registration successful");
+//   } catch (error) {
+//     res.status(401).send(error);
+//   }
+// };
 
 // Login Controller
 exports.login = async (req, res) => {

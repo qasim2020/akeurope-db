@@ -68,12 +68,16 @@
           <tr class="data-row">
             <td>{{user.name}}</td>
             <td>{{user.email}}</td>
-            <td>{{user.role}}</td>
+            <td>{{capitalizeFirstLetter user.role}}</td>
             <td>{{user.status}}</td>
+            {{#if (neq user.email ../data.userEmail)}}
             <td>
               <button class="btn text-blue cursor-pointer" user-id="{{user._id}}" onclick="getEditUserModal(this)">Edit</button>
               <button class="btn text-red cursor-pointer" user-id="{{user._id}}" onclick="deleteUser(this)">Delete</button>
             </td>
+            {{else}}
+            <td>A user can't edit or delete themselves.</td>
+            {{/if}}
           </tr>
           {{/each}}
         </tbody>

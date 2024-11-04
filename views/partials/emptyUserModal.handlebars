@@ -8,17 +8,17 @@
             <div class="modal-body">
                 <div class="mb-3">
                     <label class="form-label">Full Name</label>
-                    <input id="project-name" type="text" class="form-control" name="name" placeholder="Full Name" />
+                    <input type="text" class="form-control name" name="name" placeholder="Full Name" />
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Email</label>
-                    <input id="project-slug" type="email" class="form-control" name="email" placeholder="email@gmail.com" />
+                    <input type="email" class="form-control email" name="email" placeholder="email@gmail.com" />
                 </div>
                 <label class="form-label">Role</label>
-                <div class="form-selectgroup-boxes row mb-3" id="user-role">
+                <div class="form-selectgroup-boxes row mb-3 role">
                     <div class="">
                         <label class="form-selectgroup-item">
-                        <input type="radio" name="report-type" value="active" class="form-selectgroup-input" checked="" />
+                        <input type="radio" name="report-type" value="viewer" class="form-selectgroup-input" checked="" />
                         <span class="form-selectgroup-label d-flex align-items-center p-3">
                           <span class="me-3">
                             <span class="form-selectgroup-check"></span>
@@ -32,7 +32,7 @@
                     </div>
                     <div class="">
                         <label class="form-selectgroup-item">
-                          <input type="radio" name="report-type" value="inactive" class="form-selectgroup-input" />
+                          <input type="radio" name="report-type" value="editor" class="form-selectgroup-input" />
                           <span class="form-selectgroup-label d-flex align-items-center p-3">
                               <span class="me-3">
                                   <span class="form-selectgroup-check"></span>
@@ -46,7 +46,7 @@
                     </div>
                     <div class="">
                         <label class="form-selectgroup-item">
-                          <input type="radio" name="report-type" value="inactive" class="form-selectgroup-input" />
+                          <input type="radio" name="report-type" value="admin" class="form-selectgroup-input" />
                           <span class="form-selectgroup-label d-flex align-items-center p-3">
                               <span class="me-3">
                                   <span class="form-selectgroup-check"></span>
@@ -66,7 +66,7 @@
               <a href="#" class="btn btn-link link-secondary" data-bs-dismiss="modal">
                 Cancel
               </a>
-              <a href="#" class="btn btn-primary ms-auto" id="save-project">
+              <a href="#" class="btn btn-primary ms-auto" onclick="saveNewUser(this)">
                   <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                       <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                       <path d="M12 5l0 14"></path>
