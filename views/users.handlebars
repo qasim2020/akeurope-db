@@ -187,11 +187,8 @@
     }
 
     const name = $(modal).find('.name').val();
-    const email = $(modal).find('.email').val();
     const role = $(modal).find('.role input:checked').val();
     const userId = $(elem).attr("user-id");
-
-    console.log({name, email, role, userId});
 
     let currentBtnHTML = $(elem).html();
     $(elem).html(`<span class="spinner-border spinner-border-sm" role="status"></span>`);
@@ -200,7 +197,7 @@
       url: `/users/update/${userId}`, 
       type: 'POST',
       contentType: 'application/json', 
-      data: JSON.stringify({ name, email, role }),
+      data: JSON.stringify({ name, role }),
       success: function(response) {
         $(elem).html(currentBtnHTML);
         $(modal).find(".modal-footer").append(`
@@ -299,21 +296,12 @@
 
   const sendEmailInvite = function(elem) {
 
-    const email = $(elem).siblings("input").val();
     const userId = $(elem).attr("user-id");
 
     $(elem).siblings("input").removeClass("is-invalid");
-    $(elem).siblings("input").removeClass("is-valid");
+    $(elem).siblings("input").addClass("is-valid");
     $(elem).siblings(".invalid-feedback").remove();
     $(elem).siblings(".alert").remove();
-
-    if (email == "") {
-      $(elem).siblings("input").addClass("is-invalid");
-      $(elem).siblings("input").after(`<div class="invalid-feedback">Invalid email</div> `);
-      return false;
-    } else {
-      $(elem).siblings("input").addClass("is-valid");
-    }
 
     let currentBtnHTML = $(elem).html();
     $(elem).html(`<span class="spinner-border spinner-border-sm" role="status"></span>`);
@@ -322,7 +310,7 @@
       url: `/users/sendInvite`, 
       type: 'POST',
       contentType: 'application/json', 
-      data: JSON.stringify({ email }),
+      data: JSON.stringify({ userId }),
       success: function(response) {
         $(elem).html(currentBtnHTML);
         $(elem).after(`

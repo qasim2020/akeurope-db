@@ -12,7 +12,7 @@
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Email</label>
-                    <input type="email" class="form-control email" name="email" placeholder="email@gmail.com" value="{{data.user.email}}"/>
+                    <input type="email" class="form-control email" name="email" placeholder="email@gmail.com" value="{{data.user.email}}" disabled/>
                     <button class="btn btn-primary mt-2" onclick="sendEmailInvite(this)" user-id="{{data.user._id}}">Send email invite again</button>
                 </div>
                 <label class="form-label">Role</label>

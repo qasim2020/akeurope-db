@@ -138,19 +138,17 @@ router.post('/users/create', authenticate, authorize("createUsers"), async (req,
 });
 
 router.post('/users/update/:userId', authenticate, authorize("updateUsers"), async (req,res) => {
-  const { name, email, role} = req.body;
+  const { name, role} = req.body;
 
   let check = [];
-
-  if (!checkValidForm.isValidEmail(email)) {
-    check.push({elem: ".email", msg: "Invalid email"});
-  }
 
   if (!checkValidForm.isValidName(name)) {
     check.push({elem: ".name", msg: "Name contains only letters and spaces and is at least three characters long"});
   }
 
-  if (req.session.user.email == email && req.session.user.role != role) {
+  let user = await User.find({_id: req.params.userId});
+
+  if (req.session.user.email == user.email && req.session.user.role != role) {
     check.push({msg: "User is currently logged in, therefore role can not be changed!"});
   }
 
@@ -162,7 +160,6 @@ router.post('/users/update/:userId', authenticate, authorize("updateUsers"), asy
   try {
     await User.findOneAndUpdate({_id: req.params.userId}, {
       name, 
-      email, 
       role, 
       inviteToken: undefined, 
       inviteExpires: undefined, 
@@ -237,11 +234,7 @@ router.post('/users/register/:token', async (req, res) => {
 router.post('/users/sendInvite', authenticate, authorize("editUsers"), async (req,res) => {
   try {
 
-    const { email, userId } = req.body;
-
-    if (!checkValidForm.isValidEmail(email)) {
-      return res.status(400).send("Invalid email");
-    }
+    const { userId } = req.body;
 
     if (userId == req.session.user._id) {
       return res.status(400).send("You can not invite yourself!");
@@ -255,7 +248,6 @@ router.post('/users/sendInvite', authenticate, authorize("editUsers"), async (re
     const inviteToken = crypto.randomBytes(32).toString('hex');
     const inviteExpires = moment().add(24, 'hours').toDate();
 
-    user.email = email;
     user.status = 'Invite Sent';
     user.inviteToken = inviteToken;
     user.inviteExpires = inviteExpires;
