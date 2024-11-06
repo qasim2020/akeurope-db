@@ -27,7 +27,7 @@
         <div class="datagrid-item">
           <div class="datagrid-title">Role</div>
           <div class="datagrid-content">
-            <span>{{user.role}}</span>
+            <span>{{capitalizeFirstLetter user.role}}</span>
           </div>
         </div>
 
@@ -41,8 +41,12 @@
     </div>
   </div>
   <div class="card-body">
+      {{#if (neq user.email ../data.userEmail)}}
       <button class="btn text-blue cursor-pointer" user-id="{{user._id}}" onclick="getEditUserModal(this)">Edit</button>
       <button class="btn text-red cursor-pointer" user-id="{{user._id}}" onclick="deleteUser(this)">Delete</button>
+      {{else}}
+      <p> A user can't edit or delete themselves.  </p>
+      {{/if}}
   </div>
 </div>
 
