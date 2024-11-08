@@ -1,9 +1,15 @@
 const express = require('express');
 const session = require('express-session');
-const MongoStore = require('connect-mongo');
 const flash = require('connect-flash');
-const exphbs = require('express-handlebars');
 const mongoose = require('./config/db');
+
+const exphbs = require('express-handlebars');
+const path = require('path');
+const hbsHelpers = require('./modules/helpers');
+
+const MongoStore = require('connect-mongo');
+
+const { router } = require('./routes/authRoutes');
 const renderPartial = require('./routes/renderPartial');
 const authRoutes = require('./routes/authRoutes');
 const adminRoutes = require('./routes/adminRoutes');
@@ -15,9 +21,7 @@ const uploadImage = require('./routes/uploadImage');
 const uploadPdf = require('./routes/uploadPdf');
 const uploadExcel = require('./routes/uploadExcel');
 const updateLayout = require('./routes/updateLayout');
-const path = require('path');
-const { router } = require('./routes/authRoutes');
-const hbsHelpers = require('./modules/helpers');
+const customersRoutes = require('./routes/customersRoutes');
 
 require('dotenv').config();
 mongoose();
@@ -61,6 +65,7 @@ app.use(updateLayout);
 app.use(uploadExcel);
 app.use(renderPartial);
 app.use(usersRoutes);
+app.use(customersRoutes);
 
 // Home route
 app.get('/', (req, res) => {

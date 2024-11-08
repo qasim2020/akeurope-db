@@ -19,7 +19,8 @@ const roles = {
         'updateEntry', 
         'deleteEntry',
         'uploadPdf',
-        'uploadImage'
+        'uploadImage',
+        'viewCustomers'
     ],
     editor: [
         'viewDashboard', 
