@@ -1,0 +1,5 @@
+if mongo not starting run this:-
+
+rm ~/mongodata/mongod.lock
+ulimit -n 64000
+./mongod --dbpath ~/mongodata

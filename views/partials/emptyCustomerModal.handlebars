@@ -1,4 +1,4 @@
-<div class="modal modal-blur fade" id="modal-new-customer" tabindex="-1" style="display: none; padding-left: 0px;" aria-modal="true" role="dialog" customerId="">
+<div class="modal modal-blur fade" id="modal-new-customer" tabindex="-1" style="display: none; padding-left: 0px;" aria-modal="true" role="dialog" customerId="{{data.customerId}}">
   <div class="modal-dialog modal-lg" role="document" id="create-customer">
     <div class="modal-content">
       <div class="modal-header">
@@ -6,17 +6,31 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
+
         <div class="mb-3">
-          <label class="form-label">Name</label>
-          <input id="customer-name" type="text" class="form-control" name="name" placeholder="Name of customer"/>
+          <label class="form-label">Owner Name</label>
+          <input type="text" class="name form-control" name="name" placeholder="Name of owner"/>
         </div>
+
         <div class="mb-3">
-          <label class="form-label">Email</label>
-          <input id="customer-email" type="email" class="form-control" name="email" placeholder="customer@gmail.com"/>
+          <label class="form-label">Owner Email</label>
+          <p class="text-secondary mb-2">An invite email will be sent to start their oboarding.</p>
+          <input type="email" class="email form-control" name="email" placeholder="customer@gmail.com"/>
         </div>
+
+        <div class="mb-3">
+          <label class="form-label">Organization Name</label>
+          <input type="text" class="org-name form-control" name="organization" placeholder="Name of organization"/>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Location</label>
+          <input type="text" class="location form-control" name="location" placeholder="Pakistan etc"/>
+        </div>
+
         <div class="mb-3">
           <label class="form-label">Status</label>
-          <div class="form-selectgroup-boxes row mb-3" id="project-status">
+          <div class="form-selectgroup-boxes row mb-3 customer-status" >
             <div class="col-lg-6">
               <label class="form-selectgroup-item">
               <input type="radio" name="status" value="active" class="form-selectgroup-input" checked="" />
@@ -33,7 +47,7 @@
             </div>
             <div class="col-lg-6">
               <label class="form-selectgroup-item">
-                <input type="radio" name="status" value="inactive" class="form-selectgroup-input" />
+                <input type="radio" name="status" value="blocked" class="form-selectgroup-input" />
                 <span class="form-selectgroup-label d-flex align-items-center p-3">
                   <span class="me-3">
                     <span class="form-selectgroup-check"></span>
@@ -48,31 +62,30 @@
           </div>
         </div>
         <div class="mb-3">
-          <label class="form-label">Projects</label>
-          <ul>
-            <li>Project 1</li>
-            <li>Project 2</li>
-            <li>Project 3</li>
-            <li>Project 4</li>
-          </ul>
+          <label class="form-label">Active Projects</label>
+          <div class="form-selectgroup form-selectgroup-boxes d-flex flex-column projects">
+            {{#each data.projects as |project|}}
+            {{#if (eq 'active' project.status)}}
+            <label class="form-selectgroup-item flex-fill">
+              <input type="checkbox" name="projects" value="{{project.slug}}" class="form-selectgroup-input">
+              <div class="form-selectgroup-label d-flex align-items-center p-3">
+                <div class="me-3">
+                  <span class="form-selectgroup-check"></span>
+                </div>
+                <div class="form-selectgroup-label-content d-flex align-items-center">
+                    <div class="font-weight-medium">{{project.name}}</div>
+                </div>
+              </div>
+            </label>
+            {{/if}}
+            {{/each}}
+          </div>
         </div>
-        <div class="mb-3">
-          <label class="form-label">Location</label>
-          <input id="customer-location" type="text" class="form-control" name="location" placeholder="Pakistan etc"/>
-        </div>
-        <div class="mb-3">
-          <label class="form-label">Subscriptions</label>
-          <ul>
-            <li>Project 1</li>
-            <li>Project 2</li>
-            <li>Project 3</li>
-            <li>Project 4</li>
-          </ul>
-        </div>
+
       </div>
       <div class="modal-footer">
         <a href="#" class="btn btn-link link-secondary" data-bs-dismiss="modal"> Cancel </a>
-        <a href="#" class="btn btn-primary ms-auto" onclick="saveEntry(this)">
+        <a href="#" class="btn btn-primary ms-auto" onclick="createCustomer(this)">
           <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
             <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
             <path d="M12 5l0 14"></path>

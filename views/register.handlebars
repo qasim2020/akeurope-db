@@ -99,7 +99,7 @@
           error: function(xhr, status, error) {
             if (xhr.status != 400) {
               $(".form-footer").after(`
-              <div class="alert alert-success mt-4" role="alert">
+              <div class="alert alert-danger mt-4" role="alert">
                 <h4 class="alert-title">Failed to create account!</h4>
                 <div class="text-secondary">${xhr.responseText}</div>
               </div>`);
