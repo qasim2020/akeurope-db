@@ -20,7 +20,11 @@ const roles = {
         'deleteEntry',
         'uploadPdf',
         'uploadImage',
-        'viewCustomers'
+        'viewCustomers',
+        'createCustomers',
+        'editCustomers',
+        'updateCustomers',
+        'deleteCustomers'
     ],
     editor: [
         'viewDashboard', 

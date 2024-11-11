@@ -11,7 +11,8 @@ router.get("/customers", authenticate, authorize("viewCustomers"), allProjects, 
             userName: req.session.user.name,
             userRole: req.session.user.role.charAt(0).toUpperCase() + req.session.user.role.slice(1),
             activeMenu: "customers",
-            projects: req.allProjects
+            projects: req.allProjects,
+            role: req.userPermissions
         }
     })
 })
