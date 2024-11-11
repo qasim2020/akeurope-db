@@ -25,7 +25,8 @@ router.get("/customers", authenticate, authorize("viewCustomers"), allProjects, 
             activeMenu: "customers",
             projects: req.allProjects,
             role: req.userPermissions,
-            customerId: new mongoose.Types.ObjectId()
+            customerId: new mongoose.Types.ObjectId(),
+            customers: await Customer.find({}).lean()
         }
     })
 })

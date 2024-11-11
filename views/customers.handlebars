@@ -80,23 +80,22 @@ const createCustomer = function(elem) {
     });
 
     const data = $(elem)
-        .closest(".modal")
-        .find(".form-select, input, textarea")
-        .toArray() 
-        .reduce((total, val) => {
-          Object.assign(total, {
-            [$(val).attr("name")]: $(val).val()
-          });
-          return total;
-        }, {});
+      .closest(".modal")
+      .find(".form-select, input, textarea")
+      .toArray() 
+      .reduce((total, val) => {
+        Object.assign(total, {
+          [$(val).attr("name")]: $(val).val()
+        });
+        return total;
+    }, {});
       
 
-    // PROJECTS CHECKBOXES
     const projects = $(elem)
-        .closest(".modal")
-        .find(".projects input:checked") // Select only checked inputs
-        .map((key, val) => $(val).val()) // Map over the checked inputs
-        .get(); // Convert the jQuery result to an array of values
+      .closest(".modal")
+      .find(".projects input:checked") 
+      .map((key, val) => $(val).val()) 
+      .get();
 
     if (projects.length == 0) {
       $(elem).closest(".modal").find(".projects").find(".form-selectgroup-label").addClass("border-red");
@@ -106,13 +105,13 @@ const createCustomer = function(elem) {
       $(elem).closest(".modal").find(".projects").find(".form-selectgroup-label").removeClass("border-red");
     }
 
-    data.projects = projects;
-    data.status = $(elem).closest(".modal").find(".customer-status input:checked").val();
-    data.customerId = $(elem).closest(".modal").attr("customerId");
-
     if (!(isValid.every(val => val === true))) {
         return false;
     }
+
+    data.projects = projects;
+    data.status = $(elem).closest(".modal").find(".customer-status input:checked").val();
+    data.customerId = $(elem).closest(".modal").attr("customerId");
 
     let currentBtnHTML = $(elem).html();
     $(elem).html(`<span class="spinner-border spinner-border-sm me-2" role="status"></span>`);
