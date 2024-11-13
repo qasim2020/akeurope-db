@@ -17,18 +17,73 @@ const Project = require("../models/Project");
 const checkValidForm = require("../modules/checkValidForm");
 
 router.get("/customers", authenticate, authorize("viewCustomers"), allProjects, async (req,res) => {
+    const customers = await Customer.find().lean();
+
+    for (const customer of customers) {
+        customer.projects = await Promise.all(
+            customer.projects.map(async (val) => {
+                return await Project.findOne({ slug: val }).lean();
+            })
+        );
+    }
+
     res.render("customers",{
         layout: "dashboard",
         data: {
+            layout: req.session.layout,
             userName: req.session.user.name,
             userRole: req.session.user.role.charAt(0).toUpperCase() + req.session.user.role.slice(1),
             activeMenu: "customers",
             projects: req.allProjects,
             role: req.userPermissions,
             customerId: new mongoose.Types.ObjectId(),
-            customers: await Customer.find({}).lean()
+            customers
         }
     })
+})
+
+
+router.get('/getCustomersData', authenticate, authorize("viewCustomers"), async (req,res) => {
+    try {
+        const customers = await Customer.find().lean();
+
+        for (const customer of customers) {
+            customer.projects = await Promise.all(
+                customer.projects.map(async (val) => {
+                    return await Project.findOne({ slug: val }).lean();
+                })
+            );
+        }
+
+        res.render('partials/showCustomers', { 
+            layout: false, 
+            data: {
+              customers, 
+              layout: req.session.layout
+            }
+        });
+    } catch (error) {
+        res.status(500).json({ error: 'An error occurred while fetching customer partial', details: error.message });
+    }
+})
+
+router.get('/getEditCustomerModal/:customerId', authenticate, authorize("editCustomers"), allProjects, async (req,res) => {
+    try {
+        const customer = await Customer.findOne({_id: req.params.customerId}).lean();
+
+        res.render('partials/editCustomerModal', {
+          layout: false,
+          data: {
+            layout: req.session.layout,
+            projects: req.allProjects, 
+            customer
+          }
+        })
+    
+    } catch (error) {
+        res.status(500).json({ error: 'Error fetching entries', details: error.message });
+    }
+    
 })
 
 router.post("/customer/create", authenticate, authorize("createCustomers"), async (req,res) => {
@@ -79,6 +134,7 @@ router.post("/customer/create", authenticate, authorize("createCustomers"), asyn
             location,
             status,
             projects,
+            emailInvite: "Email invite sent!",
             inviteToken, 
             inviteExpires
         });
@@ -105,7 +161,7 @@ router.post("/customer/create", authenticate, authorize("createCustomers"), asyn
             subject: 'Invited to akeurope customer portal',
             html: compiledTemplate({
                 name: name,
-                inviteLink: `${process.env.CUSTOMER_PORTAL_URL}/customers/register/${inviteToken}`
+                inviteLink: `${process.env.CUSTOMER_PORTAL_URL}/register/${inviteToken}`
             }),
         };
     

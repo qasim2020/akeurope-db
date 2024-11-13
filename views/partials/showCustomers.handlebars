@@ -46,24 +46,36 @@
         </div>
 
         <div class="datagrid-item">
+          <div class="datagrid-title">Email Status</div>
+          <div class="datagrid-content">
+            <span>{{customer.emailStatus}}</span>
+          </div>
+        </div>
+
+        <div class="datagrid-item">
           <div class="datagrid-title">Projects</div>
           <div class="datagrid-content">
-            <span>{{customer.projects.length}}</span>
+            {{#each customer.projects}}
+            <a href="/project/{{this.slug}}" class="link">{{this.name}}</a>
+            {{/each}}
           </div>
         </div>
 
         <div class="datagrid-item">
           <div class="datagrid-title">Subscriptions</div>
           <div class="datagrid-content">
+            {{#if customer.subscriptions}}
             <span>{{customer.subscriptions.length}}</span>
+            {{else}}
+            <span>0</span>
+            {{/if}}
           </div>
         </div>
 
     </div>
   </div>
   <div class="card-body">
-      <button class="btn text-blue cursor-pointer" user-id="{{user._id}}" onclick="getEditCustomerModal(this)">Edit</button>
-      <button class="btn text-red cursor-pointer" user-id="{{user._id}}" onclick="deleteCustomer(this)">Delete</button>
+      <button class="btn text-blue cursor-pointer" customer-id="{{customer._id}}" onclick="getEditCustomerModal(this)">Edit</button>
   </div>
 </div>
 
@@ -81,6 +93,7 @@
               <th>Organization</th>
               <th>Location</th>
               <th>Status</th>
+              <th>Invite Status</th>
               <th>Projects</th>
               <th>Subscriptions</th>
               <th></th>
@@ -94,11 +107,19 @@
             <td>{{customer.organization}}</td>
             <td>{{customer.location}}</td>
             <td>{{capitalizeFirstLetter customer.status}}</td>
-            <td>{{customer.projects.length}}</td>
-            <td>{{customer.subscriptions.length}}</td>
+            <td>{{customer.emailStatus}}</td>
             <td>
-              <button class="btn text-blue cursor-pointer" user-id="{{user._id}}" onclick="getEditCustomerModal(this)">Edit</button>
-              <button class="btn text-red cursor-pointer" user-id="{{user._id}}" onclick="deleteCustomer(this)">Delete</button>
+              {{#each customer.projects}}
+              <a href="/project/{{this.slug}}" class="link">{{this.name}}</a>
+              {{/each}}
+            </td>
+            {{#if customer.subscriptions}}
+            <td>{{customer.subscriptions.length}}</td>
+            {{else}}
+            <td>0</td>
+            {{/if}}
+            <td>
+              <button class="btn text-blue cursor-pointer" customer-id="{{customer._id}}" onclick="getEditCustomerModal(this)">Edit</button>
             </td>
           </tr>
           {{/each}}

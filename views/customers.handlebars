@@ -157,4 +157,58 @@ const createCustomer = function(elem) {
     }); 
 
 }
+
+let newLayout = '{{data.layout}}' == 'grid' ? 'table' : 'grid'; 
+
+  const toggleLayout = function(elem) {
+    $.ajax({
+      url: '/update-layout',
+      method: 'POST',
+      data: { layout: newLayout },
+      success: function(response) {
+          showData();
+      },
+      error: function() {
+          alert("Failed to update layout.");
+      }
+    });
+
+}
+
+const showData = function() {
+  $.ajax({
+    url: '/getCustomersData',
+    method: 'GET',
+    success: function(response) {
+      newLayout = newLayout == 'grid' ? 'table' : 'grid'; 
+      $("#data-container").html(response);
+    },
+    error: function(error) {
+        alert(error.responseText);
+    }
+  }); 
+}
+
+const getEditCustomerModal = function(elem) {
+  const customerId = $(elem).attr("customer-id");
+
+  const modalExists = $(document).find(`#button-${customerId}`).length > 0;
+
+  if (modalExists) {
+    return $(`#button-${customerId}`).trigger("click");
+  }
+
+  $.ajax({
+    url: `/getEditCustomerModal/${customerId}`,
+    type: 'GET',
+    contentType: 'application/json', 
+    success: function(response) {
+      $("footer").before(response);
+      $(`#button-${customerId}`).trigger("click");
+    },
+    error: function(xhr, status, error) {
+      alert(xhr.responseText);
+    }
+  });
+}
 </script>
