@@ -2,7 +2,7 @@
   <div class="modal-dialog modal-lg" role="document" id="">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title">Customer: <span class="bg-blue-lt p-2 rounded">{{data.customer.email}}</span></h5>
+        <h5 class="modal-title"><span class="bg-blue-lt p-2 rounded">{{data.customer.email}}</span></h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
@@ -15,7 +15,7 @@
         <div class="mb-3">
           <label class="form-label">Owner Email</label>
           <input type="email" class="email form-control" name="email" placeholder="customer@gmail.com"/ value="{{data.customer.email}}" disabled>
-          <button class="btn btn-primary mt-2">Send email invite again</button>
+          <button class="btn btn-primary mt-2" customer-id="{{data.customer._id}}" onclick="sendEmailInvite(this)">Send email invite again</button>
         </div>
 
         <div class="mb-3">
@@ -85,12 +85,8 @@
       </div>
       <div class="modal-footer">
         <a href="#" class="btn btn-link link-secondary" data-bs-dismiss="modal"> Cancel </a>
-        <a href="#" class="btn btn-primary ms-auto" onclick="updateCustomer(this)">
-          <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-            <path d="M12 5l0 14"></path>
-            <path d="M5 12l14 0"></path>
-          </svg> 
+        <a href="#" class="btn btn-primary ms-auto" customer-id="{data.customer._id}}" onclick="updateCustomer(this)">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-upload"> <path stroke="none" d="M0 0h24v24H0z" fill="none" /> <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2" /> <path d="M7 9l5 -5l5 5" /> <path d="M12 4l0 12" /> </svg>
           Update Customer
           </a>
       </div>

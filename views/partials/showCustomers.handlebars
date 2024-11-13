@@ -5,7 +5,7 @@
  {{#each data.customers as |customer|}}
  <div class="card mb-3 data-row">
   <div class="card-header">
-    <h3 class="card-title"><span class="badge bg-blue-lt">Ser: {{inc @key}}</span></h3>
+    <h3 class="card-title"><span class="badge bg-blue-lt">{{customer.email}}</span></h3>
   </div>
   <div class="card-body">
     <div class="datagrid">
@@ -56,7 +56,7 @@
           <div class="datagrid-title">Projects</div>
           <div class="datagrid-content">
             {{#each customer.projects}}
-            <a href="/project/{{this.slug}}" class="link">{{this.name}}</a>
+            <a href="/project/{{this.slug}}" class="badge bg-red-lt mb-1">{{this.name}}</a> 
             {{/each}}
           </div>
         </div>
@@ -110,7 +110,7 @@
             <td>{{customer.emailStatus}}</td>
             <td>
               {{#each customer.projects}}
-              <a href="/project/{{this.slug}}" class="link">{{this.name}}</a>
+              <a href="/project/{{this.slug}}" class="badge bg-red-lt mb-1">{{this.name}}</a>
               {{/each}}
             </td>
             {{#if customer.subscriptions}}

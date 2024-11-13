@@ -13,6 +13,8 @@ router.get("/uploadExcel/:slug", authenticate, authorize("editEntry"), allProjec
     res.render( "uploadExcel", {
         layout: "dashboard",
         data: {
+            userName: req.session.user.name,
+            userRole: req.session.user.role.charAt(0).toUpperCase() + req.session.user.role.slice(1),
             projects: req.allProjects,
             project: req.oneProject,
             activeMenu: req.params.slug
