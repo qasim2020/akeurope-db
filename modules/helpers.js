@@ -14,6 +14,10 @@ const inc = function(a) {
     return a + 1;
 };
 
+const dec = function(a) {
+    return a - 1;
+};
+
 const formatDate = function(date) {
     return moment(date).format('MMMM Do, YYYY'); // Customize the format as needed
 };
@@ -59,4 +63,4 @@ const getFirstTwoLetters = function (name) {
     return name.slice(0, 2).toUpperCase();
 }
 
-module.exports = { eq , inc, formatDate, browserDate, resizeCloudinaryUrl, neq, capitalizeFirstLetter, checkInputType, findInArray, getFirstTwoLetters};
+module.exports = { eq , inc, dec, formatDate, browserDate, resizeCloudinaryUrl, neq, capitalizeFirstLetter, checkInputType, findInArray, getFirstTwoLetters};

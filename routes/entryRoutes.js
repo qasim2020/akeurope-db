@@ -6,6 +6,7 @@ const cloudinary = require('cloudinary').v2;
 const { authenticate, authorize } = require('../modules/auth');
 const { allProjects } = require("../modules/mw-data");
 const { createDynamicModel } = require("../models/createDynamicModel");
+const { generatePagination } = require("../modules/generatePagination");
 
 // Helper to extract public ID from Cloudinary URL
 function extractCloudinaryPublicId(url) {
@@ -76,7 +77,7 @@ router.get('/getEntryData/:slug', authenticate, authorize("viewEntry"), async (r
       // Count total documents for pagination info
       const totalEntries = await DynamicModel.countDocuments(searchQuery);
       const totalPages = Math.ceil(totalEntries / limit);
-
+      
       // Render response with entries, pagination info, and sorting/search metadata
       const newEntryId = new mongoose.Types.ObjectId();
       res.render('partials/showProject', {
@@ -89,7 +90,11 @@ router.get('/getEntryData/:slug', authenticate, authorize("viewEntry"), async (r
             totalEntries,
             totalPages,
             currentPage: page,
-            limit
+            limit,
+            skip,
+            startIndex: skip + 1,
+            endIndex: Math.min(skip + limit, totalEntries),
+            pagesArray: generatePagination(totalPages, page)
           },
           sort: { sortBy, order },
           search

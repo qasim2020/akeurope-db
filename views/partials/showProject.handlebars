@@ -2,8 +2,13 @@
 
 {{#if (eq data.layout 'grid')}}
 
+ <div class="card">
+    {{> dataNavigationHeader}}
+    {{> dataNavigationFooter}}
+ </div>
+
  {{#each data.entries as |entry|}}
- <div class="card mb-3 data-row">
+ <div class="card mb-3 data-row mt-3">
   <div class="card-header">
     <h3 class="card-title"><span class="badge bg-blue-lt">{{entry._id}}</span></h3>
   </div>
@@ -58,12 +63,12 @@
   </div>
 </div>
 
-
 {{/each}}
 
 {{else}}
 
 <div class="card">
+    {{> dataNavigationHeader}}
     <div class="table-responsive">
       <table class="table table-vcenter card-table table-nowrap">
         <thead>
@@ -124,6 +129,7 @@
             </tbody>
       </table>
     </div>
+    {{> dataNavigationFooter}}
 </div>
 
 {{/if}}
