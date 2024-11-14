@@ -58,40 +58,71 @@ router.post('/project/update/:id', authenticate, authorize("updateProject"), asy
   }
 });
 
-router.get('/project/:slug', authenticate, authorize("viewProject"), allProjects, async (req,res) => {
-
+router.get('/project/:slug', authenticate, authorize("viewProject"), allProjects, async (req, res) => {
   try {
     // Find the project and retrieve the fields array
     const project = await Project.findOne({ slug: req.params.slug }).lean();
-
     if (!project) throw new Error(`Project "${req.params.slug}" not found`);
 
-    // Retrieve entries from the dynamic collection using the project schema
+    // Retrieve the DynamicModel
     const DynamicModel = await createDynamicModel(project.slug);
-    const entries = await DynamicModel.find().lean();
 
+    // Pagination setup
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    // Sorting setup
+    const sortBy = req.query.sortBy || '_id'; // Default sorting by _id
+    const order = req.query.order === 'desc' ? -1 : 1; // Default order is ascending
+    const sortOptions = { [sortBy]: order };
+
+    // Search setup
+    const search = req.query.search || '';
+    const searchFields = project.fields.map(field => ({ [field.name]: new RegExp(search, 'i') }));
+    const searchQuery = search ? { $or: searchFields } : {};
+
+    // Fetch entries with sorting, pagination, and search
+    const entries = await DynamicModel.find(searchQuery)
+      .sort(sortOptions)
+      .skip(skip)
+      .limit(limit)
+      .lean();
+
+    // Count total documents for pagination info
+    const totalEntries = await DynamicModel.countDocuments(searchQuery);
+    const totalPages = Math.ceil(totalEntries / limit);
+
+    // Render response with entries, pagination info, and sorting/search metadata
     const newEntryId = new mongoose.Types.ObjectId();
-
     res.render('project', {
       layout: "dashboard",
       data: {
         userName: req.session.user.name,
         userRole: req.session.user.role.charAt(0).toUpperCase() + req.session.user.role.slice(1),
         project,
-        fields: project.fields, 
-        entries, 
-        layout: req.session.layout, 
-        newEntryId, 
+        fields: project.fields,
+        entries,
+        layout: req.session.layout,
+        newEntryId,
         projects: req.allProjects,
         activeMenu: project.slug,
-        role: req.userPermissions
+        role: req.userPermissions,
+        pagination: {
+          totalEntries,
+          totalPages,
+          currentPage: page,
+          limit
+        },
+        sort: { sortBy, order },
+        search
       }
-    })
+    });
 
   } catch (error) {
-      res.status(500).json({ error: 'Error fetching entries', details: error.message });
+    res.status(500).json({ error: 'Error fetching entries', details: error.message });
   }
+});
 
-})
 
 module.exports = router;

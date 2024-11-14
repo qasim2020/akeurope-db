@@ -59,8 +59,8 @@
                         <input type="date" class="entry-input form-control" name="{{name}}" value="{{browserDate (lookup ../data.entry name)}}">
                       {{else if (eq type "boolean")}}
                         <select class="entry-input form-select" name="{{name}}">
-                          <option value="true" {{#if (lookup ../data.entry this.value)}} selected {{/if}}>{{options.0.value}}</option>
-                          <option value="false" {{#if (lookup ../data.entry this.value)}} selected {{/if}}>{{options.1.value}}</option>
+                          <option value="{{options.0.value}}" {{#if (eq options.0.value (lookup ../data.entry name))}} selected {{/if}}>{{options.0.value}}</option>
+                          <option value="{{options.1.value}}" {{#if (eq options.1.value (lookup ../data.entry name))}} selected {{/if}}>{{options.1.value}}</option>
                         </select>
                       {{else if (eq type "string")}}
                         <input type="text" class="entry-input form-control" name="{{name}}" placeholder="String value" value="{{lookup ../data.entry name}}">

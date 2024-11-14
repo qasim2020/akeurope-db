@@ -29,8 +29,8 @@ mongoose();
 const app = express();
 app.engine('handlebars', exphbs.engine({helpers: hbsHelpers}));
 app.set('view engine', 'handlebars');
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
+app.use(express.json({ limit: '50mb' }));
 app.use(
   session({
     secret: process.env.SESSION_SECRET, // Replace with your session secret

@@ -48,18 +48,52 @@ router.get('/getEntryData/:slug', authenticate, authorize("viewEntry"), async (r
       const project = await Project.findOne({ slug: req.params.slug }).lean();
   
       if (!project) throw new Error(`Project "${req.params.slug}" not found`);
-  
-      // Retrieve entries from the dynamic collection using the project schema
+
       const DynamicModel = await createDynamicModel(project.slug);
-      const entries = await DynamicModel.find().lean();
-      // Render search results page with appropriate partial
-      res.render('partials/showProject', { 
-          layout: false, 
-          data: {
-            entries,
-            fields: project.fields,
-            layout: req.session.layout
-          }
+
+      // Pagination setup
+      const page = parseInt(req.query.page) || 1;
+      const limit = parseInt(req.query.limit) || 10;
+      const skip = (page - 1) * limit;
+
+      // Sorting setup
+      const sortBy = req.query.sortBy || '_id'; // Default sorting by _id
+      const order = req.query.order === 'desc' ? -1 : 1; // Default order is ascending
+      const sortOptions = { [sortBy]: order };
+
+      // Search setup
+      const search = req.query.search || '';
+      const searchFields = project.fields.map(field => ({ [field.name]: new RegExp(search, 'i') }));
+      const searchQuery = search ? { $or: searchFields } : {};
+
+      // Fetch entries with sorting, pagination, and search
+      const entries = await DynamicModel.find(searchQuery)
+        .sort(sortOptions)
+        .skip(skip)
+        .limit(limit)
+        .lean();
+
+      // Count total documents for pagination info
+      const totalEntries = await DynamicModel.countDocuments(searchQuery);
+      const totalPages = Math.ceil(totalEntries / limit);
+
+      // Render response with entries, pagination info, and sorting/search metadata
+      const newEntryId = new mongoose.Types.ObjectId();
+      res.render('partials/showProject', {
+        layout: false,
+        data: {
+          fields: project.fields,
+          entries,
+          layout: req.session.layout,
+          pagination: {
+            totalEntries,
+            totalPages,
+            currentPage: page,
+            limit
+          },
+          sort: { sortBy, order },
+          search
+        }
       });
     } catch (error) {
       res.status(500).json({ error: 'An error occurred while fetching entries partial', details: error.message });

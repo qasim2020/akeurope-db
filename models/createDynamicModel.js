@@ -21,7 +21,7 @@ const createDynamicModel = async function(projectName) {
                     fieldType = Number;
                     break;
                 case 'boolean':
-                    fieldType = Boolean;
+                    fieldType = String;
                     break;
                 case 'dropdown':
                     fieldType = String;

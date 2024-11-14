@@ -5,7 +5,7 @@
  {{#each data.entries as |entry|}}
  <div class="card mb-3 data-row">
   <div class="card-header">
-    <h3 class="card-title"><span class="badge bg-blue-lt">Ser: {{inc @key}}</span></h3>
+    <h3 class="card-title"><span class="badge bg-blue-lt">{{entry._id}}</span></h3>
   </div>
   <div class="card-body">
     <div class="datagrid">
@@ -16,8 +16,8 @@
           <div class="datagrid-content">
 
             {{#if (eq this.type "boolean")}}
-              {{#if (lookup entry this.name)}}
-                <span class="status status-green"> {{lookup entry this.name}}</span>
+              {{#if (eq this.options.0.value (lookup entry this.name))}}
+                <span class="status status-green">{{lookup entry this.name}}</span>
               {{else}}
                 <span class="status status-red"> {{lookup entry this.name}}</span>
               {{/if}}
@@ -79,12 +79,12 @@
             <tr class="data-row">
               {{#each ../data.fields}}
 
-                {{#if (eq this.type "boolean")}}
-                  {{#if (lookup entry this.name)}}
+              {{#if (eq this.type "boolean")}}
+                {{#if (eq this.options.0.value (lookup entry this.name))}}
                   <td> <span class="status status-green"> {{lookup entry this.name}}</span> </td>
-                  {{else}}
+                {{else}}
                   <td> <span class="status status-red"> {{lookup entry this.name}}</span> </td>
-                  {{/if}}
+                {{/if}}
 
                 {{else if (eq this.type "dropdown")}}
                   <td class="{{#if (neq @key 0)}}text-secondary{{/if}}">{{lookup entry this.name}}</td>

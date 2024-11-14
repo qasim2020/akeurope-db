@@ -47,10 +47,6 @@ const checkInputType = function(input) {
 }
 
 const findInArray = function(array, item) {
-    console.log({
-        array,
-        item
-    })
     if (array && Array.isArray(array) && array.includes(item)) {
         return true;
     } else {
