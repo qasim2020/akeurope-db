@@ -6,8 +6,6 @@ const generateSearchQuery = function(req, project) {
     const search = req.query.search || '';
     const fieldFilters = {};
 
-    console.log(search);
-
     project.fields.forEach(field => {
         if (req.query[field.name]) {
             fieldFilters[field.name] = req.query[field.name];
@@ -64,12 +62,10 @@ const projectEntries = async function(req, res) {
     const skip = (page - 1) * limit;
 
     const sortBy = req.query.sortBy || '_id';
-    const order = req.query.order === 'desc' ? -1 : 1;
+    const order = req.query.orderBy === 'desc' ? 1 : -1;
     const sortOptions = { [sortBy]: order };
 
     const { searchQuery, fieldFilters } = generateSearchQuery(req, project);
-
-    console.log(JSON.stringify(searchQuery, 0, 2));
 
     const filtersQuery = new URLSearchParams(fieldFilters).toString();
 
@@ -78,6 +74,8 @@ const projectEntries = async function(req, res) {
       .skip(skip)
       .limit(limit)
       .lean();
+
+    console.log(sortOptions);
 
     const totalEntries = await DynamicModel.countDocuments(searchQuery);
     const totalPages = Math.ceil(totalEntries / limit);
@@ -90,15 +88,18 @@ const projectEntries = async function(req, res) {
             totalPages,
             currentPage: page,
             limit,
-            startIndex: skip + 1,
+            startIndex: totalEntries == 0 ? 0 : skip + 1,
             endIndex: Math.min(skip + limit, totalEntries),
             pagesArray: generatePagination(totalPages, page),
             sort: { 
               sortBy, 
-              order: req.query.order
+              order: req.query.orderBy == undefined ? "asc" : req.query.orderBy
             },
             search: req.query.search,
-            filtersQuery
+            filtersQuery,
+            fieldFilters: fieldFilters == {} ? undefined : fieldFilters,
+            showSearchBar: req.query.showSearchBar,
+            showFilters: req.query.showFilters
         }
     }
 };

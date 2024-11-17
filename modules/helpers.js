@@ -63,4 +63,29 @@ const getFirstTwoLetters = function (name) {
     return name.slice(0, 2).toUpperCase();
 }
 
-module.exports = { eq , inc, dec, formatDate, browserDate, resizeCloudinaryUrl, neq, capitalizeFirstLetter, checkInputType, findInArray, getFirstTwoLetters};
+const arrayToCsv = function(array) {
+    console.log(array);
+    return array.join(', ');
+}
+
+const getOptionsFromValues = function(options) {
+    return options.map(option => option.value).join(', ');
+}
+
+const getKey = function(obj) {
+    return Object.keys(obj)[0];
+};
+
+const getValue = function(obj) {
+    return Object.values(obj)[0];
+}
+
+const isEmptyObject = function(obj) {
+    if (Object.keys(obj).length === 0) {
+      return false;
+    } else {
+      return true;
+    }
+};
+
+module.exports = { eq , inc, dec, formatDate, browserDate, resizeCloudinaryUrl, neq, capitalizeFirstLetter, checkInputType, findInArray, getFirstTwoLetters, arrayToCsv, getOptionsFromValues, getKey, getValue, isEmptyObject};

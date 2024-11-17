@@ -4,6 +4,7 @@
 
  <div class="card">
     {{> dataNavigationHeader}}
+    {{> dataNavigationFilters}}
     {{> dataNavigationFooter}}
  </div>
 
@@ -69,6 +70,7 @@
 
 <div class="card">
     {{> dataNavigationHeader}}
+    {{> dataNavigationFilters}}
     <div class="table-responsive">
       <table class="table table-vcenter card-table table-nowrap">
         <thead>
@@ -136,7 +138,15 @@
 
  
    {{else}}
+
       <div class="container-xl my-auto">
+        {{#if data.pagination.showSearchBar}}
+         <div class="card">
+            {{> dataNavigationHeader}}
+            {{> dataNavigationFilters}}
+            {{> dataNavigationFooter}}
+        </div>
+        {{/if}}
             <div class="empty">
               <div class="empty-img"><svg class="img" xmlns="http://www.w3.org/2000/svg" height="256" fill="none" viewBox="0 0 800 600">
                   <style>

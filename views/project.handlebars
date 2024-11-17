@@ -297,6 +297,9 @@ let editProject = function(elem) {
   })
 
   $(document).on("change keyup", ".accordion-item input, .accordion-item .form-select", function() {
+    if ($(this).closest(".accordion-item").attr("stop-changing-header")){ 
+      return;
+    }
     if ($(this).hasClass("form-select")) {
         addOptions(this);
     }
@@ -725,12 +728,15 @@ $(document).on('change', ".image-upload input", function(event) {
   }
 
   const showData = function() {
+    const href = $('.page-item.active a').attr('my-href') || $("input[my-key='search']").attr("my-href") || "";
+    console.log(href);
     $.ajax({
-      url: '/getEntryData/{{data.project.slug}}',
+      url: `/getEntryData/{{data.project.slug}}${href}`,
       method: 'GET',
       success: function(response) {
         newLayout = newLayout == 'grid' ? 'table' : 'grid'; 
         $("#data-container").html(response);
+        window.history.pushState(null, '', `/project/{{data.project.slug}}${href}`);
         refreshImages();
       },
       error: function(error) {
@@ -755,6 +761,94 @@ $(document).on('change', ".image-upload input", function(event) {
         }
       });  
   }
+
+  // search features
+
+  $(document).on("click", ".filters .dropdown-menu .dropdown-item", function (e) {
+    e.preventDefault(); 
+
+    const type = $(this).attr('my-type');
+    const options = $(this).attr('my-options') ? $(this).attr('my-options').split(',') : [];
+
+    const inputContainer = $(this).closest('.input-group').find('.form-control, .form-select');
+    inputContainer.remove();
+
+    let newInput;
+    if (type === 'date') {
+        newInput = `<input type="date" class="form-control" aria-label="search by column name" placeholder="">`;
+    } else if (type === 'boolean') {
+        newInput = `<select class="form-select" aria-label="search by column name">
+                        ${options.map(option => `<option value="${option}">${option}</option>`).join('')}
+                    </select>`;
+    } else if (type === 'number') {
+        newInput = `<input type="number" class="form-control" aria-label="search by column name" placeholder="Only numbers">`;
+    } else if (type === 'dropdown') {
+        newInput = `<select class="form-select" aria-label="search by column name">
+                ${options.map(option => `<option value="${option}">${option}</option>`).join('')}
+            </select>`;
+    } else if (type === 'string') {
+        newInput = `<input type="text" class="form-control" aria-label="search by column name" placeholder="Enter value">`;
+    } else {
+        newInput = `<input type="text" class="form-control" aria-label="search by column name" placeholder="Enter value">`;
+    }
+
+    $(this).closest('.input-group').append(newInput);
+
+    $(this).closest('.input-group').find('.dropdown-toggle').attr({'my-name': $(this).attr('my-name')}).text($(this).attr('my-actual-name'));
+  });
+
+  const doFilterSearch = function(elem) {
+
+    const parentElem = $(elem).closest(".filters");
+
+    const searchField = $(parentElem).find(".dropdown-toggle").attr('my-name');
+    const searchValue = $(parentElem).find(".input-group input, .input-group select").val().trim();
+    const sortBy = $(parentElem).find(".sortBy .form-select").val();
+    const orderBy = $(parentElem).find("input[name='btn-radio-basic']:checked").attr("id") === "btn-radio-basic-1" ? "asc" : "desc";
+
+    const href = $(elem).attr("my-href") + `&sortBy=${encodeURIComponent(sortBy)}&orderBy=${orderBy}&${encodeURIComponent(searchField)}=${encodeURIComponent(searchValue)}`;
+
+    console.log(href);
+
+    doSearch(elem, href);
+
+  }
+
+  const doSearch = function(elem, href) {
+    if (!href) {
+      href = $(elem).attr("my-href");
+    }
+    $.ajax({
+      url: `/getEntryData/{{data.project.slug}}${href}`,
+      method: 'GET',
+      success: function(response) {
+        $("#data-container").html(response);
+        window.history.pushState(null, '', `/project/{{data.project.slug}}${href}`);
+        refreshImages();
+      },
+      error: function(error) {
+          alert(error.responseText);
+      }
+    }); 
+  }
+
+  $(document).on('keypress', '[my-href]', function(e) {
+    if (e.which === 13 || e.keyCode === 13) {
+
+      e.preventDefault(); 
+
+      const href = $(this).attr("my-href");
+      const key = $(this).attr("my-key");
+      const value = $(this).val();
+      const regex = new RegExp(`${key}=([^&]*)`, "g");
+      const updatedHref = href.replace(regex, `${key}=${value}`); 
+
+      doSearch('', updatedHref);
+
+    }
+  });
+
+
 
 
 </script>

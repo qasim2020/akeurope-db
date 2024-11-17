@@ -6,7 +6,7 @@ const cloudinary = require('cloudinary').v2;
 const { authenticate, authorize } = require('../modules/auth');
 const { allProjects } = require("../modules/mw-data");
 const { createDynamicModel } = require("../models/createDynamicModel");
-const { generatePagination } = require("../modules/generatePagination");
+const { projectEntries } = require("../modules/projectEntries");
 
 // Helper to extract public ID from Cloudinary URL
 function extractCloudinaryPublicId(url) {
@@ -46,58 +46,16 @@ router.get('/getEntryModal/:slug/:id', authenticate, authorize("editEntry"), all
 
 router.get('/getEntryData/:slug', authenticate, authorize("viewEntry"), async (req,res) => {
     try {
-      const project = await Project.findOne({ slug: req.params.slug }).lean();
-  
-      if (!project) throw new Error(`Project "${req.params.slug}" not found`);
+      const { entries, project, pagination } = await projectEntries(req,res);
 
-      const DynamicModel = await createDynamicModel(project.slug);
-
-      // Pagination setup
-      const page = parseInt(req.query.page) || 1;
-      const limit = parseInt(req.query.limit) || 10;
-      const skip = (page - 1) * limit;
-
-      // Sorting setup
-      const sortBy = req.query.sortBy || '_id'; // Default sorting by _id
-      const order = req.query.order === 'desc' ? -1 : 1; // Default order is ascending
-      const sortOptions = { [sortBy]: order };
-
-      // Search setup
-      const search = req.query.search || '';
-      const searchFields = project.fields.map(field => ({ [field.name]: new RegExp(search, 'i') }));
-      const searchQuery = search ? { $or: searchFields } : {};
-
-      // Fetch entries with sorting, pagination, and search
-      const entries = await DynamicModel.find(searchQuery)
-        .sort(sortOptions)
-        .skip(skip)
-        .limit(limit)
-        .lean();
-
-      // Count total documents for pagination info
-      const totalEntries = await DynamicModel.countDocuments(searchQuery);
-      const totalPages = Math.ceil(totalEntries / limit);
-      
-      // Render response with entries, pagination info, and sorting/search metadata
-      const newEntryId = new mongoose.Types.ObjectId();
       res.render('partials/showProject', {
         layout: false,
         data: {
           fields: project.fields,
+          project, 
           entries,
           layout: req.session.layout,
-          pagination: {
-            totalEntries,
-            totalPages,
-            currentPage: page,
-            limit,
-            skip,
-            startIndex: skip + 1,
-            endIndex: Math.min(skip + limit, totalEntries),
-            pagesArray: generatePagination(totalPages, page)
-          },
-          sort: { sortBy, order },
-          search
+          pagination,
         }
       });
     } catch (error) {

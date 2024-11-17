@@ -1,16 +1,22 @@
-   <div class="card-body border-bottom py-3">
-      <div class="d-flex">
-        <div class="text-secondary">
+   <div class="card-body py-3">
+      <div class="row">
+        <div class="text-secondary col-12 col-md-6 mb-2 mb-md-0">
           Show
           <div class="mx-2 d-inline-block">
-            <input type="text" class="form-control form-control-sm text-center" value="{{data.pagination.limit}}" size="3" aria-label="count">
+            <input 
+            my-key="limit"
+            my-href="?limit={{data.pagination.limit}}&showSearchBar=true&search={{data.pagination.search}}&sortBy={{data.pagination.sort.sortBy}}&order={{data.pagination.sort.order}}{{#if data.pagination.filtersQuery}}&{{data.pagination.filtersQuery}}{{/if}}"
+            type="text" class="form-control form-control-sm text-center" value="{{data.pagination.limit}}" size="3" aria-label="count">
           </div>
           entries
         </div>
-        <div class="ms-auto text-secondary">
+        <div class="text-secondary text-md-end col-12 col-md-6 mb-2 mb-md-0">
           Search:
           <div class="ms-2 d-inline-block">
-            <input type="text" class="form-control form-control-sm" aria-label="search" value="{{data.search}}">
+            <input 
+            my-key="search"
+            my-href="?limit={{data.pagination.limit}}&showSearchBar=true&search={{data.pagination.search}}&sortBy={{data.pagination.sort.sortBy}}&order={{data.pagination.sort.order}}{{#if data.pagination.filtersQuery}}&{{data.pagination.filtersQuery}}{{/if}}"
+            type="text" class="form-control form-control-sm" aria-label="search" value="{{data.pagination.search}}">
           </div>
         </div>
       </div>
