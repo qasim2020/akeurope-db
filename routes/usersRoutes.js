@@ -11,6 +11,7 @@ const { authenticate, authorize } = require("../modules/auth");
 const { allProjects } = require("../modules/mw-data");
 const checkValidForm = require("../modules/checkValidForm");
 const { forgotPassword } = require('../controllers/forgotPassword');
+const { sendEmail } = require('../modules/sendEmail');
 
 // Route to list all users
 router.get('/users', authenticate, authorize("viewUsers"), allProjects, async (req, res) => {
@@ -113,23 +114,39 @@ router.post('/users/create', authenticate, authorize("createUsers"), async (req,
     const templateSource = await fs.readFile(templatePath, 'utf8');
     const compiledTemplate = handlebars.compile(templateSource);
 
-    const mailOptions = {
-      from: process.env.EMAIL_USER,
+    sendEmail({
       to: email,
       subject: 'Invited to akeurope dashboard',
-      html: compiledTemplate({
+      htmlContent: compiledTemplate({
         name: name,
         inviteLink: `${process.env.URL}/users/register/${inviteToken}`
       }),
-    };
-
-    transporter.sendMail(mailOptions, async (err) => {
-      if (err) {
-          return res.status(400).send(err);
-      }
+    }).then( async (response) => {
+      console.log(response);
       await newUser.save();
-      res.status(200).send("Email sent successfully.");
-    });
+      res.status(200).send("Email sent successfully");
+    }).catch( err => {
+      console.log(err);
+      res.status(500).send('Email was not sent, therefore user was not created!');
+    })
+
+    // const mailOptions = {
+    //   from: process.env.EMAIL_USER,
+    //   to: email,
+    //   subject: 'Invited to akeurope dashboard',
+    //   html: compiledTemplate({
+    //     name: name,
+    //     inviteLink: `${process.env.URL}/users/register/${inviteToken}`
+    //   }),
+    // };
+
+    // transporter.sendMail(mailOptions, async (err) => {
+    //   if (err) {
+    //       return res.status(400).send(err);
+    //   }
+    //   await newUser.save();
+    //   res.status(200).send("Email sent successfully.");
+    // });
 
   } catch (err) {
     console.log(err);
