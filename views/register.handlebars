@@ -35,7 +35,7 @@
               </label>
             </div>
             <div class="form-footer">
-              <button type="submit" class="btn btn-primary w-100">Create new account</button>
+              <button id="submit" type="submit" class="btn btn-primary w-100">Create new account</button>
             </div>
           </div>
         </form>
@@ -82,7 +82,10 @@
        // Collect data from form inputs
         const name = $('#name').val();
         const password = $('#password').val();
+        const elem = $('#submit');
 
+        let currentBtnHTML = $(elem).html();
+        $(elem).html(`<span class="spinner-border spinner-border-sm me-2" role="status"></span>`);
         // Perform AJAX POST request
         $.ajax({
           url: '/users/register/{{token}}', // Endpoint to send the data
@@ -90,38 +93,68 @@
           contentType: 'application/json', // Sending JSON data
           data: JSON.stringify({ name, password }),
           success: function(response) {
+            $(elem).html(currentBtnHTML);
             $(".form-footer").after(`
             <div class="alert alert-success mt-4" role="alert">
               <h4 class="alert-title">Registration succesful!</h4>
-              <div class="text-secondary">Please <a href="/login">click here</a> to login.</div>
+              <div class="text-secondary">Logging you in...</div>
             </div>`);
+            login();
           },
           error: function(xhr, status, error) {
-            if (xhr.status != 400) {
+            if (Array.isArray(xhr.responseJSON)) {
+              xhr.responseJSON.forEach(val => {
+                if (val.elem == "other") {
+                  $(".form-footer").after(`
+                  <div class="alert alert-danger mt-4" role="alert">
+                    <h4 class="alert-title">Failed to create account!</h4>
+                    <div class="text-secondary">${val.msg}</div>
+                  </div>
+                  `);
+                  return false;
+                };
+                $(val.elem).addClass("is-invalid");
+                $(val.elem).siblings("span").addClass("border-red rounded-end");
+                $(val.elem).parent("div").append(`<div class="mb-2 invalid-feedback">${val.msg}</div> `);
+              });
+            } else {
               $(".form-footer").after(`
               <div class="alert alert-danger mt-4" role="alert">
                 <h4 class="alert-title">Failed to create account!</h4>
                 <div class="text-secondary">${xhr.responseText}</div>
               </div>`);
-              return false;
             }
-            xhr.responseJSON.forEach( val => {
-              if (val.elem == "other") {
-                $(".form-footer").after(`
-                <div class="alert alert-danger mt-4" role="alert">
-                  <h4 class="alert-title">Failed to create account!</h4>
-                  <div class="text-secondary">${val.msg}</div>
-                </div>
-                `);
-                return false;
-              };
-              $(val.elem).addClass("is-invalid");
-              $(val.elem).siblings("span").addClass("border-red rounded-end");
-              $(val.elem).parent("div").append(`<div class="mb-2 invalid-feedback">${val.msg}</div> `);
-            });
           }
         }); 
       })
+
+      const login = function() {
+        const email = $('#email').val();
+        const password = $('#password').val();
+
+        const elem = $('#submit');
+        let currentBtnHTML = $(elem).html();
+        $(elem).html(`<span class="spinner-border spinner-border-sm me-2" role="status"></span>`);
+
+        $.ajax({
+          url: '/login', 
+          type: 'POST',
+          contentType: 'application/json', 
+          data: JSON.stringify({ email, password }),
+          success: function(response) {
+            $(elem).html(currentBtnHTML);
+            window.location.href = "/dashboard";
+          },
+          error: function(xhr, status, error) {
+            $(elem).html(currentBtnHTML);
+            $(".form-footer").after(`
+            <div class="alert alert-danger mt-4" role="alert">
+              <h4 class="alert-title">Login failed!</h4>
+              <div class="text-secondary">${xhr.responseText}</div>
+            </div>`);
+          }
+        });
+      }
 
       $('#togglePassword').on('click', function() {
         const passwordField = $('#password');
