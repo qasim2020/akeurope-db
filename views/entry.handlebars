@@ -1,0 +1,52 @@
+<!-- Page header -->
+<div class="page-header d-print-none">
+  <div class="container-xl">
+    <div class="row g-2 align-items-center">
+      <div class="col">
+        <!-- Page pre-title -->
+        <div class="page-pretitle"> Overview </div>
+        <h2 class="page-title"> 
+          <ol class="breadcrumb" aria-label="breadcrumbs">
+            <li class="breadcrumb-item"><a href="/project/{{data.project.slug}}">{{data.project.name}}</a></li>
+            <li class="breadcrumb-item active" aria-current="page"><a href="#">{{lookup data.entry (findPrimaryKey data.project.fields)}}</a></li>
+          </ol>
+        </h2>
+      </div>
+      <!-- Page title actions -->
+      <div class="col-auto ms-auto d-print-none">
+        <div class="btn-list">
+          {{#if (findInArray data.role "editEntry")}}
+          <a href="#" class="btn btn-primary d-none d-md-inline-block" id="#createNewEntry" data-bs-toggle="modal" data-bs-target="#modal-{{data.entry._id}}">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+              <path d="M12 5l0 14" />
+              <path d="M5 12l14 0" />
+            </svg>
+            Edit Entry
+          </a>
+          <a href="#" class="btn btn-primary d-md-none btn-icon" data-bs-toggle="modal" data-bs-target="#modal-new-entry" aria-label="modal-new-entry">
+            <!-- Download SVG icon from http://tabler-icons.io/i/plus -->
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+              <path d="M12 5l0 14" />
+              <path d="M5 12l14 0" />
+            </svg>
+          </a>
+          {{/if}}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Page body -->
+<div class="container-xl pt-4" id="data-container">
+  {{> showEntry}}
+</div>
+
+{{#if (findInArray data.role "editEntry")}}
+  {{> editEntryModal}}
+{{/if}}
+
+<script>
+
+</script>

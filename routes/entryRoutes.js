@@ -66,37 +66,29 @@ router.get('/getEntryData/:slug', authenticate, authorize("viewEntry"), async (r
 
 router.post('/project/entry/:slug', authenticate, authorize("updateEntry"), async (req, res) => {
     try {
-       // Find the project to get the schema fields
        const project = await Project.findOne({ slug: req.params.slug });
        if (!project) return res.status(404).json({ error: `Project ${req.params.slug} not found` });
   
-       // Create the dynamic model based on the project schema
        const DynamicModel = await createDynamicModel(project.slug);
   
-       // Prepare data to match project fields
        const entryData = {};
   
-       // Set the _id from the entryId passed from the front-end
        const entryId = req.body.entryId;
   
-       // Validate the entryId to ensure it's a valid ObjectId
        if (!mongoose.Types.ObjectId.isValid(entryId)) {
            return res.status(400).json({ error: 'Invalid entryId provided' });
        }
   
-       // Assign entryId to the _id field in entryData
        entryData._id = entryId;
        project.fields.forEach(field => {
           const fieldName = field.name;
           const fieldValue = req.body[fieldName];
   
-          // Assign the value only if it exists in req.body
           if (fieldValue !== undefined) {
              entryData[fieldName] = fieldValue;
           }
        });
   
-       // Save the new entry using the dynamic model
        const newEntry = new DynamicModel(entryData);
        await newEntry.save();
   
@@ -108,26 +100,21 @@ router.post('/project/entry/:slug', authenticate, authorize("updateEntry"), asyn
 
 router.post('/project/entry/update/:slug/:id', authenticate, authorize("updateEntry"), async (req, res) => {
     try {
-      // Find the project to get the schema fields
       const project = await Project.findOne({ slug: req.params.slug });
       if (!project) return res.status(404).json({ error: `Project ${req.params.slug} not found` });
   
-      // Create the dynamic model based on the project schema
       const DynamicModel = await createDynamicModel(project.slug);
   
-      // Prepare data to match project fields
       const entryData = {};
       project.fields.forEach(field => {
          const fieldName = field.name;
          const fieldValue = req.body[fieldName];
   
-         // Assign the value only if it exists in req.body
          if (fieldValue !== undefined) {
             entryData[fieldName] = fieldValue;
          }
       });
   
-      // Find the entry by ID and update it
       const updatedEntry = await DynamicModel.findByIdAndUpdate(req.params.id, entryData, { new: true });
       if (!updatedEntry) return res.status(404).json({ error: `Entry with ID ${req.params.id} not found` });
   
@@ -148,24 +135,20 @@ router.post('/project/entry/delete/:slug', authenticate, authorize("deleteEntry"
 
     if (!entry) return res.status(404).json({ error: `Entry with ID ${req.body.entryId} not found!` });
 
-    // Filter fields for file types "image" or "file"
     const deletionPromises = project.fields
       .filter(field => ['image', 'file'].includes(field.type) && entry[field.name])
       .map(field => {
         const fileUrl = entry[field.name];
 
-        // Check if URL is hosted on Cloudinary before deleting
         if (fileUrl.includes("res.cloudinary.com")) {
           const publicId = extractCloudinaryPublicId(fileUrl); // Helper function to get the Cloudinary public ID
           return cloudinary.uploader.destroy(publicId, { resource_type: field.type === 'image' ? 'image' : 'raw' });
         }
       })
-      .filter(Boolean);  // Remove undefined promises for non-Cloudinary URLs
+      .filter(Boolean);  
 
-    // Wait for Cloudinary deletions to complete
     await Promise.all(deletionPromises);
 
-    // Delete the entry from the database
     await DynamicModel.deleteOne({ _id: req.body.entryId });
 
     res.status(200).json({ message: 'Entry and associated Cloudinary files deleted successfully' });
@@ -173,5 +156,33 @@ router.post('/project/entry/delete/:slug', authenticate, authorize("deleteEntry"
     res.status(500).json({ error: 'Error deleting entry or associated files', details: error.message });
   }
 });
+
+router.get('/entry/:entryId/project/:slug', authenticate, authorize("viewEntry"), allProjects, async (req,res) => {
+  try {
+    const project = await Project.findOne({ slug: req.params.slug }).lean();
+    if (!project) throw new Error(`Project "${req.params.slug}" not found`);
+
+    const DynamicModel = await createDynamicModel(project.slug);
+    const entry = await DynamicModel.findOne({_id: req.params.entryId}).lean();
+
+    res.render('entry', {
+      layout: "dashboard",
+      data: {
+        userName: req.session.user.name,
+        userRole: req.session.user.role.charAt(0).toUpperCase() + req.session.user.role.slice(1),
+        activeMenu: project.slug,
+        projects: req.allProjects,
+        project,
+        fields: project.fields, 
+        layout: req.session.layout,
+        entry, 
+        role: req.userPermissions,
+      }
+    })
+
+  } catch (error) {
+      res.status(500).json({ error: 'Error fetching entries', details: error.message });
+  }
+})
 
 module.exports = router;

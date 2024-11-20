@@ -88,4 +88,28 @@ const isEmptyObject = function(obj) {
     }
 };
 
-module.exports = { eq , inc, dec, formatDate, browserDate, resizeCloudinaryUrl, neq, capitalizeFirstLetter, checkInputType, findInArray, getFirstTwoLetters, arrayToCsv, getOptionsFromValues, getKey, getValue, isEmptyObject};
+const findPrimaryKey = function(fields) {
+    console.log(fields);
+    const primaryField = fields.find(field => field.primary === true);
+    return primaryField ? primaryField.name : null; 
+}
+
+module.exports = {
+    eq,
+    inc,
+    dec,
+    formatDate,
+    browserDate,
+    resizeCloudinaryUrl,
+    neq,
+    capitalizeFirstLetter,
+    checkInputType,
+    findInArray,
+    getFirstTwoLetters,
+    arrayToCsv,
+    getOptionsFromValues,
+    getKey,
+    getValue,
+    isEmptyObject,
+    findPrimaryKey,
+  };

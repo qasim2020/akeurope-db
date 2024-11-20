@@ -59,7 +59,8 @@
     </div>
   </div>
   <div class="card-body">
-      <button class="btn text-blue edit-entry cursor-pointer" entry-id="{{entry._id}}">Edit</button>
+      <a href="/entry/{{entry._id}}/project/{{../data.project.slug}}" class="btn btn-primary">View</a>
+      <button class="btn btn-secondary-outline edit-entry cursor-pointer" entry-id="{{entry._id}}">Edit</button>
       <button class="btn text-red cursor-pointer" entry-id="{{entry._id}}" onclick="deleteEntry(this)">Delete</button>
   </div>
 </div>

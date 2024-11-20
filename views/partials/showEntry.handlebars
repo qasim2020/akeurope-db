@@ -1,0 +1,95 @@
+ {{#with data.entry as |entry|}}
+ <div class="row row-deck row-cards">
+
+  <div class="col-12 col-md-5">
+      <div class="d-block card mb-3 data-row">
+        <div class="card-header">
+        <h3 class="card-title"><span class="badge bg-blue-lt">{{lookup entry (findPrimaryKey ../data.fields)}}</span></h3>
+      </div>
+      <div class="card-body">
+        <div class="datagrid">
+          
+          {{#each ../data.fields}}
+            <div class="datagrid-item">
+              <div class="datagrid-title">{{this.actualName}}</div>
+              <div class="datagrid-content">
+
+                {{#if (eq this.type "boolean")}}
+                  {{#if (eq this.options.0.value (lookup entry this.name))}}
+                    <span class="status status-green">{{lookup entry this.name}}</span>
+                  {{else}}
+                    <span class="status status-red"> {{lookup entry this.name}}</span>
+                  {{/if}}
+
+                {{else if (eq this.type "dropdown")}}
+                  {{lookup entry this.name}}
+
+                {{else if (eq this.type "date")}}
+                  {{formatDate (lookup entry this.name)}}
+
+                {{else if (eq this.type "image")}}
+                  {{#if (lookup entry this.name)}}
+                    <img src="{{resizeCloudinaryUrl (lookup entry this.name) 't_w-250'}}" alt="{{this.name}}" class="img-thumbnail" style="max-width: 150px;">
+                  {{else}}
+                    <span>No image available</span>
+                  {{/if}}
+
+                {{else if (eq this.type "file")}}
+                  {{#if (lookup entry this.name)}}
+                    <a href="{{lookup entry this.name}}" target="_blank">Download File</a>
+                  {{else}}
+                    <span>No file uploaded</span>
+                  {{/if}}
+
+                {{else}}
+                  {{lookup entry this.name}}
+                {{/if}}
+
+              </div>
+            </div>
+          {{/each}}
+
+        </div>
+      </div>
+      <div class="card-body">
+          <a href="#" class="btn btn-primary d-none d-md-inline-block" data-bs-toggle="modal" data-bs-target="#modal-{{entry._id}}">Edit</a>
+          <button class="btn text-red cursor-pointer" entry-id="{{entry._id}}" onclick="deleteEntry(this)">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="d-block col-12 col-md-7">
+    <div class="card">
+      <div class="card-body">
+        <h3 class="card-title">Updates</h3>
+        <ul class="steps steps-vertical">
+          <li class="step-item">
+            <div class="h4 m-0">Created:</div>
+            <div class="text-secondary">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Accusamus culpa cum expedita ipsam laborum nam ratione reprehenderit sed sint tenetur!</div>
+          </li>
+          <li class="step-item">
+            <div class="h4 m-0">Edited:</div>
+            <div class="text-secondary">Lorem ipsum dolor sit amet.</div>
+          </li>
+          <li class="step-item active">
+            <div class="h4 m-0">Changed:</div>
+            <div class="text-secondary">Lorem ipsum dolor sit amet.</div>
+          </li>
+          <li class="step-item">
+            <div class="h4 m-0">Subscription:</div>
+            <div class="text-secondary">Lorem ipsum dolor sit amet.</div>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card mt-3">
+      <div class="card-body">
+        <h3 class="card-title">Payments</h3>
+
+      </div>
+    </div>
+  </div>
+
+ </div>
+ {{/with}}
