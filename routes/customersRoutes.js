@@ -2,7 +2,6 @@ const mongoose = require('mongoose');
 const express = require('express');
 const router = express.Router();
 
-// email reqs
 const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs').promises;
@@ -15,6 +14,7 @@ const { allProjects } = require("../modules/mw-data");
 const Customer = require("../models/Customer");
 const Project = require("../models/Project");
 const checkValidForm = require("../modules/checkValidForm");
+const { saveLog } = require("../controllers/logAction");
 
 router.get("/customers", authenticate, authorize("viewCustomers"), allProjects, async (req,res) => {
     const customers = await Customer.find().lean();
@@ -170,6 +170,19 @@ router.post("/customer/create", authenticate, authorize("createCustomers"), asyn
                 return res.status(400).send(err);
             }
             await customer.save();
+               
+            await saveLog({
+                entityType: 'customer',
+                entityId: customer._id,
+                actorType: 'user',
+                actorId: req.session.user._id,
+                url: `customer/${customer._id}`,
+                action: 'New customer created',
+                details: `New customer <strong>${customer.email}</strong> created by <strong>${req.session.user.email}</strong>. Email invite sent to customer.`,
+                color: 'green',
+                isNotification: true
+            }); 
+
             res.status(201).json({ message: 'Customer created successfully', customer });
         });
 
@@ -227,6 +240,19 @@ router.post('/customer/sendInvite', authenticate, authorize("editCustomers"), as
           return res.status(400).send(err);
       }
       await customer.save();
+         
+      await saveLog({
+          entityType: 'customer',
+          entityId: customer._id,
+          actorType: 'user',
+          actorId: req.session.user._id,
+          url: `customer/${customer._id}`,
+          action: 'Email invite sent',
+          details: `Email invite sent to <strong>${customer.email}</strong>. Action by <strong>${req.session.user.email}</strong>`,
+          color: 'green',
+          isNotification: true
+      }); 
+
       res.status(200).send("Email sent successfully!");
     });
 
@@ -258,17 +284,49 @@ router.post("/customer/update/:customerId", authenticate, authorize("createCusto
             })
         );
 
+        const customer = await Customer.findById(req.params.customerId);
+
+        if (!customer) {
+            check.push({msg: "Customer not found."});
+        }
+
         if (check.length > 0) {
             res.status(400).send(check);
             return false;
         }
 
-        await Customer.findOneAndUpdate({_id: req.params.customerId}, {
-            name,
-            organization,
-            location,
-            status,
-            projects
+        const changes = [];
+        const updatedFields = { name, organization, location, status, projects };
+
+        Object.entries(updatedFields).forEach(([field, newValue]) => {
+            if (customer[field] !== newValue) {
+                changes.push({
+                    field,
+                    from: customer[field],
+                    to: newValue,
+                });
+            }
+        });
+
+        await Customer.findByIdAndUpdate(req.params.customerId, updatedFields);
+
+        const changeDetails = changes
+        .map(
+          (change) =>
+            `${change.field}: "${change.from}" → "${change.to}"`
+        )
+        .join('<br>');
+                 
+        await saveLog({
+            entityType: 'customer',
+            entityId: customer._id,
+            actorType: 'user',
+            actorId: req.session.user._id,
+            url: `customer/${customer._id}`,
+            action: 'Customer updated',
+            details: `Customer <strong>${customer.email}</strong> updated by <strong>${req.session.user.email}</strong>:<br>${changeDetails}`,
+            color: 'blue',
+            isNotification: true,
         });
 
         res.status(200).send("Customer updated successfully!");

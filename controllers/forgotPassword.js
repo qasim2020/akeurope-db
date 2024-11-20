@@ -5,6 +5,7 @@ const fs = require('fs').promises;
 const path = require('path');
 const User = require('../models/User'); 
 const { isValidEmail } = require("../modules/checkValidForm");
+const { saveLog } = require("../controllers/logAction");
 
 exports.forgotPassword = async (req, res) => {
   const { email } = req.body;
@@ -26,7 +27,6 @@ exports.forgotPassword = async (req, res) => {
   const token = crypto.randomBytes(20).toString('hex');
   user.resetPasswordToken = token;
   user.resetPasswordExpires = Date.now() + 3600000; // 1-hour expiration
-  await user.save();
 
   // Configure the SMTP transporter
   let transporter = nodemailer.createTransport({
@@ -44,7 +44,6 @@ exports.forgotPassword = async (req, res) => {
   const templateSource = await fs.readFile(templatePath, 'utf8');
   const compiledTemplate = handlebars.compile(templateSource);
 
-  // Define mail options, including the compiled HTML template with data
   const mailOptions = {
     from: process.env.EMAIL_USER,
     to: user.email,
@@ -55,13 +54,19 @@ exports.forgotPassword = async (req, res) => {
     }),
   };
 
-  console.log(mailOptions.html);
-
-  // Send the email
-  transporter.sendMail(mailOptions, (err) => {
+  transporter.sendMail(mailOptions, async (err) => {
     if (err) {
         return res.status(400).send(err);
     }
+    await user.save();
+   
+    await saveLog({
+      action: 'Reset password',
+      details: `Sent forgot password email to <strong>${user.email}</strong> .`,
+      color: 'grey',
+      isNotification: true
+    }); 
+
     res.status(200).send("Email sent successfully. Check your inbox.");
   });
 };

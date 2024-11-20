@@ -22,6 +22,10 @@ const formatDate = function(date) {
     return moment(date).format('MMMM Do, YYYY'); // Customize the format as needed
 };
 
+const formatTime = function(timestamp) {
+    return moment(timestamp).format('D MMM YYYY [at] h:mm A');
+}
+
 const browserDate = function(dateString) {
     const date = new Date(dateString);
     const year = date.getFullYear();
@@ -94,11 +98,14 @@ const findPrimaryKey = function(fields) {
     return primaryField ? primaryField.name : null; 
 }
 
+
+
 module.exports = {
     eq,
     inc,
     dec,
     formatDate,
+    formatTime,
     browserDate,
     resizeCloudinaryUrl,
     neq,

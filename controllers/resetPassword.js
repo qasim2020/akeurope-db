@@ -21,6 +21,15 @@ exports.resetPassword = async (req, res) => {
     user.password = password;
     user.resetPasswordToken = undefined; // Clear reset token
     user.resetPasswordExpires = undefined; // Clear token expiration
+
+       
+    await saveLog({
+      action: 'Reset password',
+      details: `Password changed by <strong>${user.email}</strong> .`,
+      color: 'grey',
+      isNotification: true
+    }); 
+
     await user.save();
 
     res.status(200).send("Password changed.");

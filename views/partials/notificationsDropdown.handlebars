@@ -1,0 +1,49 @@
+{{#if data.logs}}
+<div class="card" style="min-width: 30vw;">
+    <div class="card-header">
+        <h3 class="card-title">Last updates</h3>
+    </div>
+    <div class="list-group list-group-flush list-group-hoverable">
+        {{#each data.logs as |log|}}
+        <div class="list-group-item">
+        <div class="row align-items-center">
+            {{#if (eq log.color 'red')}}
+            <div class="col-auto"><span class="status-dot status-dot-animated bg-red d-block"></span></div>
+            {{/if}}
+            {{#if (eq log.color 'blue')}}
+            <div class="col-auto"><span class="status-dot status-dot-animated bg-blue d-block"></span></div>
+            {{/if}}
+            {{#if (eq log.color 'green')}}
+            <div class="col-auto"><span class="status-dot status-dot-animated bg-green d-block"></span></div>
+            {{/if}}
+            {{#if (eq log.color 'grey')}}
+            <div class="col-auto"><span class="status-dot d-block"></span></div>
+            {{/if}}
+            <div class="col text-truncate">
+            <div class="text-secondary fs-6 badge bg-blue-lt">{{formatTime log.timestamp}}</div>
+            <div class="d-block text-secondary text-truncate mt-1 text-wrap">
+                {{{log.details}}}
+            </div>
+            {{#if log.url}}
+            <a href="{{log.url}}" class="btn btn-secondary-outline btn-sm mt-1 text-secondary">View</a>
+            {{/if}}
+            <a href="#" class="btn btn-secondary-outline btn-sm mt-1 text-secondary">Clear</a>
+            </div>
+        </div>
+        </div>
+        {{/each}}
+    </div>
+</div>
+{{else}}
+<div class="card" style="min-width:30vw">
+    <div class="card-header">
+        <h3 class="card-title">No new notifications</h3>
+    </div>
+    <div class="card-body text-center">
+        <button type="button" class="btn">
+        <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-x"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M18 6l-12 12" /><path d="M6 6l12 12" /></svg>
+        Close
+        </button>
+    </div>
+</div>
+{{/if}}
