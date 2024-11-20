@@ -46,4 +46,9 @@ const visibleLogs = async ( req, res ) => {
     }
 }
 
-module.exports = { saveLog, updateLog, visibleLogs }
+const entryLogs = async (req,res) => {
+    const logs = await Log.find({entityId: req.params.entryId}).sort({timestamp: -1}).lean();
+    return logs;
+}
+
+module.exports = { saveLog, updateLog, visibleLogs, entryLogs }

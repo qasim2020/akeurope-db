@@ -8,7 +8,7 @@ const { authenticate, authorize } = require('../modules/auth');
 const { allProjects } = require("../modules/mw-data");
 const { createDynamicModel } = require("../models/createDynamicModel");
 const { projectEntries } = require("../modules/projectEntries");
-const { saveLog } = require("../controllers/logAction");
+const { saveLog, visibleLogs, entryLogs } = require("../controllers/logAction");
 
 // Helper to extract public ID from Cloudinary URL
 function extractCloudinaryPublicId(url) {
@@ -271,6 +271,8 @@ router.get('/entry/:entryId/project/:slug', authenticate, authorize("viewEntry")
         layout: req.session.layout,
         entry, 
         role: req.userPermissions,
+        logs: await visibleLogs(req,res),
+        entryLogs: await entryLogs(req,res)
       }
     })
 

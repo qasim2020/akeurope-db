@@ -13,6 +13,7 @@ router.post('/project/create', authenticate, authorize("createProject"), async (
     const { name, slug, status, location, fields} = req.body;
 
     const project = new Project({
+      _id: new mongoose.Types.ObjectId(),
       name,
       slug: toKebabCase(slug),
       status,
@@ -21,6 +22,18 @@ router.post('/project/create', authenticate, authorize("createProject"), async (
     });
 
     await project.save();
+
+    await saveLog({
+      entityType: 'project',
+      entityId: project._id,
+      actorType: 'user',
+      actorId: req.session.user._id,
+      url: `/project/${project.slug}`,
+      action: 'Project created',
+      details: `Project <strong>${project.slug}</strong> created by <strong>${req.session.user.email}</strong>`,
+      color: 'green',
+      isNotification: true,
+    });
 
     res.status(200).send("Saved successfully");
 
@@ -50,6 +63,18 @@ router.post('/project/update/:id', authenticate, authorize("updateProject"), asy
     if (!project) {
       return res.status(404).send("Project not found");
     }
+
+    await saveLog({
+      entityType: 'project',
+      entityId: id,
+      actorType: 'user',
+      actorId: req.session.user._id,
+      url: `/project/${project.slug}`,
+      action: 'Project updated',
+      details: `Project <strong>${project.slug}</strong> updated by <strong>${req.session.user.email}</strong>`,
+      color: 'green',
+      isNotification: true,
+    });
 
     res.status(200).send("Updated successfully");
 

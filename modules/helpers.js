@@ -68,7 +68,6 @@ const getFirstTwoLetters = function (name) {
 }
 
 const arrayToCsv = function(array) {
-    console.log(array);
     return array.join(', ');
 }
 
@@ -93,7 +92,6 @@ const isEmptyObject = function(obj) {
 };
 
 const findPrimaryKey = function(fields) {
-    console.log(fields);
     const primaryField = fields.find(field => field.primary === true);
     return primaryField ? primaryField.name : null; 
 }

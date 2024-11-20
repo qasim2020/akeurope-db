@@ -75,8 +75,6 @@ const projectEntries = async function(req, res) {
       .limit(limit)
       .lean();
 
-    console.log(sortOptions);
-
     const totalEntries = await DynamicModel.countDocuments(searchQuery);
     const totalPages = Math.ceil(totalEntries / limit);
 

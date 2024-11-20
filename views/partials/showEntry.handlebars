@@ -62,24 +62,19 @@
     <div class="card">
       <div class="card-body">
         <h3 class="card-title">Updates</h3>
+        {{#if ../data.entryLogs}}
         <ul class="steps steps-vertical">
+          {{#each ../data.entryLogs as |log|}}
           <li class="step-item">
-            <div class="h4 m-0">Created:</div>
-            <div class="text-secondary">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Accusamus culpa cum expedita ipsam laborum nam ratione reprehenderit sed sint tenetur!</div>
+            <div class="badge bg-blue-lt mb-1">{{formatTime log.timestamp}}</div>
+            <div class="h4 m-0">{{log.action}}:</div>
+            <div class="text-secondary">{{{log.details}}}</div>
           </li>
-          <li class="step-item">
-            <div class="h4 m-0">Edited:</div>
-            <div class="text-secondary">Lorem ipsum dolor sit amet.</div>
-          </li>
-          <li class="step-item active">
-            <div class="h4 m-0">Changed:</div>
-            <div class="text-secondary">Lorem ipsum dolor sit amet.</div>
-          </li>
-          <li class="step-item">
-            <div class="h4 m-0">Subscription:</div>
-            <div class="text-secondary">Lorem ipsum dolor sit amet.</div>
-          </li>
+          {{/each}}
         </ul>
+        {{else}}
+        <div class="text-center"><p>No logs stored for this entity!</p></div>
+        {{/if}}
       </div>
     </div>
 

@@ -9,6 +9,7 @@ const moment = require('moment');
 const { allProjects, oneProject } = require("../modules/mw-data");
 const { authenticate, authorize } = require("../modules/auth");
 const { createDynamicModel } = require("../models/createDynamicModel");
+const { saveLog } = require("../controllers/logAction");
 
 router.get("/uploadExcel/:slug", authenticate, authorize("editEntry"), allProjects, oneProject, async (req,res) => {
     res.render( "uploadExcel", {
@@ -92,6 +93,7 @@ router.post('/uploadExcel/:slug', authenticate, authorize("editEntry"), upload.s
         const results = {
             merged: 0,
             createdNew: 0,
+            skipped: 0,
             errors: []
         };
 
@@ -158,32 +160,97 @@ router.post('/uploadExcel/:slug', authenticate, authorize("editEntry"), upload.s
                 return;
             }
 
-            // Handle row as a promise to allow async processing
             const rowPromise = DynamicModel.findOne({ [uniqueField]: entryData[uniqueField] })
-                .then(existingEntry => {
-                    if (existingEntry) {
-                        // Update existing entry
-                        Object.assign(existingEntry, entryData);
-                        return existingEntry.save().then(() => {
-                            results.merged++;
-                        });
-                    } else {
-                        // Create new entry
-                        const newEntry = new DynamicModel(entryData);
-                        return newEntry.save().then(() => {
-                            results.createdNew++;
-                        });
+            .then(async (existingEntry) => {
+                if (existingEntry) {
+
+                    const updatedFields = {};
+
+                    for (const key in entryData) {
+                        if (entryData[key] !== undefined) {
+                            if (project.fields.some(field => field.name === key && field.type === 'date')) {
+                                const existingValue = moment(existingEntry[key]).format('YYYY-MM-DD');
+                                const newValue = moment(entryData[key]).format('YYYY-MM-DD');
+
+                                if (existingValue !== newValue) {
+                                    updatedFields[key] = {
+                                        from: existingValue,
+                                        to: newValue,
+                                    };
+                                }
+                            } else if (existingEntry[key] != entryData[key]) {
+                                updatedFields[key] = {
+                                    from: existingEntry[key],
+                                    to: entryData[key],
+                                };
+                            }
+                        }
                     }
-                })
-                .catch(err => {
-                    results.errors.push(`Error in row ${rowNumber}: ${err.message}`);
-                });
+
+                    if (Object.keys(updatedFields).length > 0) {
+                        const changedEntries = Object.entries(updatedFields)
+                            .map(
+                                ([field, { from, to }]) =>
+                                    `<strong>${field}</strong>: "${from || 'null'}" → "${to || 'null'}"`
+                            )
+                            .join('<br>');
+        
+                        saveLog({
+                            entityType: 'entry',
+                            entityId: existingEntry._id,
+                            actorType: 'user',
+                            actorId: req.session.user._id,
+                            url: `/entry/${existingEntry._id}/project/${project.slug}`,
+                            action: 'Entry updated',
+                            details: `Bulk upload! Entry <strong>${uniqueField}</strong> = <strong>${entryData[uniqueField]}</strong> in project <strong>${project.slug}</strong> updated by <strong>${req.session.user.email}</strong>:<br>${changedEntries}`,
+                            color: 'green',
+                            isNotification: false,
+                        });
+        
+                        Object.assign(existingEntry, entryData);
+                        await existingEntry.save();
+                        results.merged++;
+                    } else {
+                        results.skipped++;
+                    }
+                } else {
+                    const newEntry = new DynamicModel(entryData);
+                    await newEntry.save();
+                    saveLog({
+                        entityType: 'entry',
+                        entityId: newEntry._id,
+                        actorType: 'user',
+                        actorId: req.session.user._id,
+                        url: `/entry/${newEntry._id}/project/${project.slug}`,
+                        action: 'Entry created',
+                        details: `Bulk upload! Entry <strong>${uniqueField}</strong> = <strong>${entryData[uniqueField]}</strong> in project <strong>${project.slug}</strong> created by <strong>${req.session.user.email}</strong>`,
+                        color: 'green',
+                        isNotification: false,
+                    });
+                    results.createdNew++;
+                }
+            })
+            .catch((err) => {
+                results.errors.push(`Error in row ${rowNumber}: ${err.message}`);
+            });
+        
             
             rowPromises.push(rowPromise);
         });
 
         // Wait for all row promises to complete before sending response
         await Promise.all(rowPromises);
+
+        await saveLog({
+            actorType: 'user',
+            actorId: req.session.user._id,
+            action: 'Bulk upload',
+            details: `Bulk upload of data in project ${project.name} by <strong>${req.session.user.email}</strong> completed. <br> Created new: ${results.createdNew} <br> Merged: ${results.merged} <br> Skipped: ${results.skipped} <br> Errors: ${results.errors.length}`,
+
+            url: `/project/${project.slug}`,
+            color: 'red',
+            isNotification: true
+        });
 
         res.json({
             message: 'Upload and processing completed',

@@ -3,15 +3,14 @@ const Project = require('./Project');
 
 const createDynamicModel = async function(projectName) {
     try {
-        // Fetch the project by name
         const project = await Project.findOne({ slug: projectName });
         if (!project) throw new Error(`Project with name "${projectName}" not found`);
 
-        // Define schema fields based on project.fields
         const dynamicFields = {};
 
         project.fields.forEach(field => {
             let fieldType;
+            let unique = field.primary ? true : false;
 
             switch (field.type) {
                 case 'string':
@@ -39,22 +38,17 @@ const createDynamicModel = async function(projectName) {
                     fieldType = String; 
             }
 
-            dynamicFields[field.name] = { type: fieldType };
+            dynamicFields[field.name] = { type: fieldType, unique: unique };
         });
 
-        // Define a dynamic schema
         const dynamicSchema = new mongoose.Schema(dynamicFields);
 
-        // Model name
         const modelName = project.slug;
 
-        // Check if the model already exists
         if (mongoose.models[modelName]) {
-            // If it exists, we can recompile it with the new schema
-            mongoose.deleteModel(modelName); // Remove existing model from Mongoose cache
+            mongoose.deleteModel(modelName); 
         }
 
-        // Create and return a new model
         const DynamicModel = mongoose.model(modelName, dynamicSchema, modelName.toLowerCase());
         return DynamicModel;
     } catch (error) {
