@@ -24,7 +24,8 @@ const roles = {
         'createCustomers',
         'editCustomers',
         'updateCustomers',
-        'deleteCustomers'
+        'deleteCustomers',
+        'editNotifications'
     ],
     editor: [
         'viewDashboard', 
@@ -35,12 +36,14 @@ const roles = {
         'updateEntry', 
         'deleteEntry',
         'uploadPdf',
-        'uploadImage'
+        'uploadImage',
+        'editNotifications'
     ],
     viewer: [
         'viewDashboard',
         'viewProject',
-        'viewEntry'
+        'viewEntry',
+        'editNotifications'
     ]
 };
 

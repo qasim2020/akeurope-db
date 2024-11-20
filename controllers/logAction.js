@@ -25,23 +25,16 @@ const saveLog = async ({ entityType, entityId, actorType, actorId, action, detai
 };
 
 const updateLog = async ({ logId, updates, }) => {
-    try {
-        const updatedLog = await Log.findByIdAndUpdate( logId,
-            { $set: updates },
-            { new: true } 
-        );
+    const updatedLog = await Log.findByIdAndUpdate( logId,
+        { $set: updates },
+        { new: true } 
+    );
 
-        if (!updatedLog) {
-            console.error('Log not found or update failed.');
-            return null;
-        }
-
-        console.log('Log updated successfully:', updatedLog);
-        return updatedLog;
-    } catch (error) {
-        console.error('Error updating log:', error);
-        return error;
+    if (!updatedLog) {
+        throw new Error('Log not found or update failed.');
     }
+
+    return updatedLog;
 };
 
 const visibleLogs = async ( req, res ) => {

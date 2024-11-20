@@ -22,6 +22,7 @@ const uploadPdf = require('./routes/uploadPdf');
 const uploadExcel = require('./routes/uploadExcel');
 const updateLayout = require('./routes/updateLayout');
 const customersRoutes = require('./routes/customersRoutes');
+const logRoutes = require('./routes/logRoutes');
 
 require('dotenv').config();
 mongoose();
@@ -66,6 +67,7 @@ app.use(uploadExcel);
 app.use(renderPartial);
 app.use(usersRoutes);
 app.use(customersRoutes);
+app.use(logRoutes);
 
 // Home route
 app.get('/', (req, res) => {

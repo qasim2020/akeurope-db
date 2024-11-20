@@ -313,7 +313,7 @@ router.post("/customer/update/:customerId", authenticate, authorize("createCusto
         const changeDetails = changes
         .map(
           (change) =>
-            `${change.field}: "${change.from}" → "${change.to}"`
+            `<strong>${change.field}</strong>: "${change.from}" → "${change.to}"`
         )
         .join('<br>');
                  

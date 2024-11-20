@@ -19,6 +19,7 @@
       body {
       	font-feature-settings: "cv03", "cv04", "cv11";
       }
+
     </style>
   </head>
   <body >
@@ -245,5 +246,33 @@
     <script src="/tabler/js/tabler.min.js?1692870487" defer></script>
     <script src="/tabler/js/demo.min.js?1692870487" defer></script>
    
+
+  <script>
+
+    $(document).ready(() => {
+      $(".notifications strong").addClass("text-blue");
+    });
+
+    document.querySelector('.card').addEventListener('click', function (event) {
+        event.stopPropagation(); // Prevent the click from propagating to the parent
+    });
+
+    const clearNotification = function(elem) {
+        const id = $(elem).attr("log-id");
+        $.ajax({
+          url: `/clearNotification/${id}`,
+          method: "POST",
+          contentType: 'application/json', 
+          success: function(response) {
+            $(elem).closest(".list-group-item").remove();
+          },
+          error: function(xhr, status, error) {
+            alert(xhr.responseText);
+          }
+        })
+    };
+
+  </script>
+
   </body>
 </html>
