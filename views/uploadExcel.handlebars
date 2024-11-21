@@ -15,14 +15,12 @@
 
 <script>
     $(document).on("click", ".next, .prev", function(e) {
-        console.log("go to next step");
         let url = $(this).attr("data-url");
 
         $.ajax({
             url: url, 
             method: 'GET',
             success: function(response) {
-                console.log(response);
                 $("#data-container").html(response);
             },
             error: function(error) {

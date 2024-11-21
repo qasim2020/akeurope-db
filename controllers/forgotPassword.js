@@ -17,7 +17,6 @@ exports.forgotPassword = async (req, res) => {
 
   // Find the user by email
   const user = await User.findOne({ email });
-  console.log(user);
   if (!user) {
     res.status(400).send("User not found");
     return false;
