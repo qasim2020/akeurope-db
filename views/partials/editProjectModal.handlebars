@@ -66,9 +66,10 @@
                 <div class="accordion-item">
                   <h2 class="accordion-header d-flex justify-content-between" id="">
                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{../data.project.slug}}-{{@key}}" aria-expanded="true">
-                        Field is 
-                        <span class="badge bg-blue-lt mx-2">{{this.actualName}}</span> with type of 
-                        <span class="badge bg-azure-lt mx-2">{{this.type}}</span>
+                        <span class='d-none d-md-inline-block me-2'>Field is </span>
+                        <span class="badge bg-azure-lt me-2">{{this.actualName}}</span>
+                        <span class='d-none d-md-inline-block me-2'>with type of </span>
+                        <span class="badge bg-blue-lt">{{this.type}}</span>
                     </button>
                   </h2>
                   <div id="collapse-{{../data.project.slug}}-{{@key}}" class="accordion-collapse collapse" data-bs-parent="#accordion-{{../data.project.slug}}">
@@ -168,7 +169,7 @@
                   <p class="card-subtitle mb-3">This is a unique field in your project that never repeats. It can be an email, id card number, mobile number, or slug etc. </p>
                   <div class="mb-3 primary-field-selectors">
                         {{#each data.project.fields}}
-                        <span class="badge cursor-pointer {{#if this.primary}} bg-blue-lt {{/if}}" onclick="setPrimaryField(this)">{{this.actualName}}</span>
+                        <span class="badge cursor-pointer mb-1 {{#if this.primary}} bg-blue-lt {{/if}}" onclick="setPrimaryField(this)">{{this.actualName}}</span>
                         {{/each}}
                   </div>
                   <input type="text" class="form-control" disabled

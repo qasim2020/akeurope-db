@@ -307,8 +307,10 @@ let editProject = function(elem) {
     let input = $(this).closest(".accordion-item").find("input").val();
     let type = $(this).closest(".accordion-item").find(".form-select").val();
     $(this).closest(".accordion-item").find(".accordion-button").html(`
-    Field is <span class="badge bg-azure-lt mx-2">${input}</span>
-    with type of <span class="badge bg-blue-lt mx-2">${type}</span>
+      <span class='d-none d-md-inline-block me-2'>Field is </span>
+      <span class="badge bg-azure-lt me-2">${input}</span>
+      <span class='d-none d-md-inline-block me-2'>with type of </span>
+      <span class="badge bg-blue-lt">${type}</span>
     `);
   })
 
@@ -317,7 +319,7 @@ let editProject = function(elem) {
     let html = ``;
     allFields.each( (key, val) => {
       if (val.length > 0) {
-        html += `<span class="badge cursor-pointer me-1" onclick="setPrimaryField(this)">${val}</span>`;
+        html += `<span class="badge cursor-pointer me-1 mb-1" onclick="setPrimaryField(this)">${val}</span>`;
       }
     });
     $(elem).closest(".modal").find(".primary-field-selectors").html(html);

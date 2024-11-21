@@ -1,6 +1,6 @@
- {{#with data.entry as |entry|}}
  <div class="row row-deck row-cards">
 
+ {{#with data.entry as |entry|}}
   <div class="col-12 col-md-5">
       <div class="d-block card mb-3 data-row">
         <div class="card-header">
@@ -57,14 +57,15 @@
       </div>
     </div>
   </div>
+ {{/with}}
 
   <div class="d-block col-12 col-md-7">
     <div class="card">
       <div class="card-body">
         <h3 class="card-title">Updates</h3>
-        {{#if ../data.entryLogs}}
+        {{#if data.entryLogs}}
         <ul class="steps steps-vertical">
-          {{#each ../data.entryLogs as |log|}}
+          {{#each data.entryLogs as |log|}}
           <li class="step-item">
             <div class="badge bg-blue-lt mb-1">{{formatTime log.timestamp}}</div>
             <div class="h4 m-0">{{log.action}}:</div>
@@ -87,4 +88,3 @@
   </div>
 
  </div>
- {{/with}}

@@ -8,7 +8,11 @@
         <h2 class="page-title"> 
           <ol class="breadcrumb" aria-label="breadcrumbs">
             <li class="breadcrumb-item"><a href="/project/{{data.project.slug}}">{{data.project.name}}</a></li>
+            {{#if data.entry}}
             <li class="breadcrumb-item active" aria-current="page"><a href="#">{{lookup data.entry (findPrimaryKey data.project.fields)}}</a></li>
+            {{else}}
+            <li class="breadcrumb-item active" aria-current="page"><a href="#">Entry deleted</a></li>
+            {{/if}}
           </ol>
         </h2>
       </div>

@@ -32,7 +32,7 @@
               <div class="datagrid-title">Fields</div>
               <div class="datagrid-content">
                 {{#each this.fields}}
-                <span class="badge bg-blue-lt mb-1">{{this.actualName}}</span>
+                <span class="badge bg-blue-lt mb-1 {{#if this.primary}}bg-red-lt{{/if}}">{{this.actualName}}</span>
                 {{/each}}
               </div>
             </div>

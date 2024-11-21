@@ -102,7 +102,7 @@ router.post('/project/entry/:slug', authenticate, authorize("createEntry"), asyn
           entityId: entryId,
           actorType: 'user',
           actorId: req.session.user._id,
-          url: `entry/${entryId}/project/${project.slug}`,
+          url: `/entry/${entryId}/project/${project.slug}`,
           action: 'Entry created',
           details: `Entry <strong>${newEntry[primaryField.name]}</strong> created in project <strong>${project.name}</strong> created by <strong>${req.session.user.email}</strong>`,
           color: 'green',
@@ -188,7 +188,7 @@ router.post('/project/entry/update/:slug/:id', authenticate, authorize("updateEn
           entityId: entryId,
           actorType: 'user',
           actorId: req.session.user._id,
-          url: `entry/${entryId}/project/${project.slug}`,
+          url: `/entry/${entryId}/project/${project.slug}`,
           action: 'Entry updated',
           details: `Entry <strong>${existingEntry[primaryField.name]}</strong> updated in project <strong>${project.name}</strong> by <strong>${req.session.user.email}</strong>: <br> ${changedEntries}`,
           color: 'blue',
@@ -238,7 +238,7 @@ router.post('/project/entry/delete/:slug', authenticate, authorize("deleteEntry"
       entityId: entry._id,
       actorType: 'user',
       actorId: req.session.user._id,
-      url: `entry/${entry._id}/project/${project.slug}`,
+      url: `/entry/${entry._id}/project/${project.slug}`,
       action: 'Entry deleted',
       details: `Entry <strong>${primaryField.actualName}</strong> = <strong>${entry[primaryField.name]}</strong> deleted in project <strong>${project.name}</strong> by <strong>${req.session.user.email}</strong>`,
       color: 'red',
@@ -277,7 +277,8 @@ router.get('/entry/:entryId/project/:slug', authenticate, authorize("viewEntry")
     })
 
   } catch (error) {
-      res.status(500).json({ error: 'Error fetching entries', details: error.message });
+    console.log(error);
+    res.status(500).json({ error: 'Error fetching entries', details: error.message });
   }
 })
 
