@@ -9,7 +9,7 @@ const moment = require('moment');
 const { allProjects, oneProject } = require("../modules/mw-data");
 const { authenticate, authorize } = require("../modules/auth");
 const { createDynamicModel } = require("../models/createDynamicModel");
-const { saveLog } = require("../controllers/logAction");
+const { saveLog, visibleLogs } = require("../controllers/logAction");
 
 router.get("/uploadExcel/:slug", authenticate, authorize("editEntry"), allProjects, oneProject, async (req,res) => {
     res.render( "uploadExcel", {
@@ -19,7 +19,8 @@ router.get("/uploadExcel/:slug", authenticate, authorize("editEntry"), allProjec
             userRole: req.session.user.role.charAt(0).toUpperCase() + req.session.user.role.slice(1),
             projects: req.allProjects,
             project: req.oneProject,
-            activeMenu: req.params.slug
+            activeMenu: req.params.slug,
+            logs: await visibleLogs(req,res)
         }
     })
 });
@@ -246,7 +247,6 @@ router.post('/uploadExcel/:slug', authenticate, authorize("editEntry"), upload.s
             actorId: req.session.user._id,
             action: 'Bulk upload',
             details: `Bulk upload of data in project ${project.name} by <strong>${req.session.user.email}</strong> completed. <br> Created new: ${results.createdNew} <br> Merged: ${results.merged} <br> Skipped: ${results.skipped} <br> Errors: ${results.errors.length}`,
-
             url: `/project/${project.slug}`,
             color: 'red',
             isNotification: true

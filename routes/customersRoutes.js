@@ -14,7 +14,7 @@ const { allProjects } = require("../modules/mw-data");
 const Customer = require("../models/Customer");
 const Project = require("../models/Project");
 const checkValidForm = require("../modules/checkValidForm");
-const { saveLog } = require("../controllers/logAction");
+const { saveLog, visibleLogs } = require("../controllers/logAction");
 
 router.get("/customers", authenticate, authorize("viewCustomers"), allProjects, async (req,res) => {
     const customers = await Customer.find().lean();
@@ -37,7 +37,8 @@ router.get("/customers", authenticate, authorize("viewCustomers"), allProjects, 
             projects: req.allProjects,
             role: req.userPermissions,
             customerId: new mongoose.Types.ObjectId(),
-            customers
+            customers,
+            logs: await visibleLogs(req,res)
         }
     })
 })

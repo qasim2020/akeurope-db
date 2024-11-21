@@ -11,8 +11,8 @@ const { authenticate, authorize } = require("../modules/auth");
 const { allProjects } = require("../modules/mw-data");
 const checkValidForm = require("../modules/checkValidForm");
 const { forgotPassword } = require('../controllers/forgotPassword');
+const { saveLog, visibleLogs } = require('../controllers/logAction');
 
-// Route to list all users
 router.get('/users', authenticate, authorize("viewUsers"), allProjects, async (req, res) => {
   try {
     const users = await User.find().lean();
@@ -28,6 +28,7 @@ router.get('/users', authenticate, authorize("viewUsers"), allProjects, async (r
         activeMenu: "users",
         role: req.userPermissions,
         users: users,
+        logs: await visibleLogs(req,res)
       }
     });
   } catch (err) {
@@ -97,7 +98,6 @@ router.post('/users/create', authenticate, authorize("createUsers"), async (req,
       inviteExpires,
     });
 
-      // Configure the SMTP transporter
     let transporter = nodemailer.createTransport({
       host: process.env.EMAIL_HOST,
       port: process.env.EMAIL_PORT,
@@ -108,7 +108,6 @@ router.post('/users/create', authenticate, authorize("createUsers"), async (req,
       },
     });
 
-    // Load and compile the Handlebars template
     const templatePath = path.join(__dirname, '../views/emails/userInvite.handlebars');
     const templateSource = await fs.readFile(templatePath, 'utf8');
     const compiledTemplate = handlebars.compile(templateSource);
@@ -128,6 +127,17 @@ router.post('/users/create', authenticate, authorize("createUsers"), async (req,
           return res.status(400).send(err);
       }
       await newUser.save();
+      await saveLog({
+          entityType: 'user',
+          entityId: newUser._id,
+          actorType: 'user',
+          actorId: req.session.user._id,
+          url: `user/${customer._id}`,
+          action: 'New user created',
+          details: `New administrator <strong>${newUser.email}</strong> created by <strong>${req.session.user.email}</strong>. Email invite sent to user.`,
+          color: 'blue',
+          isNotification: true
+      })
       res.status(200).send("Email sent successfully.");
     });
 
@@ -138,7 +148,7 @@ router.post('/users/create', authenticate, authorize("createUsers"), async (req,
 });
 
 router.post('/users/update/:userId', authenticate, authorize("updateUsers"), async (req,res) => {
-  const { name, role} = req.body;
+  const { name, role } = req.body;
 
   let check = [];
 
@@ -158,15 +168,31 @@ router.post('/users/update/:userId', authenticate, authorize("updateUsers"), asy
   }
 
   try {
-    await User.findOneAndUpdate({_id: req.params.userId}, {
-      name, 
-      role, 
-      inviteToken: undefined, 
-      inviteExpires: undefined, 
-      resetPasswordToken: undefined,
-      resetPasswordExpires: undefined
+    const updatedFields = { name, role };
+    
+    const user = await User.findById(req.params.userId); 
+    
+    let changeDetails = '';
+    for (const [key, newValue] of Object.entries(updatedFields)) {
+      const oldValue = user[key];
+      if (oldValue !== newValue) {
+        changeDetails += `<strong>${key}</strong>: ${oldValue ?? 'null'} → ${newValue ?? 'null'}<br>`;
+      }
+    }
+    
+    await User.findOneAndUpdate({_id: req.params.userId}, updatedFields);
+    
+    await saveLog({
+      entityType: 'user',
+      entityId: user._id,
+      actorType: 'user',
+      actorId: req.session.user._id,
+      url: `/user/${user._id}`,
+      action: 'User updated',
+      details: `User <strong>${user.email}</strong> updated by <strong>${req.session.user.email}</strong>:<br>${changeDetails}`,
+      color: 'green',
+      isNotification: true,
     });
-    res.status(200).send("User updated successfully");
   } catch (e) {
     console.log(e);
     res.status(400).send(e);
@@ -182,7 +208,22 @@ router.post('/users/delete/:userId', authenticate, authorize("deleteUsers"), asy
   }
 
   try {
+
+    const user = User.findOne({_id: req.params.userId}).lean();
     await User.deleteOne({_id: req.params.userId});
+
+    await saveLog({
+      entityType: 'user',
+      entityId: req.params.userId,
+      actorType: 'user',
+      actorId: req.session.user._id,
+      url: `user/${customer._id}`,
+      action: 'User deleted',
+      details: `User <strong>${user.email}</strong> deleted by <strong>${req.session.user.email}</strong>.`,
+      color: 'red',
+      isNotification: true
+    });
+
     res.status(200).send("user deleted");
   } catch (e) {
     res.status(400).send(e);
@@ -225,6 +266,19 @@ router.post('/users/register/:token', async (req, res) => {
     user.inviteExpires = undefined;
 
     await user.save();
+
+    await saveLog({
+      entityType: 'user',
+      entityId: user._id,
+      actorType: 'user',
+      actorId: user._id,
+      url: `user/${customer._id}`,
+      action: 'User accepted invite',
+      details: `Invite accepted by <strong>${user.email}</strong>. User has set his/her password.`,
+      color: 'green',
+      isNotification: true
+    }); 
+
     res.status(200).send("User updated successfully");
   } catch (err) {
     res.status(500).send('Error completing registration');
@@ -252,7 +306,6 @@ router.post('/users/sendInvite', authenticate, authorize("editUsers"), async (re
     user.inviteToken = inviteToken;
     user.inviteExpires = inviteExpires;
 
-    // Configure the SMTP transporter
     let transporter = nodemailer.createTransport({
       host: process.env.EMAIL_HOST,
       port: process.env.EMAIL_PORT,
@@ -263,7 +316,6 @@ router.post('/users/sendInvite', authenticate, authorize("editUsers"), async (re
       },
     });
 
-    // Load and compile the Handlebars template
     const templatePath = path.join(__dirname, '../views/emails/userInvite.handlebars');
     const templateSource = await fs.readFile(templatePath, 'utf8');
     const compiledTemplate = handlebars.compile(templateSource);
@@ -283,6 +335,19 @@ router.post('/users/sendInvite', authenticate, authorize("editUsers"), async (re
           return res.status(400).send(err);
       }
       await user.save();
+
+      await saveLog({
+        entityType: 'user',
+        entityId: user._id,
+        actorType: 'user',
+        actorId: req.session.user._id,
+        url: `user/${user._id}`,
+        action: 'User invited',
+        details: `Email invite sent to <strong>${user.email}</strong>. Generated by <strong>${req.session.user.email}</strong>`,
+        color: 'green',
+        isNotification: true
+      }); 
+
       res.status(200).send("Email sent successfully.");
     });
 

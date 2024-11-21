@@ -4,12 +4,9 @@
             Showing <span>{{data.pagination.startIndex}}</span> to <span>{{data.pagination.endIndex}}</span> of <span>{{data.pagination.totalEntries}}</span> entries
         </p>
         <ul class="pagination m-0 col-12 col-md-6 text-md-end d-flex justify-content-center justify-content-md-end">
-            <!-- Previous button -->
             <li class="page-item {{#if (eq data.pagination.currentPage 1)}}disabled{{/if}}">
                 <a class="page-link cursor-pointer" 
-                {{#unless (eq data.pagination.currentPage data.pagination.totalPages)}}
                 my-href="?page={{dec data.pagination.currentPage}}&limit={{data.pagination.limit}}&search={{data.pagination.search}}&sortBy={{data.pagination.sort.sortBy}}&order={{data.pagination.sort.order}}{{#if data.pagination.filtersQuery}}&{{data.pagination.filtersQuery}}{{/if}}"
-                {{/unless}}
                 onclick="doSearch(this)"
                 tabindex="-1" aria-disabled="{{#if (eq data.pagination.currentPage 1)}}true{{/if}}">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">

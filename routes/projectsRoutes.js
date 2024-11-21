@@ -3,6 +3,7 @@ const express = require('express');
 const router = express.Router();
 const Project = require('../models/Project');
 const { authenticate, authorize } = require('../modules/auth');
+const { visibleLogs } = require("../controllers/logAction");
 
 router.get('/projects', authenticate, authorize("viewProject"), async (req, res) => {
   let projects = await Project.find().lean();
@@ -15,7 +16,8 @@ router.get('/projects', authenticate, authorize("viewProject"), async (req, res)
       projects: projects,
       layout: req.session.layout,
       activeMenu: "allProjects",
-      role: req.userPermissions
+      role: req.userPermissions,
+      logs: await visibleLogs(req,res)
     }
   });
 });

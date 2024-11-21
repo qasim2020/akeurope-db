@@ -7,6 +7,7 @@ const { allProjects } = require("../modules/mw-data");
 const { toKebabCase } = require("../modules/stringFuncs");
 const { generatePagination } = require("../modules/generatePagination");
 const { projectEntries } = require("../modules/projectEntries");
+const { visibleLogs } = require("../controllers/logAction");
 
 router.post('/project/create', authenticate, authorize("createProject"), async (req, res) => {
   try {
@@ -103,7 +104,8 @@ router.get('/project/:slug', authenticate, authorize("viewProject"), allProjects
         projects: req.allProjects,
         activeMenu: project.slug,
         role: req.userPermissions,
-        pagination
+        pagination,
+        logs: await visibleLogs(req,res)
       }
     });
 
