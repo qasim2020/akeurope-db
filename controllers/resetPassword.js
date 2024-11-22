@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const { saveLog } = require('../controllers/logAction');
 
 exports.resetPassword = async (req, res) => {
   const { password, confirmPassword } = req.body;
@@ -24,6 +25,10 @@ exports.resetPassword = async (req, res) => {
 
        
     await saveLog({
+      entityType: 'user',
+      entityId: user._id,
+      actorType: 'user',
+      actorId: user._id,
       action: 'Reset password',
       details: `Password changed by <strong>${user.email}</strong> .`,
       color: 'grey',

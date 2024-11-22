@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const checkValidForm = require('../modules/checkValidForm');
 const { saveLog } = require('../controllers/logAction');
+
 require('dotenv').config();
 
 exports.login = async (req, res) => {
@@ -15,6 +16,10 @@ exports.login = async (req, res) => {
     }
 
     await saveLog({
+      entityType: 'user',
+      entityId: req.session.user._id,
+      actorType: 'user',
+      actorId: req.session.user._id,
       action: 'Logged in',
       details: `<strong>${req.session.user.email}</strong> logged in.`,
       color: 'grey',
@@ -30,6 +35,10 @@ exports.login = async (req, res) => {
 exports.logout = async (req, res) => {
   if (req.session.user) {
     await saveLog({
+      entityType: 'user',
+      entityId: req.session.user._id,
+      actorType: 'user',
+      actorId: req.session.user._id,
       action: 'Logged out',
       details: `<strong>${req.session.user.email}</strong> logged out.`,
       color: 'grey',

@@ -15,19 +15,16 @@ exports.forgotPassword = async (req, res) => {
     return false;
   }
 
-  // Find the user by email
   const user = await User.findOne({ email });
   if (!user) {
     res.status(400).send("User not found");
     return false;
   };
 
-  // Generate a reset token
   const token = crypto.randomBytes(20).toString('hex');
   user.resetPasswordToken = token;
-  user.resetPasswordExpires = Date.now() + 3600000; // 1-hour expiration
+  user.resetPasswordExpires = Date.now() + 3600000; 
 
-  // Configure the SMTP transporter
   let transporter = nodemailer.createTransport({
     host: process.env.EMAIL_HOST,
     port: process.env.EMAIL_PORT,
@@ -38,7 +35,6 @@ exports.forgotPassword = async (req, res) => {
     },
   });
 
-  // Load and compile the Handlebars template
   const templatePath = path.join(__dirname, '../views/emails/passwordReset.handlebars');
   const templateSource = await fs.readFile(templatePath, 'utf8');
   const compiledTemplate = handlebars.compile(templateSource);
@@ -60,6 +56,10 @@ exports.forgotPassword = async (req, res) => {
     await user.save();
    
     await saveLog({
+      entityType: 'user',
+      entityId: user._id,
+      actorType: 'user',
+      actorId: user._id,
       action: 'Reset password',
       details: `Sent forgot password email to <strong>${user.email}</strong> .`,
       color: 'grey',
