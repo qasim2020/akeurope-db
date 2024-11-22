@@ -13,7 +13,7 @@ exports.resetPasswordForm = async (req, res) => {
     }
 
     // If valid, render the reset password form
-    res.render('reset-password', { token: req.params.token });
+    res.render('reset-password', { email: user.email, token: req.params.token });
   } catch (error) {
     console.error('Error in resetPasswordForm:', error);
     res.status(500).send('Server error');
