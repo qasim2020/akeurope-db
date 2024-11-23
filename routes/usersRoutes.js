@@ -10,8 +10,8 @@ router.get('/getUserModal/:userId', authenticate, authorize("editUsers"), usersC
 router.post('/users/create', authenticate, authorize("createUsers"), usersController.createUser);
 router.post('/users/update/:userId', authenticate, authorize("updateUsers"), usersController.updateUser);
 router.post('/users/delete/:userId', authenticate, authorize("deleteUsers"), usersController.deleteUser);
+router.post('/users/sendInvite', authenticate, authorize("editUsers"), usersController.sendInvite);
 router.get('/users/register/:token', usersController.register);
 router.post('/users/register/:token', usersController.setRegister);
-router.post('/users/sendInvite', authenticate, authorize("editUsers"), usersController.sendInvite);
 
 module.exports = router;
