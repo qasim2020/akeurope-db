@@ -5,5 +5,7 @@ const { allProjects } = require('../modules/mw-data');
 const dashboardController = require('../controllers/dashboardController');
 
 router.get('/dashboard', authenticate, authorize('viewDashboard'), allProjects, dashboardController.showDashboard);
+router.post('/renderPartial', dashboardController.renderPartial);
+router.post('/update-layout', dashboardController.updateLayout);
 
 module.exports = router;

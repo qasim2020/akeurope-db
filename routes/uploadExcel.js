@@ -9,7 +9,7 @@ const moment = require('moment');
 const { allProjects, oneProject } = require("../modules/mw-data");
 const { authenticate, authorize } = require("../modules/auth");
 const { createDynamicModel } = require("../models/createDynamicModel");
-const { saveLog, visibleLogs } = require("../controllers/logAction");
+const { saveLog, visibleLogs } = require("../modules/logAction");
 
 router.get("/uploadExcel/:slug", authenticate, authorize("editEntry"), allProjects, oneProject, async (req,res) => {
     res.render( "uploadExcel", {

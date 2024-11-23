@@ -5,7 +5,71 @@ const fs = require('fs').promises;
 const path = require('path');
 const User = require('../models/User'); 
 const { isValidEmail } = require("../modules/checkValidForm");
-const { saveLog } = require("../controllers/logAction");
+const { saveLog } = require("../modules/logAction");
+
+exports.resetPassword = async (req, res) => {
+  const { password, confirmPassword } = req.body;
+
+  // Check if passwords match
+  if (password !== confirmPassword) {
+    return res.status(400).send("Passwords do not match");
+  }
+
+  try {
+    const user = await User.findOne({
+      resetPasswordToken: req.params.token,
+      resetPasswordExpires: { $gt: Date.now() },
+    });
+
+    if (!user) {
+      return res.status(400).send("Password reset token is invalid or has expired.");
+    }
+
+    user.password = password;
+    user.resetPasswordToken = undefined; // Clear reset token
+    user.resetPasswordExpires = undefined; // Clear token expiration
+
+       
+    await saveLog({
+      entityType: 'user',
+      entityId: user._id,
+      actorType: 'user',
+      actorId: user._id,
+      action: 'Reset password',
+      details: `Password changed by <strong>${user.email}</strong> .`,
+      color: 'grey',
+      isNotification: true
+    }); 
+
+    await user.save();
+
+    res.status(200).send("Password changed.");
+  } catch (error) {
+    console.error('Error in resetPassword:', error);
+    res.status(500).send(error);
+  }
+};
+
+
+exports.resetPasswordForm = async (req, res) => {
+  try {
+    const user = await User.findOne({
+      resetPasswordToken: req.params.token,
+      resetPasswordExpires: { $gt: Date.now() }, // Ensure token is not expired
+    });
+
+    if (!user) {
+      return res.status(400).render('error', { heading: "Expired link", error: 'Password reset token is invalid or has expired.' });
+    }
+
+    // If valid, render the reset password form
+    res.render('reset-password', { email: user.email, token: req.params.token });
+  } catch (error) {
+    console.error('Error in resetPasswordForm:', error);
+    res.status(500).send('Server error');
+  }
+};
+
 
 exports.forgotPassword = async (req, res) => {
   const { email } = req.body;

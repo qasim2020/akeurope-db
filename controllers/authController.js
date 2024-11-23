@@ -1,6 +1,6 @@
 const User = require('../models/User');
 const checkValidForm = require('../modules/checkValidForm');
-const { saveLog } = require('../controllers/logAction');
+const { saveLog } = require('../modules/logAction');
 
 require('dotenv').config();
 
