@@ -43,6 +43,11 @@ const capitalizeFirstLetter = function (str) {
     return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
+const lowerCaseFirstLetter = function (str) {
+    if (typeof str !== 'string') return '';
+    return str.charAt(0).toLowerCase() + str.slice(1);
+};
+
 const checkInputType = function(input) {
     if (input == "file") {
         return "URL of the file"
@@ -95,7 +100,30 @@ const findPrimaryKey = function(fields) {
     return primaryField ? primaryField.name : null; 
 }
 
+const timeAgo = function(timestamp) {
+    const now = moment();
+    const date = moment(timestamp);
 
+    const seconds = now.diff(date, 'seconds');
+    const minutes = now.diff(date, 'minutes');
+    const hours = now.diff(date, 'hours');
+    const days = now.diff(date, 'days');
+
+    if (seconds < 60) return 'few seconds ago';
+    if (minutes < 60) return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+    if (hours < 24) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+    if (days === 1) return 'yesterday';
+    if (days < 7) return `${days} day${days > 1 ? 's' : ''} ago`;
+
+    return date.format('DD MMM YYYY');
+}
+
+const camelCaseToNormalString = function(string) {
+    string = string ? string : "";
+    return string
+    .replace(/([a-z])([A-Z])/g, '$1 $2') 
+    .replace(/^./, str => str.toUpperCase());
+}
 
 module.exports = {
     eq,
@@ -107,6 +135,7 @@ module.exports = {
     resizeCloudinaryUrl,
     neq,
     capitalizeFirstLetter,
+    lowerCaseFirstLetter,
     checkInputType,
     findInArray,
     getFirstTwoLetters,
@@ -116,4 +145,6 @@ module.exports = {
     getValue,
     isEmptyObject,
     findPrimaryKey,
+    timeAgo,
+    camelCaseToNormalString,
   };

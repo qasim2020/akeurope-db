@@ -1,6 +1,11 @@
+const { createDynamicModel } = require('../models/createDynamicModel');
+const Project = require('../models/Project');
+const Customer = require('../models/Customer');
 const Log = require('../models/Log');
+const User = require('../models/User');
+const { generatePagination } = require("../modules/generatePagination");
 
-const saveLog = async ({ entityType, entityId, actorType, actorId, action, details, timestamp = new Date(), url, color, isNotification, isRead, expiresAt }) => {
+const saveLog = async ({ entityType, entityId, actorType, actorId, action, changes, timestamp = new Date(), url, color, isNotification, isRead, expiresAt }) => {
     try {
         const log = new Log({
             entityType,
@@ -8,7 +13,7 @@ const saveLog = async ({ entityType, entityId, actorType, actorId, action, detai
             actorType,
             actorId,
             action,
-            details,
+            changes,
             timestamp,
             url,
             isNotification,
@@ -37,18 +42,73 @@ const updateLog = async ({ logId, updates, }) => {
     return updatedLog;
 };
 
+const entryLogs = async (req,res) => {
+    const logs = await Log.find({entityId: req.params.entryId}).sort({timestamp: -1}).lean();
+    return logs;
+};
+
+const findConnectedIds = async (logs) => {
+    for (const log of logs) {
+        log.actor = await User.findById(log.actorId).lean();
+        if (log.entityType == 'user') {
+            log.entity = await User.findById(log.entityId).lean();
+        } else if (log.entityType == 'customer') {
+            log.entity = await Customer.findById(log.entityId).lean();
+        } else if (log.entityType == 'project') {
+            log.entity = await Project.findById(log.entityId).lean();
+        } else if (log.entityType == 'entry') {
+            const slug = log.url.split('/').pop();
+            const model = await createDynamicModel(slug);
+            log.entity = await model.findById(log.entityId).lean();
+            log.project = await Project.findOne({slug: slug}).lean();
+        }
+    }
+    return logs;
+}
+
 const visibleLogs = async ( req, res ) => {
     try {
         const logs = await Log.find({isNotification: true, isRead: false}).sort({timestamp: -1}).lean();
-        return logs;
+        return await findConnectedIds(logs);
     } catch (error) {
+        console.log(error);
         return error;
     }
 }
 
-const entryLogs = async (req,res) => {
-    const logs = await Log.find({entityId: req.params.entryId}).sort({timestamp: -1}).lean();
-    return logs;
-}
 
-module.exports = { saveLog, updateLog, visibleLogs, entryLogs }
+const activtyByEntityType = async(req,res) => {
+    try {
+        const entityType = req.query.entityType || undefined; 
+        const page = parseInt(req.query.page) || 1; 
+        const limit = parseInt(req.query.limit) || 10; 
+    
+        const query = entityType ? { entityType } : {};
+        const total = await Log.countDocuments(query);
+        const logs = await Log.find(query)
+        .skip((page - 1) * limit) 
+        .limit(limit) 
+        .sort({ timestamp: -1 }) 
+        .lean();
+        
+        const totalPages = Math.ceil(total / limit);
+
+        return {
+            logs: await findConnectedIds(logs),
+            entityTypes: await Log.distinct('entityType').lean(),
+            entityType,
+            pagesArray: generatePagination(totalPages, page),
+            currentPage: page,
+            totalPages,
+            hasNextPage: page < totalPages,
+            hasPrevPage: page > 1,
+            nextPage: page + 1,
+            prevPage: page - 1,
+        };
+    } catch(error) {
+        console.log(error);
+        return error;
+    }
+};
+
+module.exports = { saveLog, updateLog, visibleLogs, entryLogs, activtyByEntityType }

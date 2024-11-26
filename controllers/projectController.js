@@ -3,6 +3,8 @@ const Project = require('../models/Project');
 const { toKebabCase } = require("../modules/stringFuncs");
 const { projectEntries } = require("../modules/projectEntries");
 const { saveLog, visibleLogs } = require("../modules/logAction");
+const { logTemplates } = require("../modules/logTemplates");
+const { getChanges } = require("../modules/getChanges");
 
 exports.createProject = async(req,res) => {
   try {
@@ -19,17 +21,11 @@ exports.createProject = async(req,res) => {
 
     await project.save();
 
-    await saveLog({
-      entityType: 'project',
-      entityId: project._id,
-      actorType: 'user',
-      actorId: req.session.user._id,
-      url: `/project/${project.slug}`,
-      action: 'Project created',
-      details: `Project <strong>${project.slug}</strong> created by <strong>${req.session.user.email}</strong>`,
-      color: 'green',
-      isNotification: true,
-    });
+    await saveLog(logTemplates({ 
+      type: 'projectCreated',
+      entity: project,
+      actor: req.session.user 
+    }));
 
     res.status(200).send("Saved successfully");
 
@@ -64,67 +60,29 @@ exports.updateProject = async(req,res) => {
       fields,
     };
     
-    const updatedProject = await Project.findByIdAndUpdate(
-      id,
-      updatedData,
-      { new: true } 
-    );
-    
-    let changeDetails = '';
+    changeDetails = getChanges(originalProject, updatedData, ['fields']);
 
-    for (const [key, newValue] of Object.entries(updatedData)) {
-      const oldValue = originalProject[key];
+    if (changeDetails.length > 0) {
+                             
+        await saveLog(logTemplates({ 
+            type: 'projectUpdated',
+            entity: originalProject,
+            actor: req.session.user,
+            changes: changeDetails
+        }));
+            
+        await Project.findByIdAndUpdate(
+            id,
+            updatedData,
+            { new: true } 
+        );
 
-      if (key === 'fields' && Array.isArray(newValue) && Array.isArray(oldValue)) {
-        const fieldChanges = [];
-
-        const maxLength = Math.max(oldValue.length, newValue.length);
-        for (let i = 0; i < maxLength; i++) {
-          const oldField = oldValue[i] ?? {};
-          const newField = newValue[i] ?? {};
-
-          const fieldDiffs = [];
-          for (const [fieldKey, newFieldValue] of Object.entries(newField)) {
-            const oldFieldValue = oldField[fieldKey];
-            if (oldFieldValue !== newFieldValue) {
-              fieldDiffs.push(
-                `${fieldKey}: ${oldFieldValue ?? 'null'} → ${newFieldValue ?? 'null'}`
-              );
-            }
-          }
-
-          if (fieldDiffs.length > 0) {
-            fieldChanges.push(`<strong>${newField.actualName}</strong>: ${fieldDiffs.join(', ')}`);
-          }
-        }
-
-        if (fieldChanges.length > 0) {
-          changeDetails += `${fieldChanges.join('<br>')}<br>`;
-        }
-      } else if (JSON.stringify(oldValue) !== JSON.stringify(newValue)) {
-        changeDetails += `<strong>${key}</strong>: ${oldValue ?? 'null'} → ${newValue ?? 'null'}<br>`;
-      }
-    }
-
-    if (changeDetails) {
-
-      await saveLog({
-        entityType: 'project',
-        entityId: id,
-        actorType: 'user',
-        actorId: req.session.user._id,
-        url: `/project/${updatedProject.slug}`,
-        action: 'Project updated',
-        details: `Project <strong>${updatedProject.slug}</strong> updated by <strong>${req.session.user.email}</strong>:<br>${changeDetails}`,
-        color: 'green',
-        isNotification: true,
-      });
-    
     }
 
     res.status(200).send("Project updated successfully");
 
   } catch (err) {
+    console.log(err);
     console.error(err.toString());
     res.status(500).send(err.toString());
   }

@@ -7,6 +7,7 @@ const moment = require('moment');
 const nodemailer = require('nodemailer');
 const checkValidForm = require("../modules/checkValidForm");
 const { saveLog, visibleLogs } = require("../modules/logAction");
+const { logTemplates } = require("../modules/logTemplates");
 
 exports.users = async(req,res) => {
 
@@ -120,22 +121,21 @@ exports.createUser = async(req,res) => {
         };
 
         transporter.sendMail(mailOptions, async (err) => {
-        if (err) {
-            return res.status(400).send(err);
-        }
-        await newUser.save();
-        await saveLog({
-            entityType: 'user',
-            entityId: newUser._id,
-            actorType: 'user',
-            actorId: req.session.user._id,
-            url: `/user/${customer._id}`,
-            action: 'New user created',
-            details: `New administrator <strong>${newUser.email}</strong> created by <strong>${req.session.user.email}</strong>. Email invite sent to user.`,
-            color: 'blue',
-            isNotification: true
-        })
-        res.status(200).send("Email sent successfully.");
+
+            if (err) {
+                return res.status(400).send(err);
+            }
+
+            await newUser.save();
+                                
+            await saveLog(logTemplates({ 
+                type: 'userCreated',
+                entity: newUser,
+                actor: req.session.user
+            }));
+
+            res.status(200).send("Email sent successfully.");
+
         });
 
     } catch (err) {
@@ -180,17 +180,13 @@ exports.updateUser = async(req,res) => {
         
         await User.findOneAndUpdate({_id: req.params.userId}, updatedFields);
         
-        await saveLog({
-            entityType: 'user',
-            entityId: user._id,
-            actorType: 'user',
-            actorId: req.session.user._id,
-            url: `/user/${user._id}`,
-            action: 'User updated',
-            details: `User <strong>${user.email}</strong> updated by <strong>${req.session.user.email}</strong>:<br>${changeDetails}`,
-            color: 'green',
-            isNotification: true,
-        });
+                               
+        await saveLog(logTemplates({ 
+            type: 'userUpdated',
+            entity: user,
+            actor: req.session.user,
+            changes: changeDetails
+        }));
 
         res.status(200).send("Administrator updated succesfully");
     } catch (e) {
@@ -209,21 +205,16 @@ exports.deleteUser = async(req,res) => {
 
     try {
 
-        const user = User.findOne({_id: req.params.userId}).lean();
+        const user = await User.findOne({_id: req.params.userId}).lean();
+
+        await saveLog(logTemplates({ 
+            type: 'userDeleted',
+            entity: user,
+            actor: req.session.user 
+        }));
+
         await User.deleteOne({_id: req.params.userId});
-
-        await saveLog({
-        entityType: 'user',
-        entityId: req.params.userId,
-        actorType: 'user',
-        actorId: req.session.user._id,
-        url: `/user/${req.params.userId}`,
-        action: 'User deleted',
-        details: `User <strong>${user.email}</strong> deleted by <strong>${req.session.user.email}</strong>.`,
-        color: 'red',
-        isNotification: true
-        });
-
+                               
         res.status(200).send("user deleted");
     } catch (e) {
         res.status(400).send(e);
@@ -234,8 +225,8 @@ exports.deleteUser = async(req,res) => {
 exports.register = async(req,res) => {
     try {
         const user = await User.findOne({
-        inviteToken: req.params.token,
-        inviteExpires: { $gt: new Date() }
+            inviteToken: req.params.token,
+            inviteExpires: { $gt: new Date() }
         });
 
         if (!user) {
@@ -252,8 +243,8 @@ exports.setRegister = async(req,res) => {
     try {
         const { name, password } = req.body;
         const user = await User.findOne({
-        inviteToken: req.params.token,
-        inviteExpires: { $gt: new Date() }
+            inviteToken: req.params.token,
+            inviteExpires: { $gt: new Date() }
         });
 
         if (!user) {
@@ -268,17 +259,12 @@ exports.setRegister = async(req,res) => {
 
         await user.save();
 
-        await saveLog({
-        entityType: 'user',
-        entityId: user._id,
-        actorType: 'user',
-        actorId: user._id,
-        url: `/user/${user._id}`,
-        action: 'User accepted invite',
-        details: `Invite accepted by <strong>${user.email}</strong>. User has set his/her password.`,
-        color: 'green',
-        isNotification: true
-        }); 
+                               
+        await saveLog(logTemplates({ 
+            type: 'userAcceptedInvite',
+            entity: user,
+            actor: user
+        }));
 
         res.status(200).send("User updated successfully");
     } catch (err) {
@@ -333,24 +319,19 @@ exports.sendInvite = async(req,res) => {
         };
 
         transporter.sendMail(mailOptions, async (err) => {
-        if (err) {
-            return res.status(400).send(err);
-        }
-        await user.save();
+            if (err) {
+                return res.status(400).send(err);
+            }
 
-        await saveLog({
-            entityType: 'user',
-            entityId: user._id,
-            actorType: 'user',
-            actorId: req.session.user._id,
-            url: `/user/${user._id}`,
-            action: 'User invited',
-            details: `Email invite sent to <strong>${user.email}</strong>. Generated by <strong>${req.session.user.email}</strong>`,
-            color: 'green',
-            isNotification: true
-        }); 
+            await user.save();
 
-        res.status(200).send("Email sent successfully.");
+            await saveLog(logTemplates({ 
+                type: 'sentEmailUserInvite',
+                entity: user,
+                actor: req.session.user 
+            }));
+
+            res.status(200).send("Email sent successfully.");
         });
 
     } catch (err) {

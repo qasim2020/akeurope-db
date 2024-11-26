@@ -1,0 +1,43 @@
+ {{#each data.activity.logs as |log|}}
+    <div class="list-group-item">
+        <div class="row">
+            <div class="col-auto">
+                <a href="/user/{{log.actor._id}}">
+                    <span class="avatar">{{getFirstTwoLetters log.actor.name}}</span>
+                </a>
+            </div>
+            <div class="col">
+            <div class="">
+                {{#if log.entity.name}}
+                <a href="{{log.url}}">{{log.entity.name}}</a> {{lowerCaseFirstLetter log.action}} {{#if log.project}} in <a href="/project/{{log.project.slug}}">{{log.project.name}}</a> project {{/if}}
+                {{else}}
+                <a href="{{log.url}}" class="">{{log.action}}</a> {{#if log.project}} in <a href="/project/{{log.project.slug}}">{{log.project.name}}</a> project {{/if}}
+                {{/if}}
+                {{#if log.changes}}
+                {{#each log.changes}}
+                <br>
+                <span class="badge bg-green-lt"></b3>{{camelCaseToNormalString this.key}}</span>
+                <span class="text-decoration-line-through">{{this.oldValue}}</span>
+                <span>{{this.newValue}}</span>
+                {{/each}}
+                {{/if}}
+            </div>
+            <div class="text-secondary">{{timeAgo log.timestamp}}</div>
+            </div>
+            <div class="col-auto align-self-center">
+                {{#if (eq log.color 'red')}}
+                <div class="status-dot bg-red d-block"></div>
+                {{/if}}
+                {{#if (eq log.color 'blue')}}
+                <div class="status-dot bg-blue d-block"></div>
+                {{/if}}
+                {{#if (eq log.color 'green')}}
+                <div class="status-dot bg-green d-block"></div>
+                {{/if}}
+                {{#if (eq log.color 'grey')}}
+                <div class="status-dot bg-grey d-block"></div>
+                {{/if}}
+            </div>
+        </div>
+    </div>
+{{/each}}

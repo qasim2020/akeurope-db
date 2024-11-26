@@ -39,7 +39,8 @@
         </div>
       </div>
       <div class="card-body">
-        <a project-id="{{this._id}}" class="card-link text-blue edit-project cursor-pointer">Edit</a> 
+        <a href="/project/{{this.slug}}" class="btn btn-primary">View</a>
+        <button class="btn btn-secondary-outline edit-project" project-id="{{this._id}}">Edit</button>
       </div>
     </div>
 
@@ -51,23 +52,28 @@
       <table class="table table-vcenter card-table">
         <thead>
             <tr>
+              <th></th>
               <th>Name</th>
               <th>Slug</th>
               <th>Location</th>
               <th>Status</th>
-              <th>Settings</th>
             </tr>
         </thead>
           <tbody>
             {{#each data.projects}}
             <tr class="select-project">
+              <td> 
+                <a href="/project/{{this.slug}}" class="btn btn-primary btn-icon cursor-pointer">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-file-analytics"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M14 3v4a1 1 0 0 0 1 1h4"></path><path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z"></path><path d="M9 17l0 -5"></path><path d="M12 17l0 -1"></path><path d="M15 17l0 -3"></path></svg>
+                </a>
+                <button class="edit-project btn btn-secondary-outline btn-icon cursor-pointer" project-id="{{this._id}}">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-pencil-plus m-0"> <path stroke="none" d="M0 0h24v24H0z" fill="none"></path> <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4"></path> <path d="M13.5 6.5l4 4"></path> <path d="M16 19h6"></path> <path d="M19 16v6"></path> </svg>
+                </button>
+              </td>
               <td>{{this.name}}</td>
               <td class="text-secondary">{{this.slug}}</td>
               <td class="text-secondary">{{this.location}}</td>
               <td class="text-secondary">{{this.status}}</td>
-              <td> 
-                <a project-id="{{this._id}}" class="edit-project cursor-pointer">Edit</a> 
-              </td>
             </tr>
             {{/each}}
           </tbody>

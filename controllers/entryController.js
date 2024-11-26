@@ -7,6 +7,8 @@ const moment = require("moment");
 const { createDynamicModel } = require("../models/createDynamicModel");
 const { projectEntries } = require("../modules/projectEntries");
 const { saveLog, visibleLogs, entryLogs } = require("../modules/logAction");
+const { logTemplates } = require("../modules/logTemplates");
+const { getChanges } = require("../modules/getChanges");
 
 function extractCloudinaryPublicId(url) {
   const parts = url.split('/');
@@ -90,19 +92,15 @@ exports.createEntry = async(req,res) => {
  
         await newEntry.save();
                          
-        await saveLog({
-           entityType: 'entry',
-           entityId: entryId,
-           actorType: 'user',
-           actorId: req.session.user._id,
-           url: `/entry/${entryId}/project/${project.slug}`,
-           action: 'Entry created',
-           details: `Entry <strong>${newEntry[primaryField.name]}</strong> created in project <strong>${project.name}</strong> created by <strong>${req.session.user.email}</strong>`,
-           color: 'green',
-           isNotification: true,
-       });
-   
-       res.status(201).json({ message: 'Entry created successfully', entry: newEntry });
+                       
+        await saveLog(logTemplates({ 
+            type: 'entryCreated',
+            entity: newEntry,
+            actor: req.session.user,
+            project,
+        }));
+
+        res.status(201).json({ message: 'Entry created successfully', entry: newEntry });
     } catch (error) {
        res.status(500).json({ error: 'Error saving entry', details: error.message });
     }
@@ -122,13 +120,12 @@ exports.updateEntry = async(req,res) => {
             return res.status(400).json({ error: 'Invalid entryId provided' });
         }
         
-        const existingEntry = await DynamicModel.findById(entryId);
+        const existingEntry = await DynamicModel.findById(entryId).lean();
         if (!existingEntry) {
             return res.status(404).json({ error: 'Entry not found' });
         }
         
         const entryData = {};
-        const updatedFields = {};
         project.fields.forEach((field) => {
             const fieldName = field.name;
             const fieldValue = req.body[fieldName];
@@ -138,62 +135,47 @@ exports.updateEntry = async(req,res) => {
             }
   
             if (field.type === 'date') {
-              const formattedExisting = moment(existingEntry[fieldName]).format('YYYY-MM-DD');
-              const formattedNew = moment(fieldValue).format('YYYY-MM-DD');
-  
-              if (formattedExisting != formattedNew) {
-                  entryData[fieldName] = formattedNew; 
-                  updatedFields[fieldName] = {
-                      from: formattedExisting,
-                      to: formattedNew,
-                  };
-              } 
+
+                const formattedExisting = moment(existingEntry[fieldName]).format('YYYY-MM-DD');
+                const formattedNew = moment(fieldValue).format('YYYY-MM-DD');
+    
+                if (formattedExisting != formattedNew) {
+                    entryData[fieldName] = formattedNew; 
+                }
+
+                existingEntry[fieldName] = formattedExisting;
   
             } else {
                 if (existingEntry[fieldName] != fieldValue) {
                     entryData[fieldName] = fieldValue;
-                    updatedFields[fieldName] = {
-                        from: existingEntry[fieldName],
-                        to: fieldValue,
-                    };
                 }
             };
-  
         });
-  
-        Object.assign(existingEntry, entryData);
-  
-        await existingEntry.save();
-  
-        if (Object.keys(updatedFields).length > 0) {
-  
-          const changedEntries = Object.entries(updatedFields)
-              .map(
-                  ([field, { from, to }]) =>
-                      `<strong>${field}</strong>: "${from || 'null'}" → "${to || 'null'}"`
-              )
-              .join('<br>');
-  
-          const primaryField = project.fields.find( field => field.primary == true );
-  
-          await saveLog({
-            entityType: 'entry',
-            entityId: entryId,
-            actorType: 'user',
-            actorId: req.session.user._id,
-            url: `/entry/${entryId}/project/${project.slug}`,
-            action: 'Entry updated',
-            details: `Entry <strong>${existingEntry[primaryField.name]}</strong> updated in project <strong>${project.name}</strong> by <strong>${req.session.user.email}</strong>: <br> ${changedEntries}`,
-            color: 'blue',
-            isNotification: true, 
-          })
-  
+
+        const changedEntries = getChanges(existingEntry, entryData);
+
+        if (changedEntries.length > 0) {
+
+            await saveLog(logTemplates({ 
+                type: 'entryUpdated',
+                entity: existingEntry,
+                actor: req.session.user,
+                changes: changedEntries,
+                project,
+            }));
+
+            Object.assign(existingEntry, entryData);
+    
+            await DynamicModel.findByIdAndUpdate(existingEntry._id, entryData);
+
         };
         
         res.status(200).send("Entry updated successfully");
   
     } catch (error) {
+
         res.status(500).json({ error: 'Error updating entry', details: error.message });
+
     }
 }
 
@@ -208,16 +190,16 @@ exports.deleteEntry = async(req,res) => {
         if (!entry) return res.status(404).json({ error: `Entry with ID ${req.body.entryId} not found!` });
     
         const deletionPromises = project.fields
-          .filter(field => ['image', 'file'].includes(field.type) && entry[field.name])
-          .map(field => {
-            const fileUrl = entry[field.name];
-    
-            if (fileUrl.includes("res.cloudinary.com")) {
-              const publicId = extractCloudinaryPublicId(fileUrl); 
-              return cloudinary.uploader.destroy(publicId, { resource_type: field.type === 'image' ? 'image' : 'raw' });
-            }
-          })
-          .filter(Boolean);  
+            .filter(field => ['image', 'file'].includes(field.type) && entry[field.name])
+            .map(field => {
+                const fileUrl = entry[field.name];
+        
+                if (fileUrl.includes("res.cloudinary.com")) {
+                const publicId = extractCloudinaryPublicId(fileUrl); 
+                return cloudinary.uploader.destroy(publicId, { resource_type: field.type === 'image' ? 'image' : 'raw' });
+                }
+            })
+            .filter(Boolean);  
     
         const primaryField = project.fields.find(field => field.primary == true);
     
@@ -225,18 +207,14 @@ exports.deleteEntry = async(req,res) => {
     
         await DynamicModel.deleteOne({ _id: req.body.entryId });
     
-        await saveLog({
-          entityType: 'entry',
-          entityId: entry._id,
-          actorType: 'user',
-          actorId: req.session.user._id,
-          url: `/entry/${entry._id}/project/${project.slug}`,
-          action: 'Entry deleted',
-          details: `Entry <strong>${primaryField.actualName}</strong> = <strong>${entry[primaryField.name]}</strong> deleted in project <strong>${project.name}</strong> by <strong>${req.session.user.email}</strong>`,
-          color: 'red',
-          isNotification: true,  
-        })
-    
+                       
+        await saveLog(logTemplates({ 
+            type: 'entryDeleted',
+            entity: entry,
+            actor: req.session.user,
+            project
+        }));
+
         res.status(200).json({ message: 'Entry and associated Cloudinary files deleted successfully' });
     } catch (error) {
         res.status(500).json({ error: 'Error deleting entry or associated files', details: error.message });

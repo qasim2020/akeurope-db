@@ -6,6 +6,7 @@ const path = require('path');
 const User = require('../models/User'); 
 const { isValidEmail } = require("../modules/checkValidForm");
 const { saveLog } = require("../modules/logAction");
+const { logTemplates } = require("../modules/logTemplates");
 
 exports.resetPassword = async (req, res) => {
   const { password, confirmPassword } = req.body;
@@ -29,17 +30,11 @@ exports.resetPassword = async (req, res) => {
     user.resetPasswordToken = undefined; // Clear reset token
     user.resetPasswordExpires = undefined; // Clear token expiration
 
-       
-    await saveLog({
-      entityType: 'user',
-      entityId: user._id,
-      actorType: 'user',
-      actorId: user._id,
-      action: 'Reset password',
-      details: `Password changed by <strong>${user.email}</strong> .`,
-      color: 'grey',
-      isNotification: true
-    }); 
+    await saveLog(logTemplates({ 
+      type: 'passwordChanged',
+      entity: user,
+      actor: user
+    }));
 
     await user.save();
 
@@ -119,16 +114,12 @@ exports.forgotPassword = async (req, res) => {
     }
     await user.save();
    
-    await saveLog({
-      entityType: 'user',
-      entityId: user._id,
-      actorType: 'user',
-      actorId: user._id,
-      action: 'Reset password',
-      details: `Sent forgot password email to <strong>${user.email}</strong> .`,
-      color: 'grey',
-      isNotification: true
-    }); 
+                           
+    await saveLog(logTemplates({ 
+      type: 'sentEmailForgotPassword',
+      entity: user,
+      actor: user
+    }));
 
     res.status(200).send("Email sent successfully. Check your inbox.");
   });

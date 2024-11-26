@@ -13,6 +13,7 @@ const Customer = require("../models/Customer");
 const Project = require("../models/Project");
 const checkValidForm = require("../modules/checkValidForm");
 const { saveLog, visibleLogs } = require("../modules/logAction");
+const { logTemplates } = require("../modules/logTemplates");
 
 exports.customers = async(req,res) => {
     const customers = await Customer.find().lean();
@@ -165,22 +166,18 @@ exports.createCustomer = async(req,res) => {
         };
     
         transporter.sendMail(mailOptions, async (err) => {
+
             if (err) {
                 return res.status(400).send(err);
             }
+
             await customer.save();
                
-            await saveLog({
-                entityType: 'customer',
-                entityId: customer._id,
-                actorType: 'user',
-                actorId: req.session.user._id,
-                url: `/customer/${customer._id}`,
-                action: 'New customer created',
-                details: `New customer <strong>${customer.email}</strong> created by <strong>${req.session.user.email}</strong>. Email invite sent to customer.`,
-                color: 'green',
-                isNotification: true
-            }); 
+            await saveLog(logTemplates({ 
+                type: 'customerCreated',
+                entity: customer,
+                actor: req.session.user 
+            }));
 
             res.status(201).json({ message: 'Customer created successfully', customer });
         });
@@ -235,24 +232,18 @@ exports.sendInvite= async(req,res) => {
         };
     
         transporter.sendMail(mailOptions, async (err) => {
-          if (err) {
-              return res.status(400).send(err);
-          }
-          await customer.save();
-             
-          await saveLog({
-              entityType: 'customer',
-              entityId: customer._id,
-              actorType: 'user',
-              actorId: req.session.user._id,
-              url: `/customer/${customer._id}`,
-              action: 'Email invite sent',
-              details: `Email invite sent to <strong>${customer.email}</strong>. Action by <strong>${req.session.user.email}</strong>`,
-              color: 'green',
-              isNotification: true
-          }); 
-    
-          res.status(200).send("Email sent successfully!");
+            if (err) {
+                return res.status(400).send(err);
+            }
+            await customer.save();
+
+            await saveLog(logTemplates({ 
+                type: 'sentEmailCustomerInvite',
+                entity: customer,
+                actor: req.session.user 
+            }));
+
+            res.status(200).send("Email sent successfully!");
         });
     
     } catch (err) {
@@ -315,18 +306,12 @@ exports.updateCustomer = async(req,res) => {
             `<strong>${change.field}</strong>: "${change.from}" → "${change.to}"`
         )
         .join('<br>');
-                 
-        await saveLog({
-            entityType: 'customer',
-            entityId: customer._id,
-            actorType: 'user',
-            actorId: req.session.user._id,
-            url: `/customer/${customer._id}`,
-            action: 'Customer updated',
-            details: `Customer <strong>${customer.email}</strong> updated by <strong>${req.session.user.email}</strong>:<br>${changeDetails}`,
-            color: 'blue',
-            isNotification: true,
-        });
+
+        await saveLog(logTemplates({ 
+            type: 'customerUpdated',
+            entity: customer,
+            actor: req.session.user 
+        }));   
 
         res.status(200).send("Customer updated successfully!");
 

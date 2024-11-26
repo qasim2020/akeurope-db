@@ -4,6 +4,7 @@ const fs = require('fs');
 const moment = require('moment');
 const { createDynamicModel } = require("../models/createDynamicModel");
 const { saveLog, visibleLogs } = require("../modules/logAction");
+const { logTemplates } = require("../modules/logTemplates");
 
 exports.uploadExcel = async(req,res) => {
     res.render( "uploadExcel", {
@@ -184,18 +185,14 @@ exports.upload = async(req,res) => {
                                     `<strong>${field}</strong>: "${from || 'null'}" → "${to || 'null'}"`
                             )
                             .join('<br>');
-        
-                        saveLog({
-                            entityType: 'entry',
-                            entityId: existingEntry._id,
-                            actorType: 'user',
-                            actorId: req.session.user._id,
-                            url: `/entry/${existingEntry._id}/project/${project.slug}`,
-                            action: 'Entry updated',
-                            details: `Bulk upload! Entry <strong>${uniqueField}</strong> = <strong>${entryData[uniqueField]}</strong> in project <strong>${project.slug}</strong> updated by <strong>${req.session.user.email}</strong>:<br>${changedEntries}`,
-                            color: 'green',
-                            isNotification: false,
-                        });
+
+                                              
+                        saveLog(logTemplates({ 
+                            type: 'entryUpdated',
+                            entity: existingEntry,
+                            actor: req.session.user,
+                            changes: changedEntries
+                        })); 
         
                         Object.assign(existingEntry, entryData);
                         await existingEntry.save();
@@ -206,17 +203,13 @@ exports.upload = async(req,res) => {
                 } else {
                     const newEntry = new DynamicModel(entryData);
                     await newEntry.save();
-                    saveLog({
-                        entityType: 'entry',
-                        entityId: newEntry._id,
-                        actorType: 'user',
-                        actorId: req.session.user._id,
-                        url: `/entry/${newEntry._id}/project/${project.slug}`,
-                        action: 'Entry created',
-                        details: `Bulk upload! Entry <strong>${uniqueField}</strong> = <strong>${entryData[uniqueField]}</strong> in project <strong>${project.slug}</strong> created by <strong>${req.session.user.email}</strong>`,
-                        color: 'green',
-                        isNotification: false,
-                    });
+                                           
+                    await saveLog(logTemplates({ 
+                        type: 'entryCreated',
+                        entity: newEntry,
+                        actor: req.session.user 
+                    }));
+
                     results.createdNew++;
                 }
             })
@@ -230,15 +223,11 @@ exports.upload = async(req,res) => {
 
         await Promise.all(rowPromises);
 
-        await saveLog({
-            actorType: 'user',
-            actorId: req.session.user._id,
-            action: 'Bulk upload',
-            details: `Bulk upload of data in project ${project.name} by <strong>${req.session.user.email}</strong> completed. <br> Created new: ${results.createdNew} <br> Merged: ${results.merged} <br> Skipped: ${results.skipped} <br> Errors: ${results.errors.length}`,
-            url: `/project/${project.slug}`,
-            color: 'red',
-            isNotification: true
-        });
+        await saveLog(logTemplates({ 
+            type: 'bulkUploadCompleted',
+            entity: project,
+            actor: req.session.user 
+        }));
 
         res.json({
             message: 'Upload and processing completed',

@@ -1,4 +1,4 @@
-const { visibleLogs } = require('../modules/logAction');
+const { visibleLogs, activtyByEntityType } = require('../modules/logAction');
 
 exports.showDashboard = async (req, res) => { 
     res.render('dashboard', { layout: "dashboard", 
@@ -7,10 +7,20 @@ exports.showDashboard = async (req, res) => {
             userRole: req.session.user.role.charAt(0).toUpperCase() + req.session.user.role.slice(1),
             activeMenu: "dashboard",
             projects: req.allProjects,
-            logs: await visibleLogs(req,res)
+            logs: await visibleLogs(req,res),
+            activity: await activtyByEntityType(req,res)
         }
     });
 };
+
+exports.getActivityData = async(req,res) => {
+    res.render('partials/dashboardActivity', {
+        layout: false,
+        data: {
+            activity: await activtyByEntityType(req,res) 
+        }
+    })
+}
 
 exports.renderPartial = async(req,res) => {
     try {

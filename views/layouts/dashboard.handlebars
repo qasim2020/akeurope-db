@@ -48,7 +48,7 @@
                 <a href="#" class="nav-link px-0" data-bs-toggle="dropdown" tabindex="-1" aria-label="Show notifications">
                   <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M10 5a2 2 0 1 1 4 0a7 7 0 0 1 4 6v3a4 4 0 0 0 2 3h-16a4 4 0 0 0 2 -3v-3a7 7 0 0 1 4 -6"></path><path d="M9 17v1a3 3 0 0 0 6 0v-1"></path></svg>
                   {{#if data.logs}}
-                  <span class="badge bg-red"></span>
+                  <span class="badge bg-red notification-check"></span>
                   {{/if}}
                 </a>
                 <div class="dropdown-menu dropdown-menu-arrow dropdown-menu-end dropdown-menu-card">
@@ -100,7 +100,9 @@
                 <a href="#" class="nav-link px-0" data-bs-toggle="dropdown" tabindex="-1" aria-label="Show notifications">
                   <!-- Download SVG icon from http://tabler-icons.io/i/bell -->
                   <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M10 5a2 2 0 1 1 4 0a7 7 0 0 1 4 6v3a4 4 0 0 0 2 3h-16a4 4 0 0 0 2 -3v-3a7 7 0 0 1 4 -6"></path><path d="M9 17v1a3 3 0 0 0 6 0v-1"></path></svg>
-                  <span class="badge bg-red"></span>
+                  {{#if data.logs}}
+                  <span class="badge bg-red notification-check"></span>
+                  {{/if}}
                 </a>
                 <div class="dropdown-menu dropdown-menu-arrow dropdown-menu-end dropdown-menu-card" style="width: 80vw;">
                   {{> notificationsDropdown}}
@@ -260,7 +262,23 @@
           method: "POST",
           contentType: 'application/json', 
           success: function(response) {
-            $(elem).closest(".list-group-item").remove();
+            if ($(elem).closest(".card").find(".list-group-item").length == 1) {
+              $(elem).closest(".card").html(`
+              <div class="card-header">
+                  <h3 class="card-title">No new notifications</h3>
+              </div>
+              <div class="card-body text-center">
+                  <button type="button" class="btn" onclick="$(this).closest('.dropdown-menu').removeClass('show');">
+                      <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-x"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M18 6l-12 12" /><path d="M6 6l12 12" /></svg>
+                      Close
+                  </button>
+              </div>
+              `);
+              $(".notification-check").remove();
+            } else {
+              $(elem).closest(".list-group-item").remove();
+            }
+
           },
           error: function(xhr, status, error) {
             alert(xhr.responseText);

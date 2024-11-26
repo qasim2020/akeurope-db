@@ -6,30 +6,30 @@
     <div class="list-group list-group-flush list-group-hoverable notifications">
         {{#each data.logs as |log|}}
         <div class="list-group-item">
-        <div class="row align-items-center">
-            {{#if (eq log.color 'red')}}
-            <div class="col-auto"><span class="status-dot status-dot-animated bg-red d-block"></span></div>
-            {{/if}}
-            {{#if (eq log.color 'blue')}}
-            <div class="col-auto"><span class="status-dot status-dot-animated bg-blue d-block"></span></div>
-            {{/if}}
-            {{#if (eq log.color 'green')}}
-            <div class="col-auto"><span class="status-dot status-dot-animated bg-green d-block"></span></div>
-            {{/if}}
-            {{#if (eq log.color 'grey')}}
-            <div class="col-auto"><span class="status-dot d-block"></span></div>
-            {{/if}}
-            <div class="col text-truncate">
-            <div class="text-secondary fs-6 badge bg-blue-lt">{{formatTime log.timestamp}}</div>
-            <div class="d-block text-secondary text-truncate mt-1 text-wrap">
-                {{{log.details}}}
+            <div class="row">
+                <div class="col-auto">
+                    <a href="/user/{{log.actor._id}}">
+                        <span class="avatar">{{getFirstTwoLetters log.actor.name}}</span>
+                    </a>
+                </div>
+                <div class="col">
+                    <div class="">
+                        {{#if log.entity.name}}
+                        {{log.action}} · <a href="{{log.url}}">{{log.entity.name}}</a>
+                        {{else}}
+                        <a href="{{log.url}}" class="">{{log.action}}</a>
+                        {{/if}}
+                    </div>
+                    <div class="text-secondary">{{timeAgo log.timestamp}}</div>
+                </div>
+                <div class="col-auto align-self-center cursor-pointer">
+                    <div class="col-auto">
+                        <a class="list-group-item-actions" log-id="{{log._id}}" onclick="clearNotification(this)">
+                            <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-x"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M18 6l-12 12" /><path d="M6 6l12 12" /></svg>
+                        </a>
+                    </div>
+                </div>
             </div>
-            {{#if log.url}}
-            <a href="{{log.url}}" class="btn btn-secondary-outline btn-sm mt-1 text-secondary">View</a>
-            {{/if}}
-            <a href="#" class="btn btn-secondary-outline btn-sm mt-1 text-secondary" onclick="clearNotification(this)" log-id="{{log._id}}">Clear</a>
-            </div>
-        </div>
         </div>
         {{/each}}
     </div>
