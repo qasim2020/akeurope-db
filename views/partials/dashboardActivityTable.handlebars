@@ -14,12 +14,26 @@
                 <a href="{{log.url}}" class="">{{log.action}}</a> {{#if log.project}} in <a href="/project/{{log.project.slug}}">{{log.project.name}}</a> project {{/if}}
                 {{/if}}
                 {{#if log.changes}}
-                {{#each log.changes}}
-                <br>
-                <span class="badge bg-green-lt"></b3>{{camelCaseToNormalString this.key}}</span>
-                <span class="text-decoration-line-through">{{this.oldValue}}</span>
-                <span>{{this.newValue}}</span>
-                {{/each}}
+                    {{#each log.changes}}
+                    <br>
+                    <span class="badge bg-green-lt"></b3>{{camelCaseToNormalString this.key}}</span>
+                        {{#if this.oldValue}}
+                        <span class="text-decoration-line-through">{{this.oldValue}}</span>
+                        <span>{{this.newValue}}</span>
+                        {{/if}}
+                        {{#if this.changes}}
+                            {{#each this.changes as |change|}}
+                                {{#if this.details}}
+                                <span class="badge bg-grey-lt">{{this.fieldName}}</span>
+                                <span class="text-strong">{{capitalizeFirstLetter this.action}}</span>
+                                {{else}}
+                                <span class="badge bg-grey-lt">{{camelCaseToNormalString this.key}}</span>
+                                <span class="text-decoration-line-through">{{this.oldValue}}</span>
+                                <span>{{this.newValue}}</span>
+                                {{/if}}
+                            {{/each}}
+                        {{/if}}
+                    {{/each}}
                 {{/if}}
             </div>
             <div class="text-secondary">{{timeAgo log.timestamp}}</div>

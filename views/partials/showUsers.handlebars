@@ -41,12 +41,10 @@
     </div>
   </div>
   <div class="card-body">
-      {{#if (neq user.email ../data.userEmail)}}
       <a href="/user/{{user._id}}" class="btn btn-primary">View</a>
+      {{#if (neq user.email ../data.userEmail)}}
       <button class="btn text-blue cursor-pointer" user-id="{{user._id}}" onclick="getEditUserModal(this)">Edit</button>
       <button class="btn text-red cursor-pointer" user-id="{{user._id}}" onclick="deleteUser(this)">Delete</button>
-      {{else}}
-      <p> A user can't edit or delete themselves.  </p>
       {{/if}}
   </div>
 </div>

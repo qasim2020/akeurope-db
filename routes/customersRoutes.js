@@ -11,4 +11,6 @@ router.post('/customer/sendInvite', authenticate, authorize("editCustomers"), cu
 router.post("/customer/update/:customerId", authenticate, authorize("createCustomers"), customersController.updateCustomer);
 router.post("/customer/create", authenticate, authorize("createCustomers"), customersController.createCustomer);
 
+router.get("/customer/:customerId", authenticate, authorize("viewCustomers"), allProjects, customersController.customer);
+
 module.exports = router;

@@ -1,6 +1,4 @@
 const mongoose = require('mongoose');
-const express = require('express');
-const router = express.Router();
 
 const crypto = require('crypto');
 const path = require('path');
@@ -12,7 +10,7 @@ const nodemailer = require('nodemailer');
 const Customer = require("../models/Customer");
 const Project = require("../models/Project");
 const checkValidForm = require("../modules/checkValidForm");
-const { saveLog, visibleLogs } = require("../modules/logAction");
+const { saveLog, customerLogs, visibleLogs } = require("../modules/logAction");
 const { logTemplates } = require("../modules/logTemplates");
 
 exports.customers = async(req,res) => {
@@ -318,5 +316,38 @@ exports.updateCustomer = async(req,res) => {
     } catch (error) {
         console.log(error);
         res.status(500).json({ message: 'Error creating customer', error });
+    }
+}
+
+exports.customer = async(req,res) => {
+    try {
+        const customer = await Customer.findById(req.params.customerId).lean();
+
+        customer.projects = await Promise.all(
+            customer.projects.map(async (val) => {
+                return await Project.findOne({ slug: val }).lean();
+            })
+        );
+
+        res.render('customer', {
+            layout: 'dashboard',
+            data: {
+                layout: req.session.layout,
+                userName: req.session.user.name,
+                userRole: req.session.user.role.charAt(0).toUpperCase() + req.session.user.role.slice(1),
+                activeMenu: "customers",
+                projects: req.allProjects,
+                role: req.userPermissions,
+                logs: await visibleLogs(req,res),
+                customerLogs: await customerLogs(req,res),
+                customer,
+            }
+        })
+    } catch (error) {
+        console.log(error);
+        res.status(404).render('error', {
+            heading: 'Server error',
+            error,
+        })
     }
 }

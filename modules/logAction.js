@@ -44,8 +44,61 @@ const updateLog = async ({ logId, updates, }) => {
 
 const entryLogs = async (req,res) => {
     const logs = await Log.find({entityId: req.params.entryId}).sort({timestamp: -1}).lean();
-    return logs;
+    return findConnectedIds(logs);
 };
+
+const userLogs = async (req,res) => {
+    const page = parseInt(req.query.page) || 1; 
+    const limit = parseInt(req.query.limit) || 10; 
+    let query;
+    if (req.query.showBy == 'actor') {
+        query =  {
+            actorId: req.params.userId
+        }
+    } else if (req.query.showBy == 'entity') {
+        query = {
+            entityId: req.params.userId
+        }
+    } else {
+        query = {
+            $or: [
+                {
+                    entityId: req.params.userId
+                },
+                {
+                    actorId: req.params.userId
+                }
+            ]
+        };
+    };
+
+    const total = await Log.countDocuments(query);
+    const logs = await Log.find(query)
+    .skip((page - 1) * limit) 
+    .limit(limit) 
+    .sort({ timestamp: -1 }) 
+    .lean();
+    
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+        showBy: req.query.showBy || 'all',
+        logs: await findConnectedIds(logs),
+        pagesArray: generatePagination(totalPages, page),
+        currentPage: page,
+        totalPages,
+        hasNextPage: page < totalPages,
+        hasPrevPage: page > 1,
+        nextPage: page + 1,
+        prevPage: page - 1,
+    }
+}
+
+const customerLogs = async (req,res) => {
+    const logs = await Log.find({entityId: req.params.customerId}).sort({timestamp: -1}).lean();
+    return findConnectedIds(logs);
+
+}
 
 const findConnectedIds = async (logs) => {
     for (const log of logs) {
@@ -111,4 +164,4 @@ const activtyByEntityType = async(req,res) => {
     }
 };
 
-module.exports = { saveLog, updateLog, visibleLogs, entryLogs, activtyByEntityType }
+module.exports = { saveLog, updateLog, visibleLogs, entryLogs, userLogs, customerLogs, activtyByEntityType }

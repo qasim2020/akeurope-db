@@ -6,7 +6,7 @@ const User = require('../models/User');
 const moment = require('moment');
 const nodemailer = require('nodemailer');
 const checkValidForm = require("../modules/checkValidForm");
-const { saveLog, visibleLogs } = require("../modules/logAction");
+const { saveLog, visibleLogs, userLogs } = require("../modules/logAction");
 const { logTemplates } = require("../modules/logTemplates");
 
 exports.users = async(req,res) => {
@@ -339,4 +339,47 @@ exports.sendInvite = async(req,res) => {
         res.status(500).send(err);
     }
 
+}
+
+exports.user = async(req,res) => {
+    try {
+        res.render('user', {
+            layout: 'dashboard',
+            data: {
+                layout: req.session.layout,
+                userEmail: req.session.user.email,
+                userName: req.session.user.name,
+                userRole: req.session.user.role.charAt(0).toUpperCase() + req.session.user.role.slice(1),
+                activeMenu: "users",
+                projects: req.allProjects,
+                role: req.userPermissions,
+                logs: await visibleLogs(req,res),
+                userLogs: await userLogs(req,res),
+                user: await User.findById(req.params.userId).lean()
+            }
+        })
+    } catch (error) {
+        console.log(error);
+        res.status(404).render('error', {
+            heading: 'Server error',
+            error,
+        })
+    }
+}
+
+exports.getUserActivityData = async(req,res) => {
+    try {
+        res.render('partials/showUserActivity', {
+            layout: false,
+            data: {
+                userLogs: await userLogs(req,res),
+                user: await User.findById(req.params.userId).lean()
+            }
+        })
+    } catch(error) {
+        res.render('error',{
+            heading: 'Server Error',
+            error: error
+        })
+    }
 }

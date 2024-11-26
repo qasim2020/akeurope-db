@@ -22,6 +22,7 @@ UserSchema.pre('save', async function (next) {
 });
 
 UserSchema.methods.comparePassword = function (password) {
+  if (this.password == undefined) return false;
   return bcrypt.compare(password, this.password);
 };
 

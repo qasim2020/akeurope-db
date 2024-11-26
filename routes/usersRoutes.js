@@ -14,4 +14,7 @@ router.post('/users/sendInvite', authenticate, authorize("editUsers"), usersCont
 router.get('/users/register/:token', usersController.register);
 router.post('/users/register/:token', usersController.setRegister);
 
+router.get('/user/:userId', authenticate, authorize("viewUsers"), allProjects, usersController.user);
+router.get('/getUserActivityData/:userId', authenticate, authorize("viewUsers"), allProjects, usersController.getUserActivityData);
+
 module.exports = router;
