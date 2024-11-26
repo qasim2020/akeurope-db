@@ -63,6 +63,9 @@
                         {{/if}}
                     {{/each}}
                 {{/if}}
+                {{#if log.details}}
+                <div class="text-secondary">{{{log.details}}}</div>
+                {{/if}}
             </div>
           </li>
           {{/each}}

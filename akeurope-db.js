@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const express = require('express');
 const session = require('express-session');
 const flash = require('connect-flash');
@@ -21,7 +23,6 @@ const uploadExcel = require('./routes/uploadExcel');
 const customersRoutes = require('./routes/customersRoutes');
 const logRoutes = require('./routes/logRoutes');
 
-require('dotenv').config();
 mongoose();
 
 const app = express();
