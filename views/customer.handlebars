@@ -208,4 +208,19 @@ const updateCustomer = function(elem) {
   }); 
 
 }
+
+const getCustomerLogs = function(elem, href) {
+    href = href || $(elem).attr("my-href");
+    console.log(href);
+    $.ajax({
+        url: href,
+        method: 'GET',
+        success: function (response) {
+            $('#logs-container').replaceWith(response);
+        },
+        error: function (error) {
+            $('#logs-container').html(error.responseText);
+        }
+    })
+}
 </script>

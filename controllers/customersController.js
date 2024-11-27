@@ -338,11 +338,11 @@ exports.getLogs = async(req,res) => {
     res.render("partials/showCustomerLogs", {
         layout: false,
         data: {
-            customerLogs: await customerLogs(req,res)
+            customerLogs: await customerLogs(req,res),
+            customer: await Customer.findById(req.params.customerId).lean()
         }
     })
 }
-
 
 exports.customer = async(req,res) => {
     try {
