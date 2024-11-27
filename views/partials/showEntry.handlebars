@@ -68,20 +68,7 @@
         {{#if data.entryLogs}}
         <ul class="steps steps-vertical">
           {{#each data.entryLogs as |log|}}
-          <li class="step-item">
-            <div class="badge bg-blue-lt mb-1">{{formatTime log.timestamp}}</div>
-            <div class="m-0">{{log.action}} 
-              by <a href="/user/{{log.actor._id}}">{{log.actor.name}}</a>
-            </div>
-            {{#if log.details}}
-            <div class="text-secondary">{{{log.details}}}</div>
-            {{/if}}
-            {{#if log.changes}}
-              {{#each log.changes}}
-                <strong>{{camelCaseToNormalString this.key}}</strong>: {{this.oldValue}} → {{this.newValue}} <br>
-              {{/each}}
-            {{/if}}
-          </li>
+            {{> components/showLogSteps log=log showActor=true showEntity=false}}
           {{/each}}
         </ul>
         {{else}}

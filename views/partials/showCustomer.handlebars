@@ -1,7 +1,6 @@
- <div class="row row-deck row-cards">
 
   {{#with data.customer as |customer|}}
-  <div class="col-12 col-md-6">
+  <div class="col-12 col-md-6 mb-auto" id="customer-container">
 
     <div class="card mb-3 data-row">
       <div class="card-header">
@@ -55,7 +54,7 @@
             <div class="datagrid-item">
               <div class="datagrid-title">Projects</div>
               <div class="datagrid-content">
-                {{#each customer.projects}}
+                {{#each customer.projectsOpened}}
                 <a href="/project/{{this.slug}}" class="badge bg-red-lt mb-1">{{this.name}}</a> 
                 {{/each}}
               </div>
@@ -75,44 +74,10 @@
         </div>
       </div>
       <div class="card-body">
-          <button class="btn text-blue cursor-pointer" customer-id="{{customer._id}}" onclick="getEditCustomerModal(this)">Edit</button>
+          <button class="btn text-blue cursor-pointer" data-bs-toggle="modal" data-bs-target="#modal-{{customer._id}}">Edit</button>
       </div>
     </div>
 
   </div>
   {{/with}}
-  <div class="d-block col-12 col-md-6">
-    <div class="card">
-      <div class="card-header">
-        <h3 class="card-title">Updates</h3>
-      </div>
-      <div class="card-body">
-        {{#if data.customerLogs}}
-        <ul class="steps steps-vertical">
-          {{#each data.customerLogs as |log|}}
-          <li class="step-item">
-            <div class="badge bg-blue-lt mb-1">{{formatTime log.timestamp}}</div>
-            <div class="m-0">{{log.action}} by <a href="/user/{{log.actor._id}}">{{log.actor.name}}</a></div>
-            {{#if log.details}}
-            <div class="text-secondary">{{{log.details}}}</div>
-            {{/if}}
-          </li>
-          {{/each}}
-        </ul>
-        {{else}}
-        <div class="text-center"><p>No logs stored for this entity!</p></div>
-        {{/if}}
-      </div>
-    </div>
 
-    <div class="card mt-3">
-      <div class="card-header">
-        <h3 class="card-title">Payments</h3>
-      </div>
-      <div class="card-body">
-        <div class="text-center py-4">No payments found</div>
-      </div>
-    </div>
-  </div>
-
- </div>

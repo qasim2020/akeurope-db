@@ -12,6 +12,7 @@ const Project = require("../models/Project");
 const checkValidForm = require("../modules/checkValidForm");
 const { saveLog, customerLogs, visibleLogs } = require("../modules/logAction");
 const { logTemplates } = require("../modules/logTemplates");
+const { getChanges } = require("../modules/getChanges");
 
 exports.customers = async(req,res) => {
     const customers = await Customer.find().lean();
@@ -64,6 +65,30 @@ exports.getData = async(req,res) => {
         res.status(500).json({ error: 'An error occurred while fetching customer partial', details: error.message });
     } 
 }
+
+exports.getCustomerData = async(req,res) => {
+    try {
+        const customer = await Customer.findOne({_id: req.params.customerId}).lean();
+
+        customer.projectsOpened = await Promise.all(
+            customer.projects.map(async (val) => {
+                return await Project.findOne({ slug: val }).lean();
+            })
+        );
+
+        res.render('partials/showCustomer', { 
+            layout: false, 
+            data: {
+              customer, 
+              layout: req.session.layout
+            }
+        });
+    } catch (error) {
+        res.status(500).json({ error: 'An error occurred while fetching customer partial', details: error.message });
+    } 
+}
+
+
 
 exports.editModal = async(req,res) => {
     try {
@@ -283,33 +308,22 @@ exports.updateCustomer = async(req,res) => {
             return false;
         }
 
-        const changes = [];
         const updatedFields = { name, organization, location, status, projects };
 
-        Object.entries(updatedFields).forEach(([field, newValue]) => {
-            if (customer[field] !== newValue) {
-                changes.push({
-                    field,
-                    from: customer[field],
-                    to: newValue,
-                });
-            }
-        });
+        const changes = getChanges(customer, updatedFields);
 
-        await Customer.findByIdAndUpdate(req.params.customerId, updatedFields);
+        if (changes.length > 0) {
 
-        const changeDetails = changes
-        .map(
-          (change) =>
-            `<strong>${change.field}</strong>: "${change.from}" → "${change.to}"`
-        )
-        .join('<br>');
+            await saveLog(logTemplates({ 
+                type: 'customerUpdated',
+                entity: customer,
+                actor: req.session.user,
+                changes: getChanges(customer, updatedFields)
+            }));   
 
-        await saveLog(logTemplates({ 
-            type: 'customerUpdated',
-            entity: customer,
-            actor: req.session.user 
-        }));   
+            await Customer.findByIdAndUpdate(req.params.customerId, updatedFields);
+
+        }
 
         res.status(200).send("Customer updated successfully!");
 
@@ -319,11 +333,22 @@ exports.updateCustomer = async(req,res) => {
     }
 }
 
+
+exports.getLogs = async(req,res) => {
+    res.render("partials/showCustomerLogs", {
+        layout: false,
+        data: {
+            customerLogs: await customerLogs(req,res)
+        }
+    })
+}
+
+
 exports.customer = async(req,res) => {
     try {
         const customer = await Customer.findById(req.params.customerId).lean();
 
-        customer.projects = await Promise.all(
+        customer.projectsOpened = await Promise.all(
             customer.projects.map(async (val) => {
                 return await Project.findOne({ slug: val }).lean();
             })

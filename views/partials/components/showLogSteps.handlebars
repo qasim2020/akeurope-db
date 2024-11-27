@@ -1,0 +1,55 @@
+<li class="step-item">
+    <div class="badge bg-blue-lt mb-1">{{formatTime log.timestamp}}</div>
+        <div class="">
+        {{#if log.entity.name}}
+            {{#if (eq log.entityType 'customer')}}
+                {{log.action}} 
+                {{#if showEntity}}in <a href="{{log.url}}">{{log.entity.name}}</a>{{/if}}
+                {{#if showActor}}by <a href="/{{log.actorType}}/{{log.actor._id}}">{{log.actor.name}}</a>{{/if}}
+            {{/if}}
+
+            {{#if (eq log.entityType 'entry')}}
+                {{#if showEntity}}
+                    <a href="{{log.url}}">{{log.entity.name}}</a>
+                    {{lowerCaseFirstLetter log.action}} 
+                {{else}}
+                    {{log.action}}
+                {{/if}}
+                {{#if log.project}} in <a href="/project/{{log.project.slug}}">{{log.project.name}}</a> project {{/if}} 
+                {{#if showActor}}by <a href="/{{log.actorType}}/{{log.actor._id}}">{{log.actor.name}}</a>{{/if}}
+            {{/if}}
+
+            {{#if (eq log.entityType 'user')}}
+                <a href="{{log.url}}">{{log.entity.name}}</a>
+                {{lowerCaseFirstLetter log.action}} by <a href="">{{log.actor.name}}</a>
+                {{#if log.project}} in <a href="/project/{{log.project.slug}}">{{log.project.name}}</a> project {{/if}} 
+            {{/if}}
+
+        {{else}}
+            <a href="{{log.url}}" class="">{{log.action}}</a> {{#if log.project}} in <a href="/project/{{log.project.slug}}">{{log.project.name}}</a> project {{/if}}
+        {{/if}}
+
+        {{#if log.changes}}
+            {{#each log.changes}}
+            <br>
+            <span class="badge bg-green-lt"></b3>{{camelCaseToNormalString this.key}}</span>
+                {{#if this.oldValue}}
+                <span class="text-decoration-line-through">{{this.oldValue}}</span>
+                <span>{{this.newValue}}</span>
+                {{/if}}
+                {{#if this.changes}}
+                    {{#each this.changes as |change|}}
+                        {{#if this.details}}
+                        <span class="badge bg-grey-lt">{{this.fieldName}}</span>
+                        <span class="text-strong">{{capitalizeFirstLetter this.action}}</span>
+                        {{else}}
+                        <span class="badge bg-grey-lt">{{camelCaseToNormalString this.key}}</span>
+                        <span class="text-decoration-line-through">{{this.oldValue}}</span>
+                        <span>{{this.newValue}}</span>
+                        {{/if}}
+                    {{/each}}
+                {{/if}}
+            {{/each}}
+        {{/if}}
+    </div>
+</li>

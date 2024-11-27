@@ -33,45 +33,11 @@
         {{#if data.userLogs.logs}}
         <ul class="steps steps-vertical">
           {{#each data.userLogs.logs as |log|}}
-          <li class="step-item">
-            <div class="badge bg-blue-lt mb-1">{{formatTime log.timestamp}}</div>
-              <div class="">
-                {{#if log.entity.name}}
-                <a href="{{log.url}}">{{log.entity.name}}</a> {{lowerCaseFirstLetter log.action}} {{#if log.project}} in <a href="/project/{{log.project.slug}}">{{log.project.name}}</a> project {{/if}}
-                {{else}}
-                <a href="{{log.url}}" class="">{{log.action}}</a> {{#if log.project}} in <a href="/project/{{log.project.slug}}">{{log.project.name}}</a> project {{/if}}
-                {{/if}}
-                {{#if log.changes}}
-                    {{#each log.changes}}
-                    <br>
-                    <span class="badge bg-green-lt"></b3>{{camelCaseToNormalString this.key}}</span>
-                        {{#if this.oldValue}}
-                        <span class="text-decoration-line-through">{{this.oldValue}}</span>
-                        <span>{{this.newValue}}</span>
-                        {{/if}}
-                        {{#if this.changes}}
-                            {{#each this.changes as |change|}}
-                                {{#if this.details}}
-                                <span class="badge bg-grey-lt">{{this.fieldName}}</span>
-                                <span class="text-strong">{{capitalizeFirstLetter this.action}}</span>
-                                {{else}}
-                                <span class="badge bg-grey-lt">{{camelCaseToNormalString this.key}}</span>
-                                <span class="text-decoration-line-through">{{this.oldValue}}</span>
-                                <span>{{this.newValue}}</span>
-                                {{/if}}
-                            {{/each}}
-                        {{/if}}
-                    {{/each}}
-                {{/if}}
-                {{#if log.details}}
-                <div class="text-secondary">{{{log.details}}}</div>
-                {{/if}}
-            </div>
-          </li>
+            {{> components/showLogSteps log=log showActor=false showEntity=true}}
           {{/each}}
         </ul>
         {{else}}
-        <div class="text-center py-4"><p>No activity found!</p></div>
+        <div class="text-center py-4"><p>No logs found!</p></div>
         {{/if}}
       </div>
     </div>

@@ -12,5 +12,7 @@ router.post("/customer/update/:customerId", authenticate, authorize("createCusto
 router.post("/customer/create", authenticate, authorize("createCustomers"), customersController.createCustomer);
 
 router.get("/customer/:customerId", authenticate, authorize("viewCustomers"), allProjects, customersController.customer);
+router.get("/getCustomerData/:customerId", authenticate, authorize("viewCustomers"), customersController.getCustomerData);
+router.get("/getCustomerLogs/:customerId", authenticate, authorize("viewCustomers"), customersController.getLogs);
 
 module.exports = router;
