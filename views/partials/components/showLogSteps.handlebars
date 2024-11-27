@@ -20,9 +20,25 @@
             {{/if}}
 
             {{#if (eq log.entityType 'user')}}
-                <a href="{{log.url}}">{{log.entity.name}}</a>
-                {{lowerCaseFirstLetter log.action}} by <a href="">{{log.actor.name}}</a>
+                {{#if showEntity}}
+                    <a href="{{log.url}}">{{log.entity.name}}</a>
+                    {{lowerCaseFirstLetter log.action}} 
+                {{else}}
+                    {{log.action}}
+                {{/if}}
                 {{#if log.project}} in <a href="/project/{{log.project.slug}}">{{log.project.name}}</a> project {{/if}} 
+                {{#if showActor}}by <a href="/{{log.actorType}}/{{log.actor._id}}">{{log.actor.name}}</a>{{/if}}
+            {{/if}}
+
+            {{#if (eq log.entityType 'project')}}
+                {{#if showEntity}}
+                    <a href="{{log.url}}">{{log.entity.name}}</a>
+                    {{lowerCaseFirstLetter log.action}} 
+                {{else}}
+                    {{log.action}}
+                {{/if}}
+                {{#if log.project}} in <a href="/project/{{log.project.slug}}">{{log.project.name}}</a> project {{/if}} 
+                {{#if showActor}}by <a href="/{{log.actorType}}/{{log.actor._id}}">{{log.actor.name}}</a>{{/if}}
             {{/if}}
 
         {{else}}
