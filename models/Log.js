@@ -5,7 +5,6 @@ const logSchema = new mongoose.Schema({
     entityId: mongoose.Schema.Types.ObjectId,
     actorType: String,
     actorId: mongoose.Schema.Types.ObjectId,
-    projectId: mongoose.Schema.Types.ObjectId,
     action: String,
     changes: [],
     url: String, 

@@ -160,8 +160,7 @@ exports.updateEntry = async(req,res) => {
                 type: 'entryUpdated',
                 entity: existingEntry,
                 actor: req.session.user,
-                changes: changedEntries,
-                project,
+                changes: changedEntries
             }));
 
             Object.assign(existingEntry, entryData);

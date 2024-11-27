@@ -65,11 +65,30 @@ function getChanges(original, updated, arrayKeys = []) {
         }
       } 
 
-      else if (oldValue.toString() != newValue.toString()) {
+      else if (areValuesDifferent(oldValue, newValue)) {
         changes.push(formatChange(key, oldValue, newValue));
       }
+
     }
-  
+
+    function stringifyValue(value) {
+      if (value == null) {
+        return ''; 
+      }
+      if (typeof value === 'object') {
+        try {
+          return JSON.stringify(value);
+        } catch (e) {
+          return '[Object]'; 
+        }
+      }
+      return value?.toString();
+    }
+
+    function areValuesDifferent(value1, value2) {
+      return stringifyValue(value1) !== stringifyValue(value2);
+    }
+
     return changes;
   }
 

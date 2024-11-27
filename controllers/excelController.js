@@ -5,6 +5,7 @@ const moment = require('moment');
 const { createDynamicModel } = require("../models/createDynamicModel");
 const { saveLog, visibleLogs } = require("../modules/logAction");
 const { logTemplates } = require("../modules/logTemplates");
+const { getChanges } = require("../modules/getChanges");
 
 exports.uploadExcel = async(req,res) => {
     res.render( "uploadExcel", {
@@ -179,19 +180,13 @@ exports.upload = async(req,res) => {
                     }
 
                     if (Object.keys(updatedFields).length > 0) {
-                        const changedEntries = Object.entries(updatedFields)
-                            .map(
-                                ([field, { from, to }]) =>
-                                    `<strong>${field}</strong>: "${from || 'null'}" → "${to || 'null'}"`
-                            )
-                            .join('<br>');
-
-                                              
+                        
                         saveLog(logTemplates({ 
-                            type: 'entryUpdated',
+                            type: 'entryUpdatedBulkUpload',
                             entity: existingEntry,
                             actor: req.session.user,
-                            changes: changedEntries
+                            project,
+                            changes: getChanges(existingEntry, entryData)
                         })); 
         
                         Object.assign(existingEntry, entryData);
@@ -205,8 +200,9 @@ exports.upload = async(req,res) => {
                     await newEntry.save();
                                            
                     await saveLog(logTemplates({ 
-                        type: 'entryCreated',
+                        type: 'entryCreatedBulkUpload',
                         entity: newEntry,
+                        project,
                         actor: req.session.user 
                     }));
 
@@ -214,6 +210,7 @@ exports.upload = async(req,res) => {
                 }
             })
             .catch((err) => {
+                console.log(err);
                 results.errors.push(`Error in row ${rowNumber}: ${err.message}`);
             });
         

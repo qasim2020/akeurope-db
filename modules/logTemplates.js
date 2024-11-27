@@ -79,9 +79,8 @@ const logTemplates = ({ type, entity, actor, project, changes }) => {
             isNotification: true,
         } : null,
         entryCreated: project ? {
-            ...commons('project', entity._id),
+            ...commons('entry', entity._id),
             url: `/entry/${entity._id}/project/${project.slug}`,
-            projectId: project._id,
             action: 'Entry created',
             color: 'blue',
             isNotification: true,
@@ -89,7 +88,6 @@ const logTemplates = ({ type, entity, actor, project, changes }) => {
         entryUpdated: project && changes ? {
             ...commons('entry', entity._id),
             url: `/entry/${entity._id}/project/${project.slug}`,
-            projectId: project._id,
             action: 'Entry updated',
             changes,
             color: 'blue',
@@ -98,7 +96,6 @@ const logTemplates = ({ type, entity, actor, project, changes }) => {
         entryDeleted: project ? {
             ...commons('entry', entity._id),
             url: `/entry/${entity._id}/project/${project.slug}`,
-            projectId: project._id,
             action: 'Entry deleted',
             color: 'red',
             isNotification: true,  
@@ -106,7 +103,6 @@ const logTemplates = ({ type, entity, actor, project, changes }) => {
         entryUpdatedBulkUpload: project && changes ? {
             ...commons('entry', entity._id),
             url: `/entry/${entity._id}/project/${project.slug}`,
-            projectId: project._id,
             action: 'Entry updated in bulk upload',
             changes,
             isNotification: false,
@@ -165,7 +161,7 @@ const logTemplates = ({ type, entity, actor, project, changes }) => {
     }
 
     if (templates[type] == null) {
-        throw new Eror(`Incomplete parameters for template type: ${type}`);
+        throw new Error(`Incomplete parameters for template type: ${type}`);
     }
 
     if (!templates[type]) {
