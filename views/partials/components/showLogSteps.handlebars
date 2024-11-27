@@ -42,7 +42,7 @@
             {{/if}}
 
         {{else}}
-            <a href="{{log.url}}" class="">{{log.action}}</a> {{#if log.project}} in <a href="/project/{{log.project.slug}}">{{log.project.name}}</a> project {{/if}}
+            <a href="{{log.url}}" class="">{{log.action}}</a> {{#if log.project}} in <a href="/project/{{log.project.slug}}">{{log.project.name}}</a> project {{/if}} by <a href="/{{log.actorType}}/{{log.actor._id}}">{{log.actor.name}}</a>
         {{/if}}
 
         {{#if log.changes}}

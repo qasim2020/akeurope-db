@@ -160,6 +160,7 @@ exports.updateEntry = async(req,res) => {
                 type: 'entryUpdated',
                 entity: existingEntry,
                 actor: req.session.user,
+                project: project,
                 changes: changedEntries
             }));
 
@@ -249,4 +250,41 @@ exports.entry = async(req,res) => {
         console.log(error);
         res.status(500).json({ error: 'Error fetching entries', details: error.message });
     }
+}
+
+exports.getSingleEntryData = async(req,res) => {
+    try {
+        const project = await Project.findOne({ slug: req.params.slug }).lean();
+        if (!project) throw new Error(`Project "${req.params.slug}" not found`);
+    
+        const DynamicModel = await createDynamicModel(project.slug);
+        const entry = await DynamicModel.findOne({_id: req.params.entryId}).lean();
+  
+        res.render('partials/showEntry', {
+          layout: false,
+          data: {
+              fields: project.fields,
+              project, 
+              entry,
+          }
+        });
+      } catch (error) {
+        res.status(500).json({ error: 'An error occurred while fetching entries partial', details: error.message });
+      }
+}
+
+exports.getSingleEntryLogs = async(req,res) => {
+    const project = await Project.findOne({ slug: req.params.slug }).lean();
+    if (!project) throw new Error(`Project "${req.params.slug}" not found`);
+
+    const DynamicModel = await createDynamicModel(project.slug);
+    const entry = await DynamicModel.findOne({_id: req.params.entryId}).lean();
+    res.render("partials/showEntryLogs", {
+        layout: false,
+        data: {
+            entryLogs: await entryLogs(req,res),
+            project,
+            entry,
+        }
+    })
 }

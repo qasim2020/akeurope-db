@@ -11,4 +11,6 @@ router.post('/project/entry/:slug', authenticate, authorize("createEntry"), entr
 router.post('/project/entry/update/:slug/:id', authenticate, authorize("updateEntry"), entryController.updateEntry);
 router.post('/project/entry/delete/:slug', authenticate, authorize("deleteEntry"), entryController.deleteEntry);
 
+router.get('/getSingleEntryData/:entryId/project/:slug', authenticate, authorize("editEntry"), entryController.getSingleEntryData);
+router.get('/getSingleEntryLogs/:entryId/project/:slug', authenticate, authorize("editEntry"), entryController.getSingleEntryLogs);
 module.exports = router;

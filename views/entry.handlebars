@@ -44,7 +44,13 @@
 </div>
 <!-- Page body -->
 <div class="container-xl pt-4" id="data-container">
-  {{> showEntry}}
+  <div class="row row-deck row-cards">
+    {{> showEntry}}
+    <div class="d-block col-12 col-md-6">
+    {{> showEntryLogs}}
+    {{> showEntryPayments}}
+    </div>
+  </div>
 </div>
 
 {{#if (findInArray data.role "editEntry")}}
@@ -52,5 +58,119 @@
 {{/if}}
 
 <script>
+
+  const deleteEntry = function(elem) {
+    const entryId = $(elem).attr("entry-id");
+    $.ajax({
+        url: '/project/entry/delete/{{data.project.slug}}',
+        method: 'POST',
+        data: {entryId}, 
+        success: function(response) {
+            $(elem).closest(".data-row").remove();
+        },
+        error: function(error) {
+            alert(error.responseText)
+        }
+      });  
+  }
+
+  const editEntry = function(elem) {
+
+    $(elem).closest(".modal").find("input").removeClass("is-invalid");
+    $(elem).closest(".modal").find(".invalid-feedback").remove();
+    $(elem).closest(".modal").find("span").removeClass("border-red");
+    $(elem).closest(".modal").find("span").removeClass("rounded-end");
+    $(elem).closest(".modal").find(".alert").remove();
+
+    let isValid = [];
+
+    $(elem).closest(".modal").find(".entry-input").each( (key, val) => {
+      if ($(val).val() == "") {
+        $(val).addClass("is-invalid")
+        if ($(val).siblings("span").length > 0) {
+          $(val).siblings(".invalid-feedback").remove();
+          $(val).siblings("span").after(`<div class="invalid-feedback mb-2">Invalid entry</div> `);
+          $(val).siblings("span").addClass("is-invalid border-red rounded-end");
+          $(val).siblings("input").addClass("is-invalid");
+        } else {
+          $(val).after(`<div class="invalid-feedback">Invalid entry</div> `);
+        }
+      } else {
+        $(val).addClass("is-valid");
+      }
+      isValid.push($(val).val() != "");
+    });
+
+    const data = $(elem)
+        .closest(".modal")
+        .find(".form-select, input, textarea")
+        .toArray() // Convert jQuery collection to an array
+        .reduce((total, val) => {
+            Object.assign(total, {
+                [$(val).attr("name")]: $(val).val()
+            });
+            return total;
+        }, {});
+
+    if (!(isValid.every(val => val === true))) {
+        return false;
+    }
+
+    let currentBtnHTML = $(elem).html();
+
+    $(elem).html(`<span class="spinner-border spinner-border-sm me-2" role="status"></span>`);
+
+    const entryId = $(elem).closest(".modal").attr("entryId");
+
+    $.ajax({
+      url: `/project/entry/update/{{data.project.slug}}/${entryId}`,
+      type: 'POST',
+      contentType: 'application/json', 
+      data: JSON.stringify(data),
+      success: function(response) {
+        $(elem).html(currentBtnHTML);
+        showDataAsSuch('/getSingleEntryData/{{data.entry._id}}/project/{{data.project.slug}}', '#entry-container');
+        showDataAsSuch('/getSingleEntryLogs/{{data.entry._id}}/project/{{data.project.slug}}', '#logs-container');
+      },
+      error: function(xhr, status, error) {
+        $(elem).html(currentBtnHTML);
+        $(".modal-footer").append(`
+        <div class="w-100 d-block alert alert-danger mt-4" role="alert">
+          <h4 class="alert-title">Could not save.</h4>
+          <div class="text-secondary">${xhr.responseText}</div>
+        </div>`);
+      }
+    }); 
+
+}
+
+const showDataAsSuch = function(url, containerId) {
+  $.ajax({
+    url: url, 
+    method: 'GET',
+    success: function(response) {
+      $(containerId).replaceWith(response);
+    },
+    error: function(error) {
+        alert(error.responseText);
+    }
+  }); 
+}
+
+const getEntryLogs = function(elem, href) {
+    href = href || $(elem).attr("my-href");
+    console.log(href);
+    $.ajax({
+        url: href,
+        method: 'GET',
+        success: function (response) {
+            $('#logs-container').replaceWith(response);
+        },
+        error: function (error) {
+            $('#logs-container').html(error.responseText);
+        }
+    })
+}
+
 
 </script>

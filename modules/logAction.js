@@ -43,8 +43,35 @@ const updateLog = async ({ logId, updates, }) => {
 };
 
 const entryLogs = async (req,res) => {
-    const logs = await Log.find({entityId: req.params.entryId}).sort({timestamp: -1}).lean();
-    return findConnectedIds(logs);
+    try {
+        const query = {entityId: req.params.entryId};
+
+        const page = parseInt(req.query.page) || 1; 
+        const limit = parseInt(req.query.limit) || 10; 
+        const total = await Log.countDocuments(query);
+    
+        const logs = await Log.find(query)
+        .skip((page - 1) * limit) 
+        .limit(limit) 
+        .sort({ timestamp: -1 }) 
+        .lean();
+
+        const totalPages = Math.ceil(total / limit);
+    
+        return {
+            logs: await findConnectedIds(logs),
+            pagesArray: generatePagination(totalPages, page),
+            currentPage: page,
+            totalPages,
+            hasNextPage: page < totalPages,
+            hasPrevPage: page > 1,
+            nextPage: page + 1,
+            prevPage: page - 1,
+        } 
+    } catch (error) {
+       console.log(error);
+       return error; 
+    }
 };
 
 const userLogs = async (req,res) => {
