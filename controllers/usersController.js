@@ -8,6 +8,7 @@ const nodemailer = require('nodemailer');
 const checkValidForm = require("../modules/checkValidForm");
 const { saveLog, visibleLogs, userLogs } = require("../modules/logAction");
 const { logTemplates } = require("../modules/logTemplates");
+const { getChanges } = require("../modules/getChanges");
 
 exports.users = async(req,res) => {
 
@@ -170,24 +171,23 @@ exports.updateUser = async(req,res) => {
         
         const user = await User.findById(req.params.userId); 
         
-        let changeDetails = '';
-        for (const [key, newValue] of Object.entries(updatedFields)) {
-            const oldValue = user[key];
-            if (oldValue !== newValue) {
-                changeDetails += `<strong>${key}</strong>: ${oldValue ?? 'null'} → ${newValue ?? 'null'}<br>`;
-            }
+        let changeDetails = getChanges(user, updatedFields);
+
+        console.log(changeDetails);
+
+        if (changeDetails.length > 0) {
+
+            await saveLog(logTemplates({ 
+                type: 'userUpdated',
+                entity: user,
+                actor: req.session.user,
+                changes: changeDetails
+            }));
+
+            await User.findOneAndUpdate({_id: req.params.userId}, updatedFields);
+
         }
         
-        await User.findOneAndUpdate({_id: req.params.userId}, updatedFields);
-        
-                               
-        await saveLog(logTemplates({ 
-            type: 'userUpdated',
-            entity: user,
-            actor: req.session.user,
-            changes: changeDetails
-        }));
-
         res.status(200).send("Administrator updated succesfully");
     } catch (e) {
         console.log(e);
@@ -365,6 +365,26 @@ exports.user = async(req,res) => {
             error,
         })
     }
+}
+
+exports.getUserData = async(req,res) => {
+    try {
+        res.render('partials/showUser', {
+            layout: false,
+            data: {
+                userEmail: req.session.user.email,
+                userRole: req.session.user.role.charAt(0).toUpperCase() + req.session.user.role.slice(1),
+                role: req.userPermissions,
+                user: await User.findById(req.params.userId).lean()
+            }
+        })
+    } catch (error) {
+        console.log(error);
+        res.status(404).render('error', {
+            heading: 'Server error',
+            error,
+        })
+    } 
 }
 
 exports.getUserActivityData = async(req,res) => {

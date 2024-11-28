@@ -2,6 +2,7 @@
     <div class="badge bg-blue-lt mb-1">{{formatTime log.timestamp}}</div>
         <div class="">
         {{#if log.entity.name}}
+
             {{#if (eq log.entityType 'customer')}}
                 {{log.action}} 
                 {{#if showEntity}}in <a href="{{log.url}}">{{log.entity.name}}</a>{{/if}}
@@ -42,7 +43,9 @@
             {{/if}}
 
         {{else}}
-            <a href="{{log.url}}" class="">{{log.action}}</a> {{#if log.project}} in <a href="/project/{{log.project.slug}}">{{log.project.name}}</a> project {{/if}} by <a href="/{{log.actorType}}/{{log.actor._id}}">{{log.actor.name}}</a>
+            <a href="{{log.url}}" class="">{{log.action}}</a> 
+            {{#if log.project}} in <a href="/project/{{log.project.slug}}">{{log.project.name}}</a> project {{/if}} 
+            {{#if showActor}} by <a href="/{{log.actorType}}/{{log.actor._id}}">{{log.actor.name}}</a> {{/if}}
         {{/if}}
 
         {{#if log.changes}}
@@ -67,5 +70,6 @@
                 {{/if}}
             {{/each}}
         {{/if}}
+
     </div>
 </li>

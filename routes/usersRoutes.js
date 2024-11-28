@@ -15,6 +15,7 @@ router.get('/users/register/:token', usersController.register);
 router.post('/users/register/:token', usersController.setRegister);
 
 router.get('/user/:userId', authenticate, authorize("viewUsers"), allProjects, usersController.user);
-router.get('/getUserActivityData/:userId', authenticate, authorize("viewUsers"), allProjects, usersController.getUserActivityData);
+router.get('/getUserActivityData/:userId', authenticate, authorize("viewUsers"), usersController.getUserActivityData);
+router.get('/getUserData/:userId', authenticate, authorize("viewUsers"), usersController.getUserData);
 
 module.exports = router;

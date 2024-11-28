@@ -1,7 +1,5 @@
- <div class="row row-deck row-cards">
-
   {{#with data.user as |user|}}
-  <div class="col-12 col-md-6 mb-auto">
+  <div class="col-12 col-md-6 mb-auto" id="user-container">
     <div class="card mb-3 data-row">
       <div class="card-header">
         <h3 class="card-title"><span class="badge bg-blue-lt">{{user.name}}</span></h3>
@@ -41,7 +39,7 @@
       </div>
       <div class="card-body">
           {{#if (neq user.email ../data.userEmail)}}
-            <button class="btn text-blue cursor-pointer" user-id="{{user._id}}" onclick="getEditUserModal(this)">Edit</button>
+            <button class="btn text-blue cursor-pointer" user-id="{{user._id}}" data-bs-toggle="modal" data-bs-target="#modal-{{user._id}}">Edit</button>
             <button class="btn text-red cursor-pointer" user-id="{{user._id}}" onclick="deleteUser(this)">Delete</button>
           {{else}}
             <p>An administrator can't edit or delete themselves.</p>
@@ -50,9 +48,3 @@
     </div>
   </div>
   {{/with}}
-
-  <div class="d-block col-12 col-md-6" id="activity-container">
-    {{> showUserActivity}}
-  </div>
-
- </div>

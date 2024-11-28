@@ -3,14 +3,33 @@
     <div class="list-group-item">
         <div class="row">
             <div class="col-auto">
-                <a href="/user/{{log.actor._id}}">
+                <a href="/{{log.actorType}}/{{log.actor._id}}">
                     <span class="avatar">{{getFirstTwoLetters log.actor.name}}</span>
                 </a>
             </div>
             <div class="col">
             <div class="">
                 {{#if log.entity.name}}
-                <a href="{{log.url}}">{{log.entity.name}}</a> {{lowerCaseFirstLetter log.action}} {{#if log.project}} in <a href="/project/{{log.project.slug}}">{{log.project.name}}</a> project {{/if}}
+                    {{#if (eq log.entityType 'entry')}}
+                        <a href="{{log.url}}">{{log.entity.name}}</a> 
+                        {{lowerCaseFirstLetter log.action}}
+                        {{#if log.project}} in <a href="/project/{{log.project.slug}}">{{log.project.name}}</a> project {{/if}}
+                    {{/if}}
+                    {{#if (eq log.entityType 'project')}}
+                        <a href="{{log.url}}">{{log.entity.name}}</a> 
+                        {{lowerCaseFirstLetter log.action}} project
+                        {{#if log.project}} in <a href="/project/{{log.project.slug}}">{{log.project.name}}</a> project {{/if}}
+                    {{/if}}
+                    {{#if (eq log.entityType 'customer')}}
+                        {{log.action}} in
+                        <a href="{{log.url}}">{{log.entity.name}}</a> 
+                        {{#if log.project}} in <a href="/project/{{log.project.slug}}">{{log.project.name}}</a> project {{/if}}
+                    {{/if}}
+                    {{#if (eq log.entityType 'user')}}
+                        {{log.action}} in
+                        <a href="{{log.url}}">{{log.entity.name}}</a> 
+                        {{#if log.project}} in <a href="/project/{{log.project.slug}}">{{log.project.name}}</a> project {{/if}}
+                    {{/if}}
                 {{else}}
                 <a href="{{log.url}}" class="">{{log.action}}</a> {{#if log.project}} in <a href="/project/{{log.project.slug}}">{{log.project.name}}</a> project {{/if}}
                 {{/if}}
