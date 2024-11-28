@@ -4,6 +4,11 @@ const eq = function(a, b) {
     return a === b;
 };
 
+const compareIds = function (a, b) {
+    if (!a || !b) return false; 
+    return a.toString() === b.toString();
+};
+
 const neq = function(a, b) {
     return a != b;
 };
@@ -127,6 +132,7 @@ const camelCaseToNormalString = function(string) {
 
 module.exports = {
     eq,
+    compareIds,
     inc,
     dec,
     formatDate,

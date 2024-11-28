@@ -35,8 +35,8 @@
       {{#if data.userLogs.logs}}
       <ul class="steps steps-vertical">
         {{#each data.userLogs.logs as |log|}}
-          {{#if (eq log.entity.email ../data.user.email)}}
-            {{#if (eq log.actor.email ../data.user.email)}}
+          {{#if (compareIds log.entityId ../data.user._id)}}
+            {{#if (compareIds log.actorId ../data.user._id)}}
               {{> components/showLogSteps log=log showActor=false showEntity=false}}
             {{else}}
               {{> components/showLogSteps log=log showActor=true showEntity=false}}
