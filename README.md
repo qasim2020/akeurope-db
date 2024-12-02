@@ -1,5 +1,9 @@
 # akeurope-db
 
+### Feature 1: Collapsable sidebar
+
+<img width="853" alt="Screenshot 2024-12-02 at 4 43 36 PM" src="https://github.com/user-attachments/assets/2fbbc6f6-bd17-4008-ae6e-49242e75f2ab">
+
 ### Feature 1: Notifications & Logs on dashboard
 
 <img width="1920" alt="Screenshot 2024-11-20 at 4 33 32 PM" src="https://github.com/user-attachments/assets/67ea84ce-c2c2-4b4e-aa6f-5a2e742c8de8">
