@@ -36,7 +36,8 @@ exports.customers = async(req,res) => {
             role: req.userPermissions,
             customerId: new mongoose.Types.ObjectId(),
             customers,
-            logs: await visibleLogs(req,res)
+            logs: await visibleLogs(req,res),
+            sidebarCollapsed: req.session.sidebarCollapsed
         }
     })
 }
@@ -366,6 +367,7 @@ exports.customer = async(req,res) => {
                 logs: await visibleLogs(req,res),
                 customerLogs: await customerLogs(req,res),
                 customer,
+                sidebarCollapsed: req.session.sidebarCollapsed
             }
         })
     } catch (error) {

@@ -8,5 +8,6 @@ router.get('/dashboard', authenticate, authorize('viewDashboard'), allProjects, 
 router.get('/getActivityData', authenticate, authorize('viewDashboard'), dashboardController.getActivityData);
 router.post('/renderPartial', dashboardController.renderPartial);
 router.post('/update-layout', dashboardController.updateLayout);
+router.post('/toggleSidebar', authenticate, authorize('viewDashboard'), dashboardController.toggleSideBar);
 
 module.exports = router;

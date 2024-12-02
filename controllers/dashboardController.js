@@ -8,7 +8,8 @@ exports.showDashboard = async (req, res) => {
             activeMenu: "dashboard",
             projects: req.allProjects,
             logs: await visibleLogs(req,res),
-            activity: await activtyByEntityType(req,res)
+            activity: await activtyByEntityType(req,res),
+            sidebarCollapsed: req.session.sidebarCollapsed ? req.session.sidebarCollapsed : false
         }
     });
 };
@@ -47,4 +48,9 @@ exports.updateLayout = async(req,res) => {
     const newLayout = req.body.layout;
     req.session.layout = newLayout;
     res.json({ message: 'Layout updated', layout: newLayout });
+}
+
+exports.toggleSideBar = async(req,res) => {
+    req.session.sidebarCollapsed = req.body.sidebarCollapsed;
+    res.json({message: 'Sidebar toggled', sidebar: req.body.sidebarCollapsed });
 }

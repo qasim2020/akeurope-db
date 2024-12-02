@@ -1,4 +1,5 @@
 const moment = require('moment');
+const getLetterIcon = require("../modules/letterIcons");
 
 const eq = function(a, b) {
     return a === b;
@@ -73,7 +74,9 @@ const findInArray = function(array, item) {
 
 const getFirstTwoLetters = function (name) {
     if (!name) return ''; 
-    return name.slice(0, 2).toUpperCase();
+    const words = name.trim().split(' '); 
+    const firstLetters = words.slice(0, 2).map(word => word.charAt(0).toUpperCase()); 
+    return firstLetters.join(''); 
 }
 
 const arrayToCsv = function(array) {
@@ -130,6 +133,12 @@ const camelCaseToNormalString = function(string) {
     .replace(/^./, str => str.toUpperCase());
 }
 
+const getSvgForFirstLetter = function(str) {
+    if (!str || typeof str !== 'string') return '<svg></svg>'; 
+    const firstLetter = str.trim().charAt(0).toLowerCase(); 
+    return getLetterIcon(firstLetter);
+}
+
 module.exports = {
     eq,
     compareIds,
@@ -153,4 +162,5 @@ module.exports = {
     findPrimaryKey,
     timeAgo,
     camelCaseToNormalString,
+    getSvgForFirstLetter,
   };

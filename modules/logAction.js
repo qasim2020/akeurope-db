@@ -135,9 +135,6 @@ const customerLogs = async (req,res) => {
         .sort({ timestamp: -1 }) 
         .lean();
 
-        console.log(query);
-        console.log(logs);
-
         const totalPages = Math.ceil(total / limit);
     
         return {

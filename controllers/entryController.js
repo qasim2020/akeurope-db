@@ -1,11 +1,10 @@
 const mongoose = require('mongoose');
 const express = require('express');
-const router = express.Router();
 const Project = require('../models/Project');
 const cloudinary = require('cloudinary').v2;
 const moment = require("moment");
 const { createDynamicModel } = require("../models/createDynamicModel");
-const { projectEntries } = require("../modules/projectEntries");
+const { projectEntries, fetchEntrySubscriptionsAndPayments } = require("../modules/projectEntries");
 const { saveLog, visibleLogs, entryLogs } = require("../modules/logAction");
 const { logTemplates } = require("../modules/logTemplates");
 const { getChanges } = require("../modules/getChanges");
@@ -227,7 +226,9 @@ exports.entry = async(req,res) => {
         if (!project) throw new Error(`Project "${req.params.slug}" not found`);
     
         const DynamicModel = await createDynamicModel(project.slug);
-        const entry = await DynamicModel.findOne({_id: req.params.entryId}).lean();
+        let entry = await DynamicModel.findOne({_id: req.params.entryId}).lean();
+
+        entry = await fetchEntrySubscriptionsAndPayments(entry);
     
         res.render('entry', {
             layout: "dashboard",
@@ -242,7 +243,8 @@ exports.entry = async(req,res) => {
                 entry, 
                 role: req.userPermissions,
                 logs: await visibleLogs(req,res),
-                entryLogs: await entryLogs(req,res)
+                entryLogs: await entryLogs(req,res),
+                sidebarCollapsed: req.session.sidebarCollapsed
             }
         })
     
@@ -258,7 +260,9 @@ exports.getSingleEntryData = async(req,res) => {
         if (!project) throw new Error(`Project "${req.params.slug}" not found`);
     
         const DynamicModel = await createDynamicModel(project.slug);
-        const entry = await DynamicModel.findOne({_id: req.params.entryId}).lean();
+        let entry = await DynamicModel.findOne({_id: req.params.entryId}).lean();
+
+        entry =  await fetchEntrySubscriptionsAndPayments(entry);
   
         res.render('partials/showEntry', {
           layout: false,
@@ -274,17 +278,23 @@ exports.getSingleEntryData = async(req,res) => {
 }
 
 exports.getSingleEntryLogs = async(req,res) => {
-    const project = await Project.findOne({ slug: req.params.slug }).lean();
-    if (!project) throw new Error(`Project "${req.params.slug}" not found`);
+    try {
+        const project = await Project.findOne({ slug: req.params.slug }).lean();
+        if (!project) throw new Error(`Project "${req.params.slug}" not found`);
 
-    const DynamicModel = await createDynamicModel(project.slug);
-    const entry = await DynamicModel.findOne({_id: req.params.entryId}).lean();
-    res.render("partials/showEntryLogs", {
-        layout: false,
-        data: {
-            entryLogs: await entryLogs(req,res),
-            project,
-            entry,
-        }
-    })
+        const DynamicModel = await createDynamicModel(project.slug);
+        let entry = await DynamicModel.findOne({_id: req.params.entryId}).lean();
+
+        entry = fetchEntrySubscriptionsAndPayments(entry);
+        res.render("partials/showEntryLogs", {
+            layout: false,
+            data: {
+                entryLogs: await entryLogs(req,res),
+                project,
+                entry,
+            }
+        });
+    } catch(error) {
+        res.status(500).json({ error: 'Error occured while fetching logs', details: error.message });
+    }
 }

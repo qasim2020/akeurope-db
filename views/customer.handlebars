@@ -211,7 +211,6 @@ const updateCustomer = function(elem) {
 
 const getCustomerLogs = function(elem, href) {
     href = href || $(elem).attr("my-href");
-    console.log(href);
     $.ajax({
         url: href,
         method: 'GET',

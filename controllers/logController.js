@@ -12,7 +12,3 @@ exports.clearOne = async(req,res) => {
         });
     }
 };
-
-// exports.entityType = async(req,res) {
-//     // res.render("dashboard")
-// }

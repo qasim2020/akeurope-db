@@ -1,6 +1,58 @@
 const Project = require("../models/Project");
+const Payment = require("../models/Payment");
+const Subscription = require("../models/Subscription");
+
 const { createDynamicModel } = require("../models/createDynamicModel");
 const { generatePagination } = require("../modules/generatePagination");
+
+const fetchEntrySubscriptionsAndPayments = async function(entry) {
+    const entryId = entry._id;
+  
+    if (!entry) {
+      throw new Error("Entry not provided");
+    }
+  
+    const payments = await Payment.find({ entryId })
+      .sort({ date: -1 }) 
+      .lean();
+  
+    const subscription = await Subscription.find({ entryId }).lean();
+  
+    entry.payments = payments || null;
+    entry.subscriptions = subscription || null;
+    return entry;
+}
+
+const fetchEntryDetailsFromPaymentsAndSubscriptions = async function(entries) {
+    const entryIds = entries.map((entry) => entry._id);
+    const lastPayments = await Payment.aggregate([
+        { $match: { entryId: { $in: entryIds } } },
+        { $sort: { date: -1 } }, 
+        {
+            $group: {
+                _id: "$entryId", 
+                lastPaid: { $first: "$date" }, 
+            },
+        },
+    ]);
+
+    const subscriptions = await Subscription.find({ entryId: { $in: entryIds } }).lean();
+
+    const lastPaymentsMap = Object.fromEntries(
+        lastPayments.map(({ _id, lastPaid }) => [_id.toString(), lastPaid])
+    );
+
+    const subscriptionsMap = Object.fromEntries(
+        subscriptions.map((sub) => [sub.entryId.toString(), sub])
+    );
+
+    entries.forEach((entry) => {
+        entry.lastPaid = lastPaymentsMap[entry._id.toString()] || null;
+        entry.subscriptions = subscriptionsMap[entry._id.toString()] || null;
+    });
+
+    return entries;
+}
 
 const generateSearchQuery = function(req, project) {
     const search = req.query.search || '';
@@ -69,11 +121,13 @@ const projectEntries = async function(req, res) {
 
     const filtersQuery = new URLSearchParams(fieldFilters).toString();
 
-    const entries = await DynamicModel.find(searchQuery)
+    let entries = await DynamicModel.find(searchQuery)
       .sort(sortOptions)
       .skip(skip)
       .limit(limit)
       .lean();
+
+    entries = await fetchEntryDetailsFromPaymentsAndSubscriptions(entries);
 
     const totalEntries = await DynamicModel.countDocuments(searchQuery);
     const totalPages = Math.ceil(totalEntries / limit);
@@ -102,4 +156,4 @@ const projectEntries = async function(req, res) {
     }
 };
 
-module.exports = { projectEntries };
+module.exports = { projectEntries, fetchEntrySubscriptionsAndPayments};

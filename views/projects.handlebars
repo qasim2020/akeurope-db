@@ -203,10 +203,6 @@
       isValid.push($(val).val() != "");
     });
 
-    // $("#create-project").find(".accordion-item").each( (key,val) => {
-      // console.log($(val).find("input:first").val());
-    // })
-
     if (highlightRepeatingValues($("#create-project"))) return;
 
     if (!(isValid.every(val => val === true))) {

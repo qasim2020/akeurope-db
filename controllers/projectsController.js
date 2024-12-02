@@ -13,7 +13,8 @@ exports.projects = async(req,res) => {
             layout: req.session.layout,
             activeMenu: "allProjects",
             role: req.userPermissions,
-            logs: await visibleLogs(req,res)
+            logs: await visibleLogs(req,res),
+            sidebarCollapsed: req.session.sidebarCollapsed
         }
     });
 };

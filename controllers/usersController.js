@@ -26,7 +26,8 @@ exports.users = async(req,res) => {
                 activeMenu: "users",
                 role: req.userPermissions,
                 users: users,
-                logs: await visibleLogs(req,res)
+                logs: await visibleLogs(req,res),
+                sidebarCollapsed: req.session.sidebarCollapsed
             }
         });
 
@@ -172,8 +173,6 @@ exports.updateUser = async(req,res) => {
         const user = await User.findById(req.params.userId); 
         
         let changeDetails = getChanges(user, updatedFields);
-
-        console.log(changeDetails);
 
         if (changeDetails.length > 0) {
 
@@ -355,7 +354,8 @@ exports.user = async(req,res) => {
                 role: req.userPermissions,
                 logs: await visibleLogs(req,res),
                 userLogs: await userLogs(req,res),
-                user: await User.findById(req.params.userId).lean()
+                user: await User.findById(req.params.userId).lean(),
+                sidebarCollapsed: req.session.sidebarCollapsed
             }
         })
     } catch (error) {

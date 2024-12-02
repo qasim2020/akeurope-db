@@ -109,7 +109,8 @@ exports.project = async(req,res) => {
         activeMenu: project.slug,
         role: req.userPermissions,
         pagination,
-        logs: await visibleLogs(req,res)
+        logs: await visibleLogs(req,res),
+        sidebarCollapsed: req.session.sidebarCollapsed
       }
     });
 
