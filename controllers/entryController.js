@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
-const express = require('express');
 const Project = require('../models/Project');
+const Customer = require('../models/Customer');
 const cloudinary = require('cloudinary').v2;
 const moment = require("moment");
 const { createDynamicModel } = require("../models/createDynamicModel");
@@ -249,7 +249,8 @@ exports.entry = async(req,res) => {
                 role: req.userPermissions,
                 logs: await visibleLogs(req,res),
                 entryLogs: await entryLogs(req,res),
-                sidebarCollapsed: req.session.sidebarCollapsed
+                sidebarCollapsed: req.session.sidebarCollapsed,
+                customers: await Customer.find().lean()
             }
         })
     

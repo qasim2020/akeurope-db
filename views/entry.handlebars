@@ -6,12 +6,14 @@
         <!-- Page pre-title -->
         <div class="page-pretitle"> Overview </div>
         <h2 class="page-title"> 
-          <ol class="breadcrumb" aria-label="breadcrumbs">
-            <li class="breadcrumb-item"><a href="/project/{{data.project.slug}}">{{data.project.name}}</a></li>
             {{#if data.entry}}
-            <li class="breadcrumb-item active" aria-current="page"><a href="#">{{lookup data.entry (findPrimaryKey data.project.fields)}}</a></li>
+              {{#if data.entry.name}}
+            {{data.entry.name}}
+              {{else}}
+            {{lookup data.entry (findPrimaryKey data.project.fields)}}
+              {{/if}}
             {{else}}
-            <li class="breadcrumb-item active" aria-current="page"><a href="#">Entry deleted</a></li>
+            Entry deleted
             {{/if}}
           </ol>
         </h2>
@@ -46,6 +48,10 @@
 
 {{#if (findInArray data.role "editEntry")}}
   {{> editEntryModal}}
+{{/if}}
+
+{{#if (findInArray data.role "createPayments")}}
+  {{> emptyPaymentModal}}
 {{/if}}
 
 <script>
