@@ -139,6 +139,11 @@ const getSvgForFirstLetter = function(str) {
     return getLetterIcon(firstLetter);
 }
 
+const regexMatch = function(value, pattern) {
+    let regex = new RegExp(pattern);
+    return regex.test(value);
+}
+
 module.exports = {
     eq,
     compareIds,
@@ -163,4 +168,5 @@ module.exports = {
     timeAgo,
     camelCaseToNormalString,
     getSvgForFirstLetter,
+    regexMatch
   };

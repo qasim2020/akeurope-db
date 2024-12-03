@@ -127,10 +127,15 @@ exports.updateEntry = async(req,res) => {
         const entryData = {};
         project.fields.forEach((field) => {
             const fieldName = field.name;
-            const fieldValue = req.body[fieldName];
+            let fieldValue = req.body[fieldName];
   
             if (fieldValue !== undefined) {
                 entryData[fieldName] = fieldValue;
+            }
+
+            if (field.primary === true) {
+                entryData[fieldName] = existingEntry[fieldName];
+                fieldValue = existingEntry[fieldName];
             }
   
             if (field.type === 'date') {

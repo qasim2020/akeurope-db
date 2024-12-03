@@ -261,12 +261,10 @@
     const valueCounts = new Map();
     let hasRepeatingValues = false;
 
-    // First, count occurrences of each input value
     $container.find(".accordion-item").each((key, val) => {
       const $input = $(val).find("input:first");
       const inputValue = $input.val();
 
-      // Update the count of the value in the map
       if (valueCounts.has(inputValue)) {
         valueCounts.set(inputValue, valueCounts.get(inputValue) + 1);
       } else {
@@ -274,7 +272,6 @@
       }
     });
 
-    // Highlight the fields with repeating values and check if there are any
     $container.find(".accordion-item").each((key, val) => {
       const $input = $(val).find("input:first");
       const inputValue = $input.val();
@@ -386,7 +383,14 @@
   })
 
   const addPrimaryField = function(elem) {
-    let allFields = $(elem).closest(".modal").find(".accordion-item").map( (key, val) => $(val).find("input:first").val() );
+    let allFields = $(elem).closest(".modal").find(".accordion-item").map( (key, val) => {
+        const inputType = $(val).find(".form-select:first").val();
+        if (/^(string|textarea|number)$/.test(inputType)) {
+          return $(val).find("input:first").val() 
+        } else {
+          return null;
+        }
+      }).filter(val => val != null);
     let html = ``;
     allFields.each( (key, val) => {
       if (val.length > 0) {

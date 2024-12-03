@@ -298,7 +298,14 @@ let editProject = function(elem) {
   })
 
   const addPrimaryField = function(elem) {
-    let allFields = $(elem).closest(".modal").find(".accordion-item").map( (key, val) => $(val).find("input:first").val() );
+    let allFields = $(elem).closest(".modal").find(".accordion-item").map( (key, val) => {
+      const inputType = $(val).find(".form-select:first").val();
+      if (/^(string|textarea|number)$/.test(inputType)) {
+        return $(val).find("input:first").val() 
+      } else {
+        return null;
+      }
+    }).filter(val => val != null);
     let html = ``;
     allFields.each( (key, val) => {
       if (val.length > 0) {

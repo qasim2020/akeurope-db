@@ -63,11 +63,23 @@
                           <option value="{{options.1.value}}" {{#if (eq options.1.value (lookup ../data.entry name))}} selected {{/if}}>{{options.1.value}}</option>
                         </select>
                       {{else if (eq type "string")}}
-                        <input type="text" class="entry-input form-control" name="{{name}}" placeholder="String value" value="{{lookup ../data.entry name}}">
+                        {{#if primary}}
+                          <input type="text" class="entry-input form-control" name="" placeholder="String value" value="{{lookup ../data.entry name}}" disabled="true">
+                        {{else}}
+                          <input type="text" class="entry-input form-control" name="{{name}}" placeholder="String value" value="{{lookup ../data.entry name}}">
+                        {{/if}}
                       {{else if (eq type "number")}}
+                        {{#if primary}}
+                        <input type="number" class="entry-input form-control" name="" placeholder="Only numbers are allowed" value="{{lookup ../data.entry name}}" disabled="true">
+                        {{else}}
                         <input type="number" class="entry-input form-control" name="{{name}}" placeholder="Only numbers are allowed" value="{{lookup ../data.entry name}}">
+                        {{/if}}
                       {{else}}
-                        <input type="text" class="entry-input form-control" name="{{name}}" placeholder="String value" value="{{lookup ../data.entry name}}">
+                        {{#if primary}}
+                          <input type="text" class="entry-input form-control" name="" placeholder="String value" value="{{lookup ../data.entry name}}" disabled="true">
+                        {{else}}
+                          <input type="text" class="entry-input form-control" name="{{name}}" placeholder="String value" value="{{lookup ../data.entry name}}">
+                        {{/if}}
                       {{/if}}
                     </td>
                   </tr>

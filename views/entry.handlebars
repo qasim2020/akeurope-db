@@ -95,7 +95,7 @@
     const data = $(elem)
         .closest(".modal")
         .find(".form-select, input, textarea")
-        .toArray() // Convert jQuery collection to an array
+        .toArray() 
         .reduce((total, val) => {
             Object.assign(total, {
                 [$(val).attr("name")]: $(val).val()
