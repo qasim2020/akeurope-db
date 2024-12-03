@@ -20,6 +20,14 @@
       	font-feature-settings: "cv03", "cv04", "cv11";
       }
 
+      .navbar-vertical.navbar-expand-lg {
+        scrollbar-width: none;
+      }
+
+      .navbar-vertical.navbar-expand-lg::-webkit-scrollbar {
+        display: none;
+      }
+
       @media (min-width: 991.98px) {
         .collapsed-sidebar {
           width: 71px;
@@ -62,7 +70,7 @@
           position: fixed;
           left: 227px;
           top: 42px;
-          z-index: 2031;
+          z-index: 1045;
         }
 
         .ml-collapsed-sidebar {
@@ -261,7 +269,7 @@
 
               <li class="nav-item dropdown show">
                 <a class="nav-link dropdown-toggle" href="#navbar-help" data-bs-toggle="dropdown" data-bs-auto-close="false" role="button" aria-expanded="false" >
-                  <span class="nav-link-icon d-md-none d-lg-inline-block"><!-- Download SVG icon from http://tabler-icons.io/i/lifebuoy -->
+                  <span class="nav-link-icon d-md-none d-lg-inline-block">
                     <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-credit-card"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 5m0 3a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v8a3 3 0 0 1 -3 3h-12a3 3 0 0 1 -3 -3z" /><path d="M3 10l18 0" /><path d="M7 15l.01 0" /><path d="M11 15l2 0" /></svg>
                   </span>
                   <span class="nav-link-title">
@@ -271,7 +279,7 @@
                 
                 <div class="dropdown-menu show">
                   <a class="nav-link" href="/invoices" target="_blank" rel="noopener">
-                    <span class="nav-link-icon d-md-none d-lg-inline-block"><!-- Download SVG icon from http://tabler-icons.io/i/lifebuoy -->
+                    <span class="nav-link-icon d-md-none d-lg-inline-block">
                       {{{getSvgForFirstLetter 'invoices'}}}
                     </span>
                     <span class="nav-link-title">
@@ -279,7 +287,7 @@
                     </span>
                   </a>
                   <a class="nav-link" href="/subscriptions">
-                    <span class="nav-link-icon d-md-none d-lg-inline-block"><!-- Download SVG icon from http://tabler-icons.io/i/lifebuoy -->
+                    <span class="nav-link-icon d-md-none d-lg-inline-block">
                       {{{getSvgForFirstLetter 'subscriptions'}}}
                     </span>
                     <span class="nav-link-title">
@@ -344,7 +352,7 @@
               </li>
 
               <li class="nav-item">
-                <a class="nav-link {{#if (eq "projects" data.activeMenu)}} bg-azure-lt {{/if}}" href="/projects"  data-bs-toggle="tooltip" data-bs-title="All Projects">
+                <a class="nav-link {{#if (eq "allProjects" data.activeMenu)}} bg-azure-lt {{/if}}" href="/projects"  data-bs-toggle="tooltip" data-bs-title="All Projects">
                   <span class="nav-link-icon d-md-none d-lg-inline-block">
                     <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-file-analytics"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M14 3v4a1 1 0 0 0 1 1h4" /><path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z" /><path d="M9 17l0 -5" /><path d="M12 17l0 -1" /><path d="M15 17l0 -3" /></svg>
                   </span>
@@ -352,7 +360,7 @@
               </li>
 
               <li class="nav-item">
-                <a class="nav-link {{#if (eq "projects" data.activeMenu)}} bg-azure-lt {{/if}}" href="/projects"  data-bs-toggle="tooltip" data-bs-title="All Projects">
+                <a class="nav-link {{#if (eq "allProjects" data.activeMenu)}} bg-azure-lt {{/if}}" href="/projects"  data-bs-toggle="tooltip" data-bs-title="All Projects">
                   <span class="nav-link-icon d-md-none d-lg-inline-block">
                   {{{getSvgForFirstLetter 'all projects'}}}
                   </span>
@@ -361,7 +369,7 @@
 
               {{#each data.projects}}
               <li class="nav-item">
-                <a class="nav-link {{#if (eq "projects" data.activeMenu)}} bg-azure-lt {{/if}}" href="/project/{{this.slug}}" data-bs-toggle="tooltip" data-bs-title="{{this.name}}" >
+                <a class="nav-link {{#if (eq this.slug ../data.activeMenu)}} bg-azure-lt {{/if}}" href="/project/{{this.slug}}" data-bs-toggle="tooltip" data-bs-title="{{this.name}}" >
                   <span class="nav-link-icon d-md-none d-lg-inline-block">
                     {{{getSvgForFirstLetter this.name}}}
                   </span>

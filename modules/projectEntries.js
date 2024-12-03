@@ -6,11 +6,13 @@ const { createDynamicModel } = require("../models/createDynamicModel");
 const { generatePagination } = require("../modules/generatePagination");
 
 const fetchEntrySubscriptionsAndPayments = async function(entry) {
-    const entryId = entry._id;
-  
+
+      
     if (!entry) {
-      throw new Error("Entry not provided");
+        return null;
     }
+
+    const entryId = entry._id;
   
     const payments = await Payment.find({ entryId })
       .sort({ date: -1 }) 

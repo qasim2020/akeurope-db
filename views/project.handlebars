@@ -27,32 +27,15 @@
           </a>
           {{#if (findInArray data.role "editProject")}}
           <a href="#" class="btn btn-secondary-outline d-none d-md-inline-block" id="#edit-project-{{data.project.slug}}" data-bs-toggle="modal" data-bs-target="#modal-{{data.project.slug}}">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-pencil-plus">
-              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-              <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
-              <path d="M13.5 6.5l4 4" />
-              <path d="M16 19h6" />
-              <path d="M19 16v6" />
-            </svg>
             Edit this project
           </a>
           <a href="#" class="btn btn-secondary-outline d-md-none btn-icon" data-bs-toggle="modal" data-bs-target="#modal-{{data.project.slug}}" aria-label="Create new report">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-pencil-plus">
-              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-              <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
-              <path d="M13.5 6.5l4 4" />
-              <path d="M16 19h6" />
-              <path d="M19 16v6" />
-            </svg> 
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-pencil-plus"> <path stroke="none" d="M0 0h24v24H0z" fill="none" /> <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" /> <path d="M13.5 6.5l4 4" /> <path d="M16 19h6" /> <path d="M19 16v6" /> </svg>
           </a>
           {{/if}}
           {{#if (findInArray data.role "createEntry")}}
           <a href="#" class="btn btn-primary d-none d-md-inline-block" id="#createNewEntry" data-bs-toggle="modal" data-bs-target="#modal-new-entry">
-            <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-              <path d="M12 5l0 14" />
-              <path d="M5 12l14 0" />
-            </svg>
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"> <path stroke="none" d="M0 0h24v24H0z" fill="none" /> <path d="M12 5l0 14" /> <path d="M5 12l14 0" /> </svg>
             Create new entry
           </a>
           <a href="#" class="btn btn-primary d-md-none btn-icon" data-bs-toggle="modal" data-bs-target="#modal-new-entry" aria-label="modal-new-entry">
