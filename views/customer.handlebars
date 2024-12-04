@@ -45,6 +45,10 @@
   {{> editCustomerModal}}
 {{/if}}
 
+{{#if (findInArray data.role "createPayments")}}
+  {{> emptyPaymentModal}}
+{{/if}}
+
 <script>
 const sendEmailInvite = function(elem) {
 
@@ -222,4 +226,6 @@ const getCustomerLogs = function(elem, href) {
         }
     })
 }
+
+
 </script>

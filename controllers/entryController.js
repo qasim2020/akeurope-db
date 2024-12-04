@@ -304,3 +304,30 @@ exports.getSingleEntryLogs = async(req,res) => {
         res.status(500).json({ error: 'Error occured while fetching logs', details: error.message });
     }
 }
+
+
+exports.getPaymentModalEntryData = async(req,res) => {
+    try {
+
+        let { entries, project, pagination } = await projectEntries(req,res);
+
+        entries = entries.sort((a, b) => {
+            if (a.lastPaid === null) return -1;
+            if (b.lastPaid === null) return 1;
+            return new Date(a.lastPaid) - new Date(b.lastPaid);
+        });
+
+        res.render('partials/components/paymentModalEntryData', {
+            layout: false,
+            data: {
+                fields: project.fields,
+                project, 
+                entries,
+                pagination,
+            }
+        });
+
+    } catch(error) {
+        res.status(500).json({ error: 'Error occured while fetching logs', details: error.message });
+    }
+}

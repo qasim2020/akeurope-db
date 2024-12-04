@@ -367,7 +367,8 @@ exports.customer = async(req,res) => {
                 logs: await visibleLogs(req,res),
                 customerLogs: await customerLogs(req,res),
                 customer,
-                sidebarCollapsed: req.session.sidebarCollapsed
+                sidebarCollapsed: req.session.sidebarCollapsed,
+                customers: await Customer.find().lean()
             }
         })
     } catch (error) {

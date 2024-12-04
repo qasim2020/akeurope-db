@@ -13,4 +13,7 @@ router.post('/project/entry/delete/:slug', authenticate, authorize("deleteEntry"
 
 router.get('/getSingleEntryData/:entryId/project/:slug', authenticate, authorize("editEntry"), entryController.getSingleEntryData);
 router.get('/getSingleEntryLogs/:entryId/project/:slug', authenticate, authorize("editEntry"), entryController.getSingleEntryLogs);
+
+router.get('/getPaymentModalEntryData/:slug', authenticate, authorize('viewEntry'), entryController.getPaymentModalEntryData);
+
 module.exports = router;

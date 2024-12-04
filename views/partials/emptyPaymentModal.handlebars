@@ -1,21 +1,62 @@
 <div class="modal modal-blur fade" id="modal-new-payment" tabindex="-1" style="display: none; padding-left: 0px;" aria-modal="true" role="dialog" entryId="">
-  <div class="modal-dialog modal-lg" role="document">
+  <div class="modal-dialog modal-xl" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title">Add new payment for {{data.entry.name}}</h5>
+        <h5 class="modal-title">Add New Payment</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
 
         <div class="mb-3">
           <label class="form-label">Select Customer</label>
-          <div class="text-secondary mb-2">If your customer is not listed here, <a href="/customers">click here</a> to add a new customer.</div>
           <select name="" id="" class="form-select">
             {{#each data.customers}}
             <option value="{{this._id}}">{{this.name}}</option>
             {{/each}}
           </select>  
+          <small class="text-muted">If your customer is not listed here, <a href="/customers">click here</a> to add a new customer.</small>
         </div>
+
+        <div class="mb-3">
+          <label class="form-label">Select Project</label>
+          <select name="projectSlug" id="" class="form-select">
+            {{#each data.projects}}
+            <option value="{{this.slug}}">{{this.name}}</option>
+            {{/each}}
+          </select>  
+        </div>
+
+        <div class="mb-3 search-beneficiaries">
+          <label class="form-label">Select Beneficiaries</label>
+          <div class="row g-3">
+            <div class="col-lg-6">
+              <div class="input-group bg-light">
+                <span class="input-group-text">Select</span>
+                <input type="number" class="form-control" value="10" min="1" onkeydown="if (event.key === 'Enter') searchBeneficiaries(this)" name="randomBeneficiaries" placeholder="Number of beneficiaries" />
+                <span class="input-group-text">beneficiaries randomly</span>
+              </div>
+              <small class="text-muted">Select beneficiaries with the oldest payment day.</small>
+            </div>
+
+            <div class="col-lg-5">
+              <div class="input-icon">
+                <span class="input-icon-addon">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"> <path stroke="none" d="M0 0h24v24H0z" fill="none" /> <circle cx="10" cy="10" r="7" /> <line x1="21" y1="21" x2="15" y2="15" /> </svg>
+                </span>
+                <input type="text" class="form-control" placeholder="Search beneficiaries..." onkeydown="if (event.key === 'Enter') searchBeneficiaries(this)" name="specificBeneficiaries"/>
+              </div>
+              <small class="text-muted">Search for specific beneficiaries.</small>
+            </div>
+
+            <div class="col-lg-1">
+              <button class="btn btn-icon" id="searchBeneficiaries" onclick="searchBeneficiaries(this)">
+                <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-arrow-narrow-right"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l14 0" /><path d="M15 16l4 -4" /><path d="M15 8l4 4" /></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div id="search-results-payment-modal-entries"> </div>
 
         <div class="mb-3">
           <label class="form-label">Add Payment</label>
@@ -23,16 +64,19 @@
             <div class="card-header">
               <ul class="nav nav-tabs card-header-tabs nav-fill" data-bs-toggle="tabs" role="tablist">
                 <li class="nav-item" role="presentation">
-                  <a href="#tab-credit-card" class="nav-link active" data-bs-toggle="tab" aria-selected="true" role="tab">Credit card</a>
+                  <a href="#tab-credit-card" class="nav-link active" data-bs-toggle="tab" aria-selected="true" role="tab">Credit card (charge now)</a>
+                </li>
+                <li class="nav-item" role="presentation">
+                  <a href="#tab-credit-card-recurring" class="nav-link" data-bs-toggle="tab" aria-selected="true" role="tab">Credit card (recurring payment)</a>
                 </li>
                 <li class="nav-item" role="presentation">
                   <a href="#tab-bank-transfer-completed" class="nav-link" data-bs-toggle="tab" aria-selected="false" role="tab" tabindex="-1">Bank transfer (completed)</a>
-                </li>
-                <li class="nav-item" role="presentation">
-                  <a href="#tab-bank-transfer-pending" class="nav-link" data-bs-toggle="tab" aria-selected="false" role="tab" tabindex="-1">Bank transfer (pending)</a>
-                </li>
-              </ul>
-            </div>
+              </li>
+              <li class="nav-item" role="presentation">
+                <a href="#tab-bank-transfer-pending" class="nav-link" data-bs-toggle="tab" aria-selected="false" role="tab" tabindex="-1">Bank transfer (pending)</a>
+              </li>
+            </ul>
+          </div>
             <div class="card-body">
               <div class="tab-content">
 
@@ -67,8 +111,11 @@
                               
                 </div>
 
-                <div class="tab-pane" id="tab-bank-transfer-completed" role="tabpanel">
+                <div class="tab-pane" id="tab-credit-card-recurring">
+                  <p>show recurring credit card form</p>
+                </div>
 
+                <div class="tab-pane" id="tab-bank-transfer-completed" role="tabpanel">
 
                   <div class="mb-3">
                     <label for="invoice" class="form-label">Upload Invoice</label>
@@ -129,7 +176,6 @@
                       <input type="text" class="form-control" id="ifscCode" placeholder="Enter IFSC code" required>
                   </div>
 
-
                   <div class="mb-3">
                     <label for="paymentDate" class="form-label">Payment Date</label>
                     <input type="date" class="form-control" id="paymentDate" required>
@@ -151,10 +197,26 @@
                   <div class="mb-3">
                     <label for="invoiceAmount" class="form-label">Invoice Amount</label>
                     <div class="input-group">
-                      <span class="input-group-text">$</span>
-                      <input type="number" class="form-control" id="invoiceAmount" name="invoiceAmount" placeholder="Enter amount" required>
+                      <select class="form-select" id="currency" name="currency" style="max-width: 112px;">
+                        <option value="USD" selected>USD ($)</option>
+                        <option value="NOK">NOK (kr)</option>
+                        <option value="GBP">GBP (£)</option>
+                        <option value="EUR">EUR (€)</option>
+                        <option value="PKR">PKR (₨)</option>
+                        <option value="ILS">ILS (₪)</option>
+                        <option value="EGP">EGP (£)</option>
+                      </select>
+                      <input 
+                        type="number" 
+                        class="form-control" 
+                        id="invoiceAmount" 
+                        name="invoiceAmount" 
+                        placeholder="Enter amount" 
+                        required 
+                      />
                     </div>
                   </div>
+
 
                   <div class="mb-3">
                     <label for="dueDate" class="form-label">Due Date</label>
@@ -165,6 +227,8 @@
                     <label for="notes" class="form-label">Notes (Optional)</label>
                     <textarea class="form-control" id="notes" name="notes" rows="3" placeholder="Add any additional notes..."></textarea>
                   </div>
+
+
                 </div>
 
               </div>
@@ -176,7 +240,7 @@
         </div>
         <div class="modal-footer">
           <a href="#" class="btn btn-link link-secondary" data-bs-dismiss="modal"> Cancel </a>
-          <a href="#" class="btn btn-primary ms-auto" onclick="createCustomer(this)">
+          <a href="#" class="btn btn-primary ms-auto" onclick="createNewPayment(this)">
             <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
               <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
               <path d="M12 5l0 14"></path>
@@ -186,3 +250,75 @@
       </div>
     </div>
   </div>
+
+
+  <script>
+    $(document).ready(() => {
+      console.log('document is ready');
+      $("#showPaymentModal").trigger('click');
+    })
+
+    const searchBeneficiaries = function(elem) {
+      
+      let error;
+
+      const limit = $("[name=randomBeneficiaries]").val();
+      const search = $("[name=specificBeneficiaries]").val();
+      const slug = $("[name=projectSlug]").val();
+
+      $('.search-beneficiaries').find('.form-control').removeClass('is-invalid');
+      $('.search-beneficiaries').find('.invalid-feedback').remove();
+
+      if (limit == '' && search == '') {
+        error = 'Please fill either the random or specific beneficiary input field.';
+        $('.search-beneficiaries').find('.form-control').addClass('is-invalid');
+        $('.search-beneficiaries').append(`<div class='invalid-feedback d-block'>${error}</div>`);
+        return false;
+      } 
+
+      console.log({
+        limit,search, slug
+      })
+
+      const currentBtnHTML = $('#searchBeneficiaries').html();
+      $('#searchBeneficiaries').html(`<span class="spinner-border spinner-border-sm" role="status"></span>`);
+
+      $.ajax({
+        url: `/getPaymentModalEntryData/${slug}?limit=${limit}&search=${search}`,
+        method: 'GET',
+        success: (response) => {
+          $('#searchBeneficiaries').html(currentBtnHTML);
+          $('#search-results-payment-modal-entries').html(response);
+        },
+        error: (error) => {
+          $('#searchBeneficiaries').html(currentBtnHTML);
+          alert(error.responseText);
+        }
+      });
+
+    }
+
+    const selectAllSearchResults = function(elem) {
+      const count = $(elem).data("limit");
+      if ( $(elem).html() == `Select all (${count})` ) {
+        $('#last-paid-entries').find('[type="checkbox"]:not(":checked")').click();
+        $(elem).html(`Unselect all (${count})`);
+      } else {
+        $('#last-paid-entries').find('[type="checkbox"]:checked').click();
+        $(elem).html(`Select all (${count})`);
+      }
+      
+    }
+
+    const toggleSearchResults = function(elem) {
+      $(elem).toggleClass("btn-github");
+      if ( $('#last-paid-entries').hasClass("d-none")) {
+        $(elem).html('Hide results');
+        $(elem).closest(".d-flex").addClass("mb-2");
+      } else {
+        $(elem).html('Show results');
+        $(elem).closest(".d-flex").removeClass("mb-2");
+      }
+      $('#last-paid-entries').toggleClass("d-none");
+    }
+  </script>
