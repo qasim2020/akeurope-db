@@ -166,20 +166,30 @@
               <div class="mb-3 primary-field">
                   <div class="form-label">Select non-repeatable field</div>
                   <p class="card-subtitle mb-3">This is a unique field in your project that never repeats. It can be an email, id card number, mobile number, or slug etc. </p>
-                  <div class="mb-3 primary-field-selectors">
+                  <div class="card d-block p-2 mb-3 form-control primary-field-selectors">
                         {{#each data.project.fields}}
                             {{#if (regexMatch this.type '^(string|textarea|number)$')}}
-                                <span class="badge cursor-pointer mb-1 {{#if this.primary}} bg-blue-lt {{/if}}" onclick="setPrimaryField(this)">{{this.actualName}}</span>
+                                <span class="badge cursor-pointer p-2 mb-1 {{#if this.primary}} bg-blue-lt {{/if}}" onclick="setPrimaryField(this)">{{this.actualName}}</span>
                             {{/if}}
                         {{/each}}
                   </div>
-                  <input type="text" class="form-control" disabled
+                  <input type="text" class="d-none" disabled
                     {{#each data.project.fields}}
                         {{#if this.primary}}
                             value="{{this.actualName}}"
                         {{/if}}
                     {{/each}}
                   >
+              </div>
+              <div class="mb-3 visible-field">
+                <div class="form-label">Fields visible to onboarding customers</div>
+                <p class="card-subtitle mb-3">These fields are used to draw the beneficiary card while a customer is being onboarded/ adding new payment. On payment completion, all fields will be visible to the customer.</p>
+                <div class="card d-block p-2 mb-3 form-control visible-field-selectors">
+                    {{#each data.project.fields}}
+                        <span class="badge cursor-pointer p-2 mb-1 {{#if this.visible}} bg-blue-lt {{/if}}" onclick="setVisibleField(this)">{{this.actualName}}</span>
+                    {{/each}}
+                </div>
+                <input type="text" class="d-none" disabled>
               </div>
             </div>
             <div class="modal-footer">

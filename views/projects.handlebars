@@ -251,7 +251,7 @@
       url: '/project/create', 
       type: 'POST',
       contentType: 'application/json', 
-      data: JSON.stringify({name, status, location, slug, fields, subCost, subCostCurrency}),
+      data: JSON.stringify(data),
       success: function(response) {
         $("#save-project").html(currentBtnHTML);
         window.location.href = "/projects";
