@@ -15,6 +15,26 @@
                     <label class="form-label">Slug</label>
                     <input id="project-slug" type="text" class="form-control" name="example-text-input" placeholder="name-of-project" value="{{data.project.slug}}" />
                 </div>
+                <div class="mb-3">
+                    <label class="form-label">Project location</label>
+                    <input id="project-location" type="text" class="form-control" name="example-text-input" placeholder="Pakistan etc" value="{{data.project.location}}" />
+                </div>
+                <div class="mb-3">
+                    <label for="invoiceAmount" class="form-label">Minimum subscription cost</label>
+                    <div class="input-group">
+                      <select class="form-select form-control" id="project-sub-cost-currency" name="currency" style="max-width: 112px;">
+                        <option value="USD" selected>USD ($)</option>
+                        <option value="NOK">NOK (kr)</option>
+                        <option value="GBP">GBP (£)</option>
+                        <option value="EUR">EUR (€)</option>
+                        <option value="PKR">PKR (₨)</option>
+                        <option value="ILS">ILS (₪)</option>
+                        <option value="EGP">EGP (£)</option>
+                      </select>
+                      <input type="number" class="form-control" id="project-sub-cost" name="invoiceAmount" placeholder="Enter amount" required />
+                    </div>
+                    <small class="text-muted">Minimum cost for each subscriber.</small>
+                </div>
                 <label class="form-label">Project status</label>
                 <div class="form-selectgroup-boxes row mb-3" id="project-status">
                     <div class="col-lg-6">
@@ -46,13 +66,10 @@
                         </label>
                     </div>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label">Project location</label>
-                    <input id="project-location" type="text" class="form-control" name="example-text-input" placeholder="Pakistan etc" value="{{data.project.location}}" />
-                </div>
+
             </div>
             <div class="modal-body">
-              <label class="form-label">Enter project fields</label>
+              <label class="form-label">Project fields</label>
               <p class="card-subtitle mb-3">Drag and drop the fields to change their order</p>
               <div class="accordion" id="accordion-new-project">
                 <div class="accordion-item">
@@ -103,14 +120,24 @@
           </div>
           <div class="modal-body">
               <div class="mb-3 primary-field">
-                  <div class="form-label">Select non-repeatable field</div>
+                  <div class="form-label">Non repeatable field</div>
                   <p class="card-subtitle mb-3">This is a unique field in your project that never repeats. It can be an email, id card number, mobile number, or slug etc. </p>
-                  <div class="mb-3 primary-field-selectors">
-                      <span class="badge cursor-pointer" onclick="alert('No field exists. You need to enter a field name first.')">Field # 1</span>
+                  <div class="card d-block p-2 mb-3 form-control primary-field-selectors">
+                      <span class="badge cursor-pointer p-2" onclick="alert('This is a temp field. You need to enter a field name first.')">Field # 1</span>
                   </div>
-                  <input type="text" class="form-control" disabled>
+                  <input type="text" class="d-none" disabled>
+              </div>
+
+              <div class="mb-3 visible-field">
+                <div class="form-label">Fields visible to onboarding customers</div>
+                <p class="card-subtitle mb-3">These fields are used to draw the beneficiary card while a customer is being onboarded/ adding new payment. On payment completion, all fields will be visible to the customer.</p>
+                <div class="card d-block p-2 mb-3 form-control visible-field-selectors">
+                    <span class="badge cursor-pointer p-2" onclick="alert('This is a temp field. You need to enter a field name first.')">Field # 1</span>
+                </div>
+                <input type="text" class="d-none" disabled>
               </div>
           </div>
+
           <div class="modal-footer">
               <a href="#" class="btn btn-link link-secondary" data-bs-dismiss="modal">
                 Cancel

@@ -8,13 +8,15 @@ const { getChanges } = require("../modules/getChanges");
 
 exports.createProject = async(req,res) => {
   try {
-    const { name, slug, status, location, fields} = req.body;
+    const { name, slug, status, subCost, subCostCurrency, location, fields} = req.body;
 
     const project = new Project({
       _id: new mongoose.Types.ObjectId(),
       name,
       slug: toKebabCase(slug),
       status,
+      subCost,
+      subCostCurrency,
       location,
       fields
     });

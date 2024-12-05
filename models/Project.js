@@ -4,6 +4,8 @@ const ProjectSchema = new mongoose.Schema({
   name: { type: String, required: true },
   slug: { type: String, unique: true},
   location: { type: String },
+  subCost: Number,
+  subCostCurrency: String,
   status: {type:String },
   fields: { type: Array, default: [] } 
 });

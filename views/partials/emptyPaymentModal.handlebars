@@ -30,7 +30,7 @@
           <label class="form-label">Select Beneficiaries</label>
           <div class="row g-3">
             <div class="col-lg-6">
-              <div class="input-group bg-light">
+              <div class="input-group">
                 <span class="input-group-text">Select</span>
                 <input type="number" class="form-control" value="10" min="1" onkeydown="if (event.key === 'Enter') searchBeneficiaries(this)" name="randomBeneficiaries" placeholder="Number of beneficiaries" />
                 <span class="input-group-text">beneficiaries randomly</span>
@@ -49,7 +49,7 @@
             </div>
 
             <div class="col-lg-1">
-              <button class="btn btn-icon" id="searchBeneficiaries" onclick="searchBeneficiaries(this)">
+              <button class="btn btn-icon w-100" id="searchBeneficiaries" onclick="searchBeneficiaries(this)">
                 <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-arrow-narrow-right"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l14 0" /><path d="M15 16l4 -4" /><path d="M15 8l4 4" /></svg>
               </button>
             </div>
@@ -206,14 +206,7 @@
                         <option value="ILS">ILS (₪)</option>
                         <option value="EGP">EGP (£)</option>
                       </select>
-                      <input 
-                        type="number" 
-                        class="form-control" 
-                        id="invoiceAmount" 
-                        name="invoiceAmount" 
-                        placeholder="Enter amount" 
-                        required 
-                      />
+                      <input type="number" class="form-control" id="invoiceAmount" name="invoiceAmount" placeholder="Enter amount" required />
                     </div>
                   </div>
 
@@ -311,7 +304,6 @@
     }
 
     const toggleSearchResults = function(elem) {
-      $(elem).toggleClass("btn-github");
       if ( $('#last-paid-entries').hasClass("d-none")) {
         $(elem).html('Hide results');
         $(elem).closest(".d-flex").addClass("mb-2");
