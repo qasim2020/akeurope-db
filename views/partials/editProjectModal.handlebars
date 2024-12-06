@@ -16,6 +16,27 @@
                     <input type="text" class="form-control project-slug" name="example-text-input" placeholder="name-of-project" value="{{data.project.slug}}" disabled/>
                 </div>
 
+                <div class="mb-3">
+                    <label class="form-label">Project location</label>
+                    <input type="text" class="form-control project-location" name="example-text-input" placeholder="Pakistan etc" value="{{data.project.location}}" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="invoiceAmount" class="form-label">Subscription cost (per month)</label>
+                    <div class="input-group">
+                      <select class="form-select form-control project-sub-cost-currency" name="currency" style="max-width: 112px;">
+                        <option value="USD" {{#if (eq data.project.subCostCurrency 'USD')}}selected{{/if}}>USD ($)</option>
+                        <option value="NOK" {{#if (eq data.project.subCostCurrency 'NOK')}}selected{{/if}}>NOK (kr)</option>
+                        <option value="GBP" {{#if (eq data.project.subCostCurrency 'GBP')}}selected{{/if}}>GBP (£)</option>
+                        <option value="EUR" {{#if (eq data.project.subCostCurrency 'EUR')}}selected{{/if}}>EUR (€)</option>
+                        <option value="PKR" {{#if (eq data.project.subCostCurrency 'PKR')}}selected{{/if}}>PKR (₨)</option>
+                        <option value="ILS" {{#if (eq data.project.subCostCurrency 'ILS')}}selected{{/if}}>ILS (₪)</option>
+                        <option value="EGP" {{#if (eq data.project.subCostCurrency 'EGP')}}selected{{/if}}>EGP (£)</option>
+                      </select>
+                      <input type="number" class="form-control project-sub-cost" name="invoiceAmount" placeholder="Enter amount" required value="{{data.project.subCost}}" />
+                    </div>
+                </div>
+
                 <label class="form-label">Project status</label>
                 <div class="form-selectgroup-boxes row mb-3 project-status">
                     <div class="col-lg-6">
@@ -51,10 +72,7 @@
                         </label>
                     </div>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label">Project location</label>
-                    <input type="text" class="form-control project-location" name="example-text-input" placeholder="Pakistan etc" value="{{data.project.location}}" />
-                </div>
+
 
             </div>
             <div class="modal-body">
@@ -62,7 +80,7 @@
               <p class="card-subtitle mb-3">Drag and drop the fields to change their order</p>
               <div class="accordion" id="accordion-{{data.project.slug}}">
                 {{#each data.project.fields}}
-                <div class="accordion-item">
+                <div class="accordion-item form-field">
                   <h2 class="accordion-header d-flex justify-content-between" id="">
                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{../data.project.slug}}-{{@key}}" aria-expanded="true">
                         <span class='d-none d-md-inline-block me-2'>Field is </span>
@@ -163,7 +181,7 @@
             </div>
             </div>
             <div class="modal-body">
-              <div class="mb-3 primary-field">
+              <div class="mb-3 form-field primary-field">
                   <div class="form-label">Select non-repeatable field</div>
                   <p class="card-subtitle mb-3">This is a unique field in your project that never repeats. It can be an email, id card number, mobile number, or slug etc. </p>
                   <div class="card d-block p-2 mb-3 form-control primary-field-selectors">
@@ -181,7 +199,7 @@
                     {{/each}}
                   >
               </div>
-              <div class="mb-3 visible-field">
+              <div class="mb-3 form-field visible-field">
                 <div class="form-label">Fields visible to onboarding customers</div>
                 <p class="card-subtitle mb-3">These fields are used to draw the beneficiary card while a customer is being onboarded/ adding new payment. On payment completion, all fields will be visible to the customer.</p>
                 <div class="card d-block p-2 mb-3 form-control visible-field-selectors">
@@ -189,14 +207,14 @@
                         <span class="badge cursor-pointer p-2 mb-1 {{#if this.visible}} bg-blue-lt {{/if}}" onclick="setVisibleField(this)">{{this.actualName}}</span>
                     {{/each}}
                 </div>
-                <input type="text" class="d-none" disabled>
+                <input type="text" class="d-none" disabled value="{{#each data.project.fields}}{{#if (eq this.visible true)}}{{this.actualName}}{{/if}}{{/each}}">
               </div>
             </div>
             <div class="modal-footer">
                 <a href="#" class="btn btn-link link-secondary" data-bs-dismiss="modal">
                     Cancel
                 </a>
-                <a href="#" class="btn btn-primary ms-auto" onclick="editProject(this)">
+                <a href="#" class="btn btn-primary ms-auto" onclick="updateProject(this)">
                     <!-- Download SVG icon from http://tabler-icons.io/i/plus -->
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-upload"> <path stroke="none" d="M0 0h24v24H0z" fill="none" /> <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2" /> <path d="M7 9l5 -5l5 5" /> <path d="M12 4l0 12" /> </svg>
                     Update project

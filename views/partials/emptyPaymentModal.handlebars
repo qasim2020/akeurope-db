@@ -17,47 +17,37 @@
           <small class="text-muted">If your customer is not listed here, <a href="/customers">click here</a> to add a new customer.</small>
         </div>
 
-        <div class="mb-3">
-          <label class="form-label">Select Project</label>
-          <select name="projectSlug" id="" class="form-select">
-            {{#each data.projects}}
-            <option value="{{this.slug}}">{{this.name}}</option>
-            {{/each}}
-          </select>  
-        </div>
-
         <div class="mb-3 search-beneficiaries">
           <label class="form-label">Select Beneficiaries</label>
-          <div class="row g-3">
-            <div class="col-lg-6">
-              <div class="input-group">
-                <span class="input-group-text">Select</span>
-                <input type="number" class="form-control" value="10" min="1" onkeydown="if (event.key === 'Enter') searchBeneficiaries(this)" name="randomBeneficiaries" placeholder="Number of beneficiaries" />
-                <span class="input-group-text">beneficiaries randomly</span>
-              </div>
-              <small class="text-muted">Select beneficiaries with the oldest payment day.</small>
-            </div>
+          <div class="input-group">
+            <button class="input-group-btn btn btn-icon" id="addBeneficiary" onclick="addBeneficiary(this)">
+              <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"> <path stroke="none" d="M0 0h24v24H0z" fill="none"></path> <path d="M12 5l0 14"></path> <path d="M5 12l14 0"></path> </svg>
+            </button>
+            <span class="input-group-text">Select</span>
+            <input type="number" class="form-control" style="min-width: 50px;" value="10" min="1" onkeydown="if (event.key === 'Enter') searchBeneficiaries(this)" name="randomBeneficiaries" placeholder="Number of beneficiaries" />
+            <span class="input-group-text">beneficiaries randomly or</span>
 
-            <div class="col-lg-5">
-              <div class="input-icon">
-                <span class="input-icon-addon">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"> <path stroke="none" d="M0 0h24v24H0z" fill="none" /> <circle cx="10" cy="10" r="7" /> <line x1="21" y1="21" x2="15" y2="15" /> </svg>
-                </span>
-                <input type="text" class="form-control" placeholder="Search beneficiaries..." onkeydown="if (event.key === 'Enter') searchBeneficiaries(this)" name="specificBeneficiaries"/>
-              </div>
-              <small class="text-muted">Search for specific beneficiaries.</small>
-            </div>
-
-            <div class="col-lg-1">
-              <button class="btn btn-icon w-100" id="searchBeneficiaries" onclick="searchBeneficiaries(this)">
-                <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-arrow-narrow-right"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l14 0" /><path d="M15 16l4 -4" /><path d="M15 8l4 4" /></svg>
-              </button>
-            </div>
+            <input type="text" class="form-control" style="min-width: 120px;" placeholder="search specific beneficiaries..." onkeydown="if (event.key === 'Enter') searchBeneficiaries(this)" name="specificBeneficiaries"/>
+            <span class="input-group-text">from</span>
+            <select name="projectSlug" class="form-control form-select" style="min-width: 200px;">
+              {{#each data.projects}}
+              <option value="{{this.slug}}">{{this.name}}</option>
+              {{/each}}
+            </select>
+            <button class="input-group-btn btn btn-icon" id="searchBeneficiaries" onclick="searchBeneficiaries(this)">
+              <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-arrow-narrow-right"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l14 0" /><path d="M15 16l4 -4" /><path d="M15 8l4 4" /></svg>
+            </button>
           </div>
+        
         </div>
 
         <div id="search-results-payment-modal-entries"> </div>
 
+        <div id="cart" class="d-flex">
+          <p class="strong">USD: 2000</p>
+          <p>Selected 10 beneficiaries from project Palestine Orphans </p>
+        </div>
+{{!-- 
         <div class="mb-3">
           <label class="form-label">Add Payment</label>
           <div class="card">
@@ -228,24 +218,25 @@
 
             </div>
           </div>
-        </div>
+        </div> --}}
 
-        </div>
-        <div class="modal-footer">
-          <a href="#" class="btn btn-link link-secondary" data-bs-dismiss="modal"> Cancel </a>
-          <a href="#" class="btn btn-primary ms-auto" onclick="createNewPayment(this)">
-            <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-              <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-              <path d="M12 5l0 14"></path>
-              <path d="M5 12l14 0"></path>
-            </svg> Create new payment </a>
-        </div>
+      </div>
+      <div class="modal-footer">
+        <a href="#" class="btn btn-link link-secondary" data-bs-dismiss="modal"> Cancel </a>
+        <a href="#" class="btn btn-primary ms-auto" onclick="createNewPayment(this)">
+          <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+            <path d="M12 5l0 14"></path>
+            <path d="M5 12l14 0"></path>
+          </svg> Create new payment </a>
       </div>
     </div>
   </div>
+</div>
 
 
-  <script>
+<script>
+
     $(document).ready(() => {
       console.log('document is ready');
       $("#showPaymentModal").trigger('click');
@@ -313,4 +304,5 @@
       }
       $('#last-paid-entries').toggleClass("d-none");
     }
-  </script>
+
+</script>

@@ -46,7 +46,7 @@ exports.editModal = async(req,res) => {
 exports.updateProject = async(req,res) => {
   try {
     const { id } = req.params;
-    const { name, slug, status, location, fields } = req.body;
+    const { name, slug, subCost, subCostCurrency, status, location, fields } = req.body;
     
     const originalProject = await Project.findById(id);
     
@@ -58,6 +58,8 @@ exports.updateProject = async(req,res) => {
       name,
       slug: toKebabCase(slug),
       status,
+      subCost,
+      subCostCurrency,
       location,
       fields,
     };

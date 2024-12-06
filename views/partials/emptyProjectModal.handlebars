@@ -9,20 +9,20 @@
             <div class="modal-body">
                 <div class="mb-3">
                     <label class="form-label">Name</label>
-                    <input id="project-name" type="text" class="form-control" name="example-text-input" placeholder="Name of project" value="{{data.project.name}}" />
+                    <input type="text" class="project-name form-control" name="example-text-input" placeholder="Name of project" value="{{data.project.name}}" />
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Slug</label>
-                    <input id="project-slug" type="text" class="form-control" name="example-text-input" placeholder="name-of-project" value="{{data.project.slug}}" />
+                    <input type="text" class="project-slug form-control" name="example-text-input" placeholder="name-of-project" value="{{data.project.slug}}" />
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Project location</label>
-                    <input id="project-location" type="text" class="form-control" name="example-text-input" placeholder="Pakistan etc" value="{{data.project.location}}" />
+                    <input type="text" class="project-location form-control" name="example-text-input" placeholder="Pakistan etc" value="{{data.project.location}}" />
                 </div>
                 <div class="mb-3">
-                    <label for="invoiceAmount" class="form-label">Minimum subscription cost</label>
+                    <label for="invoiceAmount" class="form-label">Subscription cost (per month)</label>
                     <div class="input-group">
-                      <select class="form-select form-control" id="project-sub-cost-currency" name="currency" style="max-width: 112px;">
+                      <select class="form-select form-control project-sub-cost-currency" name="currency" style="max-width: 112px;">
                         <option value="USD" selected>USD ($)</option>
                         <option value="NOK">NOK (kr)</option>
                         <option value="GBP">GBP (£)</option>
@@ -31,12 +31,11 @@
                         <option value="ILS">ILS (₪)</option>
                         <option value="EGP">EGP (£)</option>
                       </select>
-                      <input type="number" class="form-control" id="project-sub-cost" name="invoiceAmount" placeholder="Enter amount" required />
+                      <input type="number" class="form-control project-sub-cost" name="invoiceAmount" placeholder="Enter amount" required />
                     </div>
-                    <small class="text-muted">Minimum cost for each subscriber.</small>
                 </div>
                 <label class="form-label">Project status</label>
-                <div class="form-selectgroup-boxes row mb-3" id="project-status">
+                <div class="form-selectgroup-boxes row mb-3 project-status">
                     <div class="col-lg-6">
                         <label class="form-selectgroup-item">
                         <input type="radio" name="report-type" value="active" class="form-selectgroup-input" checked="" />
@@ -72,7 +71,7 @@
               <label class="form-label">Project fields</label>
               <p class="card-subtitle mb-3">Drag and drop the fields to change their order</p>
               <div class="accordion" id="accordion-new-project">
-                <div class="accordion-item">
+                <div class="accordion-item form-field">
                   <h2 class="accordion-header d-flex justify-content-between" id="">
                     <button class="accordion-button " type="button" data-bs-toggle="collapse" data-bs-target="#collapse-new-project-1" aria-expanded="true">
                       Field # 1
@@ -119,20 +118,20 @@
             </div>
           </div>
           <div class="modal-body">
-              <div class="mb-3 primary-field">
+              <div class="mb-3 form-field primary-field">
                   <div class="form-label">Non repeatable field</div>
                   <p class="card-subtitle mb-3">This is a unique field in your project that never repeats. It can be an email, id card number, mobile number, or slug etc. </p>
                   <div class="card d-block p-2 mb-3 form-control primary-field-selectors">
-                      <span class="badge cursor-pointer p-2" onclick="alert('This is a temp field. You need to enter a field name first.')">Field # 1</span>
+                      <span class="badge cursor-pointer p-2 my-1 me-2" onclick="alert('This is a temp field. You need to enter a field name first.')">Field # 1</span>
                   </div>
                   <input type="text" class="d-none" disabled>
               </div>
 
-              <div class="mb-3 visible-field">
+              <div class="mb-3 form-field visible-field">
                 <div class="form-label">Fields visible to onboarding customers</div>
                 <p class="card-subtitle mb-3">These fields are used to draw the beneficiary card while a customer is being onboarded/ adding new payment. On payment completion, all fields will be visible to the customer.</p>
                 <div class="card d-block p-2 mb-3 form-control visible-field-selectors">
-                    <span class="badge cursor-pointer p-2" onclick="alert('This is a temp field. You need to enter a field name first.')">Field # 1</span>
+                    <span class="badge cursor-pointer p-2 my-1 me-2" onclick="alert('This is a temp field. You need to enter a field name first.')">Field # 1</span>
                 </div>
                 <input type="text" class="d-none" disabled>
               </div>
@@ -142,7 +141,7 @@
               <a href="#" class="btn btn-link link-secondary" data-bs-dismiss="modal">
                 Cancel
               </a>
-              <a href="#" class="btn btn-primary ms-auto" id="save-project">
+              <a href="#" class="btn btn-primary ms-auto" onclick="createNewProject(this)">
                   <!-- Download SVG icon from http://tabler-icons.io/i/plus -->
                   <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                       <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>

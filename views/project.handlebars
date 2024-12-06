@@ -75,27 +75,32 @@
         );
     }
 
-function toKebabCase(str) {
+  function toKebabCase(str) {
     return str
         .toLowerCase()                // Convert entire string to lowercase
         .replace(/[^a-z0-9]+/g, '-')  // Replace non-alphanumeric characters with hyphens
         .replace(/(^-|-$)/g, '');     // Remove leading or trailing hyphens if any
-}
+  }
 
+  const resetModal = function(modal) {
+    $(modal).find("input, .form-control").removeClass("is-invalid");
+    $(modal).find("input, .form-control").removeClass("is-valid");
+    $(modal).find(".invalid-feedback").remove();
+    $(modal).find("span").removeClass("border-red");
+    $(modal).find("span").removeClass("rounded-end");
+    $(modal).find(".alert").remove();
+    $(modal).closest(".modal").find(".accordion-item").removeClass("bg-red-lt");
+    return true;
+  }
 
-let editProject = function(elem) {
-
-    $(elem).closest(".modal").find("input").removeClass("is-invalid");
-    $(elem).closest(".modal").find(".invalid-feedback").remove();
-    $(elem).closest(".modal").find("span").removeClass("border-red");
-    $(elem).closest(".modal").find("span").removeClass("rounded-end");
-    $(elem).closest(".modal").find(".alert").remove();
-    $(elem).closest(".modal").find(".accordion-item").removeClass("bg-red-lt");
-
+  const checkModalValidity = function(modal) {
     let isValid = [];
-    $(elem).closest(".modal").find("input").each( (key, val) => {
+    $(modal).find("input").each( (key, val) => {
       if ($(val).val() == "") {
-        $(val).addClass("is-invalid")
+        $(val).addClass("is-invalid");
+        if ($(val).siblings(".form-control").length > 0) {
+          $(val).siblings(".form-control").addClass("is-invalid");
+        }
         if ($(val).closest(".accordion-item").length > 0) { 
           $(val).closest(".accordion-item").addClass("bg-red-lt");
         }
@@ -107,17 +112,32 @@ let editProject = function(elem) {
         }
       } else {
         $(val).addClass("is-valid");
+        $(val).siblings(".form-control").addClass("is-valid");
       }
       isValid.push($(val).val() != "");
     });
 
-    const name = $(elem).closest(".modal").find(".project-name").val();
-    const slug = $(elem).closest(".modal").find(".project-slug").val();
-    const status = $(elem).closest(".modal").find(".project-status input:checked").val();
-    const location = $(elem).closest(".modal").find(".project-location").val();
-    const id = $(elem).closest(".modal").attr("projId");
+    if (highlightRepeatingValues(modal)) {
+      return false;
+    };
 
-    const fields = $(elem).closest(".modal").find(".accordion-item").map( (key, val) => {
+    if (!(isValid.every(val => val === true))) {
+      return false;
+    };
+
+    return true;
+
+  }
+
+  const getModalFilledData = function(modal) {
+    const name = $(modal).find(".project-name").val();
+    const slug = $(modal).find(".project-slug").val();
+    const location = $(modal).find(".project-location").val();
+    const status = $(modal).find(".project-status").find("input:checked").val();
+    const subCostCurrency = $(modal).find(".project-sub-cost-currency").val();
+    const subCost = $(modal).find(".project-sub-cost").val();
+
+    const fields = $(modal).find(".accordion-item").map( (key, val) => {
         let options = [];
         if ( $(val).find(".dynamic-options").length > 0 ) {
             $(val).find(".dynamic-options input").each( (key, dynamicField) => {
@@ -132,27 +152,41 @@ let editProject = function(elem) {
             actualName: $(val).find("input:first").val(),
             type: $(val).find(".form-select").val(),
             options: options.length > 0 ? options : undefined,
-            primary: $(elem).closest(".modal").find(".primary-field input").val() == $(val).find("input:first").val()
+            primary: $(modal).find(".primary-field input").val() == $(val).find("input:first").val(),
+            visible: checkVisibleField($(val).find("input:first").val(), $(modal))
         }
     }).get();
-
-    if (highlightRepeatingValues($(elem).closest(".modal"))) return;
-
-    if (!(isValid.every(val => val === true))) {
-        return false;
+    
+    return {
+      name, status, location, slug, fields, subCost, subCostCurrency
     }
+  }
+
+  const updateProject = function(elem) {
+    
+    const modal = $(elem).closest(".modal");
+
+    resetModal(modal);
+    const isValidModal = checkModalValidity(modal);
+    if (isValidModal == false) return;
+    const data = getModalFilledData(modal);    
 
     let currentBtnHTML = $(elem).html();
-    $(elem).html(`<span class="spinner-border spinner-border-sm me-2" role="status"></span>`);
-   
+    $(elem).html(`<span class="spinner-border spinner-border-sm" role="status"></span>`);
+
+    const id = $(modal).attr("projId");
+
+    console.log(data);
+
     $.ajax({
       url: `/project/update/${id}`, 
       type: 'POST',
       contentType: 'application/json', 
-      data: JSON.stringify({name, status, location, slug, fields}),
+      data: JSON.stringify(data),
       success: function(response) {
         $(elem).html(currentBtnHTML);
-        window.location.href = `/project/${toKebabCase(slug)}`;
+        console.log(response);
+        window.location.href = "/project/{{data.project.slug}}";
       },
       error: function(xhr, status, error) {
         $(elem).html(currentBtnHTML);
@@ -166,7 +200,7 @@ let editProject = function(elem) {
 
   };
 
-  function highlightRepeatingValues($container) {
+  const highlightRepeatingValues = function($container) {
     const valueCounts = new Map();
     let hasRepeatingValues = false;
 
@@ -207,7 +241,6 @@ let editProject = function(elem) {
     return hasRepeatingValues;
   }
 
-
   document.addEventListener('DOMContentLoaded', function() {
       let el = document.querySelector('.accordion');
       if (el) {
@@ -222,7 +255,6 @@ let editProject = function(elem) {
           });
       }
   });
-
 
   $(document).on("click", ".add-project-field", function(e) {
     let projectSlug=$(this).closest(".modal").attr("projSlug");
@@ -268,7 +300,6 @@ let editProject = function(elem) {
     `);
   })
 
-
   $(document).on("click", ".delete-project-field", function(e) {
     let modal = $(this).closest(".modal");
     let projectSlug = modal.attr("projSlug");
@@ -280,12 +311,11 @@ let editProject = function(elem) {
   })
 
   $(document).on("change keyup", ".accordion-item input, .accordion-item .form-select", function() {
-    if ($(this).closest(".accordion-item").attr("stop-changing-header")){ 
-      return;
-    }
+    clearMsgs(this);
     if ($(this).hasClass("form-select")) {
         addOptions(this);
     }
+    addVisibleField(this);
     addPrimaryField(this);
     let input = $(this).closest(".accordion-item").find("input").val();
     let type = $(this).closest(".accordion-item").find(".form-select").val();
@@ -299,27 +329,67 @@ let editProject = function(elem) {
 
   const addPrimaryField = function(elem) {
     let allFields = $(elem).closest(".modal").find(".accordion-item").map( (key, val) => {
-      const inputType = $(val).find(".form-select:first").val();
-      if (/^(string|textarea|number)$/.test(inputType)) {
-        return $(val).find("input:first").val() 
-      } else {
-        return null;
-      }
-    }).filter(val => val != null);
+        const inputType = $(val).find(".form-select:first").val();
+        if (/^(string|textarea|number)$/.test(inputType)) {
+          return $(val).find("input:first").val() 
+        } else {
+          return null;
+        }
+      }).filter(val => val != null);
     let html = ``;
     allFields.each( (key, val) => {
       if (val.length > 0) {
-        html += `<span class="badge cursor-pointer me-1 mb-1" onclick="setPrimaryField(this)">${val}</span>`;
+        html += `<span class="p-2 badge cursor-pointer me-2 my-1" onclick="setPrimaryField(this)">${val}</span>`;
       }
     });
     $(elem).closest(".modal").find(".primary-field-selectors").html(html);
     $(elem).closest(".modal").find(".primary-field input").removeClass("is-valid").val("");
+    $(elem).closest(".modal").find(".primary-field .form-control").removeClass("is-valid");
+    $(elem).closest(".modal").find(".primary-field .form-control").removeClass("is-invalid");
+    $(elem).closest(".modal").find(".primary-field .invalid-feedback").remove();
+  }
+
+  const addVisibleField = function(elem) {
+    let allFields = $(elem).closest(".modal").find(".accordion-item").map( (key, val) => {
+      return $(val).find("input:first").val() 
+    });
+    let html = ``;
+    allFields.each( (key, val) => {
+      if (val.length > 0) {
+        html += `<span class="p-2 badge cursor-pointer me-2 my-1" onclick="setVisibleField(this)">${val}</span>`;
+      }
+    });
+    $(elem).closest(".modal").find(".visible-field-selectors").html(html);
+    $(elem).closest(".modal").find(".visible-field input").removeClass("is-valid").val(""); 
+    $(elem).closest(".modal").find(".visible-field .form-control").removeClass("is-valid"); 
+    $(elem).closest(".modal").find(".visible-field .form-control").removeClass("is-invalid"); 
+    $(elem).closest(".modal").find(".visible-field .invalid-feedback").remove();
+  }
+
+  const checkVisibleField = function(field, modal) {
+    const array = $(modal).find(".visible-field").find(".bg-blue-lt").map( (key,val) => $(val).html()).get();
+    return array.includes(field);
+  };
+
+  const setVisibleField = function(elem) {
+    $(elem).toggleClass("bg-blue-lt");
+    const array = $(elem).closest(".visible-field").find(".bg-blue-lt").map( (key,val) => $(val).html()).get();
+    $(elem).closest(".visible-field").find("input").val( array.length > 0 ? array.join(','): '' ); 
+    clearMsgs(elem);
   }
 
   const setPrimaryField = function(elem) {
     $(elem).siblings().removeClass("bg-blue-lt");
     $(elem).addClass("bg-blue-lt");
     $(elem).closest(".primary-field").find("input").val( $(elem).html() );
+    clearMsgs(elem);
+  }
+
+  const clearMsgs = function(elem) {
+    $(elem).closest(".form-field").removeClass("bg-red-lt");
+    $(elem).closest(".form-field").find(".invalid-feedback").remove();
+    $(elem).closest(".form-field").find(".is-valid").removeClass("is-valid");
+    $(elem).closest(".form-field").find(".is-invalid").removeClass("is-invalid");
   }
 
   const addOptions = function (elem) {
@@ -384,7 +454,7 @@ let editProject = function(elem) {
     $(elem).closest(".accordion-body").find(".text-center").before(html); // Adjust the selector to your actual container
 }
 
-const addOption = function (elem) {
+  const addOption = function (elem) {
     let html = `
         <div class="mb-3 dynamic-options">
             <div class="row g-2">
@@ -405,16 +475,16 @@ const addOption = function (elem) {
     $(elem).closest(".accordion-body").find(".text-center").before(html);
 }
 
-const deleteOption = function (elem) {
+  const deleteOption = function (elem) {
     if ($(elem).closest(".accordion-body").find(".mb-3.dynamic-options").length == 1) {
         return console.log("can't be deleted as this is the last option");
     }
     $(elem).closest(".mb-3").remove();
 }
 
-// Here start creating entries on click of save-entry button
+  // Here start creating entries on click of save-entry button
 
-const saveEntry = function(elem) {
+  const saveEntry = function(elem) {
 
     $(elem).closest(".modal").find("input").removeClass("is-invalid");
     $(elem).closest(".modal").find(".invalid-feedback").remove();
@@ -482,7 +552,7 @@ const saveEntry = function(elem) {
 
 }
 
-const editEntry = function(elem) {
+  const editEntry = function(elem) {
 
     $(elem).closest(".modal").find("input").removeClass("is-invalid");
     $(elem).closest(".modal").find(".invalid-feedback").remove();
@@ -551,11 +621,11 @@ const editEntry = function(elem) {
 
 }
 
-const uploadImage = function(elem) {
+  const uploadImage = function(elem) {
   $(elem).closest(".image-upload").find("input[type=file]").trigger("click");
 }
 
-$(document).on('change', ".image-upload input", function(event) {
+  $(document).on('change', ".image-upload input", function(event) {
   let elem = $(this);
   let inputName = $(this).attr("name");
   if (event.target.files && event.target.files[0]) {
@@ -820,8 +890,5 @@ $(document).on('change', ".image-upload input", function(event) {
 
     }
   });
-
-
-
 
 </script>
