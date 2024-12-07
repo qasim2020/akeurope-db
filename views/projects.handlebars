@@ -124,7 +124,8 @@
             type: $(val).find(".form-select").val(),
             options: options.length > 0 ? options : undefined,
             primary: $(modal).find(".primary-field input").val() == $(val).find("input:first").val(),
-            visible: checkVisibleField($(val).find("input:first").val(), $(modal))
+            visible: checkVisibleField( $(val).find("input:first").val(), $(modal) ),
+            subscription: checkSubscriptionField( $(val).find("input:first").val(), $(modal) )
         }
     }).get();
     
@@ -332,13 +333,17 @@
   })
 
   $(document).on("click", ".delete-project-field", function(e) {
+    const accordion = $(this).closest(".accordion");
     let modal = $(this).closest(".modal");
     let projectSlug = modal.attr("projSlug");
     $(this).closest(".accordion-item").remove();
     modal.find(".accordion-item").each( (key, val) => {
       $(val).find(".accordion-button").attr({"data-bs-target": `#collapse-${projectSlug}-${key+1}`});
       $(val).find(".accordion-collapse").attr({id: `collapse-${projectSlug}-${key+1}`})
-    })
+    });
+    addVisibleField(accordion);
+    addPrimaryField(accordion);
+    addSubscriptionField(accordion);
   })
   
   $(document).on("change keyup", ".accordion-item input, .accordion-item .form-select", function() {
@@ -348,6 +353,7 @@
     }
     addVisibleField(this);
     addPrimaryField(this);
+    addSubscriptionField(this);
     let input = $(this).closest(".accordion-item").find("input").val();
     let type = $(this).closest(".accordion-item").find(".form-select").val();
     $(this).closest(".accordion-item").find(".accordion-button").html(`
@@ -397,17 +403,40 @@
     $(elem).closest(".modal").find(".visible-field .invalid-feedback").remove();
   }
 
+  const addSubscriptionField = function(elem) {
+
+    let allFields = $(elem).closest(".modal").find(".accordion-item").map( (key, val) => {
+      const inputType = $(val).find(".form-select:first").val();
+      if (/^(number)$/.test(inputType)) {
+        return $(val).find("input:first").val() 
+      } else {
+        return null;
+      }
+    }).filter(val => val != null);
+    console.log(allFields);
+    let html = ``;
+    allFields.each( (key, val) => {
+      if (val.length > 0) {
+        html += `<span class="p-2 badge cursor-pointer me-2 my-1" onclick="setSubscriptionField(this)">${val}</span>`;
+      }
+    });
+    $(elem).closest(".modal").find(".subscription-field-selectors").html(html);
+    $(elem).closest(".modal").find(".subscription-field input").removeClass("is-valid").val("");
+    $(elem).closest(".modal").find(".subscription-field .form-control").removeClass("is-valid");
+    $(elem).closest(".modal").find(".subscription-field .form-control").removeClass("is-invalid");
+    $(elem).closest(".modal").find(".subscription-field .invalid-feedback").remove();
+
+  }
+
+  const checkSubscriptionField = function(field, modal) {
+    const array = $(modal).find(".subscription-field").find(".bg-blue-lt").map( (key,val) => $(val).html()).get();
+    return array.includes(field); 
+  }
+  
   const checkVisibleField = function(field, modal) {
     const array = $(modal).find(".visible-field").find(".bg-blue-lt").map( (key,val) => $(val).html()).get();
     return array.includes(field);
   };
-
-  const setVisibleField = function(elem) {
-    $(elem).toggleClass("bg-blue-lt");
-    const array = $(elem).closest(".visible-field").find(".bg-blue-lt").map( (key,val) => $(val).html()).get();
-    $(elem).closest(".visible-field").find("input").val( array.length > 0 ? array.join(','): '' ); 
-    clearMsgs(elem);
-  }
 
   const setPrimaryField = function(elem) {
     $(elem).siblings().removeClass("bg-blue-lt");
@@ -416,6 +445,20 @@
     clearMsgs(elem);
   }
 
+  const setVisibleField = function(elem) {
+    $(elem).toggleClass("bg-blue-lt");
+    const array = $(elem).closest(".visible-field").find(".bg-blue-lt").map( (key,val) => $(val).html()).get();
+    $(elem).closest(".visible-field").find("input").val( array.length > 0 ? array.join(','): '' ); 
+    clearMsgs(elem);
+  }
+
+  const setSubscriptionField = function(elem) {
+    $(elem).toggleClass("bg-blue-lt");
+    const array = $(elem).closest(".subscription-field").find(".bg-blue-lt").map( (key,val) => $(val).html()).get();
+    $(elem).closest(".subscription-field").find("input").val( array.length > 0 ? array.join(','): '' ); 
+    clearMsgs(elem);
+  }
+  
   const clearMsgs = function(elem) {
     $(elem).closest(".form-field").removeClass("bg-red-lt");
     $(elem).closest(".form-field").find(".invalid-feedback").remove();

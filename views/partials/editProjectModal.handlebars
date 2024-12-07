@@ -199,6 +199,7 @@
                     {{/each}}
                   >
               </div>
+
               <div class="mb-3 form-field visible-field">
                 <div class="form-label">Fields visible to onboarding customers</div>
                 <p class="card-subtitle mb-3">These fields are used to draw the beneficiary card while a customer is being onboarded/ adding new payment. On payment completion, all fields will be visible to the customer.</p>
@@ -209,6 +210,21 @@
                 </div>
                 <input type="text" class="d-none" disabled value="{{#each data.project.fields}}{{#if (eq this.visible true)}}{{this.actualName}}{{/if}}{{/each}}">
               </div>
+
+              <div class="mb-3 form-field subscription-field">
+                <div class="form-label">Subscription fields</div>
+                <p class="card-subtitle mb-3">Fields that show different subscription options for each project entry. Can only be numbers.</p>
+                <div class="card d-block p-2 mb-3 form-control subscription-field-selectors">
+                    {{#each data.project.fields}}
+                        {{#if (regexMatch this.type '^(number)$')}}
+                        {{log this}}
+                        <span class="badge cursor-pointer p-2 mb-1 {{#if this.subscription}} bg-blue-lt {{/if}}" onclick="setSubscriptionField(this)">{{this.actualName}}</span>
+                        {{/if}}
+                    {{/each}}
+                </div>
+                <input type="text" class="d-none" disabled value="{{#each data.project.fields}}{{#if (eq this.subscription true)}}{{this.actualName}}{{/if}}{{/each}}">
+              </div>
+
             </div>
             <div class="modal-footer">
                 <a href="#" class="btn btn-link link-secondary" data-bs-dismiss="modal">

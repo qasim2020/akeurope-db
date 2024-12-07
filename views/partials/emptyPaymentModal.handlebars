@@ -1,4 +1,5 @@
-<div class="modal modal-blur fade" id="modal-new-payment" tabindex="-1" style="display: none; padding-left: 0px;" aria-modal="true" role="dialog" entryId="">
+<div class="modal modal-blur fade" id="modal-new-payment" tabindex="-1" style="display: none; padding-left: 0px;"
+  aria-modal="true" role="dialog" entryId="">
   <div class="modal-dialog modal-xl" role="document">
     <div class="modal-content">
       <div class="modal-header">
@@ -13,21 +14,31 @@
             {{#each data.customers}}
             <option value="{{this._id}}">{{this.name}}</option>
             {{/each}}
-          </select>  
-          <small class="text-muted">If your customer is not listed here, <a href="/customers">click here</a> to add a new customer.</small>
+          </select>
+          <small class="text-muted">If your customer is not listed here, <a href="/customers">click here</a> to add a
+            new customer.</small>
         </div>
 
         <div class="mb-3 search-beneficiaries">
           <label class="form-label">Select Beneficiaries</label>
           <div class="input-group">
             <button class="input-group-btn btn btn-icon" id="addBeneficiary" onclick="addBeneficiary(this)">
-              <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"> <path stroke="none" d="M0 0h24v24H0z" fill="none"></path> <path d="M12 5l0 14"></path> <path d="M5 12l14 0"></path> </svg>
+              <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24"
+                stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                <path d="M12 5l0 14"></path>
+                <path d="M5 12l14 0"></path>
+              </svg>
             </button>
             <span class="input-group-text">Select</span>
-            <input type="number" class="form-control" style="min-width: 50px;" value="10" min="1" onkeydown="if (event.key === 'Enter') searchBeneficiaries(this)" name="randomBeneficiaries" placeholder="Number of beneficiaries" />
+            <input type="number" class="form-control" style="min-width: 50px;" value="10" min="1"
+              onkeydown="if (event.key === 'Enter') searchBeneficiaries(this)" name="randomBeneficiaries"
+              placeholder="Number of beneficiaries" />
             <span class="input-group-text">beneficiaries randomly or</span>
 
-            <input type="text" class="form-control" style="min-width: 120px;" placeholder="search specific beneficiaries..." onkeydown="if (event.key === 'Enter') searchBeneficiaries(this)" name="specificBeneficiaries"/>
+            <input type="text" class="form-control" style="min-width: 120px;"
+              placeholder="search specific beneficiaries..."
+              onkeydown="if (event.key === 'Enter') searchBeneficiaries(this)" name="specificBeneficiaries" />
             <span class="input-group-text">from</span>
             <select name="projectSlug" class="form-control form-select" style="min-width: 200px;">
               {{#each data.projects}}
@@ -35,196 +46,27 @@
               {{/each}}
             </select>
             <button class="input-group-btn btn btn-icon" id="searchBeneficiaries" onclick="searchBeneficiaries(this)">
-              <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-arrow-narrow-right"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l14 0" /><path d="M15 16l4 -4" /><path d="M15 8l4 4" /></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                class="icon icon-tabler icons-tabler-outline icon-tabler-arrow-narrow-right">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                <path d="M5 12l14 0" />
+                <path d="M15 16l4 -4" />
+                <path d="M15 8l4 4" />
+              </svg>
             </button>
           </div>
-        
+
         </div>
 
         <div id="search-results-payment-modal-entries"> </div>
-
-        <div id="cart" class="d-flex">
-          <p class="strong">USD: 2000</p>
-          <p>Selected 10 beneficiaries from project Palestine Orphans </p>
-        </div>
-{{!-- 
-        <div class="mb-3">
-          <label class="form-label">Add Payment</label>
-          <div class="card">
-            <div class="card-header">
-              <ul class="nav nav-tabs card-header-tabs nav-fill" data-bs-toggle="tabs" role="tablist">
-                <li class="nav-item" role="presentation">
-                  <a href="#tab-credit-card" class="nav-link active" data-bs-toggle="tab" aria-selected="true" role="tab">Credit card (charge now)</a>
-                </li>
-                <li class="nav-item" role="presentation">
-                  <a href="#tab-credit-card-recurring" class="nav-link" data-bs-toggle="tab" aria-selected="true" role="tab">Credit card (recurring payment)</a>
-                </li>
-                <li class="nav-item" role="presentation">
-                  <a href="#tab-bank-transfer-completed" class="nav-link" data-bs-toggle="tab" aria-selected="false" role="tab" tabindex="-1">Bank transfer (completed)</a>
-              </li>
-              <li class="nav-item" role="presentation">
-                <a href="#tab-bank-transfer-pending" class="nav-link" data-bs-toggle="tab" aria-selected="false" role="tab" tabindex="-1">Bank transfer (pending)</a>
-              </li>
-            </ul>
-          </div>
-            <div class="card-body">
-              <div class="tab-content">
-
-                <div class="tab-pane active show" id="tab-credit-card" role="tabpanel">
-
-                  <div class="mb-3">
-                    <label for="paymentAmount" class="form-label">Payment Amount</label>
-                    <input type="number" class="form-control" id="paymentAmount" placeholder="Enter payment amount" required>
-                  </div>
-
-                  <div class="mb-3">
-                    <label for="creditCard" class="form-label">Credit Card Number</label>
-                    <input type="text" class="form-control" id="creditCard" placeholder="Enter credit card number" required>
-                  </div>
-
-                  <div class="row">
-                    <div class="col-12 col-md-6 mb-3">
-                      <label for="expiryDate" class="form-label">Expiration Date</label>
-                      <input type="month" class="form-control" id="expiryDate" required>
-                    </div>
-
-                    <div class="col-12 col-md-6 mb-3">
-                      <label for="cvv" class="form-label">CVV</label>
-                      <input type="number" class="form-control" id="cvv" placeholder="Enter CVV" required>
-                    </div>
-                  </div>
-
-                  <div class="mb-3">
-                    <label for="notes" class="form-label">Notes</label>
-                    <textarea class="form-control" id="notes" rows="3" placeholder="Any additional notes"></textarea>
-                  </div>
-                              
-                </div>
-
-                <div class="tab-pane" id="tab-credit-card-recurring">
-                  <p>show recurring credit card form</p>
-                </div>
-
-                <div class="tab-pane" id="tab-bank-transfer-completed" role="tabpanel">
-
-                  <div class="mb-3">
-                    <label for="invoice" class="form-label">Upload Invoice</label>
-                    <input type="file" class="form-control" id="invoice" accept="image/*,application/pdf" required>
-                  </div>
-
-                  <div class="mb-3">
-                    <button class="btn btn-primary-outline">
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icons-tabler-outline icon-tabler-ai">
-                      <g clip-path="url(#clip0_128_5)">
-                      <path d="M21.9937 9.88289C22.2552 9.09747 22.346 8.26524 22.2599 7.4419C22.1738 6.61856 21.9128 5.82312 21.4943 5.10883C20.8739 4.02839 19.9263 3.17298 18.7882 2.66605C17.65 2.15911 16.3803 2.02686 15.1622 2.28838C14.6128 1.66918 13.9375 1.17446 13.1815 0.837346C12.4254 0.500228 11.6061 0.328484 10.7784 0.333607C9.533 0.330616 8.31885 0.723138 7.31094 1.4546C6.30302 2.18605 5.5534 3.21866 5.17012 4.40357C4.35869 4.5696 3.5921 4.90707 2.92168 5.39339C2.25125 5.87971 1.69247 6.50365 1.28274 7.22344C0.657575 8.30092 0.390759 9.54911 0.520762 10.788C0.650765 12.0269 1.17087 13.1925 2.00608 14.1168C1.74449 14.9023 1.65372 15.7346 1.73984 16.5581C1.82595 17.3815 2.08697 18.177 2.50542 18.8914C3.1259 19.9718 4.07355 20.8272 5.21164 21.3341C6.34973 21.841 7.61943 21.9733 8.83758 21.7119C9.3871 22.331 10.0625 22.8256 10.8186 23.1627C11.5748 23.4997 12.3942 23.6713 13.222 23.6661C14.4679 23.6694 15.6827 23.2767 16.691 22.5448C17.6994 21.8128 18.4491 20.7794 18.832 19.5938C19.6433 19.4277 20.4097 19.0902 21.0801 18.6038C21.7504 18.1175 22.3091 17.4936 22.7188 16.7739C23.3432 15.6965 23.6095 14.4487 23.4792 13.2102C23.3489 11.9718 22.8287 10.8067 21.9937 9.88289ZM13.2237 22.1424C12.2007 22.1439 11.2098 21.7856 10.4243 21.1303C10.4598 21.111 10.5223 21.0772 10.5625 21.0521L15.2082 18.3687C15.325 18.3024 15.422 18.2062 15.4891 18.0899C15.5563 17.9736 15.5912 17.8415 15.5903 17.7072V11.1569L17.5539 12.2909C17.5642 12.296 17.5731 12.3036 17.5798 12.3129C17.5865 12.3223 17.5908 12.3332 17.5924 12.3446V17.7691C17.591 18.9278 17.1303 20.0386 16.3113 20.8583C15.4923 21.6779 14.3818 22.1395 13.2231 22.1418L13.2237 22.1424ZM3.82844 18.129C3.31616 17.2437 3.13155 16.2065 3.30693 15.1989C3.34193 15.2199 3.40143 15.2566 3.44518 15.2811L8.0909 17.9645C8.20668 18.0321 8.33834 18.0677 8.47241 18.0677C8.60648 18.0677 8.73814 18.0321 8.85391 17.9645L14.5263 14.6896V16.9576C14.527 16.9692 14.5248 16.9807 14.5199 16.9912C14.515 17.0017 14.5076 17.0108 14.4983 17.0177L9.80184 19.7297C8.79717 20.3083 7.60399 20.4648 6.48411 20.1647C5.36423 19.8646 4.40915 19.1325 3.82844 18.129ZM2.60634 7.98703C3.11663 7.10042 3.92262 6.42164 4.88312 6.06959C4.88312 6.10926 4.88078 6.18043 4.88078 6.22943V11.5967C4.88002 11.7308 4.91496 11.8626 4.98201 11.9786C5.04906 12.0947 5.1458 12.1908 5.26229 12.2571L10.9341 15.532L8.97058 16.666C8.96086 16.6724 8.94968 16.6763 8.93807 16.6773C8.92646 16.6783 8.91477 16.6764 8.90408 16.6718L4.20644 13.9581C3.20354 13.3773 2.4719 12.4225 2.17195 11.303C1.87199 10.1836 2.02821 8.99147 2.60634 7.98703ZM18.7404 11.742L13.068 8.46654L15.0321 7.33311C15.0417 7.32682 15.0528 7.32301 15.0643 7.32199C15.0758 7.32097 15.0874 7.32279 15.098 7.32728L19.795 10.0386C20.5146 10.4543 21.1009 11.0664 21.4852 11.8032C21.8695 12.54 22.036 13.371 21.9651 14.199C21.8942 15.027 21.5889 15.8177 21.085 16.4784C20.581 17.1392 19.8993 17.6427 19.1195 17.9301V12.4023C19.1206 12.2685 19.086 12.1368 19.0194 12.0208C18.9528 11.9048 18.8565 11.8085 18.7404 11.742ZM20.6946 8.80021C20.6601 8.77863 20.6001 8.74246 20.5569 8.71796L15.9106 6.03459C15.7948 5.96705 15.6631 5.93146 15.5291 5.93146C15.395 5.93146 15.2634 5.96705 15.1476 6.03459L9.47575 9.30947V7.04144C9.47509 7.02989 9.47731 7.01836 9.48219 7.00787C9.48708 6.99739 9.49449 6.98828 9.50375 6.98136L14.1996 4.27174C14.9192 3.85664 15.7421 3.65507 16.572 3.69061C17.402 3.72614 18.2046 3.99732 18.8861 4.4724C19.5675 4.94748 20.0995 5.60681 20.4199 6.37324C20.7403 7.13967 20.8352 7.9815 20.6946 8.80021ZM8.40766 12.8422L6.44355 11.7082C6.43332 11.703 6.42451 11.6954 6.4179 11.6861C6.41129 11.6767 6.40708 11.6659 6.40563 11.6545V6.23001C6.40632 5.39933 6.64358 4.58602 7.08965 3.88526C7.53571 3.1845 8.17213 2.62527 8.92443 2.27302C9.67673 1.92077 10.5138 1.79006 11.3377 1.89619C12.1616 2.00232 12.9382 2.3409 13.5766 2.87231C13.5302 2.89746 13.4843 2.92352 13.439 2.95047L8.79266 5.63384C8.67617 5.70013 8.57943 5.79623 8.51239 5.91229C8.44534 6.02834 8.4104 6.16015 8.41116 6.29418L8.40766 12.8422ZM9.47459 10.5421L12.0005 9.08313L14.5275 10.5415V13.4582L12.001 14.9165L9.47459 13.4582V10.5421Z" fill="black"/>
-                      </g>
-                      <defs>
-                      <clipPath id="clip0_128_5">
-                      <rect width="24" height="24" fill="white"/>
-                      </clipPath>
-                      </defs>
-                      </svg>
-
-                      Read invoice <span class="d-none d-md-inline-block ms-1">with chatgpt</span>
-                    </button>
-                  </div>
-
-                  <div class="hr-text my-4">
-                    Invoice details
-                  </div>
-
-                  <div class="mb-3">
-                    <label for="paymentAmount" class="form-label">Payment Amount</label>
-                    <input type="number" class="form-control" id="paymentAmount" placeholder="Enter payment amount" required>
-                  </div>
-
-                  <div class="mb-3">
-                    <label for="bankName" class="form-label">Bank Name</label>
-                    <input type="text" class="form-control" id="bankName" placeholder="Enter bank name" required>
-                  </div>
-
-                  <div class="mb-3">
-                    <label for="accountHolder" class="form-label">Account Holder Name</label>
-                    <input type="text" class="form-control" id="accountHolder" placeholder="Enter account holder's name" required>
-                  </div>
-
-                  <div class="mb-3">
-                    <label for="accountNumber" class="form-label">Account Number</label>
-                    <input type="text" class="form-control" id="accountNumber" placeholder="Enter bank account number" required>
-                  </div>
-
-                  <div class="mb-3">
-                    <label for="ifscCode" class="form-label">
-                          IFSC Code 
-                        <span class="ms-1 text-muted" 
-                          data-bs-toggle="tooltip" 
-                          data-bs-placement="top" 
-                          title="The IFSC (Indian Financial System Code) is an 11-character alphanumeric code that uniquely identifies a bank branch for online transfers.">
-                          <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-info-circle"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" /><path d="M12 9h.01" /><path d="M11 12h1v4h1" /></svg>
-                        </span>
-                      </label>
-                      <input type="text" class="form-control" id="ifscCode" placeholder="Enter IFSC code" required>
-                  </div>
-
-                  <div class="mb-3">
-                    <label for="paymentDate" class="form-label">Payment Date</label>
-                    <input type="date" class="form-control" id="paymentDate" required>
-                  </div>
-
-                  <div class="mb-3">
-                    <label for="notes" class="form-label">Notes</label>
-                    <textarea class="form-control" id="notes" rows="3" placeholder="Any additional notes"></textarea>
-                  </div>
-
-                </div>
-
-                <div class="tab-pane" id="tab-bank-transfer-pending">
-                  <div class="mb-3">
-                    <label for="customerEmail" class="form-label">Customer Email</label>
-                    <input type="email" class="form-control" placeholder="Enter customer email" value="{{data.customer.email}}" disabled>
-                  </div>
-
-                  <div class="mb-3">
-                    <label for="invoiceAmount" class="form-label">Invoice Amount</label>
-                    <div class="input-group">
-                      <select class="form-select" id="currency" name="currency" style="max-width: 112px;">
-                        <option value="USD" selected>USD ($)</option>
-                        <option value="NOK">NOK (kr)</option>
-                        <option value="GBP">GBP (£)</option>
-                        <option value="EUR">EUR (€)</option>
-                        <option value="PKR">PKR (₨)</option>
-                        <option value="ILS">ILS (₪)</option>
-                        <option value="EGP">EGP (£)</option>
-                      </select>
-                      <input type="number" class="form-control" id="invoiceAmount" name="invoiceAmount" placeholder="Enter amount" required />
-                    </div>
-                  </div>
-
-
-                  <div class="mb-3">
-                    <label for="dueDate" class="form-label">Due Date</label>
-                    <input type="date" class="form-control" id="dueDate" name="dueDate" required>
-                  </div>
-
-                  <div class="mb-3">
-                    <label for="notes" class="form-label">Notes (Optional)</label>
-                    <textarea class="form-control" id="notes" name="notes" rows="3" placeholder="Add any additional notes..."></textarea>
-                  </div>
-
-
-                </div>
-
-              </div>
-
-            </div>
-          </div>
-        </div> --}}
 
       </div>
       <div class="modal-footer">
         <a href="#" class="btn btn-link link-secondary" data-bs-dismiss="modal"> Cancel </a>
         <a href="#" class="btn btn-primary ms-auto" onclick="createNewPayment(this)">
-          <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24"
+            stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
             <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
             <path d="M12 5l0 14"></path>
             <path d="M5 12l14 0"></path>
@@ -237,72 +79,188 @@
 
 <script>
 
-    $(document).ready(() => {
-      console.log('document is ready');
-      $("#showPaymentModal").trigger('click');
+  $(document).ready(() => {
+    console.log('document is ready');
+    $("#showPaymentModal").trigger('click');
+  })
+
+  const searchBeneficiaries = function (elem) {
+
+    let error;
+
+    const limit = $("[name=randomBeneficiaries]").val();
+    const search = $("[name=specificBeneficiaries]").val();
+    const slug = $("[name=projectSlug]").val();
+
+    $('.search-beneficiaries').find('.form-control').removeClass('is-invalid');
+    $('.search-beneficiaries').find('.invalid-feedback').remove();
+
+    if (limit == '' && search == '') {
+      error = 'Please fill either the random or specific beneficiary input field.';
+      $('.search-beneficiaries').find('.form-control').addClass('is-invalid');
+      $('.search-beneficiaries').append(`<div class='invalid-feedback d-block'>${error}</div>`);
+      return false;
+    }
+
+    console.log({
+      limit, search, slug
     })
 
-    const searchBeneficiaries = function(elem) {
-      
-      let error;
+    const currentBtnHTML = $('#searchBeneficiaries').html();
+    $('#searchBeneficiaries').html(`<span class="spinner-border spinner-border-sm" role="status"></span>`);
 
-      const limit = $("[name=randomBeneficiaries]").val();
-      const search = $("[name=specificBeneficiaries]").val();
-      const slug = $("[name=projectSlug]").val();
+    $.ajax({
+      url: `/getPaymentModalEntryData/${slug}?limit=${limit}&search=${search}`,
+      method: 'GET',
+      success: (response) => {
+        $('#searchBeneficiaries').html(currentBtnHTML);
+        $('#search-results-payment-modal-entries').html(response);
+      },
+      error: (error) => {
+        $('#searchBeneficiaries').html(currentBtnHTML);
+        alert(error.responseText);
+      }
+    });
 
-      $('.search-beneficiaries').find('.form-control').removeClass('is-invalid');
-      $('.search-beneficiaries').find('.invalid-feedback').remove();
+  }
 
-      if (limit == '' && search == '') {
-        error = 'Please fill either the random or specific beneficiary input field.';
-        $('.search-beneficiaries').find('.form-control').addClass('is-invalid');
-        $('.search-beneficiaries').append(`<div class='invalid-feedback d-block'>${error}</div>`);
-        return false;
-      } 
+  const selectAllSearchResults = function (elem) {
+    const count = $(elem).data("limit");
+    if ($(elem).html() == `Select all (${count})`) {
+      $('#last-paid-entries').find('[type="checkbox"]:not(":checked")').click();
+      $(elem).html(`Unselect all (${count})`);
+    } else {
+      $('#last-paid-entries').find('[type="checkbox"]:checked').click();
+      $(elem).html(`Select all (${count})`);
+    }
 
-      console.log({
-        limit,search, slug
-      })
+  }
 
-      const currentBtnHTML = $('#searchBeneficiaries').html();
-      $('#searchBeneficiaries').html(`<span class="spinner-border spinner-border-sm" role="status"></span>`);
+  const toggleSearchResults = function (elem) {
+    if ($('#last-paid-entries').hasClass("d-none")) {
+      $(elem).html('Hide results');
+      $(elem).closest(".d-flex").addClass("mb-2");
+    } else {
+      $(elem).html('Show results');
+      $(elem).closest(".d-flex").removeClass("mb-2");
+    }
+    $('#last-paid-entries').toggleClass("d-none");
+  }
 
-      $.ajax({
-        url: `/getPaymentModalEntryData/${slug}?limit=${limit}&search=${search}`,
-        method: 'GET',
-        success: (response) => {
-          $('#searchBeneficiaries').html(currentBtnHTML);
-          $('#search-results-payment-modal-entries').html(response);
-        },
-        error: (error) => {
-          $('#searchBeneficiaries').html(currentBtnHTML);
-          alert(error.responseText);
-        }
+  const toggleColumnSelect = function (elem) {
+    const active = $(elem).hasClass("bg-green-lt");
+    const colIndex = $(elem).closest("th").index();
+    const isTotal = $(elem).closest("th").index() == 0;
+
+    if (isTotal && active) {
+      $(elem).closest('table').find(`tr`).each(function () {
+        const button = $(this).find(`td, th`).find('button.bg-green-lt');
+        $(button).removeClass("bg-green-lt");
+        $(button).find('.icon-tabler-check').addClass("d-none");
+        $(button).find('.icon-tabler-plus').removeClass("d-none");
       });
-
+    } else if (isTotal && !active) {
+      $(elem).closest('table').find(`tr`).each(function () {
+        const button = $(this).find(`td, th`).find('button:not(.bg-green-lt)');
+        $(button).addClass("bg-green-lt");
+        $(button).find('.icon-tabler-check').removeClass("d-none");
+        $(button).find('.icon-tabler-plus').addClass("d-none");
+      });
+    } else if (!isTotal && active) {
+      $(elem).closest('table').find(`tr`).each(function () {
+        const button = $(this).find(`td, th`).eq(colIndex).find('button');
+        $(button).removeClass("bg-green-lt");
+        $(button).find('.icon-tabler-check').addClass("d-none");
+        $(button).find('.icon-tabler-plus').removeClass("d-none");
+      });
+    } else if (!isTotal && !active) {
+      $(elem).closest('table').find(`tr`).each(function () {
+        const button = $(this).find(`td, th`).eq(colIndex).find('button');
+        $(button).addClass("bg-green-lt");
+        $(button).find('.icon-tabler-check').removeClass("d-none");
+        $(button).find('.icon-tabler-plus').addClass("d-none");
+      });
     }
 
-    const selectAllSearchResults = function(elem) {
-      const count = $(elem).data("limit");
-      if ( $(elem).html() == `Select all (${count})` ) {
-        $('#last-paid-entries').find('[type="checkbox"]:not(":checked")').click();
-        $(elem).html(`Unselect all (${count})`);
-      } else {
-        $('#last-paid-entries').find('[type="checkbox"]:checked').click();
-        $(elem).html(`Select all (${count})`);
+  }
+
+  const toggleCostSelect = function (elem) {
+
+    const elemState = $(elem).hasClass("bg-green-lt");
+    const rowState = $(elem).closest("tr").find("button").eq(0).hasClass("bg-green-lt");
+    const colIndex = $(elem).closest('td').index();
+    const row = $(elem).closest('td').closest('tr');
+    const table = $(elem).closest('td').closest('table');
+
+    const isTotalColumn = $(table).find('th').eq(colIndex).index() === 0;
+
+    if (isTotalColumn && rowState) {
+      $(row).find('button').removeClass('bg-green-lt');
+      $(row).find('.icon-tabler-check').addClass("d-none");
+      $(row).find('.icon-tabler-plus').removeClass("d-none");;
+    } else if (isTotalColumn && !rowState) {
+      $(row).find('button').addClass('bg-green-lt');
+      $(row).find('.icon-tabler-check').removeClass("d-none");
+      $(row).find('.icon-tabler-plus').addClass("d-none");
+    } else if (!isTotalColumn && elemState) {
+      $(elem).removeClass("bg-green-lt").find("svg").toggleClass("d-none");
+      unselectColRowHeading(elem);
+    } else if (!isTotalColumn && !elemState) {
+      $(elem).addClass("bg-green-lt").find("svg").toggleClass("d-none");
+      selectColRowHeading(elem);
+    }
+
+  }
+
+  const selectColRowHeading = function(elem) {
+    const index = $(elem).closest("td, th").index();
+    const rowHeading = $(elem).closest("tr").find("td:eq(0) > button");
+    const colHeading = $(elem).closest("table").find("th").eq(index).find("button");
+    const totalHeading = $(elem).closest("table").find("tr:eq(0)").find("button:eq(0)");
+
+    const rowEntries = $(elem).closest("tr").find("td:not(:eq(0))");
+    const colEntries = $(elem).closest("table").find(`td:nth-child(${index + 1})`);
+
+    const fullRowSelected = rowEntries.find(".bg-green-lt").length == rowEntries.find("button").length;
+    const fullColSelected = colEntries.find(".bg-green-lt").length == colEntries.find("button").length;
+    
+    if (fullRowSelected) {
+      rowHeading.addClass("bg-green-lt");
+      rowHeading.find(".icon-tabler-check").removeClass("d-none");
+      rowHeading.find(".icon-tabler-plus").addClass("d-none");
+    };
+
+    if (fullColSelected) {
+      colHeading.addClass("bg-green-lt");
+      colHeading.find(".icon-tabler-check").removeClass("d-none");
+      colHeading.find(".icon-tabler-plus").addClass("d-none");
+    };
+
+    if (fullRowSelected && fullColSelected) {
+      const allSelectedEntries = $(elem).closest("table").find("tr:not(:eq(0))").find("td:not(:eq(0))").find("button.bg-green-lt");
+      const allEntries = $(elem).closest("table").find("tr:not(:eq(0))").find("td:not(:eq(0))").find("button");
+      if (allEntries.length == allSelectedEntries.length) {
+        totalHeading.addClass("bg-green-lt");
+        totalHeading.find(".icon-tabler-check").removeClass("d-none");
+        totalHeading.find(".icon-tabler-plus").addClass("d-none");
       }
-      
-    }
+    };
 
-    const toggleSearchResults = function(elem) {
-      if ( $('#last-paid-entries').hasClass("d-none")) {
-        $(elem).html('Hide results');
-        $(elem).closest(".d-flex").addClass("mb-2");
-      } else {
-        $(elem).html('Show results');
-        $(elem).closest(".d-flex").removeClass("mb-2");
-      }
-      $('#last-paid-entries').toggleClass("d-none");
-    }
+  }
+
+  const unselectColRowHeading = function (elem) {
+    const index = $(elem).closest("td").index();
+    const rowHeading = $(elem).closest("tr").find("td:eq(0) > button");
+    const colHeading = $(elem).closest("table").find("th").eq(index).find("button");
+    const totalHeading = $(elem).closest("table").find("tr:eq(0)").find("button:eq(0)");
+    const combinedElements = $().add(rowHeading).add(colHeading).add(totalHeading);
+    combinedElements.removeClass("bg-green-lt");
+    combinedElements.find(".icon-tabler-check").addClass("d-none");
+    combinedElements.find(".icon-tabler-plus").removeClass("d-none");
+  }
+
+  const showCost = function () {
+
+  }
 
 </script>

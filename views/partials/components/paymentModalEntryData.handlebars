@@ -1,46 +1,154 @@
-<div class="card p-2 mb-3">
-        
-    {{#if data.entries}}
+{{#if data.entries}}
 
-    <div class="d-flex justify-content-between mb-2">
-        <div class="flex-grow">
-            <button class="btn" data-limit="{{data.pagination.limit}}" onclick="selectAllSearchResults(this)">Select all ({{data.pagination.limit}})</button>
-            <button class="btn" onclick="toggleSearchResults(this)">Hide results</button>
-        </div>
-        <button class="btn btn-icon" onclick="$('#search-results-payment-modal-entries').html('');">
-            <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-x"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M18 6l-12 12" /><path d="M6 6l12 12" /></svg>
-        </button>
-    </div>
-    
-
-    <div class="form-selectgroup form-selectgroup-boxes d-flex d-flex flex-wrap" id="last-paid-entries">
-
-        {{#each data.entries}}
-        <label class="form-selectgroup-item flex-fill">
-        <input type="checkbox" name="{{this._id}}" value="{{this._id}}" class="form-selectgroup-input">
-            <div class="form-selectgroup-label d-flex align-items-center p-3">
-                <div class="me-3">
-                <span class="form-selectgroup-check"></span>
-                </div>
-                <div class="form-selectgroup-label-content d-flex align-items-center">
-                <span class="avatar me-3">{{getFirstTwoLetters this.name}}</span>
-                <div>
-                    <div class="font-weight-medium">{{this.name}}</div>
-                    <div class="text-secondary">{{#if this.lastPaid}} {{this.lastPaid}} {{else}} Never paid! {{/if}}</div>
-                </div>
-                </div>
-            </div>
-        </label>
-        {{/each}}
-
-    </div>
-
-    {{else}}
-    <div class="card m-auto">
-        <div class="card-header">
-            <div class="strong">Founding no matching results!</div>
+<div class="card">
+    <div class="card-header">
+        <div class="ms-auto no-wrap">
+            <button class="btn" onclick="toggleSearchResults(this)">Show results</button>
+            <button class="btn btn-icon" onclick="$('#search-results-payment-modal-entries').html('');">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="icon icon-tabler icons-tabler-outline icon-tabler-x">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                    <path d="M18 6l-12 12"></path>
+                    <path d="M6 6l12 12"></path>
+                </svg>
+            </button>
         </div>
     </div>
-    {{/if}}
+    <div class="table-responsive" id="last-paid-entries">
+        <table class="table card-table table-vcenter text-nowrap datatable">
+            <thead>
+                <tr>
+                    <th>
+                        <button class="btn btn-sm btn-icon px-2 font-sm text-uppercase fs-6 strong bg-green-lt"
+                            onclick="toggleColumnSelect(this)">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round"
+                                class="icon icon-tabler icons-tabler-outline icon-tabler-check me-2">
+                                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                <path d="M5 12l5 5l10 -10" />
+                            </svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round"
+                                class="icon icon-tabler icons-tabler-outline icon-tabler-plus me-2 d-none">
+                                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                <path d="M12 5l0 14" />
+                                <path d="M5 12l14 0" />
+                            </svg>
+                            Total
+                        </button>
+                    </th>
+                    {{#each data.project.fields}}
+                    {{#if (eq this.subscription true)}}
+                    <th class="">
+                        <button class="btn btn-sm btn-icon px-2 font-sm text-uppercase fs-6 strong bg-green-lt"
+                            onclick="toggleColumnSelect(this)">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round"
+                                class="icon icon-tabler icons-tabler-outline icon-tabler-check me-2">
+                                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                <path d="M5 12l5 5l10 -10" />
+                            </svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round"
+                                class="icon icon-tabler icons-tabler-outline icon-tabler-plus me-2 d-none">
+                                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                <path d="M12 5l0 14" />
+                                <path d="M5 12l14 0" />
+                            </svg>
+                            {{this.actualName}}
+                        </button>
+                    </th>
+                    {{/if}}
+                    {{/each}}
+                    {{#each data.project.fields}}
+                    {{#if (eq this.subscription false)}}
+                    {{#if (eq this.visible true)}}
+                    <th class="">
+                        {{this.actualName}}
+                    </th>
+                    {{/if}}
+                    {{/if}}
+                    {{/each}}
+                    <th>Last paid</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#each data.entries as |entry|}}
+                <tr>
+                    <td>
+                        <button class="btn btn-icon btn-sm px-2 bg-green-lt" onclick="toggleCostSelect(this)">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round"
+                                class="icon icon-tabler icons-tabler-outline icon-tabler-check me-2">
+                                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                <path d="M5 12l5 5l10 -10" />
+                            </svg>  
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round"
+                                class="icon icon-tabler icons-tabler-outline icon-tabler-plus me-2 d-none">
+                                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                <path d="M12 5l0 14" />
+                                <path d="M5 12l14 0" />
+                            </svg>
+                            {{entry.totalCost}} {{../data.project.subCostCurrency}}
+                        </button>
+                    </td>
+                    {{#each ../data.project.fields as |field|}}
+                    {{#if (eq field.subscription true)}}
+                    <td>
+                        {{#if (lookup entry field.name)}}
+                        <button class="btn btn-icon btn-sm px-2 bg-green-lt" onclick="toggleCostSelect(this)">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round"
+                                class="icon icon-tabler icons-tabler-outline icon-tabler-check me-2">
+                                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                <path d="M5 12l5 5l10 -10" />
+                            </svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round"
+                                class="icon icon-tabler icons-tabler-outline icon-tabler-plus me-2 d-none">
+                                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                <path d="M12 5l0 14" />
+                                <path d="M5 12l14 0" />
+                            </svg>
+                            {{lookup entry field.name}} {{../../data.project.subCostCurrency}}
+                        </button>
+                        {{/if}}
+                    </td>
+                    {{/if}}
+                    {{/each}}
 
+                    {{#each ../data.project.fields as |field|}}
+                    {{#if (eq field.subscription false)}}
+                    {{#if (eq field.visible true)}}
+                    <td>
+                        {{lookup entry field.name}}
+                    </td>
+                    {{/if}}
+                    {{/if}}
+                    {{/each}}
+                    <td>{{#if entry.lastPaid}}{{entry.lastPaid}}{{else}}<span
+                            class="badge bg-danger me-2"></span>Never{{/if}}</td>
+                </tr>
+                {{/each}}
+            </tbody>
+        </table>
+    </div>
 </div>
+
+{{else}}
+<div class="card m-auto">
+    <div class="card-header">
+        <div class="strong">Founding no matching results!</div>
+    </div>
+</div>
+{{/if}}
