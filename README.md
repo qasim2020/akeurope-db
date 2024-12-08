@@ -1,5 +1,9 @@
 # akeurope-db
 
+### Feature 1: Selectable lists to create draft order
+
+<img width="1122" alt="Screenshot 2024-12-08 at 2 17 07 AM" src="https://github.com/user-attachments/assets/873d7f1f-c8c2-4faf-a1e1-049a71c9734b">
+
 ### Feature 1: Collapsable sidebar
 
 <img width="853" alt="Screenshot 2024-12-02 at 4 43 36 PM" src="https://github.com/user-attachments/assets/2fbbc6f6-bd17-4008-ae6e-49242e75f2ab">
