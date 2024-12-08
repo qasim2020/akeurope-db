@@ -152,6 +152,9 @@
     const colIndex = $(elem).closest("th").index();
     const isTotal = $(elem).closest("th").index() == 0;
 
+    const rowHeadings = $(elem).closest("table").find("tr").find("th:eq(0), td:eq(0)");
+
+
     if (isTotal && active) {
       $(elem).closest('table').find(`tr`).each(function () {
         const button = $(this).find(`td, th`).find('button.bg-green-lt');
@@ -173,6 +176,9 @@
         $(button).find('.icon-tabler-check').addClass("d-none");
         $(button).find('.icon-tabler-plus').removeClass("d-none");
       });
+      rowHeadings.find('button').removeClass('bg-green-lt');
+      rowHeadings.find('.icon-tabler-check').addClass('d-none');
+      rowHeadings.find('.icon-tabler-plus').removeClass('d-none');
     } else if (!isTotal && !active) {
       $(elem).closest('table').find(`tr`).each(function () {
         const button = $(this).find(`td, th`).eq(colIndex).find('button');
@@ -180,6 +186,24 @@
         $(button).find('.icon-tabler-check').removeClass("d-none");
         $(button).find('.icon-tabler-plus').addClass("d-none");
       });
+      const rowEntries = $(elem).closest("table").find("tr");
+      rowEntries.each(function () {
+        const isHeadingRow = $(this).find("th").length > 0;
+        let allBtnsInRow, allSelectedBtns;
+        if (isHeadingRow) {
+          allBtnsInRow = $(this).find('th:not(:eq(0))').find('button');
+          allSelectedBtns = $(this).find('th:not(:eq(0))').find('button.bg-green-lt');
+        } else {
+          allBtnsInRow = $(this).find('td:not(:eq(0))').find('button');
+          allSelectedBtns = $(this).find('td:not(:eq(0))').find('button.bg-green-lt');
+        }
+        if (allBtnsInRow.length == allSelectedBtns.length) {
+          const button = $(this).closest("tr").find("td:eq(0), th:eq(0)").find('button');
+          button.addClass('bg-green-lt');
+          button.find('.icon-tabler-check').removeClass('d-none');
+          button.find('.icon-tabler-plus').addClass('d-none');
+        }
+      })
     }
 
   }
@@ -197,11 +221,18 @@
     if (isTotalColumn && rowState) {
       $(row).find('button').removeClass('bg-green-lt');
       $(row).find('.icon-tabler-check').addClass("d-none");
-      $(row).find('.icon-tabler-plus').removeClass("d-none");;
+      $(row).find('.icon-tabler-plus').removeClass("d-none");
+
+      $(row).find('button').each(function () {
+        unselectColRowHeading(this);
+      })
     } else if (isTotalColumn && !rowState) {
       $(row).find('button').addClass('bg-green-lt');
       $(row).find('.icon-tabler-check').removeClass("d-none");
       $(row).find('.icon-tabler-plus').addClass("d-none");
+      $(table).find('button').each(function () {
+        selectColRowHeading(this);
+      })
     } else if (!isTotalColumn && elemState) {
       $(elem).removeClass("bg-green-lt").find("svg").toggleClass("d-none");
       unselectColRowHeading(elem);
@@ -209,10 +240,9 @@
       $(elem).addClass("bg-green-lt").find("svg").toggleClass("d-none");
       selectColRowHeading(elem);
     }
-
   }
 
-  const selectColRowHeading = function(elem) {
+  const selectColRowHeading = function (elem) {
     const index = $(elem).closest("td, th").index();
     const rowHeading = $(elem).closest("tr").find("td:eq(0) > button");
     const colHeading = $(elem).closest("table").find("th").eq(index).find("button");
@@ -223,7 +253,7 @@
 
     const fullRowSelected = rowEntries.find(".bg-green-lt").length == rowEntries.find("button").length;
     const fullColSelected = colEntries.find(".bg-green-lt").length == colEntries.find("button").length;
-    
+
     if (fullRowSelected) {
       rowHeading.addClass("bg-green-lt");
       rowHeading.find(".icon-tabler-check").removeClass("d-none");
