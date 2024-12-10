@@ -4,10 +4,10 @@ const Subscription = require("../models/Subscription");
 
 const { createDynamicModel } = require("../models/createDynamicModel");
 const { generatePagination } = require("../modules/generatePagination");
+const { generateSearchQuery } = require("../modules/generateSearchQuery");
 
 const fetchEntrySubscriptionsAndPayments = async function(entry) {
 
-      
     if (!entry) {
         return null;
     }
@@ -23,6 +23,7 @@ const fetchEntrySubscriptionsAndPayments = async function(entry) {
     entry.payments = payments || null;
     entry.subscriptions = subscription || null;
     return entry;
+    
 }
 
 const fetchEntryDetailsFromPaymentsAndSubscriptions = async function(entries) {
@@ -55,55 +56,6 @@ const fetchEntryDetailsFromPaymentsAndSubscriptions = async function(entries) {
 
     return entries;
 }
-
-const generateSearchQuery = function(req, project) {
-    const search = req.query.search || '';
-    const fieldFilters = {};
-
-    project.fields.forEach(field => {
-        if (req.query[field.name]) {
-            fieldFilters[field.name] = req.query[field.name];
-        }
-    });
-
-    const stringFields = project.fields.filter(field => /string|boolean|image|file|dropdown/i.test(field.type)).map(field => ({ [field.name]: new RegExp(search, 'i') }));
-    const numberFields = project.fields.filter(field => field.type === 'number');
-    const dateFields = project.fields.filter(field => field.type === 'date');
-
-    let searchQuery = {};
-
-    if (Object.keys(fieldFilters).length > 0) {
-        Object.assign(searchQuery, fieldFilters);
-    }
-
-    if (search) {
-        const searchConditions = [];
-
-        if (stringFields.length > 0) {
-            searchConditions.push({ $or: stringFields });
-        }
-
-        const searchAsNumber = parseFloat(search);
-        if (!isNaN(searchAsNumber)) {
-            searchConditions.push({
-                $or: numberFields.map(field => ({ [field.name]: searchAsNumber }))
-            });
-        }
-
-        const searchAsDate = new Date(search);
-        if (!isNaN(searchAsDate.getTime())) {
-            searchConditions.push({
-                $or: dateFields.map(field => ({ [field.name]: searchAsDate }))
-            });
-        }
-
-        if (searchConditions.length > 0) {
-            searchQuery.$or = searchConditions;
-        }
-    }
-
-    return { searchQuery, fieldFilters };
-};
 
 const projectEntries = async function(req, res) {
     const project = await Project.findOne({ slug: req.params.slug }).lean();

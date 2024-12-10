@@ -371,36 +371,27 @@ exports.getSingleEntryLogs = async (req, res) => {
     }
 };
 
+const { createDraftOrder } = require('../modules/orders.js');
+
 exports.getPaymentModalEntryData = async (req, res) => {
     try {
-        let { entries, project, pagination } = await projectEntries(req, res);
 
-        entries = entries.sort((a, b) => {
-            if (a.lastPaid === null) return -1;
-            if (b.lastPaid === null) return 1;
-            return new Date(a.lastPaid) - new Date(b.lastPaid);
-        });
-
-        entries.forEach((entry) => {
-            entry.totalCost = project.fields.reduce((total, field) => {
-                if (field.subscription == true) {
-                    total = total + entry[field.name];
-                }
-                return total;
-            }, 0);
-        });
+        const {order, project, entries, pagination} = await createDraftOrder(req, res);
 
         res.render('partials/components/paymentModalEntryData', {
             layout: false,
             data: {
+                order,
                 project,
                 entries,
                 pagination,
             },
         });
+
     } catch (error) {
+        console.log(error);
         res.status(500).json({
-            error: 'Error occured while fetching logs',
+            error: 'Error while create draft order',
             details: error.message,
         });
     }

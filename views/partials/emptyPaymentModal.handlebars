@@ -22,14 +22,6 @@
         <div class="mb-3 search-beneficiaries">
           <label class="form-label">Select Beneficiaries</label>
           <div class="input-group">
-            <button class="input-group-btn btn btn-icon" id="addBeneficiary" onclick="addBeneficiary(this)">
-              <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24"
-                stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                <path d="M12 5l0 14"></path>
-                <path d="M5 12l14 0"></path>
-              </svg>
-            </button>
             <span class="input-group-text">Select</span>
             <input type="number" class="form-control" style="min-width: 50px;" value="10" min="1"
               onkeydown="if (event.key === 'Enter') searchBeneficiaries(this)" name="randomBeneficiaries"
@@ -48,11 +40,13 @@
             <button class="input-group-btn btn btn-icon" id="searchBeneficiaries" onclick="searchBeneficiaries(this)">
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                class="icon icon-tabler icons-tabler-outline icon-tabler-arrow-narrow-right">
+                class="icon icon-tabler icons-tabler-outline icon-tabler-shopping-cart-plus">
                 <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                <path d="M5 12l14 0" />
-                <path d="M15 16l4 -4" />
-                <path d="M15 8l4 4" />
+                <path d="M4 19a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+                <path d="M12.5 17h-6.5v-14h-2" />
+                <path d="M6 5l14 1l-.86 6.017m-2.64 .983h-10.5" />
+                <path d="M16 19h6" />
+                <path d="M19 16v6" />
               </svg>
             </button>
           </div>
@@ -88,14 +82,14 @@
 
     let error;
 
-    const limit = $("[name=randomBeneficiaries]").val();
+    const select = $("[name=randomBeneficiaries]").val();
     const search = $("[name=specificBeneficiaries]").val();
     const slug = $("[name=projectSlug]").val();
 
     $('.search-beneficiaries').find('.form-control').removeClass('is-invalid');
     $('.search-beneficiaries').find('.invalid-feedback').remove();
 
-    if (limit == '' && search == '') {
+    if (select == '' && search == '') {
       error = 'Please fill either the random or specific beneficiary input field.';
       $('.search-beneficiaries').find('.form-control').addClass('is-invalid');
       $('.search-beneficiaries').append(`<div class='invalid-feedback d-block'>${error}</div>`);
@@ -103,18 +97,23 @@
     }
 
     console.log({
-      limit, search, slug
+      select, search, slug
     })
 
     const currentBtnHTML = $('#searchBeneficiaries').html();
     $('#searchBeneficiaries').html(`<span class="spinner-border spinner-border-sm" role="status"></span>`);
 
     $.ajax({
-      url: `/getPaymentModalEntryData/${slug}?limit=${limit}&search=${search}`,
+      url: `/getPaymentModalEntryData/${slug}?select=${select}&search=${search}`,
       method: 'GET',
       success: (response) => {
         $('#searchBeneficiaries').html(currentBtnHTML);
-        $('#search-results-payment-modal-entries').html(response);
+        const elemExists = $(`#${slug}`).length > 0;
+        if (elemExists) {
+          $(`#${slug}`).replaceWith(response);
+        } else {
+          $('#search-results-payment-modal-entries').append(response);
+        }
       },
       error: (error) => {
         $('#searchBeneficiaries').html(currentBtnHTML);
@@ -138,11 +137,9 @@
 
   const toggleSearchResults = function (elem) {
     if ($('#last-paid-entries').hasClass("d-none")) {
-      $(elem).html('Hide results');
-      $(elem).closest(".d-flex").addClass("mb-2");
+      $(elem).closest('.card-header').removeClass("border-0");
     } else {
-      $(elem).html('Show results');
-      $(elem).closest(".d-flex").removeClass("mb-2");
+      $(elem).closest('.card-header').addClass("border-0");
     }
     $('#last-paid-entries').toggleClass("d-none");
   }
