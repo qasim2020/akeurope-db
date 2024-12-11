@@ -2,23 +2,18 @@ const mongoose = require('mongoose');
 
 const OrderSchema = new mongoose.Schema(
     {
+        customerId: {
+            type: mongoose.Schema.Types.ObjectId,
+            required: true
+        },
         status: {
             type: String,
             enum: ['draft', 'invoice created', 'paid'],
             default: 'draft',
         },
-        grandTotal: {
-            type: Number,
-            required: true,
-            min: 0,
-        },
         projects: [
             {
                 slug: {
-                    type: String,
-                    required: true,
-                },
-                currency: {
                     type: String,
                     required: true,
                 },

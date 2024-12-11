@@ -105,7 +105,7 @@ const getOldestPaidEntries = async (req, project) => {
         }, 0);
     });
 
-    let grandTotal = 0;
+    let projectTotalSingleMonth = 0;
 
     project.fields = project.fields.map((field) => {
         if (field.subscription == true) {
@@ -113,7 +113,7 @@ const getOldestPaidEntries = async (req, project) => {
                 total = total + entry[field.name];
                 return total;
             }, 0);
-            grandTotal = grandTotal + colSum;
+            projectTotalSingleMonth = projectTotalSingleMonth + colSum;
             Object.assign(field, { totalCost: colSum });
         }
 
@@ -124,41 +124,234 @@ const getOldestPaidEntries = async (req, project) => {
 
     return {
         select: allEntries.length,
+        project,
+        allEntries,
         entries: allEntries.slice(skip, skip + limit),
         pagination,
-        grandTotal,
+        projectTotalSingleMonth,
     };
 };
 
 const deleteDraftOrder = async (req, res) => {};
 
-const updateDraftOrder = async (req, res) => {
-    const project = await Project.findOne({ slug: req.params.slug }).lean();
-    if (!project) throw new Error(`Project "${req.params.slug}" not found`);
+const fetchEntriesInOrder = async (req, res) => {
+    const orderId = req.query.orderId;
+    const projectSlug = req.params.slug;
 
-    const order = await Order.findOne({_id: req.query.orderId}).lean();
-    const DynamicModel = await createDynamicModel(project.slug);
-    const entries = await order.
+    const order = await Order.findOne({
+        _id: orderId,
+        'projects.slug': projectSlug,
+    }).lean();
+
+    const projectOrdered = order.projects.find((p) => p.slug === projectSlug);
+
+    const DynamicModel = await createDynamicModel(projectOrdered.slug);
+
+    const allEntries = await Promise.all(
+        projectOrdered.entries.map((entry) =>
+            DynamicModel.findById(entry.entryId).lean(),
+        ),
+    );
+
+    const projectOriginal = await Project.findOne({ slug: projectSlug }).lean();
+
+    allEntries.forEach((entry) => {
+        const matchingOrderedEntry = projectOrdered.entries.find(
+            (entryOrdered) =>
+                entryOrdered.entryId.toString() === entry._id.toString(),
+        );
+
+        if (matchingOrderedEntry) {
+            entry.selectedSubscriptions =
+                matchingOrderedEntry.selectedSubscriptions || [];
+        } else {
+            entry.selectedSubscriptions = [];
+        }
+
+        entry.totalOrderedCost = projectOriginal.fields.reduce(
+            (total, field) => {
+                if (
+                    field.subscription == true &&
+                    entry.selectedSubscriptions.includes(field.name)
+                ) {
+                    total = total + entry[field.name];
+                }
+                return total;
+            },
+            0,
+        );
+
+        entry.totalCost = projectOriginal.fields.reduce((total, field) => {
+            if (field.subscription == true) {
+                total = total + entry[field.name];
+            }
+            return total;
+        }, 0);
+    });
+
+    let projectTotalSingleMonth = 0;
+    let projectOrderedSingleMonth = 0;
+
+    projectOriginal.fields = projectOriginal.fields.map((field) => {
+        if (field.subscription == true) {
+            const colSum = allEntries.reduce((total, entry) => {
+                total = total + entry[field.name];
+                return total;
+            }, 0);
+            projectTotalSingleMonth = projectTotalSingleMonth + colSum;
+            Object.assign(field, { totalCost: colSum });
+        }
+
+        if (field.subscription == true) {
+            const colSum = allEntries.reduce((total, entry) => {
+                if (entry.selectedSubscriptions.includes(field.name)) {
+                    total = total + entry[field.name];
+                }
+                return total;
+            }, 0);
+            projectOrderedSingleMonth = projectOrderedSingleMonth + colSum;
+            Object.assign(field, { totalOrderedCost: colSum });
+        }
+
+        return field;
+    });
+
+    projectOriginal.totalCost = projectTotalSingleMonth;
+    projectOriginal.totalOrderedCost = projectOrderedSingleMonth;
+    projectOriginal.totalOrderedCostAllMonths = projectOrderedSingleMonth * projectOrdered.months;
+
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const pagination = createPagination(req, allEntries.length);
+
     return {
-        order
+        select: allEntries.length,
+        project: projectOriginal,
+        allEntries,
+        entries: allEntries.slice(skip, skip + limit),
+        pagination
+    };
+};
+
+const fetchOrderByProject = async (req, res) => {
+    let order = await Order.findOne({
+        _id: req.query.orderId,
+        'projects.slug': req.params.slug,
+    }).lean();
+    order.project = order.projects[0];
+    return order;
+};
+
+const updateDraftOrder = async (req, res) => {
+    let checkProject = await Project.findOne({ slug: req.params.slug }).lean();
+    if (!checkProject)
+        throw new Error(`Project "${req.params.slug}" not found`);
+
+    const orderId = req.query.orderId;
+    const projectSlug = checkProject.slug;
+
+    if (req.query.months > 0) {
+        const updatedMonths = req.query.months;
+        await Order.updateOne(
+            { _id: orderId, 'projects.slug': projectSlug },
+            { $set: { 'projects.$.months': updatedMonths } },
+        );
     }
+
+    if (req.query.subscriptions && !req.query.entryId) {
+        const subscriptions = req.query.subscriptions;
+        if (subscriptions === 'empty') {
+            await Order.updateOne(
+                { _id: orderId, 'projects.slug': projectSlug },
+                {
+                    $unset: { 'projects.$.entries.$[].selectedSubscriptions': '' },
+                }
+            );
+        } else {
+            await Order.updateOne(
+                { _id: orderId, 'projects.slug': projectSlug },
+                {
+                    $set: {
+                        'projects.$.entries.$[].selectedSubscriptions':
+                            subscriptions.split(','), 
+                    },
+                },
+            );
+        }
+    }
+
+    if (req.query.entryId && req.query.subscriptions) {
+        const entryId = req.query.entryId;
+        const subscriptions = req.query.subscriptions; 
+        if (subscriptions === 'empty') {
+            await Order.updateOne(
+                { _id: orderId, 'projects.slug': projectSlug },
+                {
+                    $unset: { 'projects.$.entries.$[entry].selectedSubscriptions': '' },
+                },
+                {
+                    arrayFilters: [{ 'entry.entryId': entryId }],
+                }
+            );
+        } else {
+            const subscriptionsArray = subscriptions.split(','); 
+            await Order.updateOne(
+                { _id: orderId, 'projects.slug': projectSlug },
+                {
+                    $set: { 'projects.$.entries.$[entry].selectedSubscriptions': subscriptionsArray },
+                },
+                {
+                    arrayFilters: [{ 'entry.entryId': entryId }],
+                }
+            );
+        }
+    }
+
+    const order = await fetchOrderByProject(req, res);
+
+    const {
+        entries,
+        project,
+        pagination,
+        projectTotalSingleMonth,
+        select,
+        projectTotalAllMonths,
+    } = await fetchEntriesInOrder(req, res);
+
+    return {
+        orderId: order._id,
+        projectTotalSingleMonth,
+        projectTotalAllMonths,
+        project,
+        entries,
+        pagination,
+        select,
+        toggleState: req.query.toggleState,
+        months: order.project.months,
+    };
 };
 
 const createDraftOrder = async (req, res) => {
-    const project = await Project.findOne({ slug: req.params.slug }).lean();
-    if (!project) throw new Error(`Project "${req.params.slug}" not found`);
+    const checkProject = await Project.findOne({
+        slug: req.params.slug,
+    }).lean();
+    if (!checkProject)
+        throw new Error(`Project "${req.params.slug}" not found`);
 
-    const { entries, pagination, grandTotal, select } =
-        await getOldestPaidEntries(req, project);
+    const { project, allEntries } = await getOldestPaidEntries(
+        req,
+        checkProject,
+    );
 
     const order = new Order({
-        grandTotal,
+        customerId: req.params.customerId,
         projects: [
             {
                 slug: project.slug,
-                currency: project.subCostCurrency,
                 months: 1,
-                entries: entries.map((entry) => {
+                entries: allEntries.map((entry) => {
                     return {
                         entryId: entry._id,
                         selectedSubscriptions: project.fields
@@ -176,15 +369,8 @@ const createDraftOrder = async (req, res) => {
 
     try {
         await order.save();
-        return {
-            orderId: order._id,
-            grandTotal,
-            project,
-            entries,
-            pagination,
-            select,
-            toggleState: req.query.toggleState,
-        };
+        req.query.orderId = order._id;
+        return await updateDraftOrder(req, res);
     } catch (error) {
         console.error('Error saving order:', error);
         throw error;

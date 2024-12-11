@@ -1,6 +1,7 @@
 {{#if data.entries}}
 
-<div class="card mb-3" id="{{data.project.slug}}" orderId="{{data.orderId}}" toggleState="{{data.toggleState}}">
+<div class="card mb-3" id="{{data.project.slug}}" orderId="{{data.orderId}}" toggleState="{{data.toggleState}}" 
+my-href="?months={{data.months}}&page={{data.pagination.currentPage}}&limit={{data.pagination.limit}}&search={{data.pagination.search}}&sortBy={{data.pagination.sort.sortBy}}&orderBy={{data.pagination.sort.order}}{{#if data.pagination.filtersQuery}}&{{data.pagination.filtersQuery}}{{/if}}">
     <div class="card-header flex-wrap border-0">
         <div class="card-title w-100 d-flex">
             <div class="page-pretitle mb-2">{{data.select}} x {{data.project.name}}</div>
@@ -29,7 +30,7 @@
             </div>
         </div>
         <div class="d-flex align-items-center flex-wrap">
-            <span class="strong">{{data.grandTotal}} {{data.project.subCostCurrency}}</span>
+            <span class="strong">{{data.project.totalOrderedCost}} {{data.project.subCostCurrency}}</span>
             <button class="btn btn-icon btn-sm  border-0 shadow-none disabled">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -39,19 +40,19 @@
                     <path d="M5 12l14 0" />
                 </svg>
             </button>
-
-            <button class="btn btn-icon btn-sm" onclick="doSearch(this)"
-                my-href="?month=-1&&page={{data.pagination.currentPage}}&limit={{data.pagination.limit}}&search={{data.pagination.search}}&sortBy={{data.pagination.sort.sortBy}}&orderBy={{data.pagination.sort.order}}{{#if data.pagination.filtersQuery}}&{{data.pagination.filtersQuery}}{{/if}}">
+            <button class="btn btn-icon btn-sm" {{#if (neq (dec data.months) 0)}} onclick="doSearch(this)"
+                my-href="?months={{dec data.months}}&page={{data.pagination.currentPage}}&limit={{data.pagination.limit}}&search={{data.pagination.search}}&sortBy={{data.pagination.sort.sortBy}}&orderBy={{data.pagination.sort.order}}{{#if data.pagination.filtersQuery}}&{{data.pagination.filtersQuery}}{{/if}}"
+                {{/if}}>
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                class="icon icon-tabler icons-tabler-outline icon-tabler-minus">
-                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                <path d="M5 12l14 0" />
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="icon icon-tabler icons-tabler-outline icon-tabler-minus">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                    <path d="M5 12l14 0" />
                 </svg>
             </button>
-            <span class="mx-2 strong">1</span>
+            <span class="mx-2 strong">{{data.months}}</span>
             <button class="btn btn-icon btn-sm" onclick="doSearch(this)"
-                my-href="?month=1page={{data.pagination.currentPage}}&limit={{data.pagination.limit}}&search={{data.pagination.search}}&sortBy={{data.pagination.sort.sortBy}}&orderBy={{data.pagination.sort.order}}{{#if data.pagination.filtersQuery}}&{{data.pagination.filtersQuery}}{{/if}}">
+                my-href="?months={{inc data.months}}&page={{data.pagination.currentPage}}&limit={{data.pagination.limit}}&search={{data.pagination.search}}&sortBy={{data.pagination.sort.sortBy}}&orderBy={{data.pagination.sort.order}}{{#if data.pagination.filtersQuery}}&{{data.pagination.filtersQuery}}{{/if}}">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                     class="icon icon-tabler icons-tabler-outline icon-tabler-plus">
@@ -79,60 +80,65 @@
                     <path d="M5 14h14" />
                 </svg>
             </button>
-            <span class="strong">{{data.grandTotal}} {{data.project.subCostCurrency}}</span>
+            <span class="strong">{{data.project.totalOrderedCostAllMonths}} {{data.project.subCostCurrency}}</span>
         </div>
 
     </div>
-    <div class="{{#if (eq data.toggleState 'hide')}}d-none{{/if}} last-paid-entries">
+    <div class="{{#if (eq data.toggleState 'hide')}}d-none{{/if}} last-paid-entries border-top">
         <div class="table-responsive">
             <table class="table card-table table-vcenter text-nowrap datatable">
                 <thead>
                     <tr>
                         <th>
                             <button
-                                class="btn btn-sm btn-icon px-2 font-sm text-uppercase fs-6 strong bg-green-lt text-start"
+                                class="btn btn-sm btn-icon px-2 font-sm text-uppercase fs-6 strong {{#if (eq data.project.totalOrderedCost data.project.totalCost)}}bg-green-lt{{/if}} text-start"
                                 onclick="toggleColumnSelect(this)">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
                                     fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                                     stroke-linejoin="round"
-                                    class="icon icon-tabler icons-tabler-outline icon-tabler-check me-2">
+                                    class="icon icon-tabler icons-tabler-outline icon-tabler-check me-2 {{#if (neq data.project.totalOrderedCost data.project.totalCost)}}d-none{{/if}}">
                                     <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                                     <path d="M5 12l5 5l10 -10" />
                                 </svg>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
                                     fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                                     stroke-linejoin="round"
-                                    class="icon icon-tabler icons-tabler-outline icon-tabler-plus me-2 d-none">
+                                    class="icon icon-tabler icons-tabler-outline icon-tabler-plus me-2 {{#if (eq data.project.totalOrderedCost data.project.totalCost)}}d-none{{/if}}">
                                     <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                                     <path d="M12 5l0 14" />
                                     <path d="M5 12l14 0" />
                                 </svg>
-                                Total <br> {{data.order.grandTotal}} {{data.project.subCostCurrency}}
+                                Total <br> {{data.project.totalCost}} {{data.project.subCostCurrency}}
                             </button>
                         </th>
                         {{#each data.project.fields}}
                         {{#if (eq this.subscription true)}}
                         <th class="">
+                        {{#if (neq this.totalCost 0)}}
+
                             <button
-                                class="btn btn-sm btn-icon px-2 font-sm text-uppercase fs-6 strong bg-green-lt text-start"
+                                subscriptionName="{{this.name}}"
+                                class="btn btn-sm btn-icon px-2 font-sm text-uppercase fs-6 strong {{#if (eq this.totalCost this.totalOrderedCost)}}bg-green-lt{{/if}} text-start"
                                 onclick="toggleColumnSelect(this)">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
                                     fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                                     stroke-linejoin="round"
-                                    class="icon icon-tabler icons-tabler-outline icon-tabler-check me-2">
+                                    class="icon icon-tabler icons-tabler-outline icon-tabler-check me-2 {{#if (neq this.totalCost this.totalOrderedCost)}}d-none{{/if}}">
                                     <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                                     <path d="M5 12l5 5l10 -10" />
                                 </svg>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
                                     fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                                     stroke-linejoin="round"
-                                    class="icon icon-tabler icons-tabler-outline icon-tabler-plus me-2 d-none">
+                                    class="icon icon-tabler icons-tabler-outline icon-tabler-plus me-2 {{#if (eq this.totalCost this.totalOrderedCost)}}d-none{{/if}}">
                                     <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                                     <path d="M12 5l0 14" />
                                     <path d="M5 12l14 0" />
                                 </svg>
                                 {{this.actualName}} <br> {{this.totalCost}} {{../data.project.subCostCurrency}}
                             </button>
+                        {{/if}}
+
                         </th>
                         {{/if}}
                         {{/each}}
@@ -150,20 +156,20 @@
                 </thead>
                 <tbody>
                     {{#each data.entries as |entry|}}
-                    <tr>
+                    <tr entry-id="{{entry._id}}">
                         <td>
-                            <button class="btn btn-icon btn-sm px-2 bg-green-lt" onclick="toggleCostSelect(this)">
+                            <button class="btn btn-icon btn-sm px-2 {{#if (eq entry.totalCost entry.totalOrderedCost)}}bg-green-lt{{/if}}" onclick="toggleCostSelect(this)">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
                                     fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                                     stroke-linejoin="round"
-                                    class="icon icon-tabler icons-tabler-outline icon-tabler-check me-2">
+                                    class="icon icon-tabler icons-tabler-outline icon-tabler-check me-2 {{#if (neq entry.totalCost entry.totalOrderedCost)}}d-none{{/if}}">
                                     <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                                     <path d="M5 12l5 5l10 -10" />
                                 </svg>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
                                     fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                                     stroke-linejoin="round"
-                                    class="icon icon-tabler icons-tabler-outline icon-tabler-plus me-2 d-none">
+                                    class="icon icon-tabler icons-tabler-outline icon-tabler-plus me-2 {{#if (eq entry.totalCost entry.totalOrderedCost)}}d-none{{/if}}">
                                     <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                                     <path d="M12 5l0 14" />
                                     <path d="M5 12l14 0" />
@@ -175,18 +181,18 @@
                         {{#if (eq field.subscription true)}}
                         <td>
                             {{#if (lookup entry field.name)}}
-                            <button class="btn btn-icon btn-sm px-2 bg-green-lt" onclick="toggleCostSelect(this)">
+                            <button subscriptionName="{{field.name}}" class="btn btn-icon btn-sm px-2 {{#if (findInArray entry.selectedSubscriptions field.name)}}bg-green-lt{{/if}}" onclick="toggleCostSelect(this)">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
                                     fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                                     stroke-linejoin="round"
-                                    class="icon icon-tabler icons-tabler-outline icon-tabler-check me-2">
+                                    class="icon icon-tabler icons-tabler-outline icon-tabler-check me-2 {{#unless (findInArray entry.selectedSubscriptions field.name)}}d-none{{/unless}}">
                                     <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                                     <path d="M5 12l5 5l10 -10" />
                                 </svg>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
                                     fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                                     stroke-linejoin="round"
-                                    class="icon icon-tabler icons-tabler-outline icon-tabler-plus me-2 d-none">
+                                    class="icon icon-tabler icons-tabler-outline icon-tabler-plus me-2 {{#if (findInArray entry.selectedSubscriptions field.name)}}d-none{{/if}}">
                                     <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                                     <path d="M12 5l0 14" />
                                     <path d="M5 12l14 0" />

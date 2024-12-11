@@ -379,27 +379,17 @@ const {
 
 exports.getPaymentModalEntryData = async (req, res) => {
     try {
-        let orderId, grandTotal, project, entries, pagination, select;
+        let output;
 
         if (!req.query.orderId) {
-            ({ orderId, grandTotal, project, entries, pagination, select, toggleState } =
-                await createDraftOrder(req, res));
+            output = await createDraftOrder(req, res);
         } else {
-            ({ orderId, grandTotal, project, entries, pagination, select, toggleState } =
-                await updateDraftOrder(req, res));
+            output = await updateDraftOrder(req, res);
         }
 
         res.render('partials/components/paymentModalEntryData', {
             layout: false,
-            data: {
-                orderId,
-                grandTotal,
-                select,
-                project,
-                entries,
-                pagination,
-                toggleState
-            },
+            data: output,
         });
     } catch (error) {
         console.log(error);

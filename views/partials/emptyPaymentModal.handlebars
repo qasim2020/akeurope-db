@@ -10,7 +10,7 @@
 
         <div class="mb-3">
           <label class="form-label">Select Customer</label>
-          <select name="" id="" class="form-select">
+          <select name="customerId" id="" class="form-select">
             {{#each data.customers}}
             <option value="{{this._id}}">{{this.name}}</option>
             {{/each}}
@@ -70,7 +70,6 @@
   </div>
 </div>
 
-
 <script>
 
   $(document).ready(() => {
@@ -84,6 +83,7 @@
 
     const select = $("[name=randomBeneficiaries]").val();
     const search = $("[name=specificBeneficiaries]").val();
+    const customerId = $('[name=customerId]').val();
     const slug = $("[name=projectSlug]").val();
 
     $('.search-beneficiaries').find('.form-control').removeClass('is-invalid');
@@ -100,7 +100,7 @@
     $('#searchBeneficiaries').html(`<span class="spinner-border spinner-border-sm" role="status"></span>`);
 
     $.ajax({
-      url: `/getPaymentModalEntryData/${slug}?select=${select}&search=${search}&toggleState=hide`,
+      url: `/getPaymentModalEntryData/${slug}/${customerId}?select=${select}&search=${search}&toggleState=hide`,
       method: 'GET',
       success: (response) => {
         $('#searchBeneficiaries').html(currentBtnHTML);
@@ -119,13 +119,21 @@
 
   }
 
-  const doSearch = function (elem) {
-    const href = $(elem).attr("my-href");
+  const doSearch = function (elem, href) {
+    const customerId = $('[name=customerId]').val();
+    if (!href) {
+      href = $(elem).attr("my-href");
+    }
     const slug = $("[name=projectSlug]").val();
     const orderId = $(`#${slug}`).attr('orderId');
     const toggleState = $(`#${slug}`).attr('toggleState');
+
+    const url = `/getPaymentModalEntryData/${slug}/${customerId}${href}&orderId=${orderId}&toggleState=${toggleState}`;
+
+    console.log(url);
+
     $.ajax({
-      url: `/getPaymentModalEntryData/${slug}?${href}&orderId=${orderId}&toggleState=${toggleState}`,
+      url,
       method: 'GET',
       success: function (response) {
         $(`#${slug}`).replaceWith(response);
@@ -138,26 +146,31 @@
 
   const selectAllSearchResults = function (elem) {
     const count = $(elem).data("limit");
-    if ($(elem).html() == `Select all(${ count })`) {
+    if ($(elem).html() == `Select all(${count})`) {
       $('#last-paid-entries').find('[type="checkbox"]:not(":checked")').click();
-      $(elem).html(`Unselect all(${ count })`);
+      $(elem).html(`Unselect all(${count})`);
     } else {
       $('#last-paid-entries').find('[type="checkbox"]:checked').click();
-      $(elem).html(`Select all(${ count })`);
+      $(elem).html(`Select all(${count})`);
     }
 
   }
 
   const toggleSearchResults = function (elem) {
     if ($('.last-paid-entries').hasClass("d-none")) {
+      $('.last-paid-entries').removeClass("d-none");
       $(elem).closest('.card-header').removeClass("border-0");
+      $('.last-paid-entries').closest('.card').attr({ toggleState: 'show' });
     } else {
       $(elem).closest('.card-header').addClass("border-0");
+      $('.last-paid-entries').addClass("d-none");
+      $('.last-paid-entries').closest('.card').attr({ toggleState: 'hide' });
     }
-    $('.last-paid-entries').toggleClass("d-none");
   }
 
   const toggleColumnSelect = function (elem) {
+
+
     const active = $(elem).hasClass("bg-green-lt");
     const colIndex = $(elem).closest("th").index();
     const isTotal = $(elem).closest("th").index() == 0;
@@ -216,6 +229,22 @@
       })
     }
 
+    let subscriptions;
+
+    subscriptions = $(elem)
+      .closest('tr')
+      .find('.bg-green-lt')
+      .map((index, val) => $(val).attr('subscriptionName'))
+      .get()
+      .join(',');
+
+    if (subscriptions == "") {
+      subscriptions = 'empty';
+    }
+
+    const href = $(elem).closest(".card").attr("my-href") + `&subscriptions=${subscriptions}`;
+    doSearch(elem, href);
+
   }
 
   const toggleCostSelect = function (elem) {
@@ -250,6 +279,22 @@
       $(elem).addClass("bg-green-lt").find("svg").toggleClass("d-none");
       selectColRowHeading(elem);
     }
+
+    let subscriptions = $(elem)
+      .closest('tr')
+      .find('.bg-green-lt')
+      .map((index, val) => $(val).attr('subscriptionName'))
+      .get()
+      .join(',');
+
+    if (subscriptions == "") {
+      subscriptions = 'empty';
+    }
+
+    const entryId = $(elem).closest("tr").attr('entry-id');
+
+    const href = $(elem).closest(".card").attr("my-href") + `&entryId=${entryId}&subscriptions=${subscriptions}`;
+    doSearch(elem, href);
   }
 
   const selectColRowHeading = function (elem) {
@@ -259,7 +304,7 @@
     const totalHeading = $(elem).closest("table").find("tr:eq(0)").find("button:eq(0)");
 
     const rowEntries = $(elem).closest("tr").find("td:not(:eq(0))");
-    const colEntries = $(elem).closest("table").find(`td: nth - child(${ index + 1})`);
+    const colEntries = $(elem).closest("table").find(`td:nth-child(${index + 1})`);
 
     const fullRowSelected = rowEntries.find(".bg-green-lt").length == rowEntries.find("button").length;
     const fullColSelected = colEntries.find(".bg-green-lt").length == colEntries.find("button").length;
