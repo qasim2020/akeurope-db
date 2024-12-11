@@ -1,9 +1,9 @@
 {{#if data.entries}}
 
-<div class="card mb-3" id="{{data.project.slug}}">
+<div class="card mb-3" id="{{data.project.slug}}" orderId="{{data.orderId}}" toggleState="{{data.toggleState}}">
     <div class="card-header flex-wrap border-0">
         <div class="card-title w-100 d-flex">
-            <div class="page-pretitle mb-2">{{data.pagination.limit}} x {{data.project.name}}</div>
+            <div class="page-pretitle mb-2">{{data.select}} x {{data.project.name}}</div>
             <div class="ms-auto no-wrap">
                 <button class="btn btn-icon btn-sm btn-pill border-0 shadow-none p-0"
                     onclick="toggleSearchResults(this)" style=" margin-top: -13px;">
@@ -29,7 +29,7 @@
             </div>
         </div>
         <div class="d-flex align-items-center flex-wrap">
-            <span class="strong">{{data.order.grandTotal}} {{data.project.subCostCurrency}}</span>
+            <span class="strong">{{data.grandTotal}} {{data.project.subCostCurrency}}</span>
             <button class="btn btn-icon btn-sm  border-0 shadow-none disabled">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -39,16 +39,19 @@
                     <path d="M5 12l14 0" />
                 </svg>
             </button>
-            <button class="btn btn-icon btn-sm">
+
+            <button class="btn btn-icon btn-sm" onclick="doSearch(this)"
+                my-href="?month=-1&&page={{data.pagination.currentPage}}&limit={{data.pagination.limit}}&search={{data.pagination.search}}&sortBy={{data.pagination.sort.sortBy}}&orderBy={{data.pagination.sort.order}}{{#if data.pagination.filtersQuery}}&{{data.pagination.filtersQuery}}{{/if}}">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                    class="icon icon-tabler icons-tabler-outline icon-tabler-minus">
-                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                    <path d="M5 12l14 0" />
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                class="icon icon-tabler icons-tabler-outline icon-tabler-minus">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                <path d="M5 12l14 0" />
                 </svg>
             </button>
             <span class="mx-2 strong">1</span>
-            <button class="btn btn-icon btn-sm">
+            <button class="btn btn-icon btn-sm" onclick="doSearch(this)"
+                my-href="?month=1page={{data.pagination.currentPage}}&limit={{data.pagination.limit}}&search={{data.pagination.search}}&sortBy={{data.pagination.sort.sortBy}}&orderBy={{data.pagination.sort.order}}{{#if data.pagination.filtersQuery}}&{{data.pagination.filtersQuery}}{{/if}}">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                     class="icon icon-tabler icons-tabler-outline icon-tabler-plus">
@@ -76,146 +79,151 @@
                     <path d="M5 14h14" />
                 </svg>
             </button>
-            <span class="strong">{{data.order.grandTotal}} {{data.project.subCostCurrency}}</span>
+            <span class="strong">{{data.grandTotal}} {{data.project.subCostCurrency}}</span>
         </div>
 
     </div>
-    <div class="table-responsive d-none" id="last-paid-entries">
-        <table class="table card-table table-vcenter text-nowrap datatable">
-            <thead>
-                <tr>
-                    <th>
-                        <button class="btn btn-sm btn-icon px-2 font-sm text-uppercase fs-6 strong bg-green-lt text-start"
-                            onclick="toggleColumnSelect(this)">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                stroke-linejoin="round"
-                                class="icon icon-tabler icons-tabler-outline icon-tabler-check me-2">
-                                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                                <path d="M5 12l5 5l10 -10" />
-                            </svg>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                stroke-linejoin="round"
-                                class="icon icon-tabler icons-tabler-outline icon-tabler-plus me-2 d-none">
-                                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                                <path d="M12 5l0 14" />
-                                <path d="M5 12l14 0" />
-                            </svg>
-                            Total <br> {{data.order.grandTotal}} {{data.project.subCostCurrency}}
-                        </button>
-                    </th>
-                    {{#each data.project.fields}}
-                    {{#if (eq this.subscription true)}}
-                    <th class="">
-                        <button class="btn btn-sm btn-icon px-2 font-sm text-uppercase fs-6 strong bg-green-lt text-start"
-                            onclick="toggleColumnSelect(this)">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                stroke-linejoin="round"
-                                class="icon icon-tabler icons-tabler-outline icon-tabler-check me-2">
-                                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                                <path d="M5 12l5 5l10 -10" />
-                            </svg>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                stroke-linejoin="round"
-                                class="icon icon-tabler icons-tabler-outline icon-tabler-plus me-2 d-none">
-                                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                                <path d="M12 5l0 14" />
-                                <path d="M5 12l14 0" />
-                            </svg>
-                            {{this.actualName}} <br> {{this.totalCost}} {{../data.project.subCostCurrency}}
-                        </button>
-                    </th>
-                    {{/if}}
-                    {{/each}}
-                    {{#each data.project.fields}}
-                    {{#if (eq this.subscription false)}}
-                    {{#if (eq this.visible true)}}
-                    <th class="">
-                        {{this.actualName}}
-                    </th>
-                    {{/if}}
-                    {{/if}}
-                    {{/each}}
-                    <th>Last paid</th>
-                </tr>
-            </thead>
-            <tbody>
-                {{#each data.entries as |entry|}}
-                <tr>
-                    <td>
-                        <button class="btn btn-icon btn-sm px-2 bg-green-lt" onclick="toggleCostSelect(this)">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                stroke-linejoin="round"
-                                class="icon icon-tabler icons-tabler-outline icon-tabler-check me-2">
-                                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                                <path d="M5 12l5 5l10 -10" />
-                            </svg>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                stroke-linejoin="round"
-                                class="icon icon-tabler icons-tabler-outline icon-tabler-plus me-2 d-none">
-                                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                                <path d="M12 5l0 14" />
-                                <path d="M5 12l14 0" />
-                            </svg>
-                            {{entry.totalCost}} {{../data.project.subCostCurrency}}
-                        </button>
-                    </td>
-                    {{#each ../data.project.fields as |field|}}
-                    {{#if (eq field.subscription true)}}
-                    <td>
-                        {{#if (lookup entry field.name)}}
-                        <button class="btn btn-icon btn-sm px-2 bg-green-lt" onclick="toggleCostSelect(this)">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                stroke-linejoin="round"
-                                class="icon icon-tabler icons-tabler-outline icon-tabler-check me-2">
-                                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                                <path d="M5 12l5 5l10 -10" />
-                            </svg>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                stroke-linejoin="round"
-                                class="icon icon-tabler icons-tabler-outline icon-tabler-plus me-2 d-none">
-                                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                                <path d="M12 5l0 14" />
-                                <path d="M5 12l14 0" />
-                            </svg>
-                            {{lookup entry field.name}} {{../../data.project.subCostCurrency}}
-                        </button>
+    <div class="{{#if (eq data.toggleState 'hide')}}d-none{{/if}} last-paid-entries">
+        <div class="table-responsive">
+            <table class="table card-table table-vcenter text-nowrap datatable">
+                <thead>
+                    <tr>
+                        <th>
+                            <button
+                                class="btn btn-sm btn-icon px-2 font-sm text-uppercase fs-6 strong bg-green-lt text-start"
+                                onclick="toggleColumnSelect(this)">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    class="icon icon-tabler icons-tabler-outline icon-tabler-check me-2">
+                                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                    <path d="M5 12l5 5l10 -10" />
+                                </svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    class="icon icon-tabler icons-tabler-outline icon-tabler-plus me-2 d-none">
+                                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                    <path d="M12 5l0 14" />
+                                    <path d="M5 12l14 0" />
+                                </svg>
+                                Total <br> {{data.order.grandTotal}} {{data.project.subCostCurrency}}
+                            </button>
+                        </th>
+                        {{#each data.project.fields}}
+                        {{#if (eq this.subscription true)}}
+                        <th class="">
+                            <button
+                                class="btn btn-sm btn-icon px-2 font-sm text-uppercase fs-6 strong bg-green-lt text-start"
+                                onclick="toggleColumnSelect(this)">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    class="icon icon-tabler icons-tabler-outline icon-tabler-check me-2">
+                                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                    <path d="M5 12l5 5l10 -10" />
+                                </svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    class="icon icon-tabler icons-tabler-outline icon-tabler-plus me-2 d-none">
+                                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                    <path d="M12 5l0 14" />
+                                    <path d="M5 12l14 0" />
+                                </svg>
+                                {{this.actualName}} <br> {{this.totalCost}} {{../data.project.subCostCurrency}}
+                            </button>
+                        </th>
                         {{/if}}
-                    </td>
-                    {{/if}}
-                    {{/each}}
+                        {{/each}}
+                        {{#each data.project.fields}}
+                        {{#if (eq this.subscription false)}}
+                        {{#if (eq this.visible true)}}
+                        <th class="">
+                            {{this.actualName}}
+                        </th>
+                        {{/if}}
+                        {{/if}}
+                        {{/each}}
+                        <th>Last paid</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#each data.entries as |entry|}}
+                    <tr>
+                        <td>
+                            <button class="btn btn-icon btn-sm px-2 bg-green-lt" onclick="toggleCostSelect(this)">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    class="icon icon-tabler icons-tabler-outline icon-tabler-check me-2">
+                                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                    <path d="M5 12l5 5l10 -10" />
+                                </svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    class="icon icon-tabler icons-tabler-outline icon-tabler-plus me-2 d-none">
+                                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                    <path d="M12 5l0 14" />
+                                    <path d="M5 12l14 0" />
+                                </svg>
+                                {{entry.totalCost}} {{../data.project.subCostCurrency}}
+                            </button>
+                        </td>
+                        {{#each ../data.project.fields as |field|}}
+                        {{#if (eq field.subscription true)}}
+                        <td>
+                            {{#if (lookup entry field.name)}}
+                            <button class="btn btn-icon btn-sm px-2 bg-green-lt" onclick="toggleCostSelect(this)">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    class="icon icon-tabler icons-tabler-outline icon-tabler-check me-2">
+                                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                    <path d="M5 12l5 5l10 -10" />
+                                </svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    class="icon icon-tabler icons-tabler-outline icon-tabler-plus me-2 d-none">
+                                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                    <path d="M12 5l0 14" />
+                                    <path d="M5 12l14 0" />
+                                </svg>
+                                {{lookup entry field.name}} {{../../data.project.subCostCurrency}}
+                            </button>
+                            {{/if}}
+                        </td>
+                        {{/if}}
+                        {{/each}}
 
-                    {{#each ../data.project.fields as |field|}}
-                    {{#if (eq field.subscription false)}}
-                    {{#if (eq field.visible true)}}
-                    <td>
-                        {{lookup entry field.name}}
-                    </td>
-                    {{/if}}
-                    {{/if}}
-                    {{/each}}
-                    <td>
-                        {{#if entry.lastPaid}}
-                        <span class="badge bg-green me-2"></span>
-                        {{entry.lastPaid}}
-                        {{else}}
-                        <span class="badge bg-danger me-2"></span>
-                        Never
+                        {{#each ../data.project.fields as |field|}}
+                        {{#if (eq field.subscription false)}}
+                        {{#if (eq field.visible true)}}
+                        <td>
+                            {{lookup entry field.name}}
+                        </td>
                         {{/if}}
-                    </td>
-                </tr>
-                {{/each}}
-            </tbody>
-        </table>
+                        {{/if}}
+                        {{/each}}
+                        <td>
+                            {{#if entry.lastPaid}}
+                            <span class="badge bg-green me-2"></span>
+                            {{entry.lastPaid}}
+                            {{else}}
+                            <span class="badge bg-danger me-2"></span>
+                            Never
+                            {{/if}}
+                        </td>
+                    </tr>
+                    {{/each}}
+                </tbody>
+            </table>
+        </div>
         {{> dataNavigationFooter}}
     </div>
+
 </div>
 
 {{else}}

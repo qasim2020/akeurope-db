@@ -12,30 +12,24 @@ const OrderSchema = new mongoose.Schema(
             required: true,
             min: 0,
         },
-        currency: {
-            type: String,
-            default: 'USD'
-        },
         projects: [
             {
                 slug: {
                     type: String,
                     required: true,
-                    ref: 'Project', 
+                },
+                currency: {
+                    type: String,
+                    required: true,
+                },
+                months: {
+                    type: Number,
+                    required: true
                 },
                 entries: [
                     {
-                        _id: {
-                            type: mongoose.Schema.Types.ObjectId,
-                            required: true
-                        }, 
-                        subscriptions: [
-                            {
-                                subscription: String,
-                                subCost: Number
-                            }
-                        ],
-                        rowCost: Number
+                        entryId: mongoose.Schema.Types.ObjectId,
+                        selectedSubscriptions: [String],
                     },
                 ],
             },
@@ -43,10 +37,10 @@ const OrderSchema = new mongoose.Schema(
     },
     {
         timestamps: true,
-        versionKey: false, 
+        versionKey: false,
     },
 );
 
-const Order = mongoose.model('Order', orderSchema);
+const Order = mongoose.model('Order', OrderSchema);
 
 module.exports = Order;

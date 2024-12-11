@@ -1,5 +1,6 @@
 const Project = require('../models/Project');
 const Payment = require('../models/Payment');
+const Order = require('../models/Order');
 const Subscription = require('../models/Subscription');
 
 const { createDynamicModel } = require('../models/createDynamicModel');
@@ -94,25 +95,8 @@ const getOldestPaidEntries = async (req, project) => {
     });
 
     let allEntries = [...entriesWithoutPayments, ...entriesWithPayments];
-    // const totalEntries = allEntries.length;
-    const pagination = createPagination(req, allEntries.length);
-    allEntries = allEntries.slice(skip, skip + limit);
-    
-    return {
-        entries: allEntries,
-        pagination
-    }
-};
 
-const updateDraftOrder = async (req, res) => {};
-
-const createDraftOrder = async (req, res) => {
-    const project = await Project.findOne({ slug: req.params.slug }).lean();
-    if (!project) throw new Error(`Project "${req.params.slug}" not found`);
-
-    const { entries, pagination } = await getOldestPaidEntries(req, project);
-
-    entries.forEach((entry) => {
+    allEntries.forEach((entry) => {
         entry.totalCost = project.fields.reduce((total, field) => {
             if (field.subscription == true) {
                 total = total + entry[field.name];
@@ -125,7 +109,7 @@ const createDraftOrder = async (req, res) => {
 
     project.fields = project.fields.map((field) => {
         if (field.subscription == true) {
-            const colSum = entries.reduce((total, entry) => {
+            const colSum = allEntries.reduce((total, entry) => {
                 total = total + entry[field.name];
                 return total;
             }, 0);
@@ -136,11 +120,75 @@ const createDraftOrder = async (req, res) => {
         return field;
     });
 
-    let order = {};
+    const pagination = createPagination(req, allEntries.length);
 
-    order.grandTotal = grandTotal;
-
-    return { order, project, entries, pagination };
+    return {
+        select: allEntries.length,
+        entries: allEntries.slice(skip, skip + limit),
+        pagination,
+        grandTotal,
+    };
 };
 
-module.exports = { createDraftOrder };
+const deleteDraftOrder = async (req, res) => {};
+
+const updateDraftOrder = async (req, res) => {
+    const project = await Project.findOne({ slug: req.params.slug }).lean();
+    if (!project) throw new Error(`Project "${req.params.slug}" not found`);
+
+    const order = await Order.findOne({_id: req.query.orderId}).lean();
+    const DynamicModel = await createDynamicModel(project.slug);
+    const entries = await order.
+    return {
+        order
+    }
+};
+
+const createDraftOrder = async (req, res) => {
+    const project = await Project.findOne({ slug: req.params.slug }).lean();
+    if (!project) throw new Error(`Project "${req.params.slug}" not found`);
+
+    const { entries, pagination, grandTotal, select } =
+        await getOldestPaidEntries(req, project);
+
+    const order = new Order({
+        grandTotal,
+        projects: [
+            {
+                slug: project.slug,
+                currency: project.subCostCurrency,
+                months: 1,
+                entries: entries.map((entry) => {
+                    return {
+                        entryId: entry._id,
+                        selectedSubscriptions: project.fields
+                            .filter(
+                                (field) =>
+                                    field.subscription &&
+                                    entry[field.name] != undefined,
+                            )
+                            .map((field) => field.name),
+                    };
+                }),
+            },
+        ],
+    });
+
+    try {
+        await order.save();
+        return {
+            orderId: order._id,
+            grandTotal,
+            project,
+            entries,
+            pagination,
+            select,
+            toggleState: req.query.toggleState,
+        };
+    } catch (error) {
+        console.error('Error saving order:', error);
+        throw error;
+    }
+};
+
+module.exports = { createDraftOrder, updateDraftOrder, deleteDraftOrder };

@@ -371,23 +371,36 @@ exports.getSingleEntryLogs = async (req, res) => {
     }
 };
 
-const { createDraftOrder } = require('../modules/orders.js');
+const {
+    createDraftOrder,
+    updateDraftOrder,
+    deleteDraftOrder,
+} = require('../modules/orders');
 
 exports.getPaymentModalEntryData = async (req, res) => {
     try {
+        let orderId, grandTotal, project, entries, pagination, select;
 
-        const {order, project, entries, pagination} = await createDraftOrder(req, res);
+        if (!req.query.orderId) {
+            ({ orderId, grandTotal, project, entries, pagination, select, toggleState } =
+                await createDraftOrder(req, res));
+        } else {
+            ({ orderId, grandTotal, project, entries, pagination, select, toggleState } =
+                await updateDraftOrder(req, res));
+        }
 
         res.render('partials/components/paymentModalEntryData', {
             layout: false,
             data: {
-                order,
+                orderId,
+                grandTotal,
+                select,
                 project,
                 entries,
                 pagination,
+                toggleState
             },
         });
-
     } catch (error) {
         console.log(error);
         res.status(500).json({

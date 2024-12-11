@@ -23,7 +23,7 @@
           <label class="form-label">Select Beneficiaries</label>
           <div class="input-group">
             <span class="input-group-text">Select</span>
-            <input type="number" class="form-control" style="min-width: 50px;" value="10" min="1"
+            <input type="number" class="form-control" style="min-width: 60px;" value="10" min="1"
               onkeydown="if (event.key === 'Enter') searchBeneficiaries(this)" name="randomBeneficiaries"
               placeholder="Number of beneficiaries" />
             <span class="input-group-text">beneficiaries randomly or</span>
@@ -96,15 +96,11 @@
       return false;
     }
 
-    console.log({
-      select, search, slug
-    })
-
     const currentBtnHTML = $('#searchBeneficiaries').html();
     $('#searchBeneficiaries').html(`<span class="spinner-border spinner-border-sm" role="status"></span>`);
 
     $.ajax({
-      url: `/getPaymentModalEntryData/${slug}?select=${select}&search=${search}`,
+      url: `/getPaymentModalEntryData/${slug}?select=${select}&search=${search}&toggleState=hide`,
       method: 'GET',
       success: (response) => {
         $('#searchBeneficiaries').html(currentBtnHTML);
@@ -123,25 +119,42 @@
 
   }
 
+  const doSearch = function (elem) {
+    const href = $(elem).attr("my-href");
+    const slug = $("[name=projectSlug]").val();
+    const orderId = $(`#${slug}`).attr('orderId');
+    const toggleState = $(`#${slug}`).attr('toggleState');
+    $.ajax({
+      url: `/getPaymentModalEntryData/${slug}?${href}&orderId=${orderId}&toggleState=${toggleState}`,
+      method: 'GET',
+      success: function (response) {
+        $(`#${slug}`).replaceWith(response);
+      },
+      error: function (error) {
+        alert(error.responseText);
+      }
+    });
+  }
+
   const selectAllSearchResults = function (elem) {
     const count = $(elem).data("limit");
-    if ($(elem).html() == `Select all (${count})`) {
+    if ($(elem).html() == `Select all(${ count })`) {
       $('#last-paid-entries').find('[type="checkbox"]:not(":checked")').click();
-      $(elem).html(`Unselect all (${count})`);
+      $(elem).html(`Unselect all(${ count })`);
     } else {
       $('#last-paid-entries').find('[type="checkbox"]:checked').click();
-      $(elem).html(`Select all (${count})`);
+      $(elem).html(`Select all(${ count })`);
     }
 
   }
 
   const toggleSearchResults = function (elem) {
-    if ($('#last-paid-entries').hasClass("d-none")) {
+    if ($('.last-paid-entries').hasClass("d-none")) {
       $(elem).closest('.card-header').removeClass("border-0");
     } else {
       $(elem).closest('.card-header').addClass("border-0");
     }
-    $('#last-paid-entries').toggleClass("d-none");
+    $('.last-paid-entries').toggleClass("d-none");
   }
 
   const toggleColumnSelect = function (elem) {
@@ -246,7 +259,7 @@
     const totalHeading = $(elem).closest("table").find("tr:eq(0)").find("button:eq(0)");
 
     const rowEntries = $(elem).closest("tr").find("td:not(:eq(0))");
-    const colEntries = $(elem).closest("table").find(`td:nth-child(${index + 1})`);
+    const colEntries = $(elem).closest("table").find(`td: nth - child(${ index + 1})`);
 
     const fullRowSelected = rowEntries.find(".bg-green-lt").length == rowEntries.find("button").length;
     const fullColSelected = colEntries.find(".bg-green-lt").length == colEntries.find("button").length;
