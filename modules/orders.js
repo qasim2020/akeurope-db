@@ -36,9 +36,6 @@ const createPagination = (req, totalEntries, fieldFilters, filtersQuery) => {
 const getOldestPaidEntries = async (req, project) => {
     const DynamicModel = await createDynamicModel(project.slug);
     const { searchQuery, fieldFilters } = generateSearchQuery(req, project);
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const skip = (page - 1) * limit;
     const selectCount = parseInt(req.query.select) || 50;
 
     const lastPayments = await Payment.aggregate([
@@ -96,39 +93,9 @@ const getOldestPaidEntries = async (req, project) => {
 
     let allEntries = [...entriesWithoutPayments, ...entriesWithPayments];
 
-    allEntries.forEach((entry) => {
-        entry.totalCost = project.fields.reduce((total, field) => {
-            if (field.subscription == true) {
-                total = total + entry[field.name];
-            }
-            return total;
-        }, 0);
-    });
-
-    let projectTotalSingleMonth = 0;
-
-    project.fields = project.fields.map((field) => {
-        if (field.subscription == true) {
-            const colSum = allEntries.reduce((total, entry) => {
-                total = total + entry[field.name];
-                return total;
-            }, 0);
-            projectTotalSingleMonth = projectTotalSingleMonth + colSum;
-            Object.assign(field, { totalCost: colSum });
-        }
-
-        return field;
-    });
-
-    const pagination = createPagination(req, allEntries.length);
-
     return {
-        select: allEntries.length,
         project,
         allEntries,
-        entries: allEntries.slice(skip, skip + limit),
-        pagination,
-        projectTotalSingleMonth,
     };
 };
 
@@ -218,7 +185,8 @@ const fetchEntriesInOrder = async (req, res) => {
 
     projectOriginal.totalCost = projectTotalSingleMonth;
     projectOriginal.totalOrderedCost = projectOrderedSingleMonth;
-    projectOriginal.totalOrderedCostAllMonths = projectOrderedSingleMonth * projectOrdered.months;
+    projectOriginal.totalOrderedCostAllMonths =
+        projectOrderedSingleMonth * projectOrdered.months;
 
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
@@ -229,9 +197,8 @@ const fetchEntriesInOrder = async (req, res) => {
     return {
         select: allEntries.length,
         project: projectOriginal,
-        allEntries,
         entries: allEntries.slice(skip, skip + limit),
-        pagination
+        pagination,
     };
 };
 
@@ -240,9 +207,30 @@ const fetchOrderByProject = async (req, res) => {
         _id: req.query.orderId,
         'projects.slug': req.params.slug,
     }).lean();
-    order.project = order.projects[0];
+    if (!order) throw new Error("Can't fetch order. No order found!");
+    
+    order.project = order.projects.find( project => project.slug === req.params.slug );
     return order;
 };
+
+const makeProjectForOrder = (project, allEntries) => {
+    return {
+        slug: project.slug,
+        months: 1,
+        entries: allEntries.map((entry) => {
+            return {
+                entryId: entry._id,
+                selectedSubscriptions: project.fields
+                    .filter(
+                        (field) =>
+                            field.subscription &&
+                            entry[field.name] != undefined,
+                    )
+                    .map((field) => field.name),
+            };
+        }),
+    };
+}
 
 const updateDraftOrder = async (req, res) => {
     let checkProject = await Project.findOne({ slug: req.params.slug }).lean();
@@ -266,8 +254,10 @@ const updateDraftOrder = async (req, res) => {
             await Order.updateOne(
                 { _id: orderId, 'projects.slug': projectSlug },
                 {
-                    $unset: { 'projects.$.entries.$[].selectedSubscriptions': '' },
-                }
+                    $unset: {
+                        'projects.$.entries.$[].selectedSubscriptions': '',
+                    },
+                },
             );
         } else {
             await Order.updateOne(
@@ -275,7 +265,7 @@ const updateDraftOrder = async (req, res) => {
                 {
                     $set: {
                         'projects.$.entries.$[].selectedSubscriptions':
-                            subscriptions.split(','), 
+                            subscriptions.split(','),
                     },
                 },
             );
@@ -284,28 +274,74 @@ const updateDraftOrder = async (req, res) => {
 
     if (req.query.entryId && req.query.subscriptions) {
         const entryId = req.query.entryId;
-        const subscriptions = req.query.subscriptions; 
+        const subscriptions = req.query.subscriptions;
         if (subscriptions === 'empty') {
             await Order.updateOne(
                 { _id: orderId, 'projects.slug': projectSlug },
                 {
-                    $unset: { 'projects.$.entries.$[entry].selectedSubscriptions': '' },
+                    $unset: {
+                        'projects.$.entries.$[entry].selectedSubscriptions': '',
+                    },
                 },
                 {
                     arrayFilters: [{ 'entry.entryId': entryId }],
-                }
+                },
             );
         } else {
-            const subscriptionsArray = subscriptions.split(','); 
+            const subscriptionsArray = subscriptions.split(',');
             await Order.updateOne(
                 { _id: orderId, 'projects.slug': projectSlug },
                 {
-                    $set: { 'projects.$.entries.$[entry].selectedSubscriptions': subscriptionsArray },
+                    $set: {
+                        'projects.$.entries.$[entry].selectedSubscriptions':
+                            subscriptionsArray,
+                    },
                 },
                 {
                     arrayFilters: [{ 'entry.entryId': entryId }],
-                }
+                },
             );
+        }
+    }
+
+    if (req.query.addProject) {
+        const { project , allEntries } = await getOldestPaidEntries( req, checkProject ); 
+        const updatedProject = await makeProjectForOrder(project, allEntries);
+        await Order.updateOne(
+            { _id: orderId },
+            {
+                $push: { projects: updatedProject },
+            }
+        );
+    }
+
+    if (req.query.replaceProject) {
+        const { project , allEntries } = await getOldestPaidEntries( req, checkProject );
+        const updatedProject = await makeProjectForOrder(project, allEntries);
+        await Order.updateOne(
+            { _id: orderId, 'projects.slug': projectSlug },
+            {
+                $set: { 'projects.$': updatedProject }, 
+            },
+        );
+    }
+
+    if (req.query.deleteProject) {
+        await Order.updateOne(
+            { _id: orderId, 'projects.slug': projectSlug },
+            {
+                $pull: { projects: { slug: projectSlug } }, 
+            },
+        );
+        return {
+            message: 'Project deleted from order!'
+        }
+    }
+
+    if (req.query.deleteOrder) {
+        await Order.deleteOne({_id: orderId});
+        return {
+            message: 'Order deleted!'
         }
     }
 
@@ -315,15 +351,11 @@ const updateDraftOrder = async (req, res) => {
         entries,
         project,
         pagination,
-        projectTotalSingleMonth,
         select,
-        projectTotalAllMonths,
     } = await fetchEntriesInOrder(req, res);
 
     return {
         orderId: order._id,
-        projectTotalSingleMonth,
-        projectTotalAllMonths,
         project,
         entries,
         pagination,
@@ -345,25 +377,12 @@ const createDraftOrder = async (req, res) => {
         checkProject,
     );
 
+    const updatedProject = makeProjectForOrder(project, allEntries);
+
     const order = new Order({
         customerId: req.params.customerId,
         projects: [
-            {
-                slug: project.slug,
-                months: 1,
-                entries: allEntries.map((entry) => {
-                    return {
-                        entryId: entry._id,
-                        selectedSubscriptions: project.fields
-                            .filter(
-                                (field) =>
-                                    field.subscription &&
-                                    entry[field.name] != undefined,
-                            )
-                            .map((field) => field.name),
-                    };
-                }),
-            },
+            updatedProject
         ],
     });
 

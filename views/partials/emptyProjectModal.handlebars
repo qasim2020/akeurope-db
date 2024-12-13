@@ -20,9 +20,8 @@
                     <input type="text" class="project-location form-control" name="example-text-input" placeholder="Pakistan etc" value="{{data.project.location}}" />
                 </div>
                 <div class="mb-3">
-                    <label for="invoiceAmount" class="form-label">Subscription cost (per month)</label>
-                    <div class="input-group">
-                      <select class="form-select form-control project-sub-cost-currency" name="currency" style="max-width: 112px;">
+                    <label for="invoiceAmount" class="form-label">Project Currency</label>
+                      <select class="form-select form-control project-sub-cost-currency" name="currency">
                         <option value="USD" selected>USD ($)</option>
                         <option value="NOK">NOK (kr)</option>
                         <option value="GBP">GBP (£)</option>
@@ -31,8 +30,6 @@
                         <option value="ILS">ILS (₪)</option>
                         <option value="EGP">EGP (£)</option>
                       </select>
-                      <input type="number" class="form-control project-sub-cost" name="invoiceAmount" placeholder="Enter amount" required />
-                    </div>
                 </div>
                 <label class="form-label">Project status</label>
                 <div class="form-selectgroup-boxes row mb-3 project-status">

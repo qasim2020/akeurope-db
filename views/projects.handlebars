@@ -105,8 +105,7 @@
     const slug = $(modal).find(".project-slug").val();
     const location = $(modal).find(".project-location").val();
     const status = $(modal).find(".project-status").find("input:checked").val();
-    const subCostCurrency = $(modal).find(".project-sub-cost-currency").val();
-    const subCost = $(modal).find(".project-sub-cost").val();
+    const currency = $(modal).find(".project-sub-cost-currency").val();
 
     const fields = $(modal).find(".accordion-item").map( (key, val) => {
         let options = [];
@@ -130,7 +129,7 @@
     }).get();
     
     return {
-      name, status, location, slug, fields, subCost, subCostCurrency
+      name, status, location, slug, currency, fields, 
     }
   }
 

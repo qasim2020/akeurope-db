@@ -1,4 +1,4 @@
-<div class="modal modal-blur fade" id="modal-new-payment" tabindex="-1" style="display: none; padding-left: 0px;"
+<div class="modal modal-blur fade" id="modal-new-order" tabindex="-1" style="display: none; padding-left: 0px;"
   aria-modal="true" role="dialog" entryId="">
   <div class="modal-dialog modal-xl" role="document">
     <div class="modal-content">
@@ -96,11 +96,31 @@
       return false;
     }
 
+
+    const projectExistsInOrder = $(`#${slug}`).length > 0;
+    const orderAlreadyCreated = $('.project-in-order').length > 0;
+
+    let url = `/getPaymentModalEntryData/${slug}/${customerId}?select=${select}&search=${search}`;
+
+    if (orderAlreadyCreated) {
+      const orderId = $(`.project-in-order`).attr('orderId');
+      if (projectExistsInOrder) {
+        const toggleState = $(`#${slug}`).attr('toggleState');
+        url = url + `&orderId=${orderId}&replaceProject=true&toggleState=${toggleState}`;
+      } else {
+        url = url + `&orderId=${orderId}&addProject=true&toggleState=hide`;
+      }
+    } else {
+      url = url + `&toggleState=hide`;
+    }
+    
     const currentBtnHTML = $('#searchBeneficiaries').html();
     $('#searchBeneficiaries').html(`<span class="spinner-border spinner-border-sm" role="status"></span>`);
 
+    console.log(url);
+
     $.ajax({
-      url: `/getPaymentModalEntryData/${slug}/${customerId}?select=${select}&search=${search}&toggleState=hide`,
+      url,
       method: 'GET',
       success: (response) => {
         $('#searchBeneficiaries').html(currentBtnHTML);
@@ -124,13 +144,11 @@
     if (!href) {
       href = $(elem).attr("my-href");
     }
-    const slug = $("[name=projectSlug]").val();
+    const slug = $(elem).closest('.card').attr('id');
     const orderId = $(`#${slug}`).attr('orderId');
     const toggleState = $(`#${slug}`).attr('toggleState');
 
     const url = `/getPaymentModalEntryData/${slug}/${customerId}${href}&orderId=${orderId}&toggleState=${toggleState}`;
-
-    console.log(url);
 
     $.ajax({
       url,
@@ -142,6 +160,20 @@
         alert(error.responseText);
       }
     });
+  }
+
+  const removeProject = function(elem) {
+    const orderHasProjects = $(elem).closest('.project-in-order').siblings('.project-in-order').length > 0;
+    if (orderHasProjects) {
+      const href = '?deleteProject=true';
+      doSearch(elem, href);
+      $(elem).closest('.card').remove();
+    } else {
+      const href = '?deleteOrder=true';
+      doSearch(elem, href);
+      $("#search-results-payment-modal-entries").html('');
+    }
+    
   }
 
   const selectAllSearchResults = function (elem) {
@@ -157,19 +189,19 @@
   }
 
   const toggleSearchResults = function (elem) {
-    if ($('.last-paid-entries').hasClass("d-none")) {
-      $('.last-paid-entries').removeClass("d-none");
+    const projectTable = $(elem).closest('.card').find('.last-paid-entries');
+    if (projectTable.hasClass("d-none")) {
+      projectTable.removeClass("d-none");
       $(elem).closest('.card-header').removeClass("border-0");
-      $('.last-paid-entries').closest('.card').attr({ toggleState: 'show' });
+      $(elem).closest('.card').attr({ toggleState: 'show' });
     } else {
+      projectTable.addClass("d-none");
       $(elem).closest('.card-header').addClass("border-0");
-      $('.last-paid-entries').addClass("d-none");
-      $('.last-paid-entries').closest('.card').attr({ toggleState: 'hide' });
+      $(elem).closest('.card').attr({ toggleState: 'hide' });
     }
   }
 
   const toggleColumnSelect = function (elem) {
-
 
     const active = $(elem).hasClass("bg-green-lt");
     const colIndex = $(elem).closest("th").index();
@@ -342,10 +374,6 @@
     combinedElements.removeClass("bg-green-lt");
     combinedElements.find(".icon-tabler-check").addClass("d-none");
     combinedElements.find(".icon-tabler-plus").removeClass("d-none");
-  }
-
-  const showCost = function () {
-
   }
 
 </script>

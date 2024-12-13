@@ -50,8 +50,8 @@
   {{> editEntryModal}}
 {{/if}}
 
-{{#if (findInArray data.role "createPayments")}}
-  {{> emptyPaymentModal}}
+{{#if (findInArray data.role "createOrders")}}
+  {{> emptyOrderModal}}
 {{/if}}
 
 <script>

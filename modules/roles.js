@@ -6,6 +6,7 @@ const roles = {
         'viewProject',
         'viewEntry',
         'viewUsers',
+        'viewOrders',
         'createUsers',
         'editUsers',
         'updateUsers',
@@ -26,12 +27,13 @@ const roles = {
         'updateCustomers',
         'deleteCustomers',
         'editNotifications',
-        'createPayments',
+        'createOrders',
     ],
     editor: [
         'viewDashboard', 
         'viewProject',
         'viewEntry',
+        'viewOrders',
         'createEntry', 
         'editEntry', 
         'updateEntry', 
@@ -39,12 +41,13 @@ const roles = {
         'uploadPdf',
         'uploadImage',
         'editNotifications',
-        'createPayments',
+        'createOrders',
     ],
     viewer: [
         'viewDashboard',
         'viewProject',
         'viewEntry',
+        'viewOrders',
         'editNotifications'
     ]
 };

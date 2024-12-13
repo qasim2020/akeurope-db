@@ -81,7 +81,7 @@ exports.upload = async(req,res) => {
         const workbook = new ExcelJS.Workbook();
         await workbook.xlsx.readFile(req.file.path);
 
-        const worksheet = workbook.getWorksheet(project.name);
+        const worksheet = workbook.worksheets[0];
         const uniqueField = project.fields.find(field => field.primary)?.name;
 
         if (!uniqueField) return res.status(400).send('Primary (unique) field not found in schema');
@@ -111,6 +111,7 @@ exports.upload = async(req,res) => {
             project.fields.forEach(field => {
                 try {
                     const columnIndex = columnMap[field.name];
+
                     if (!columnIndex) {
                         throw new Error(`Column for field '${field.name}' not found`);
                     }
@@ -123,7 +124,7 @@ exports.upload = async(req,res) => {
                             "DD-MM-YYYY", "DD/MM/YYYY", "DD\\MM\\YYYY", 
                             "MM/DD/YYYY", "M/D/YYYY", "D/M/YYYY", 
                             "YYYY-MM-DD", "MM-DD-YYYY", "YYYY/MM/DD", 
-                            "YYYYMMDD", "YYYY/M/D"
+                            "YYYYMMDD", "YYYY/M/D", moment.ISO_8601
                         ], true);
 
                         if (parsedDate.isValid()) {
@@ -137,6 +138,12 @@ exports.upload = async(req,res) => {
                     if (cellValue == null && field.primary) {
                         missingColumns = true;
                         results.errors.push(`Missing primary field: ${field.name} in row ${rowNumber}`);
+                    }
+
+                    if (typeof cellValue === 'object' && cellValue !== null) {
+                        if ('result' in cellValue) {
+                            cellValue = cellValue.result;
+                        } 
                     }
                     
                     entryData[field.name] = cellValue;

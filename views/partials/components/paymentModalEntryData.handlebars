@@ -1,7 +1,8 @@
 {{#if data.entries}}
 
-<div class="card mb-3" id="{{data.project.slug}}" orderId="{{data.orderId}}" toggleState="{{data.toggleState}}" 
-my-href="?months={{data.months}}&page={{data.pagination.currentPage}}&limit={{data.pagination.limit}}&search={{data.pagination.search}}&sortBy={{data.pagination.sort.sortBy}}&orderBy={{data.pagination.sort.order}}{{#if data.pagination.filtersQuery}}&{{data.pagination.filtersQuery}}{{/if}}">
+<div class="card mb-3 project-in-order" id="{{data.project.slug}}" orderId="{{data.orderId}}"
+    toggleState="{{data.toggleState}}"
+    my-href="?months={{data.months}}&page={{data.pagination.currentPage}}&limit={{data.pagination.limit}}&search={{data.pagination.search}}&sortBy={{data.pagination.sort.sortBy}}&orderBy={{data.pagination.sort.order}}{{#if data.pagination.filtersQuery}}&{{data.pagination.filtersQuery}}{{/if}}">
     <div class="card-header flex-wrap border-0">
         <div class="card-title w-100 d-flex">
             <div class="page-pretitle mb-2">{{data.select}} x {{data.project.name}}</div>
@@ -16,8 +17,7 @@ my-href="?months={{data.months}}&page={{data.pagination.currentPage}}&limit={{da
                         <path d="M18 14l-6 6l-6 -6h12"></path>
                     </svg>
                 </button>
-                <button class="btn btn-icon btn-sm btn-pill shadow-none p-0"
-                    onclick="$('#search-results-payment-modal-entries').html('');"
+                <button class="btn btn-icon btn-sm btn-pill shadow-none p-0" onclick="removeProject(this)"
                     style="position: absolute;top: -8px;right: -8px;">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -89,6 +89,7 @@ my-href="?months={{data.months}}&page={{data.pagination.currentPage}}&limit={{da
             <table class="table card-table table-vcenter text-nowrap datatable">
                 <thead>
                     <tr>
+                        {{#if (neq data.project.totalCost 0)}}
                         <th>
                             <button
                                 class="btn btn-sm btn-icon px-2 font-sm text-uppercase fs-6 strong {{#if (eq data.project.totalOrderedCost data.project.totalCost)}}bg-green-lt{{/if}} text-start"
@@ -111,13 +112,13 @@ my-href="?months={{data.months}}&page={{data.pagination.currentPage}}&limit={{da
                                 Total <br> {{data.project.totalCost}} {{data.project.subCostCurrency}}
                             </button>
                         </th>
+                        {{/if}}
                         {{#each data.project.fields}}
                         {{#if (eq this.subscription true)}}
                         <th class="">
-                        {{#if (neq this.totalCost 0)}}
+                            {{#if (neq this.totalCost 0)}}
 
-                            <button
-                                subscriptionName="{{this.name}}"
+                            <button subscriptionName="{{this.name}}"
                                 class="btn btn-sm btn-icon px-2 font-sm text-uppercase fs-6 strong {{#if (eq this.totalCost this.totalOrderedCost)}}bg-green-lt{{/if}} text-start"
                                 onclick="toggleColumnSelect(this)">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
@@ -137,7 +138,7 @@ my-href="?months={{data.months}}&page={{data.pagination.currentPage}}&limit={{da
                                 </svg>
                                 {{this.actualName}} <br> {{this.totalCost}} {{../data.project.subCostCurrency}}
                             </button>
-                        {{/if}}
+                            {{/if}}
 
                         </th>
                         {{/if}}
@@ -157,8 +158,11 @@ my-href="?months={{data.months}}&page={{data.pagination.currentPage}}&limit={{da
                 <tbody>
                     {{#each data.entries as |entry|}}
                     <tr entry-id="{{entry._id}}">
+                        {{#if (neq entry.totalCost 0)}}
                         <td>
-                            <button class="btn btn-icon btn-sm px-2 {{#if (eq entry.totalCost entry.totalOrderedCost)}}bg-green-lt{{/if}}" onclick="toggleCostSelect(this)">
+                            <button
+                                class="btn btn-icon btn-sm px-2 {{#if (eq entry.totalCost entry.totalOrderedCost)}}bg-green-lt{{/if}}"
+                                onclick="toggleCostSelect(this)">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
                                     fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                                     stroke-linejoin="round"
@@ -177,11 +181,14 @@ my-href="?months={{data.months}}&page={{data.pagination.currentPage}}&limit={{da
                                 {{entry.totalCost}} {{../data.project.subCostCurrency}}
                             </button>
                         </td>
+                        {{/if}}
                         {{#each ../data.project.fields as |field|}}
                         {{#if (eq field.subscription true)}}
                         <td>
                             {{#if (lookup entry field.name)}}
-                            <button subscriptionName="{{field.name}}" class="btn btn-icon btn-sm px-2 {{#if (findInArray entry.selectedSubscriptions field.name)}}bg-green-lt{{/if}}" onclick="toggleCostSelect(this)">
+                            <button subscriptionName="{{field.name}}"
+                                class="btn btn-icon btn-sm px-2 {{#if (findInArray entry.selectedSubscriptions field.name)}}bg-green-lt{{/if}}"
+                                onclick="toggleCostSelect(this)">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
                                     fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                                     stroke-linejoin="round"
@@ -208,7 +215,11 @@ my-href="?months={{data.months}}&page={{data.pagination.currentPage}}&limit={{da
                         {{#if (eq field.subscription false)}}
                         {{#if (eq field.visible true)}}
                         <td>
+                            {{#if (eq field.type 'date')}}
+                            {{formatDate (lookup entry field.name)}}
+                            {{else}}
                             {{lookup entry field.name}}
+                            {{/if}}
                         </td>
                         {{/if}}
                         {{/if}}

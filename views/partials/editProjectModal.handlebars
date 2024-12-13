@@ -22,19 +22,16 @@
                 </div>
 
                 <div class="mb-3">
-                    <label for="invoiceAmount" class="form-label">Subscription cost (per month)</label>
-                    <div class="input-group">
-                      <select class="form-select form-control project-sub-cost-currency" name="currency" style="max-width: 112px;">
-                        <option value="USD" {{#if (eq data.project.subCostCurrency 'USD')}}selected{{/if}}>USD ($)</option>
-                        <option value="NOK" {{#if (eq data.project.subCostCurrency 'NOK')}}selected{{/if}}>NOK (kr)</option>
-                        <option value="GBP" {{#if (eq data.project.subCostCurrency 'GBP')}}selected{{/if}}>GBP (£)</option>
-                        <option value="EUR" {{#if (eq data.project.subCostCurrency 'EUR')}}selected{{/if}}>EUR (€)</option>
-                        <option value="PKR" {{#if (eq data.project.subCostCurrency 'PKR')}}selected{{/if}}>PKR (₨)</option>
-                        <option value="ILS" {{#if (eq data.project.subCostCurrency 'ILS')}}selected{{/if}}>ILS (₪)</option>
-                        <option value="EGP" {{#if (eq data.project.subCostCurrency 'EGP')}}selected{{/if}}>EGP (£)</option>
+                    <label for="invoiceAmount" class="form-label">Project Currency</label>
+                      <select class="form-select form-control project-sub-cost-currency" name="currency">
+                        <option value="USD" {{#if (eq data.project.currency 'USD')}}selected{{/if}}>USD ($)</option>
+                        <option value="NOK" {{#if (eq data.project.currency 'NOK')}}selected{{/if}}>NOK (kr)</option>
+                        <option value="GBP" {{#if (eq data.project.currency 'GBP')}}selected{{/if}}>GBP (£)</option>
+                        <option value="EUR" {{#if (eq data.project.currency 'EUR')}}selected{{/if}}>EUR (€)</option>
+                        <option value="PKR" {{#if (eq data.project.currency 'PKR')}}selected{{/if}}>PKR (₨)</option>
+                        <option value="ILS" {{#if (eq data.project.currency 'ILS')}}selected{{/if}}>ILS (₪)</option>
+                        <option value="EGP" {{#if (eq data.project.currency 'EGP')}}selected{{/if}}>EGP (£)</option>
                       </select>
-                      <input type="number" class="form-control project-sub-cost" name="invoiceAmount" placeholder="Enter amount" required value="{{data.project.subCost}}" />
-                    </div>
                 </div>
 
                 <label class="form-label">Project status</label>
