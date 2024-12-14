@@ -12,24 +12,46 @@
       <div class="col-auto ms-auto d-print-none">
         <div class="btn-list">
           <a href="#" class="btn btn-secondary-outline d-none d-md-inline-block" onclick="toggleLayout(this)">
-            <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-square-toggle-horizontal"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M22 12h-20" /><path d="M4 14v-8a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v8" /><path d="M18 20a2 2 0 0 0 2 -2" /><path d="M4 18a2 2 0 0 0 2 2" /><path d="M14 20l-4 0" /></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+              class="icon icon-tabler icons-tabler-outline icon-tabler-square-toggle-horizontal">
+              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+              <path d="M22 12h-20" />
+              <path d="M4 14v-8a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v8" />
+              <path d="M18 20a2 2 0 0 0 2 -2" />
+              <path d="M4 18a2 2 0 0 0 2 2" />
+              <path d="M14 20l-4 0" />
+            </svg>
             Toggle layout
           </a>
           <a href="#" class="btn btn-secondary-outline d-md-none btn-icon" onclick="toggleLayout(this)">
-            <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-square-toggle-horizontal"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M22 12h-20" /><path d="M4 14v-8a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v8" /><path d="M18 20a2 2 0 0 0 2 -2" /><path d="M4 18a2 2 0 0 0 2 2" /><path d="M14 20l-4 0" /></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+              class="icon icon-tabler icons-tabler-outline icon-tabler-square-toggle-horizontal">
+              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+              <path d="M22 12h-20" />
+              <path d="M4 14v-8a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v8" />
+              <path d="M18 20a2 2 0 0 0 2 -2" />
+              <path d="M4 18a2 2 0 0 0 2 2" />
+              <path d="M14 20l-4 0" />
+            </svg>
           </a>
           {{#if (findInArray data.role "createCustomers")}}
-          <a href="#" class="btn btn-primary d-none d-md-inline-block" id="#createNewCustomer" data-bs-toggle="modal" data-bs-target="#modal-new-customer">
-            <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <a href="#" class="btn btn-primary d-none d-md-inline-block" id="#createNewCustomer" data-bs-toggle="modal"
+            data-bs-target="#modal-new-customer">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24"
+              stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
               <path stroke="none" d="M0 0h24v24H0z" fill="none" />
               <path d="M12 5l0 14" />
               <path d="M5 12l14 0" />
             </svg>
             Create new customer
-            </a>
-          <a href="#" class="btn btn-primary d-md-none btn-icon" data-bs-toggle="modal" data-bs-target="#modal-new-customer" aria-label="modal-new-customer">
+          </a>
+          <a href="#" class="btn btn-primary d-md-none btn-icon" data-bs-toggle="modal"
+            data-bs-target="#modal-new-customer" aria-label="modal-new-customer">
             <!-- Download SVG icon from http://tabler-icons.io/i/plus -->
-            <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24"
+              stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
               <path stroke="none" d="M0 0h24v24H0z" fill="none" />
               <path d="M12 5l0 14" />
               <path d="M5 12l14 0" />
@@ -52,7 +74,7 @@
 
 <script>
 
-const createCustomer = function(elem) {
+  const createCustomer = function (elem) {
 
     $(elem).closest(".modal").find("input").removeClass("is-invalid");
     $(elem).closest(".modal").find(".invalid-feedback").remove();
@@ -62,7 +84,7 @@ const createCustomer = function(elem) {
 
     let isValid = [];
 
-    $(elem).closest(".modal").find(".form-control, .form-select").each( (key, val) => {
+    $(elem).closest(".modal").find(".form-control, .form-select").each((key, val) => {
       if ($(val).val() == "") {
         $(val).addClass("is-invalid")
         if ($(val).siblings("span").length > 0) {
@@ -82,19 +104,19 @@ const createCustomer = function(elem) {
     const data = $(elem)
       .closest(".modal")
       .find(".form-select, input, textarea")
-      .toArray() 
+      .toArray()
       .reduce((total, val) => {
         Object.assign(total, {
           [$(val).attr("name")]: $(val).val()
         });
         return total;
-    }, {});
-      
+      }, {});
+
 
     const projects = $(elem)
       .closest(".modal")
-      .find(".projects input:checked") 
-      .map((key, val) => $(val).val()) 
+      .find(".projects input:checked")
+      .map((key, val) => $(val).val())
       .get();
 
     if (projects.length == 0) {
@@ -106,7 +128,7 @@ const createCustomer = function(elem) {
     }
 
     if (!(isValid.every(val => val === true))) {
-        return false;
+      return false;
     }
 
     data.projects = projects;
@@ -115,13 +137,13 @@ const createCustomer = function(elem) {
 
     let currentBtnHTML = $(elem).html();
     $(elem).html(`<span class="spinner-border spinner-border-sm me-2" role="status"></span>`);
-    
+
     $.ajax({
-      url: "/customer/create", 
+      url: "/customer/create",
       type: 'POST',
-      contentType: 'application/json', 
+      contentType: 'application/json',
       data: JSON.stringify(data),
-      success: function(response) {
+      success: function (response) {
         $(elem).html(currentBtnHTML);
         $(".modal-footer").append(`
           <div class="alert alert-success mt-4 w-100" role="alert">
@@ -129,7 +151,7 @@ const createCustomer = function(elem) {
             <div class="text-secondary">Customer has been invited on ${data.email}!</div>
           </div>`);
       },
-      error: function(xhr, status, error) {
+      error: function (xhr, status, error) {
         $(elem).html(currentBtnHTML);
         if (xhr.status != 400) {
           $(".modal-footer").append(`
@@ -139,7 +161,7 @@ const createCustomer = function(elem) {
           </div>`);
           return false;
         }
-        xhr.responseJSON.forEach( val => {
+        xhr.responseJSON.forEach(val => {
           if (val.elem == "other") {
             $(".modal-footer").append(`
             <div class="alert alert-danger mt-4 w-100" role="alert">
@@ -154,222 +176,221 @@ const createCustomer = function(elem) {
           $(val.elem).parent("div").append(`<div class="mb-2 invalid-feedback">${val.msg}</div> `);
         });
       }
-    }); 
+    });
 
-}
+  }
 
-let newLayout = '{{data.layout}}' == 'grid' ? 'table' : 'grid'; 
+  let newLayout = '{{data.layout}}' == 'grid' ? 'table' : 'grid';
 
-  const toggleLayout = function(elem) {
+  const toggleLayout = function (elem) {
     $.ajax({
       url: '/update-layout',
       method: 'POST',
       data: { layout: newLayout },
-      success: function(response) {
-          showData();
+      success: function (response) {
+        showData();
       },
-      error: function() {
-          alert("Failed to update layout.");
+      error: function () {
+        alert("Failed to update layout.");
       }
     });
 
-}
-
-const showData = function() {
-  $.ajax({
-    url: '/getCustomersData',
-    method: 'GET',
-    success: function(response) {
-      newLayout = newLayout == 'grid' ? 'table' : 'grid'; 
-      $("#data-container").html(response);
-    },
-    error: function(error) {
-        alert(error.responseText);
-    }
-  }); 
-}
-
-const getEditCustomerModal = function(elem) {
-  const customerId = $(elem).attr("customer-id");
-
-  const modalExists = $(document).find(`#button-${customerId}`).length > 0;
-
-  if (modalExists) {
-    return $(`#button-${customerId}`).trigger("click");
   }
 
-  $.ajax({
-    url: `/getEditCustomerModal/${customerId}`,
-    type: 'GET',
-    contentType: 'application/json', 
-    success: function(response) {
-      $("footer").before(response);
-      $(`#button-${customerId}`).trigger("click");
-    },
-    error: function(xhr, status, error) {
-      alert(xhr.responseText);
-    }
-  });
-}
-
-
-const showDataAsSuch = function() {
-  $.ajax({
-    url: '/getCustomersData',
-    method: 'GET',
-    success: function(response) {
-      $("#data-container").html(response);
-    },
-    error: function(error) {
+  const showData = function () {
+    $.ajax({
+      url: '/getCustomersData',
+      method: 'GET',
+      success: function (response) {
+        newLayout = newLayout == 'grid' ? 'table' : 'grid';
+        $("#data-container").html(response);
+      },
+      error: function (error) {
         alert(error.responseText);
+      }
+    });
+  }
+
+  const getEditCustomerModal = function (elem) {
+    const customerId = $(elem).attr("customer-id");
+
+    const modalExists = $(document).find(`#button-${customerId}`).length > 0;
+
+    if (modalExists) {
+      return $(`#button-${customerId}`).trigger("click");
     }
-  }); 
-}
 
-const sendEmailInvite = function(elem) {
+    $.ajax({
+      url: `/getEditCustomerModal/${customerId}`,
+      type: 'GET',
+      contentType: 'application/json',
+      success: function (response) {
+        $("footer").before(response);
+        $(`#button-${customerId}`).trigger("click");
+      },
+      error: function (xhr, status, error) {
+        alert(xhr.responseText);
+      }
+    });
+  }
 
-  const customerId = $(elem).attr("customer-id");
+  const showDataAsSuch = function () {
+    $.ajax({
+      url: '/getCustomersData',
+      method: 'GET',
+      success: function (response) {
+        $("#data-container").html(response);
+      },
+      error: function (error) {
+        alert(error.responseText);
+      }
+    });
+  }
 
-  $(elem).siblings("input").removeClass("is-invalid");
-  $(elem).siblings("input").addClass("is-valid");
-  $(elem).siblings(".invalid-feedback").remove();
-  $(elem).siblings(".alert").remove();
+  const sendEmailInvite = function (elem) {
 
-  let currentBtnHTML = $(elem).html();
+    const customerId = $(elem).attr("customer-id");
 
-  $(elem).html(`<span class="spinner-border spinner-border-sm" role="status"></span>`);
+    $(elem).siblings("input").removeClass("is-invalid");
+    $(elem).siblings("input").addClass("is-valid");
+    $(elem).siblings(".invalid-feedback").remove();
+    $(elem).siblings(".alert").remove();
 
-  $.ajax({
-    url: `/customer/sendInvite`, 
-    type: 'POST',
-    contentType: 'application/json', 
-    data: JSON.stringify({ customerId }),
-    success: function(response) {
-      $(elem).html(currentBtnHTML);
-      $(elem).after(`
+    let currentBtnHTML = $(elem).html();
+
+    $(elem).html(`<span class="spinner-border spinner-border-sm" role="status"></span>`);
+
+    $.ajax({
+      url: `/customer/sendInvite`,
+      type: 'POST',
+      contentType: 'application/json',
+      data: JSON.stringify({ customerId }),
+      success: function (response) {
+        $(elem).html(currentBtnHTML);
+        $(elem).after(`
       <div class="w-100 alert alert-success mt-4" role="alert">
         <h4 class="alert-title">Success!</h4>
         <div class="text-secondary">Email invite sent successfully!</div>
       </div>`);
-      showDataAsSuch();
-    },
-    error: function(xhr, status, error) {
-      $(elem).html(currentBtnHTML);
-      $(elem).siblings("input").addClass("is-invalid");
-      $(elem).siblings("input").after(`<div class="invalid-feedback">${xhr.responseText}</div> `);
-    }
-  });
-}
-
-const updateCustomer = function(elem) {
-
-  $(elem).closest(".modal").find("input").removeClass("is-invalid");
-  $(elem).closest(".modal").find(".invalid-feedback").remove();
-  $(elem).closest(".modal").find("span").removeClass("border-red");
-  $(elem).closest(".modal").find("span").removeClass("rounded-end");
-  $(elem).closest(".modal").find(".alert").remove();
-
-  let isValid = [];
-
-  $(elem).closest(".modal").find(".form-control, .form-select").each( (key, val) => {
-    if ($(val).val() == "") {
-      $(val).addClass("is-invalid")
-      if ($(val).siblings("span").length > 0) {
-        $(val).siblings(".invalid-feedback").remove();
-        $(val).siblings("span").after(`<div class="invalid-feedback mb-2">Invalid entry</div> `);
-        $(val).siblings("span").addClass("is-invalid border-red rounded-end");
-        $(val).siblings("input").addClass("is-invalid");
-      } else {
-        $(val).after(`<div class="invalid-feedback">Invalid entry</div> `);
+        showDataAsSuch();
+      },
+      error: function (xhr, status, error) {
+        $(elem).html(currentBtnHTML);
+        $(elem).siblings("input").addClass("is-invalid");
+        $(elem).siblings("input").after(`<div class="invalid-feedback">${xhr.responseText}</div> `);
       }
+    });
+  }
+
+  const updateCustomer = function (elem) {
+
+    $(elem).closest(".modal").find("input").removeClass("is-invalid");
+    $(elem).closest(".modal").find(".invalid-feedback").remove();
+    $(elem).closest(".modal").find("span").removeClass("border-red");
+    $(elem).closest(".modal").find("span").removeClass("rounded-end");
+    $(elem).closest(".modal").find(".alert").remove();
+
+    let isValid = [];
+
+    $(elem).closest(".modal").find(".form-control, .form-select").each((key, val) => {
+      if ($(val).val() == "") {
+        $(val).addClass("is-invalid")
+        if ($(val).siblings("span").length > 0) {
+          $(val).siblings(".invalid-feedback").remove();
+          $(val).siblings("span").after(`<div class="invalid-feedback mb-2">Invalid entry</div> `);
+          $(val).siblings("span").addClass("is-invalid border-red rounded-end");
+          $(val).siblings("input").addClass("is-invalid");
+        } else {
+          $(val).after(`<div class="invalid-feedback">Invalid entry</div> `);
+        }
+      } else {
+        $(val).addClass("is-valid");
+      }
+      isValid.push($(val).val() != "");
+    });
+
+    const data = $(elem)
+      .closest(".modal")
+      .find(".form-select, input, textarea")
+      .toArray()
+      .reduce((total, val) => {
+        Object.assign(total, {
+          [$(val).attr("name")]: $(val).val()
+        });
+        return total;
+      }, {});
+
+
+    const projects = $(elem)
+      .closest(".modal")
+      .find(".projects input:checked")
+      .map((key, val) => $(val).val())
+      .get();
+
+    if (projects.length == 0) {
+      $(elem).closest(".modal").find(".projects").find(".form-selectgroup-label").addClass("border-red");
+      $(elem).closest(".modal").find(".projects").append(`<div class="d-block invalid-feedback">Invalid entry</div> `);
+      isValid.push(false);
     } else {
-      $(val).addClass("is-valid");
+      $(elem).closest(".modal").find(".projects").find(".form-selectgroup-label").removeClass("border-red");
     }
-    isValid.push($(val).val() != "");
-  });
 
-  const data = $(elem)
-    .closest(".modal")
-    .find(".form-select, input, textarea")
-    .toArray() 
-    .reduce((total, val) => {
-      Object.assign(total, {
-        [$(val).attr("name")]: $(val).val()
-      });
-      return total;
-  }, {});
-    
+    data.projects = projects;
+    data.status = $(elem).closest(".modal").find(".customer-status input:checked").val();
 
-  const projects = $(elem)
-    .closest(".modal")
-    .find(".projects input:checked") 
-    .map((key, val) => $(val).val()) 
-    .get();
+    if (!data.status) {
+      alert("Please select a status for the customer");
+      isValid.push(false);
+    }
 
-  if (projects.length == 0) {
-    $(elem).closest(".modal").find(".projects").find(".form-selectgroup-label").addClass("border-red");
-    $(elem).closest(".modal").find(".projects").append(`<div class="d-block invalid-feedback">Invalid entry</div> `);
-    isValid.push(false);
-  } else {
-    $(elem).closest(".modal").find(".projects").find(".form-selectgroup-label").removeClass("border-red");
-  }
-
-  data.projects = projects;
-  data.status = $(elem).closest(".modal").find(".customer-status input:checked").val();
-
-  if (!data.status) {
-    alert("Please select a status for the customer");
-    isValid.push(false);
-  }
-
-  if (!(isValid.every(val => val === true))) {
+    if (!(isValid.every(val => val === true))) {
       return false;
-  }
+    }
 
-  const customerId = $(elem).closest(".modal").attr("customerId");
-  let currentBtnHTML = $(elem).html();
-  $(elem).html(`<span class="spinner-border spinner-border-sm me-2" role="status"></span>`);
-  
-  $.ajax({
-    url: `/customer/update/${customerId}`, 
-    type: 'POST',
-    contentType: 'application/json', 
-    data: JSON.stringify(data),
-    success: function(response) {
-      $(elem).html(currentBtnHTML);
-      $(".modal-footer").append(`
+    const customerId = $(elem).closest(".modal").attr("customerId");
+    let currentBtnHTML = $(elem).html();
+    $(elem).html(`<span class="spinner-border spinner-border-sm me-2" role="status"></span>`);
+
+    $.ajax({
+      url: `/customer/update/${customerId}`,
+      type: 'POST',
+      contentType: 'application/json',
+      data: JSON.stringify(data),
+      success: function (response) {
+        $(elem).html(currentBtnHTML);
+        $(".modal-footer").append(`
         <div class="alert alert-success mt-4 w-100" role="alert">
           <h4 class="alert-title">Succesful!</h4>
           <div class="text-secondary">Customer updated successfully!</div>
         </div>`);
-      showDataAsSuch();
-    },
-    error: function(xhr, status, error) {
-      $(elem).html(currentBtnHTML);
-      if (xhr.status != 400) {
-        $(".modal-footer").append(`
+        showDataAsSuch();
+      },
+      error: function (xhr, status, error) {
+        $(elem).html(currentBtnHTML);
+        if (xhr.status != 400) {
+          $(".modal-footer").append(`
         <div class="alert alert-danger mt-4 w-100" role="alert">
           <h4 class="alert-title">Failed to create customer!</h4>
           <div class="text-secondary text-break">${xhr.responseText}</div>
         </div>`);
-        return false;
-      }
-      xhr.responseJSON.forEach( val => {
-        if (val.elem == "other") {
-          $(".modal-footer").append(`
+          return false;
+        }
+        xhr.responseJSON.forEach(val => {
+          if (val.elem == "other") {
+            $(".modal-footer").append(`
           <div class="alert alert-danger mt-4 w-100" role="alert">
             <h4 class="alert-title">Failed to create customer!</h4>
             <div class="text-secondary text-break">${val.msg}</div>
           </div>
           `);
-          return false;
-        };
-        $(val.elem).addClass("is-invalid");
-        $(val.elem).siblings("span").addClass("border-red rounded-end");
-        $(val.elem).parent("div").append(`<div class="mb-2 invalid-feedback">${val.msg}</div> `);
-      });
-    }
-  }); 
+            return false;
+          };
+          $(val.elem).addClass("is-invalid");
+          $(val.elem).siblings("span").addClass("border-red rounded-end");
+          $(val.elem).parent("div").append(`<div class="mb-2 invalid-feedback">${val.msg}</div> `);
+        });
+      }
+    });
 
-}
+  }
 </script>

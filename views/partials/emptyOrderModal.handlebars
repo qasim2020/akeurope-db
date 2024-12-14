@@ -1,9 +1,9 @@
-<div class="modal modal-blur fade" id="modal-new-order" tabindex="-1" style="display: none; padding-left: 0px;"
-  aria-modal="true" role="dialog" entryId="">
+<div class="modal modal-blur fade" id="{{#if data.order}}modal-{{data.order._id}}{{else}}modal-new-order{{/if}}"
+  tabindex="-1" style="display: none; padding-left: 0px;" aria-modal="true" role="dialog" entryId="">
   <div class="modal-dialog modal-xl" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title">Add New Payment</h5>
+        <h5 class="modal-title">{{#if data.order}}Edit Order{{else}}Add New Payment{{/if}}</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
@@ -12,7 +12,8 @@
           <label class="form-label">Select Customer</label>
           <select name="customerId" id="" class="form-select">
             {{#each data.customers}}
-            <option value="{{this._id}}">{{this.name}}</option>
+            <option value="{{this._id}}" {{#if (eq this.email ../data.order.customer.email)}}selected{{/if}}>
+              {{this.name}}</option>
             {{/each}}
           </select>
           <small class="text-muted">If your customer is not listed here, <a href="/customers">click here</a> to add a
@@ -37,7 +38,7 @@
               <option value="{{this.slug}}">{{this.name}}</option>
               {{/each}}
             </select>
-            <button class="input-group-btn btn btn-icon" id="searchBeneficiaries" onclick="searchBeneficiaries(this)">
+            <button class="input-group-btn btn btn-icon submit-btn" onclick="searchBeneficiaries(this)">
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                 class="icon icon-tabler icons-tabler-outline icon-tabler-shopping-cart-plus">
@@ -53,7 +54,11 @@
 
         </div>
 
-        <div id="search-results-payment-modal-entries"> </div>
+        <div class="search-results-payment-modal-entries">
+          {{#each data.order.projects}}
+          {{> components/paymentModalEntryData data=this}}
+          {{/each}}
+        </div>
 
       </div>
       <div class="modal-footer">
@@ -70,310 +75,7 @@
   </div>
 </div>
 
-<script>
-
-  $(document).ready(() => {
-    console.log('document is ready');
-    $("#showPaymentModal").trigger('click');
-  })
-
-  const searchBeneficiaries = function (elem) {
-
-    let error;
-
-    const select = $("[name=randomBeneficiaries]").val();
-    const search = $("[name=specificBeneficiaries]").val();
-    const customerId = $('[name=customerId]').val();
-    const slug = $("[name=projectSlug]").val();
-
-    $('.search-beneficiaries').find('.form-control').removeClass('is-invalid');
-    $('.search-beneficiaries').find('.invalid-feedback').remove();
-
-    if (select == '' && search == '') {
-      error = 'Please fill either the random or specific beneficiary input field.';
-      $('.search-beneficiaries').find('.form-control').addClass('is-invalid');
-      $('.search-beneficiaries').append(`<div class='invalid-feedback d-block'>${error}</div>`);
-      return false;
-    }
-
-
-    const projectExistsInOrder = $(`#${slug}`).length > 0;
-    const orderAlreadyCreated = $('.project-in-order').length > 0;
-
-    let url = `/getPaymentModalEntryData/${slug}/${customerId}?select=${select}&search=${search}`;
-
-    if (orderAlreadyCreated) {
-      const orderId = $(`.project-in-order`).attr('orderId');
-      if (projectExistsInOrder) {
-        const toggleState = $(`#${slug}`).attr('toggleState');
-        url = url + `&orderId=${orderId}&replaceProject=true&toggleState=${toggleState}`;
-      } else {
-        url = url + `&orderId=${orderId}&addProject=true&toggleState=hide`;
-      }
-    } else {
-      url = url + `&toggleState=hide`;
-    }
-    
-    const currentBtnHTML = $('#searchBeneficiaries').html();
-    $('#searchBeneficiaries').html(`<span class="spinner-border spinner-border-sm" role="status"></span>`);
-
-    console.log(url);
-
-    $.ajax({
-      url,
-      method: 'GET',
-      success: (response) => {
-        $('#searchBeneficiaries').html(currentBtnHTML);
-        const elemExists = $(`#${slug}`).length > 0;
-        if (elemExists) {
-          $(`#${slug}`).replaceWith(response);
-        } else {
-          $('#search-results-payment-modal-entries').append(response);
-        }
-      },
-      error: (error) => {
-        $('#searchBeneficiaries').html(currentBtnHTML);
-        alert(error.responseText);
-      }
-    });
-
-  }
-
-  const doSearch = function (elem, href) {
-    const customerId = $('[name=customerId]').val();
-    if (!href) {
-      href = $(elem).attr("my-href");
-    }
-    const slug = $(elem).closest('.card').attr('id');
-    const orderId = $(`#${slug}`).attr('orderId');
-    const toggleState = $(`#${slug}`).attr('toggleState');
-
-    const url = `/getPaymentModalEntryData/${slug}/${customerId}${href}&orderId=${orderId}&toggleState=${toggleState}`;
-
-    $.ajax({
-      url,
-      method: 'GET',
-      success: function (response) {
-        $(`#${slug}`).replaceWith(response);
-      },
-      error: function (error) {
-        alert(error.responseText);
-      }
-    });
-  }
-
-  const removeProject = function(elem) {
-    const orderHasProjects = $(elem).closest('.project-in-order').siblings('.project-in-order').length > 0;
-    if (orderHasProjects) {
-      const href = '?deleteProject=true';
-      doSearch(elem, href);
-      $(elem).closest('.card').remove();
-    } else {
-      const href = '?deleteOrder=true';
-      doSearch(elem, href);
-      $("#search-results-payment-modal-entries").html('');
-    }
-    
-  }
-
-  const selectAllSearchResults = function (elem) {
-    const count = $(elem).data("limit");
-    if ($(elem).html() == `Select all(${count})`) {
-      $('#last-paid-entries').find('[type="checkbox"]:not(":checked")').click();
-      $(elem).html(`Unselect all(${count})`);
-    } else {
-      $('#last-paid-entries').find('[type="checkbox"]:checked').click();
-      $(elem).html(`Select all(${count})`);
-    }
-
-  }
-
-  const toggleSearchResults = function (elem) {
-    const projectTable = $(elem).closest('.card').find('.last-paid-entries');
-    if (projectTable.hasClass("d-none")) {
-      projectTable.removeClass("d-none");
-      $(elem).closest('.card-header').removeClass("border-0");
-      $(elem).closest('.card').attr({ toggleState: 'show' });
-    } else {
-      projectTable.addClass("d-none");
-      $(elem).closest('.card-header').addClass("border-0");
-      $(elem).closest('.card').attr({ toggleState: 'hide' });
-    }
-  }
-
-  const toggleColumnSelect = function (elem) {
-
-    const active = $(elem).hasClass("bg-green-lt");
-    const colIndex = $(elem).closest("th").index();
-    const isTotal = $(elem).closest("th").index() == 0;
-
-    const rowHeadings = $(elem).closest("table").find("tr").find("th:eq(0), td:eq(0)");
-
-
-    if (isTotal && active) {
-      $(elem).closest('table').find(`tr`).each(function () {
-        const button = $(this).find(`td, th`).find('button.bg-green-lt');
-        $(button).removeClass("bg-green-lt");
-        $(button).find('.icon-tabler-check').addClass("d-none");
-        $(button).find('.icon-tabler-plus').removeClass("d-none");
-      });
-    } else if (isTotal && !active) {
-      $(elem).closest('table').find(`tr`).each(function () {
-        const button = $(this).find(`td, th`).find('button:not(.bg-green-lt)');
-        $(button).addClass("bg-green-lt");
-        $(button).find('.icon-tabler-check').removeClass("d-none");
-        $(button).find('.icon-tabler-plus').addClass("d-none");
-      });
-    } else if (!isTotal && active) {
-      $(elem).closest('table').find(`tr`).each(function () {
-        const button = $(this).find(`td, th`).eq(colIndex).find('button');
-        $(button).removeClass("bg-green-lt");
-        $(button).find('.icon-tabler-check').addClass("d-none");
-        $(button).find('.icon-tabler-plus').removeClass("d-none");
-      });
-      rowHeadings.find('button').removeClass('bg-green-lt');
-      rowHeadings.find('.icon-tabler-check').addClass('d-none');
-      rowHeadings.find('.icon-tabler-plus').removeClass('d-none');
-    } else if (!isTotal && !active) {
-      $(elem).closest('table').find(`tr`).each(function () {
-        const button = $(this).find(`td, th`).eq(colIndex).find('button');
-        $(button).addClass("bg-green-lt");
-        $(button).find('.icon-tabler-check').removeClass("d-none");
-        $(button).find('.icon-tabler-plus').addClass("d-none");
-      });
-      const rowEntries = $(elem).closest("table").find("tr");
-      rowEntries.each(function () {
-        const isHeadingRow = $(this).find("th").length > 0;
-        let allBtnsInRow, allSelectedBtns;
-        if (isHeadingRow) {
-          allBtnsInRow = $(this).find('th:not(:eq(0))').find('button');
-          allSelectedBtns = $(this).find('th:not(:eq(0))').find('button.bg-green-lt');
-        } else {
-          allBtnsInRow = $(this).find('td:not(:eq(0))').find('button');
-          allSelectedBtns = $(this).find('td:not(:eq(0))').find('button.bg-green-lt');
-        }
-        if (allBtnsInRow.length == allSelectedBtns.length) {
-          const button = $(this).closest("tr").find("td:eq(0), th:eq(0)").find('button');
-          button.addClass('bg-green-lt');
-          button.find('.icon-tabler-check').removeClass('d-none');
-          button.find('.icon-tabler-plus').addClass('d-none');
-        }
-      })
-    }
-
-    let subscriptions;
-
-    subscriptions = $(elem)
-      .closest('tr')
-      .find('.bg-green-lt')
-      .map((index, val) => $(val).attr('subscriptionName'))
-      .get()
-      .join(',');
-
-    if (subscriptions == "") {
-      subscriptions = 'empty';
-    }
-
-    const href = $(elem).closest(".card").attr("my-href") + `&subscriptions=${subscriptions}`;
-    doSearch(elem, href);
-
-  }
-
-  const toggleCostSelect = function (elem) {
-
-    const elemState = $(elem).hasClass("bg-green-lt");
-    const rowState = $(elem).closest("tr").find("button").eq(0).hasClass("bg-green-lt");
-    const colIndex = $(elem).closest('td').index();
-    const row = $(elem).closest('td').closest('tr');
-    const table = $(elem).closest('td').closest('table');
-
-    const isTotalColumn = $(table).find('th').eq(colIndex).index() === 0;
-
-    if (isTotalColumn && rowState) {
-      $(row).find('button').removeClass('bg-green-lt');
-      $(row).find('.icon-tabler-check').addClass("d-none");
-      $(row).find('.icon-tabler-plus').removeClass("d-none");
-
-      $(row).find('button').each(function () {
-        unselectColRowHeading(this);
-      })
-    } else if (isTotalColumn && !rowState) {
-      $(row).find('button').addClass('bg-green-lt');
-      $(row).find('.icon-tabler-check').removeClass("d-none");
-      $(row).find('.icon-tabler-plus').addClass("d-none");
-      $(table).find('button').each(function () {
-        selectColRowHeading(this);
-      })
-    } else if (!isTotalColumn && elemState) {
-      $(elem).removeClass("bg-green-lt").find("svg").toggleClass("d-none");
-      unselectColRowHeading(elem);
-    } else if (!isTotalColumn && !elemState) {
-      $(elem).addClass("bg-green-lt").find("svg").toggleClass("d-none");
-      selectColRowHeading(elem);
-    }
-
-    let subscriptions = $(elem)
-      .closest('tr')
-      .find('.bg-green-lt')
-      .map((index, val) => $(val).attr('subscriptionName'))
-      .get()
-      .join(',');
-
-    if (subscriptions == "") {
-      subscriptions = 'empty';
-    }
-
-    const entryId = $(elem).closest("tr").attr('entry-id');
-
-    const href = $(elem).closest(".card").attr("my-href") + `&entryId=${entryId}&subscriptions=${subscriptions}`;
-    doSearch(elem, href);
-  }
-
-  const selectColRowHeading = function (elem) {
-    const index = $(elem).closest("td, th").index();
-    const rowHeading = $(elem).closest("tr").find("td:eq(0) > button");
-    const colHeading = $(elem).closest("table").find("th").eq(index).find("button");
-    const totalHeading = $(elem).closest("table").find("tr:eq(0)").find("button:eq(0)");
-
-    const rowEntries = $(elem).closest("tr").find("td:not(:eq(0))");
-    const colEntries = $(elem).closest("table").find(`td:nth-child(${index + 1})`);
-
-    const fullRowSelected = rowEntries.find(".bg-green-lt").length == rowEntries.find("button").length;
-    const fullColSelected = colEntries.find(".bg-green-lt").length == colEntries.find("button").length;
-
-    if (fullRowSelected) {
-      rowHeading.addClass("bg-green-lt");
-      rowHeading.find(".icon-tabler-check").removeClass("d-none");
-      rowHeading.find(".icon-tabler-plus").addClass("d-none");
-    };
-
-    if (fullColSelected) {
-      colHeading.addClass("bg-green-lt");
-      colHeading.find(".icon-tabler-check").removeClass("d-none");
-      colHeading.find(".icon-tabler-plus").addClass("d-none");
-    };
-
-    if (fullRowSelected && fullColSelected) {
-      const allSelectedEntries = $(elem).closest("table").find("tr:not(:eq(0))").find("td:not(:eq(0))").find("button.bg-green-lt");
-      const allEntries = $(elem).closest("table").find("tr:not(:eq(0))").find("td:not(:eq(0))").find("button");
-      if (allEntries.length == allSelectedEntries.length) {
-        totalHeading.addClass("bg-green-lt");
-        totalHeading.find(".icon-tabler-check").removeClass("d-none");
-        totalHeading.find(".icon-tabler-plus").addClass("d-none");
-      }
-    };
-
-  }
-
-  const unselectColRowHeading = function (elem) {
-    const index = $(elem).closest("td").index();
-    const rowHeading = $(elem).closest("tr").find("td:eq(0) > button");
-    const colHeading = $(elem).closest("table").find("th").eq(index).find("button");
-    const totalHeading = $(elem).closest("table").find("tr:eq(0)").find("button:eq(0)");
-    const combinedElements = $().add(rowHeading).add(colHeading).add(totalHeading);
-    combinedElements.removeClass("bg-green-lt");
-    combinedElements.find(".icon-tabler-check").addClass("d-none");
-    combinedElements.find(".icon-tabler-plus").removeClass("d-none");
-  }
-
-</script>
+{{#if data.order}}
+<button href="#" class="btn btn-primary d-none" id="button-{{data.order._id}}" data-bs-toggle="modal"
+  data-bs-target="#modal-{{data.order._id}}"></button>
+{{/if}}

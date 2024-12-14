@@ -24,7 +24,7 @@ const dec = function(a) {
 };
 
 const formatDate = function(date) {
-    return moment(date).format('MMMM Do, YYYY'); 
+    return moment(date).format('DD-MM-YYYY'); 
 };
 
 const formatTime = function(timestamp) {

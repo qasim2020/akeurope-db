@@ -1,4 +1,5 @@
 const Project = require('../models/Project');
+const Customer = require('../models/Customer');
 const Payment = require('../models/Payment');
 const Order = require('../models/Order');
 const Subscription = require('../models/Subscription');
@@ -7,7 +8,13 @@ const { createDynamicModel } = require('../models/createDynamicModel');
 const { generatePagination } = require('../modules/generatePagination');
 const { generateSearchQuery } = require('../modules/generateSearchQuery');
 
-const createPagination = (req, totalEntries, fieldFilters, filtersQuery) => {
+const createPagination = ({
+    req,
+    totalEntries,
+    fieldFilters,
+    filtersQuery,
+    pageType,
+}) => {
     const limit = parseInt(req.query.limit) || 10;
     const totalPages = Math.ceil(totalEntries / limit);
     const page = parseInt(req.query.page) || 1;
@@ -30,6 +37,7 @@ const createPagination = (req, totalEntries, fieldFilters, filtersQuery) => {
         fieldFilters: fieldFilters == {} ? undefined : fieldFilters,
         showSearchBar: req.query.showSearchBar,
         showFilters: req.query.showFilters,
+        pageType,
     };
 };
 
@@ -101,26 +109,20 @@ const getOldestPaidEntries = async (req, project) => {
 
 const deleteDraftOrder = async (req, res) => {};
 
-const fetchEntriesInOrder = async (req, res) => {
-    const orderId = req.query.orderId;
-    const projectSlug = req.params.slug;
-
-    const order = await Order.findOne({
-        _id: orderId,
-        'projects.slug': projectSlug,
+const calculationOnProject = async (projectOrdered) => {
+    const projectOriginal = await Project.findOne({
+        slug: projectOrdered.slug,
     }).lean();
-
-    const projectOrdered = order.projects.find((p) => p.slug === projectSlug);
 
     const DynamicModel = await createDynamicModel(projectOrdered.slug);
 
-    const allEntries = await Promise.all(
+    let allEntries = await Promise.all(
         projectOrdered.entries.map((entry) =>
             DynamicModel.findById(entry.entryId).lean(),
         ),
     );
 
-    const projectOriginal = await Project.findOne({ slug: projectSlug }).lean();
+    allEntries = allEntries.filter((entry) => entry != null);
 
     allEntries.forEach((entry) => {
         const matchingOrderedEntry = projectOrdered.entries.find(
@@ -188,15 +190,38 @@ const fetchEntriesInOrder = async (req, res) => {
     projectOriginal.totalOrderedCostAllMonths =
         projectOrderedSingleMonth * projectOrdered.months;
 
+    return {
+        project: projectOriginal,
+        allEntries,
+    };
+};
+
+const fetchEntriesInOrder = async (req, res) => {
+    const orderId = req.query.orderId;
+    const projectSlug = req.params.slug;
+
+    const order = await Order.findOne({
+        _id: orderId,
+        'projects.slug': projectSlug,
+    }).lean();
+
+    const projectOrdered = order.projects.find((p) => p.slug === projectSlug);
+
+    const { project, allEntries } = await calculationOnProject(projectOrdered);
+
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
 
-    const pagination = createPagination(req, allEntries.length);
+    const pagination = createPagination({
+        req,
+        totalEntries: allEntries.length,
+        pageType: 'entries',
+    });
 
     return {
         select: allEntries.length,
-        project: projectOriginal,
+        project,
         entries: allEntries.slice(skip, skip + limit),
         pagination,
     };
@@ -208,8 +233,10 @@ const fetchOrderByProject = async (req, res) => {
         'projects.slug': req.params.slug,
     }).lean();
     if (!order) throw new Error("Can't fetch order. No order found!");
-    
-    order.project = order.projects.find( project => project.slug === req.params.slug );
+
+    order.project = order.projects.find(
+        (project) => project.slug === req.params.slug,
+    );
     return order;
 };
 
@@ -230,7 +257,7 @@ const makeProjectForOrder = (project, allEntries) => {
             };
         }),
     };
-}
+};
 
 const updateDraftOrder = async (req, res) => {
     let checkProject = await Project.findOne({ slug: req.params.slug }).lean();
@@ -305,23 +332,29 @@ const updateDraftOrder = async (req, res) => {
     }
 
     if (req.query.addProject) {
-        const { project , allEntries } = await getOldestPaidEntries( req, checkProject ); 
+        const { project, allEntries } = await getOldestPaidEntries(
+            req,
+            checkProject,
+        );
         const updatedProject = await makeProjectForOrder(project, allEntries);
         await Order.updateOne(
             { _id: orderId },
             {
                 $push: { projects: updatedProject },
-            }
+            },
         );
     }
 
     if (req.query.replaceProject) {
-        const { project , allEntries } = await getOldestPaidEntries( req, checkProject );
+        const { project, allEntries } = await getOldestPaidEntries(
+            req,
+            checkProject,
+        );
         const updatedProject = await makeProjectForOrder(project, allEntries);
         await Order.updateOne(
             { _id: orderId, 'projects.slug': projectSlug },
             {
-                $set: { 'projects.$': updatedProject }, 
+                $set: { 'projects.$': updatedProject },
             },
         );
     }
@@ -330,29 +363,27 @@ const updateDraftOrder = async (req, res) => {
         await Order.updateOne(
             { _id: orderId, 'projects.slug': projectSlug },
             {
-                $pull: { projects: { slug: projectSlug } }, 
+                $pull: { projects: { slug: projectSlug } },
             },
         );
         return {
-            message: 'Project deleted from order!'
-        }
+            message: 'Project deleted from order!',
+        };
     }
 
     if (req.query.deleteOrder) {
-        await Order.deleteOne({_id: orderId});
+        await Order.deleteOne({ _id: orderId });
         return {
-            message: 'Order deleted!'
-        }
+            message: 'Order deleted!',
+        };
     }
 
     const order = await fetchOrderByProject(req, res);
 
-    const {
-        entries,
-        project,
-        pagination,
-        select,
-    } = await fetchEntriesInOrder(req, res);
+    const { entries, project, pagination, select } = await fetchEntriesInOrder(
+        req,
+        res,
+    );
 
     return {
         orderId: order._id,
@@ -381,9 +412,7 @@ const createDraftOrder = async (req, res) => {
 
     const order = new Order({
         customerId: req.params.customerId,
-        projects: [
-            updatedProject
-        ],
+        projects: [updatedProject],
     });
 
     try {
@@ -396,4 +425,63 @@ const createDraftOrder = async (req, res) => {
     }
 };
 
-module.exports = { createDraftOrder, updateDraftOrder, deleteDraftOrder };
+const getPaginatedOrders = async (req, res) => {
+
+    const orders = await Order.find().sort({_id: -1}).lean();
+
+    const pagination = createPagination({
+        req,
+        totalEntries: orders.length,
+        pageType: 'orders',
+    });
+
+    const limit = parseInt(req.query.limit) || 10;
+    const page = parseInt(req.query.page) || 1;
+    const skip = (page - 1) * limit;
+
+    const ordersPaginated = orders.slice(skip, skip + limit);
+
+    for (const order of ordersPaginated) {
+        order.customer = await Customer.findById(order.customerId).lean();
+        order.projects = await Promise.all(
+            order.projects.map(async (val) => {
+                const { project } = await calculationOnProject(val);
+                return {
+                    project,
+                    entries: project.entries
+                };
+            }),
+        );
+    };
+
+    return {
+        orders: ordersPaginated,
+        pagination,
+    };
+};
+
+const getSingleOrder = async (req,res) => {
+    const order = await Order.findOne({_id: req.params.orderId}).lean();
+    order.customer = await Customer.findById(order.customerId).lean();
+    order.projects = await Promise.all(
+        order.projects.map(async (val) => {
+            const { project, allEntries } = await calculationOnProject(val);
+            return {
+                orderId: order._id,
+                project: project,
+                entries: allEntries,
+                toggleState: 'hide'
+            };
+        }),
+    );
+    return order;
+};
+
+
+module.exports = {
+    createDraftOrder,
+    updateDraftOrder,
+    deleteDraftOrder,
+    getPaginatedOrders,
+    getSingleOrder,
+};

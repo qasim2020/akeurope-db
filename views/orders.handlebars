@@ -12,24 +12,46 @@
       <div class="col-auto ms-auto d-print-none">
         <div class="btn-list">
           <a href="#" class="btn btn-secondary-outline d-none d-md-inline-block" onclick="toggleLayout(this)">
-            <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-square-toggle-horizontal"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M22 12h-20" /><path d="M4 14v-8a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v8" /><path d="M18 20a2 2 0 0 0 2 -2" /><path d="M4 18a2 2 0 0 0 2 2" /><path d="M14 20l-4 0" /></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+              class="icon icon-tabler icons-tabler-outline icon-tabler-square-toggle-horizontal">
+              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+              <path d="M22 12h-20" />
+              <path d="M4 14v-8a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v8" />
+              <path d="M18 20a2 2 0 0 0 2 -2" />
+              <path d="M4 18a2 2 0 0 0 2 2" />
+              <path d="M14 20l-4 0" />
+            </svg>
             Toggle layout
           </a>
           <a href="#" class="btn btn-secondary-outline d-md-none btn-icon" onclick="toggleLayout(this)">
-            <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-square-toggle-horizontal"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M22 12h-20" /><path d="M4 14v-8a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v8" /><path d="M18 20a2 2 0 0 0 2 -2" /><path d="M4 18a2 2 0 0 0 2 2" /><path d="M14 20l-4 0" /></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+              class="icon icon-tabler icons-tabler-outline icon-tabler-square-toggle-horizontal">
+              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+              <path d="M22 12h-20" />
+              <path d="M4 14v-8a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v8" />
+              <path d="M18 20a2 2 0 0 0 2 -2" />
+              <path d="M4 18a2 2 0 0 0 2 2" />
+              <path d="M14 20l-4 0" />
+            </svg>
           </a>
           {{#if (findInArray data.role "createCustomers")}}
-          <a href="#" class="btn btn-primary d-none d-md-inline-block" id="#createNewCustomer" data-bs-toggle="modal" data-bs-target="#modal-new-order">
-            <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <a href="#" class="btn btn-primary d-none d-md-inline-block" id="#createNewCustomer" data-bs-toggle="modal"
+            data-bs-target="#modal-new-order">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24"
+              stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
               <path stroke="none" d="M0 0h24v24H0z" fill="none" />
               <path d="M12 5l0 14" />
               <path d="M5 12l14 0" />
             </svg>
             Create new order
-            </a>
-          <a href="#" class="btn btn-primary d-md-none btn-icon" data-bs-toggle="modal" data-bs-target="#modal-new-order" aria-label="modal-new-order">
+          </a>
+          <a href="#" class="btn btn-primary d-md-none btn-icon" data-bs-toggle="modal"
+            data-bs-target="#modal-new-order" aria-label="modal-new-order">
             <!-- Download SVG icon from http://tabler-icons.io/i/plus -->
-            <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24"
+              stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
               <path stroke="none" d="M0 0h24v24H0z" fill="none" />
               <path d="M12 5l0 14" />
               <path d="M5 12l14 0" />
@@ -49,3 +71,82 @@
 {{#if (findInArray data.role "createOrders")}}
 {{> emptyOrderModal}}
 {{/if}}
+
+<script src="/static/orders.js"></script>
+
+<script>
+
+  let newLayout = '{{data.layout}}' == 'grid' ? 'table' : 'grid';
+
+  const toggleLayout = function (elem) {
+    $.ajax({
+      url: '/update-layout',
+      method: 'POST',
+      data: { layout: newLayout },
+      success: function (response) {
+        $.ajax({
+          url: '/getOrdersTable',
+          method: 'GET',
+          success: function (response) {
+            newLayout = newLayout == 'grid' ? 'table' : 'grid';
+            $("#data-container").html(response);
+          },
+          error: function (error) {
+            alert(error.responseText);
+          }
+        });
+      },
+      error: function () {
+        alert("Failed to update layout.");
+      }
+    });
+
+  }
+
+  const loadOrderInContainer = function (elem, href) {
+    if (!href) {
+      href = $(elem).attr("my-href");
+    }
+    const url = `/getOrdersData/${href}`;
+    $.ajax({
+      url,
+      method: 'GET',
+      success: function (response) {
+        $(`#data-container`).html(response);
+      },
+      error: function (error) {
+        alert(error.responseText);
+      }
+    });
+  }
+
+  const getEditOrderModal = function (elem) {
+    const orderId = $(elem).attr("order-id");
+
+    const modalExists = $(document).find(`#button-${orderId}`).length > 0;
+
+    if (modalExists) {
+      return $(`#button-${orderId}`).trigger("click");
+    }
+
+    $.ajax({
+      url: `/getEditOrderModal/${orderId}`,
+      type: 'GET',
+      contentType: 'application/json',
+      success: function (response) {
+        $("footer").before(response);
+        $(`#button-${orderId}`).trigger("click");
+        $(`#modal-${orderId}`).on('shown.bs.modal', function () {
+          $(this).find('.project-in-order').each(function () {
+            const href = $(this).attr('my-href');
+            doSearch(this, href); 
+          });
+        });
+      },
+      error: function (xhr, status, error) {
+        alert(xhr.responseText);
+      }
+    });
+  }
+
+</script>
