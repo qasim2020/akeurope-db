@@ -448,7 +448,7 @@ const getPaginatedOrders = async (req, res) => {
                 const { project } = await calculationOnProject(val);
                 return {
                     project,
-                    entries: project.entries
+                    entries: project.entries && project.entries.slice(0, 10)
                 };
             }),
         );
@@ -469,7 +469,7 @@ const getSingleOrder = async (req,res) => {
             return {
                 orderId: order._id,
                 project: project,
-                entries: allEntries,
+                entries: allEntries && allEntries.slice(0,10),
                 toggleState: 'hide'
             };
         }),
