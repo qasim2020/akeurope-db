@@ -426,8 +426,7 @@ const createDraftOrder = async (req, res) => {
 };
 
 const getPaginatedOrders = async (req, res) => {
-
-    const orders = await Order.find().sort({_id: -1}).lean();
+    const orders = await Order.find().sort({ _id: -1 }).lean();
 
     const pagination = createPagination({
         req,
@@ -448,11 +447,11 @@ const getPaginatedOrders = async (req, res) => {
                 const { project } = await calculationOnProject(val);
                 return {
                     project,
-                    entries: project.entries && project.entries.slice(0, 10)
+                    entries: project.entries && project.entries.slice(0, 10),
                 };
             }),
         );
-    };
+    }
 
     return {
         orders: ordersPaginated,
@@ -460,8 +459,8 @@ const getPaginatedOrders = async (req, res) => {
     };
 };
 
-const getSingleOrder = async (req,res) => {
-    const order = await Order.findOne({_id: req.params.orderId}).lean();
+const getSingleOrder = async (req, res) => {
+    const order = await Order.findOne({ _id: req.params.orderId }).lean();
     order.customer = await Customer.findById(order.customerId).lean();
     order.projects = await Promise.all(
         order.projects.map(async (val) => {
@@ -469,14 +468,13 @@ const getSingleOrder = async (req,res) => {
             return {
                 orderId: order._id,
                 project: project,
-                entries: allEntries && allEntries.slice(0,10),
-                toggleState: 'hide'
+                entries: allEntries && allEntries.slice(0, 10),
+                toggleState: 'hide',
             };
         }),
     );
     return order;
 };
-
 
 module.exports = {
     createDraftOrder,
