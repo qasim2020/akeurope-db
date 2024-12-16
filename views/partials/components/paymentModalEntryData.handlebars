@@ -1,4 +1,3 @@
-{{log data}}
 {{#if data.entries}}
 
 <div class="card mb-3 project-in-order {{data.project.slug}}" orderId="{{data.orderId}}"
@@ -31,7 +30,7 @@
             </div>
         </div>
         <div class="d-flex align-items-center flex-wrap">
-            <span class="strong">{{data.project.totalOrderedCost}} {{data.project.currency}}</span>
+            <span class="strong">{{data.project.totalOrderedCost}} {{data.project.selectedCurrency}}</span>
             <button class="btn btn-icon btn-sm  border-0 shadow-none disabled">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -81,9 +80,8 @@
                     <path d="M5 14h14" />
                 </svg>
             </button>
-            <span class="strong">{{data.project.totalOrderedCostAllMonths}} {{data.project.currency}}</span>
+            <span class="strong">{{data.project.totalOrderedCostAllMonths}} {{data.project.selectedCurrency}}</span>
         </div>
-
     </div>
     <div class="{{#if (eq data.toggleState 'hide')}}d-none{{/if}} last-paid-entries border-top">
         <div class="table-responsive">
@@ -110,7 +108,7 @@
                                     <path d="M12 5l0 14" />
                                     <path d="M5 12l14 0" />
                                 </svg>
-                                Total <br> {{data.project.totalCost}} {{data.project.currency}}
+                                Total <br> {{data.project.totalCost}} {{data.project.selectedCurrency}}
                             </button>
                         </th>
                         {{/if}}
@@ -137,7 +135,7 @@
                                     <path d="M12 5l0 14" />
                                     <path d="M5 12l14 0" />
                                 </svg>
-                                {{this.actualName}} <br> {{this.totalCost}} {{../data.project.currency}}
+                                {{this.actualName}} <br> {{this.totalCost}} {{../data.project.selectedCurrency}}
                             </button>
                             {{/if}}
 
@@ -179,7 +177,7 @@
                                     <path d="M12 5l0 14" />
                                     <path d="M5 12l14 0" />
                                 </svg>
-                                {{entry.totalCost}} {{../data.project.currency}}
+                                {{entry.totalCost}} {{../data.project.selectedCurrency}}
                             </button>
                         </td>
                         {{/if}}
@@ -205,7 +203,7 @@
                                     <path d="M12 5l0 14" />
                                     <path d="M5 12l14 0" />
                                 </svg>
-                                {{lookup entry field.name}} {{../../data.project.currency}}
+                                {{lookup entry field.name}} {{../../data.project.selectedCurrency}}
                             </button>
                             {{/if}}
                         </td>
@@ -241,13 +239,12 @@
         </div>
         {{> dataNavigationFooter}}
     </div>
-
 </div>
 
 {{else}}
-<div class="card m-auto error">
+<div class="card m-auto error mb-3">
     <div class="card-header">
-        <div class="strong">Found no matching results!</div>
+        <div class="strong">Found no matching results in Project: {{data.project.name}}!</div>
     </div>
 </div>
 {{/if}}

@@ -14,7 +14,6 @@ const { getChanges } = require('../modules/getChanges');
 const {
     createDraftOrder,
     updateDraftOrder,
-    deleteDraftOrder,
 } = require('../modules/orders');
 
 function extractCloudinaryPublicId(url) {

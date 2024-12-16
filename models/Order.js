@@ -4,7 +4,10 @@ const Counter = require('../models/Counter');
 
 const OrderSchema = new mongoose.Schema(
     {
-        orderNo: { type: Number, unique: true },
+        orderNo: {
+            type: Number,
+            unique: true,
+        },
         customerId: {
             type: mongoose.Schema.Types.ObjectId,
             required: true,
@@ -13,6 +16,12 @@ const OrderSchema = new mongoose.Schema(
             type: String,
             enum: ['draft', 'invoice created', 'paid'],
             default: 'draft',
+        },
+        currency: {
+            type: String,
+            enum: ['USD', 'NOK', 'GBP', 'EUR', 'PKR', 'ILS', 'EGP'],
+            default: 'USD',
+            required: true,
         },
         projects: [
             {
@@ -46,9 +55,9 @@ OrderSchema.pre('save', async function (next) {
 
     try {
         const counter = await Counter.findOneAndUpdate(
-            { _id: 'Order' }, 
-            { $inc: { seq: 1 } }, 
-            { new: true, upsert: true }, 
+            { _id: 'Order' },
+            { $inc: { seq: 1 } },
+            { new: true, upsert: true },
         );
         doc.orderNo = counter.seq;
         next();

@@ -28,6 +28,7 @@ const roles = {
         'deleteCustomers',
         'editNotifications',
         'createOrders',
+        'viewInvoices',
     ],
     editor: [
         'viewDashboard', 
@@ -42,13 +43,15 @@ const roles = {
         'uploadImage',
         'editNotifications',
         'createOrders',
+        'viewInvoices',
     ],
     viewer: [
         'viewDashboard',
         'viewProject',
         'viewEntry',
         'viewOrders',
-        'editNotifications'
+        'editNotifications',
+        'viewInvoices',
     ]
 };
 

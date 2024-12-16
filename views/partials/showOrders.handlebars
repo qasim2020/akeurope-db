@@ -95,7 +95,8 @@
           <th>Date</th>
           <th>Customer</th>
           <th>Status</th>
-          <th>Amount</th>
+          <th>Projects Amount</th>
+          <th>Total Amount</th>
         </tr>
       </thead>
       <tbody>
@@ -143,9 +144,10 @@
           <td>{{capitalizeFirstLetter order.status}}</td>
           <td>
             {{#each order.projects}}
-              <span class="badge bg-green-lt">{{this.project.totalOrderedCostAllMonths}} {{this.project.currency}} in {{this.project.name}} </span>
+              <span class="badge bg-green-lt">{{this.project.totalOrderedCostAllMonths}} {{this.project.selectedCurrency}} in {{this.project.name}} </span>
             {{/each}}
           </td>
+          <td> {{order.totalCost}} {{order.currency}}</td>
         </tr>
         {{/each}}
       </tbody>

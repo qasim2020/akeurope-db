@@ -1,0 +1,6 @@
+<div class="card {{#unless data.order}} d-none {{/unless}} total-cost">
+    <div class="card-header d-flex justify-content-between border-0 text-red">
+        <div class="card-title">Total Cost</div>
+        <div class="card-title">{{data.order.totalCost}} in {{data.order.currency}}</div>
+    </div>
+</div>

@@ -702,7 +702,7 @@
         data: JSON.stringify(data),
         contentType: 'application/json',
         success: (response) => {
-          console.log('side bar toggled!');
+          return;
         },
         error: (error) => {
           alert(error.response);

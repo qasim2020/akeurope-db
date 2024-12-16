@@ -227,8 +227,6 @@
 
     const id = $(modal).attr("projId");
 
-    console.log(data);
-
     $.ajax({
       url: `/project/update/${id}`,
       type: 'POST',
@@ -236,7 +234,6 @@
       data: JSON.stringify(data),
       success: function (response) {
         $(elem).html(currentBtnHTML);
-        console.log(response);
         window.location.href = "/project/{{data.project.slug}}";
       },
       error: function (xhr, status, error) {
@@ -540,7 +537,8 @@
 
   const deleteOption = function (elem) {
     if ($(elem).closest(".accordion-body").find(".mb-3.dynamic-options").length == 1) {
-      return console.log("can't be deleted as this is the last option");
+      console.log("can't be deleted as this is the last option");
+      return;
     }
     $(elem).closest(".mb-3").remove();
   }

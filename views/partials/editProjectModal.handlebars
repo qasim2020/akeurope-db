@@ -214,7 +214,6 @@
                 <div class="card d-block p-2 mb-3 form-control subscription-field-selectors">
                     {{#each data.project.fields}}
                         {{#if (regexMatch this.type '^(number)$')}}
-                        {{log this}}
                         <span class="badge cursor-pointer p-2 mb-1 {{#if this.subscription}} bg-blue-lt {{/if}}" onclick="setSubscriptionField(this)">{{this.actualName}}</span>
                         {{/if}}
                     {{/each}}

@@ -1,13 +1,25 @@
-const searchBeneficiaries = function (elem) {
+const getModalData = function (modal) {
+    const select = $(modal).find('[name=randomBeneficiaries]').val();
+    const search = $(modal).find('[name=specificBeneficiaries]').val();
+    const customerId = $(modal).find('[name=customerId]').val();
+    const currency = $(modal).find('[name=currency]').val();
+    const slug = $(modal).find('[name=projectSlug]').val();
 
+    return {
+        select,
+        search,
+        customerId,
+        currency,
+        slug,
+    };
+};
+
+const searchBeneficiaries = function (elem) {
     let error;
 
     const modal = $(elem).closest('.modal');
 
-    const select = $(modal).find('[name=randomBeneficiaries]').val();
-    const search = $(modal).find('[name=specificBeneficiaries]').val();
-    const customerId = $(modal).find('[name=customerId]').val();
-    const slug = $(modal).find('[name=projectSlug]').val();
+    const { select, search, customerId, currency, slug } = getModalData(modal);
 
     $(modal)
         .find('.search-beneficiaries')
@@ -31,7 +43,7 @@ const searchBeneficiaries = function (elem) {
     const projectExistsInOrder = $(modal).find(`.${slug}`).length > 0;
     const orderAlreadyCreated = $(modal).find('.project-in-order').length > 0;
 
-    let url = `/getPaymentModalEntryData/${slug}/${customerId}?select=${select}&search=${search}`;
+    let url = `/getPaymentModalEntryData/${slug}/${customerId}?currency=${currency}&select=${select}&search=${search}`;
 
     if (orderAlreadyCreated) {
         const orderId = $(modal).find(`.project-in-order`).attr('orderId');
@@ -48,9 +60,11 @@ const searchBeneficiaries = function (elem) {
     }
 
     const currentBtnHTML = $(modal).find('.submit-btn').html();
-    $(modal).find('.submit-btn').html(
-        `<span class="spinner-border spinner-border-sm" role="status"></span>`,
-    );
+    $(modal)
+        .find('.submit-btn')
+        .html(
+            `<span class="spinner-border spinner-border-sm" role="status"></span>`,
+        );
 
     $.ajax({
         url,
@@ -62,11 +76,19 @@ const searchBeneficiaries = function (elem) {
             if (elemExists) {
                 $(modal).find(`.${slug}`).replaceWith(response);
             } else {
-                $(modal).find('.search-results-payment-modal-entries').append(response);
+                $(modal)
+                    .find('.search-results-payment-modal-entries')
+                    .append(response);
             }
+            const orderId = $(modal).find('.project-in-order').attr('orderId');
+            updateTotalCost(modal);
+            if (!orderId) return;
+            $(modal)
+                .find('.invoice-frame')
+                .attr({ src: `/invoice/${orderId}` })
+                .removeClass('d-none');
         },
         error: (error) => {
-            
             $(modal).find('.submit-btn').html(currentBtnHTML);
             alert(error.responseText);
         },
@@ -98,6 +120,11 @@ const doSearch = function (elem, href) {
         method: 'GET',
         success: function (response) {
             $(modal).find(`.${slug}`).replaceWith(response);
+            $(modal)
+                .find('.invoice-frame')
+                .attr({ src: `/invoice/${orderId}` })
+                .removeClass('d-none');
+            updateTotalCost(modal);
         },
         error: function (error) {
             alert(error.responseText);
@@ -389,4 +416,70 @@ const unselectColRowHeading = function (elem) {
     combinedElements.removeClass('bg-green-lt');
     combinedElements.find('.icon-tabler-check').addClass('d-none');
     combinedElements.find('.icon-tabler-plus').removeClass('d-none');
+};
+
+$(document).on('change', '.modal .order-change', function (e) {
+    const modal = $(this).closest('.modal');
+
+    const orderAlreadyCreated = $(modal).find('.project-in-order').length > 0;
+
+    if (!orderAlreadyCreated) return;
+
+    const { customerId, currency, select, search } = getModalData(modal);
+    const currentBtnHTML = $(modal).find('.submit-btn').html();
+
+    $(modal)
+        .find('.project-in-order')
+        .each((key, project) => {
+            const orderId = $(modal).find(`.project-in-order`).attr('orderId');
+            const slug = $(project).attr('projectSlug');
+            const toggleState = $(modal).find(`.${slug}`).attr('toggleState');
+            const url = `/getPaymentModalEntryData/${slug}/${customerId}?customerId=${customerId}&currency=${currency}&orderId=${orderId}&select=${select}&search=${search}&toggleState=${toggleState}`;
+
+            $(modal)
+                .find('.submit-btn')
+                .html(
+                    `<span class="spinner-border spinner-border-sm" role="status"></span>`,
+                );
+
+            $.ajax({
+                url,
+                method: 'GET',
+                success: (response) => {
+                    $(modal).find('.error').remove();
+                    $(modal).find('.submit-btn').html(currentBtnHTML);
+                    $(modal).find(`.${slug}`).replaceWith(response);
+                    $(modal)
+                        .find('.invoice-frame')
+                        .attr({ src: `/invoice/${orderId}` })
+                        .removeClass('d-none');
+                    updateTotalCost(modal);
+                },
+                error: (error) => {
+                    $(modal).find('.submit-btn').html(currentBtnHTML);
+                    alert(error.responseText);
+                },
+            });
+        });
+});
+
+const updateTotalCost = function (modal) {
+    const orderId = $(modal).find('.project-in-order').attr('orderId');
+    if (!orderId) {
+        $(modal).find('.total-cost').remove();
+        return;
+    };
+    $.ajax({
+        url: `/getOrderTotalCost/${orderId}`,
+        method: 'GET',
+        success: (response) => {
+            $(modal).find('.total-cost').remove();
+            $(modal)
+                .find('.search-results-payment-modal-entries')
+                .append(response);
+        },
+        error: (error) => {
+            alert(error.responseText);
+        },
+    });
 };

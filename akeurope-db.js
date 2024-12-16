@@ -22,7 +22,8 @@ const uploadCloudinary = require('./routes/uploadCloudinary');
 const uploadExcel = require('./routes/uploadExcel');
 const customersRoutes = require('./routes/customersRoutes');
 const logRoutes = require('./routes/logRoutes');
-const orderRoutes = require('./routes/ordersRoutes')
+const orderRoutes = require('./routes/ordersRoutes');
+const invoiceRoutes = require('./routes/invoiceRoutes');
 
 mongoose();
 
@@ -62,6 +63,7 @@ app.use(usersRoutes);
 app.use(customersRoutes);
 app.use(logRoutes);
 app.use(orderRoutes);
+app.use(invoiceRoutes);
 
 app.get('/', (req, res) => {
   res.redirect('/login');
