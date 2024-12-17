@@ -116,7 +116,9 @@ const calculationOnProject = async (projectOrdered, requestedCurrencyRate) => {
     const DynamicModel = await createDynamicModel(projectOrdered.slug);
 
     const currencyRates = await getCurrencyRates(requestedCurrencyRate);
-    const currencyRate = parseFloat(currencyRates.rates.get(projectOriginal.currency).toFixed(2));
+    const currencyRate = parseFloat(
+        currencyRates.rates.get(projectOriginal.currency).toFixed(2),
+    );
 
     let allEntries = await Promise.all(
         projectOrdered.entries.map((entry) =>
@@ -139,16 +141,23 @@ const calculationOnProject = async (projectOrdered, requestedCurrencyRate) => {
             entry.selectedSubscriptions = [];
         }
 
+        projectOriginal.fields.forEach((field) => {
+            if (field.subscription == true) {
+                entry[field.name] = parseFloat(
+                    (entry[field.name] / currencyRate).toFixed(2),
+                );
+            }
+        });
+
         entry.totalOrderedCost = projectOriginal.fields.reduce(
             (total, field) => {
                 if (
                     field.subscription == true &&
                     entry.selectedSubscriptions.includes(field.name)
                 ) {
-                    entry[field.name] = parseFloat((entry[field.name] / currencyRate).toFixed(2));
                     total = total + entry[field.name];
                 }
-                return total;
+                return parseFloat(total.toFixed(2));
             },
             0,
         );
@@ -157,7 +166,7 @@ const calculationOnProject = async (projectOrdered, requestedCurrencyRate) => {
             if (field.subscription == true) {
                 total = total + entry[field.name];
             }
-            return total;
+            return parseFloat(total.toFixed(2));
         }, 0);
     });
 
@@ -182,7 +191,9 @@ const calculationOnProject = async (projectOrdered, requestedCurrencyRate) => {
                 return total;
             }, 0);
             projectOrderedSingleMonth = projectOrderedSingleMonth + colSum;
-            Object.assign(field, { totalOrderedCost: parseFloat(colSum.toFixed(2)) });
+            Object.assign(field, {
+                totalOrderedCost: parseFloat(colSum.toFixed(2)),
+            });
         }
 
         return field;
@@ -190,9 +201,12 @@ const calculationOnProject = async (projectOrdered, requestedCurrencyRate) => {
 
     projectOriginal.months = parseFloat(projectOrdered.months.toFixed(2));
     projectOriginal.totalCost = parseFloat(projectTotalSingleMonth.toFixed(2));
-    projectOriginal.totalOrderedCost = parseFloat(projectOrderedSingleMonth.toFixed(2));
-    projectOriginal.totalOrderedCostAllMonths =
-        parseFloat((projectOrderedSingleMonth * projectOrdered.months).toFixed(2));
+    projectOriginal.totalOrderedCost = parseFloat(
+        projectOrderedSingleMonth.toFixed(2),
+    );
+    projectOriginal.totalOrderedCostAllMonths = parseFloat(
+        (projectOrderedSingleMonth * projectOrdered.months).toFixed(2),
+    );
     projectOriginal.selectedCurrency = requestedCurrencyRate;
 
     return {
@@ -212,7 +226,10 @@ const fetchEntriesInOrder = async (req, res) => {
 
     const projectOrdered = order.projects.find((p) => p.slug === projectSlug);
 
-    const { project, allEntries } = await calculationOnProject(projectOrdered, order.currency);
+    const { project, allEntries } = await calculationOnProject(
+        projectOrdered,
+        order.currency,
+    );
 
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
@@ -237,7 +254,7 @@ const fetchOrderByProject = async (req, res) => {
         _id: req.query.orderId,
         'projects.slug': req.params.slug,
     }).lean();
-    
+
     if (!order) throw new Error("Can't fetch order. No order found!");
 
     order.project = order.projects.find(
@@ -277,7 +294,7 @@ const updateDraftOrder = async (req, res) => {
         const customerId = req.query.customerId;
         await Order.updateOne(
             { _id: orderId },
-            { $set: { 'customerId': customerId } },
+            { $set: { customerId: customerId } },
         );
     }
 
@@ -285,7 +302,7 @@ const updateDraftOrder = async (req, res) => {
         const currency = req.query.currency;
         await Order.updateOne(
             { _id: orderId },
-            { $set: { 'currency': currency } },
+            { $set: { currency: currency } },
         );
     }
 
@@ -473,16 +490,19 @@ const getPaginatedOrders = async (req, res) => {
         order.customer = await Customer.findById(order.customerId).lean();
         order.projects = await Promise.all(
             order.projects.map(async (val) => {
-                const { project, allEntries: entries } = await calculationOnProject(val, order.currency);
+                const { project, allEntries: entries } =
+                    await calculationOnProject(val, order.currency);
                 return {
                     project,
                     entries: entries && entries.slice(0, 10),
                 };
             }),
         );
-        order.totalCost = order.projects.reduce( (total, project) => {
+        order.totalCost = order.projects.reduce((total, project) => {
             project = project.project;
-            return parseFloat((total + project.totalOrderedCostAllMonths).toFixed(2));
+            return parseFloat(
+                (total + project.totalOrderedCostAllMonths).toFixed(2),
+            );
         }, 0);
     }
 
@@ -497,7 +517,10 @@ const getSingleOrder = async (req, res) => {
     order.customer = await Customer.findById(order.customerId).lean();
     order.projects = await Promise.all(
         order.projects.map(async (val) => {
-            const { project, allEntries } = await calculationOnProject(val, order.currency);
+            const { project, allEntries } = await calculationOnProject(
+                val,
+                order.currency,
+            );
             return {
                 orderId: order._id,
                 project: project,
@@ -507,9 +530,11 @@ const getSingleOrder = async (req, res) => {
             };
         }),
     );
-    order.totalCost = order.projects.reduce( (total, project) => {
+    order.totalCost = order.projects.reduce((total, project) => {
         project = project.project;
-        return parseFloat((total + project.totalOrderedCostAllMonths).toFixed(2));
+        return parseFloat(
+            (total + project.totalOrderedCostAllMonths).toFixed(2),
+        );
     }, 0);
 
     return order;

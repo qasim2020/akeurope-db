@@ -26,6 +26,7 @@ const searchBeneficiaries = function (elem) {
         .find('.form-control')
         .removeClass('is-invalid');
     $(modal).find('.search-beneficiaries').find('.invalid-feedback').remove();
+    $(modal).find('.total-cost').remove();
 
     if (select == '' && search == '') {
         error =
@@ -59,19 +60,11 @@ const searchBeneficiaries = function (elem) {
         url = url + `&toggleState=hide`;
     }
 
-    const currentBtnHTML = $(modal).find('.submit-btn').html();
-    $(modal)
-        .find('.submit-btn')
-        .html(
-            `<span class="spinner-border spinner-border-sm" role="status"></span>`,
-        );
-
     $.ajax({
         url,
         method: 'GET',
         success: (response) => {
             $(modal).find('.error').remove();
-            $(modal).find('.submit-btn').html(currentBtnHTML);
             const elemExists = $(modal).find(`.${slug}`).length > 0;
             if (elemExists) {
                 $(modal).find(`.${slug}`).replaceWith(response);
@@ -89,7 +82,6 @@ const searchBeneficiaries = function (elem) {
                 .removeClass('d-none');
         },
         error: (error) => {
-            $(modal).find('.submit-btn').html(currentBtnHTML);
             alert(error.responseText);
         },
     });
@@ -97,6 +89,7 @@ const searchBeneficiaries = function (elem) {
 
 const doSearch = function (elem, href) {
     const modal = $(elem).closest('.modal');
+    $(modal).find('.total-cost').remove();
     const isDashboardPage =
         $(elem).closest('.card-footer').attr('page-type') == 'orders';
 
@@ -133,15 +126,19 @@ const doSearch = function (elem, href) {
 };
 
 const removeProject = function (elem) {
-    const orderHasProjects =
-        $(elem).closest('.project-in-order').siblings('.project-in-order')
-            .length > 0;
+    // const orderHasProjects =
+    // $(elem).closest('.project-in-order').siblings('.project-in-order')
+    // .length > 0;
+    const href = '?deleteProject=true';
+    doSearch(elem, href);
+    $(elem).closest('.card').remove();
+
+    return;
+
     if (orderHasProjects) {
         const href = '?deleteProject=true';
-        doSearch(elem, href);
-        $(elem).closest('.card').remove();
     } else {
-        const href = '?deleteOrder=true';
+        const href = '?removeProject=true';
         doSearch(elem, href);
         $('#search-results-payment-modal-entries').html('');
     }
@@ -426,7 +423,6 @@ $(document).on('change', '.modal .order-change', function (e) {
     if (!orderAlreadyCreated) return;
 
     const { customerId, currency, select, search } = getModalData(modal);
-    const currentBtnHTML = $(modal).find('.submit-btn').html();
 
     $(modal)
         .find('.project-in-order')
@@ -436,18 +432,11 @@ $(document).on('change', '.modal .order-change', function (e) {
             const toggleState = $(modal).find(`.${slug}`).attr('toggleState');
             const url = `/getPaymentModalEntryData/${slug}/${customerId}?customerId=${customerId}&currency=${currency}&orderId=${orderId}&select=${select}&search=${search}&toggleState=${toggleState}`;
 
-            $(modal)
-                .find('.submit-btn')
-                .html(
-                    `<span class="spinner-border spinner-border-sm" role="status"></span>`,
-                );
-
             $.ajax({
                 url,
                 method: 'GET',
                 success: (response) => {
                     $(modal).find('.error').remove();
-                    $(modal).find('.submit-btn').html(currentBtnHTML);
                     $(modal).find(`.${slug}`).replaceWith(response);
                     $(modal)
                         .find('.invoice-frame')
@@ -456,7 +445,6 @@ $(document).on('change', '.modal .order-change', function (e) {
                     updateTotalCost(modal);
                 },
                 error: (error) => {
-                    $(modal).find('.submit-btn').html(currentBtnHTML);
                     alert(error.responseText);
                 },
             });
@@ -468,7 +456,7 @@ const updateTotalCost = function (modal) {
     if (!orderId) {
         $(modal).find('.total-cost').remove();
         return;
-    };
+    }
     $.ajax({
         url: `/getOrderTotalCost/${orderId}`,
         method: 'GET',
@@ -483,3 +471,35 @@ const updateTotalCost = function (modal) {
         },
     });
 };
+
+$(document).on('ajaxStart', function () {
+    var modal = $('.modal:visible');
+
+    if (modal.length) {
+        $(modal)
+            .find('.submit-btn')
+            .html(
+                `<span class="spinner-border spinner-border-sm" role="status"></span>`,
+            );
+    }
+});
+
+$(document).on('ajaxStop', function () {
+    var modal = $('.modal:visible');
+    $(modal)
+        .find('.submit-btn')
+        .html(
+            `
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="icon icon-tabler icons-tabler-outline icon-tabler-shopping-cart-plus">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                    <path d="M4 19a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+                    <path d="M12.5 17h-6.5v-14h-2" />
+                    <path d="M6 5l14 1l-.86 6.017m-2.64 .983h-10.5" />
+                    <path d="M16 19h6" />
+                    <path d="M19 16v6" />
+                  </svg>
+                `,
+        );
+});

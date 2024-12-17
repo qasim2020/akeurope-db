@@ -84,12 +84,8 @@
 
             </div>
             <div class="col-md-6 col-12">
-              {{#if data.order}}
-              <iframe class="invoice-frame" width="100%" height="600px" style="border: none;"
-                src="/invoice/{{data.order._id}}"></iframe>
-              {{else}}
-              <iframe class="invoice-frame d-none" width="100%" height="600px" style="border: none;" src=""></iframe>
-              {{/if}}
+              <iframe class="invoice-frame" width="100%" height="755px" style="border: none;"
+                src="/invoice/{{#if data.order}}{{data.order._id}}{{else}}blank{{/if}}"></iframe>
             </div>
 
           </div>

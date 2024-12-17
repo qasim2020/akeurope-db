@@ -17,15 +17,20 @@ const path = require('path');
 
 exports.getInvoice = async (req, res) => {
     try {
+        if (req.params.orderId == 'blank') {
+            res.status(200).render('error', {message: 'Invoice will load after you select beneficiaries', success: true});
+            return;
+        }
+        
         const order = await getSingleOrder(req, res);
 
         if (!order) {
-            res.status(404).render('error', {heading: 'Order not found'});            
+            res.status(200).render('error', {message: 'Order not yet created', success: true});
             return;
         }
 
         if (order.projects.length == 0) {
-            res.status(404).render('error', {heading: 'No projects found'});            
+            res.status(200).render('error', {message: 'Invoice is created after you select beneficiaries', success: true});            
             return;
         }
 
@@ -34,7 +39,7 @@ exports.getInvoice = async (req, res) => {
         res.sendFile(invoicePath);
     } catch (error) {
         console.error('Error generating invoice:', error);
-        res.status(404).render('error', {heading: 'No projects found', error});            
+        res.status(404).render('error', {heading: 'Server Error', error});
     }
 };
 
@@ -107,7 +112,7 @@ const generateInvoicePDF = async (order) => {
 
             // Draw a total price below the table
             doc.fontSize(12).text(
-                `Total: ${order.totalCost} in ${order.currency}`,
+                `Total: ${order.totalCost} ${order.currency}`,
                 350,
                 endY + 30,
             );
