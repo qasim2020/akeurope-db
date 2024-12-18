@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Project = require('../models/Project');
 const Customer = require('../models/Customer');
 const Payment = require('../models/Payment');
@@ -242,7 +243,7 @@ const fetchEntriesInOrder = async (req, res) => {
     });
 
     return {
-        select: allEntries.length,
+        select: countSubscribedEntries(allEntries),
         project,
         entries: allEntries.slice(skip, skip + limit),
         pagination,
@@ -512,6 +513,11 @@ const getPaginatedOrders = async (req, res) => {
     };
 };
 
+const countSubscribedEntries = (entries) => {
+    return entries.filter((entry) => entry.selectedSubscriptions.length > 0)
+        .length;
+};
+
 const getSingleOrder = async (req, res) => {
     const order = await Order.findOne({ _id: req.params.orderId }).lean();
     order.customer = await Customer.findById(order.customerId).lean();
@@ -524,7 +530,7 @@ const getSingleOrder = async (req, res) => {
             return {
                 orderId: order._id,
                 project: project,
-                entriesCount: allEntries.length,
+                entriesCount: countSubscribedEntries(allEntries),
                 entries: allEntries && allEntries.slice(0, 10),
                 toggleState: 'hide',
             };
@@ -540,9 +546,92 @@ const getSingleOrder = async (req, res) => {
     return order;
 };
 
+const updateOrderStatus = async (req, status) => {
+    const orderId = req.params.orderId;
+    await Order.updateOne({ _id: orderId }, { $set: { status: status } });
+    return {
+        message: 'Order status changed!',
+    };
+};
+
+const addPaymentsToOrder = async (order) => {
+    for (const calcProject of order.projects) {
+        const { project, entries } = calcProject;
+        const projectSlug = project.slug;
+        const fields = (await Project.findOne({ slug: projectSlug })).fields;
+        const filteredEntries = entries.filter(
+            (entry) => entry.selectedSubscriptions.length > 0,
+        );
+        const cleanedEntries = filteredEntries.map((entry) => {
+            const allSubscriptions = [];
+            const selectedSubscriptions = [];
+            fields.forEach((field) => {
+                if (field.subscription == true) {
+                    if (entry.selectedSubscriptions.includes(field.name)) {
+                        selectedSubscriptions.push({[field.name]: entry[field.name]});
+                    }
+
+                    allSubscriptions.push({[field.name]: entry[field.name]});
+                }
+            });
+            entry.selectedSubscriptionsPair = selectedSubscriptions;
+            entry.allSubscriptionsPair = allSubscriptions;
+            return entry;
+        });
+        for (const entry of cleanedEntries) {
+            const {
+                _id: entryId,
+                totalOrderedCost: totalCost,
+                selectedSubscriptions,
+                selectedSubscriptionsPair,
+                allSubscriptionsPair,
+            } = entry;
+            console.log({
+                entryId,
+                totalCost,
+                selectedSubscriptions,
+                selectedSubscriptionsPair,
+                allSubscriptionsPair,
+            });
+            await Order.updateOne(
+                { _id: order._id },
+                {
+                    $set: {
+                        totalCost: order.totalCost,
+                        'projects.$[project].totalCostSingleMonth':
+                            project.totalOrderedCost,
+                        'projects.$[project].totalCostAllMonths':
+                            project.totalOrderedCostAllMonths,
+                        'projects.$[project].months': project.months,
+                        'projects.$[project].entries.$[entry].totalCost':
+                            totalCost,
+                        'projects.$[project].entries.$[entry].selectedSubscriptions':
+                            selectedSubscriptions,
+                        'projects.$[project].entries.$[entry].selectedSubscriptionsPair':
+                            selectedSubscriptionsPair,
+                        'projects.$[project].entries.$[entry].allSubscriptionsPair':
+                            allSubscriptionsPair,
+                    },
+                },
+                {
+                    arrayFilters: [
+                        { 'project.slug': projectSlug },
+                        { 'entry.entryId': entryId },
+                    ],
+                },
+            );
+        }
+    }
+    return {
+        message: 'Order payments added!',
+    };
+};
+
 module.exports = {
     createDraftOrder,
     updateDraftOrder,
     getPaginatedOrders,
     getSingleOrder,
+    updateOrderStatus,
+    addPaymentsToOrder,
 };

@@ -14,7 +14,7 @@ const OrderSchema = new mongoose.Schema(
         },
         status: {
             type: String,
-            enum: ['draft', 'invoice created', 'paid'],
+            enum: ['draft', 'pending payment', 'paid'],
             default: 'draft',
         },
         currency: {
@@ -22,6 +22,9 @@ const OrderSchema = new mongoose.Schema(
             enum: ['USD', 'NOK', 'GBP', 'EUR', 'PKR', 'ILS', 'EGP'],
             default: 'USD',
             required: true,
+        },
+        totalCost: {
+            type: Number,
         },
         projects: [
             {
@@ -33,10 +36,21 @@ const OrderSchema = new mongoose.Schema(
                     type: Number,
                     required: true,
                 },
+                totalCostSingleMonth: {
+                    type: Number
+                },
+                totalCostAllMonths: {
+                    type: Number
+                },
                 entries: [
                     {
                         entryId: mongoose.Schema.Types.ObjectId,
                         selectedSubscriptions: [String],
+                        totalCost: {
+                            type: Number
+                        },
+                        selectedSubscriptionsPair: [Object],
+                        allSubscriptionsPair: [Object]
                     },
                 ],
             },

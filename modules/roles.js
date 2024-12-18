@@ -28,6 +28,7 @@ const roles = {
         'deleteCustomers',
         'editNotifications',
         'createOrders',
+        'editOrders',
         'viewInvoices',
     ],
     editor: [
@@ -43,6 +44,7 @@ const roles = {
         'uploadImage',
         'editNotifications',
         'createOrders',
+        'editOrders',
         'viewInvoices',
     ],
     viewer: [

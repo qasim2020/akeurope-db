@@ -1,13 +1,14 @@
 const Customer = require('../models/Customer');
 const Project = require('../models/Project');
+const Order = require('../models/Order');
 const { saveLog, customerLogs, visibleLogs } = require('../modules/logAction');
 const { logTemplates } = require('../modules/logTemplates');
 const { getChanges } = require('../modules/getChanges');
 const {
     getPaginatedOrders,
     getSingleOrder,
-    createDraftOrder,
-    updateDraftOrder,
+    updateOrderStatus,
+    addPaymentsToOrder,
 } = require('../modules/orders');
 const { allProjects } = require('../modules/mw-data');
 
@@ -35,7 +36,10 @@ exports.viewOrders = async (req, res) => {
         });
     } catch (error) {
         console.log(error);
-        res.status(404).render('error', {heading: 'Server Error', error: error});
+        res.status(404).render('error', {
+            heading: 'Server Error',
+            error: error,
+        });
     }
 };
 
@@ -59,9 +63,11 @@ exports.viewOrder = async (req, res) => {
         });
     } catch (error) {
         console.log(error);
-        res.status(404).render('error', {heading: 'Server Error', error: error});
+        res.status(404).render('error', {
+            heading: 'Server Error',
+            error: error,
+        });
     }
-
 };
 
 exports.getOrdersData = async (req, res) => {
@@ -76,7 +82,10 @@ exports.getOrdersData = async (req, res) => {
         });
     } catch (error) {
         console.log(error);
-        res.status(404).render('error', {heading: 'Server Error', error: error});
+        res.status(404).render('error', {
+            heading: 'Server Error',
+            error: error,
+        });
     }
 };
 
@@ -95,21 +104,57 @@ exports.getEditOrderModal = async (req, res) => {
         });
     } catch (error) {
         console.log(error);
-        res.status(404).render('error', {heading: 'Server Error', error: error});
+        res.status(404).render('error', {
+            heading: 'Server Error',
+            error: error,
+        });
     }
 };
 
-exports.getOrderTotalCost = async (req,res) => {
+exports.getOrderTotalCost = async (req, res) => {
     try {
-        const order = await getSingleOrder(req,res);
+        const order = await getSingleOrder(req, res);
         res.render('partials/components/orderTotalCost', {
             layout: false,
             data: {
-                order
-            }
-        })
+                order,
+            },
+        });
     } catch (error) {
         console.log(error);
-        res.status(404).render('error', {heading: 'Server Error', error: error}); 
+        res.status(404).render('error', {
+            heading: 'Server Error',
+            error: error,
+        });
     }
-}
+};
+
+exports.checkout = async (req, res) => {
+    try {
+        const order = await getSingleOrder(req,res);
+        await updateOrderStatus(req,'pending payment');
+        await addPaymentsToOrder(order);
+        res.status(200).send('Order checked out!');
+    } catch (error) {
+        console.log(error);
+        res.status(404).send(error);
+    }
+};
+
+exports.getPaymentModal = async (req, res) => {
+    try {
+        const order = await getSingleOrder(req, res);
+        res.render('partials/emptyPaymentModal', {
+            layout: false,
+            data: {
+                order,
+            },
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(404).render('error', {
+            heading: 'Server Error',
+            error: error,
+        });
+    }
+};

@@ -63,6 +63,7 @@ const searchBeneficiaries = function (elem) {
     $.ajax({
         url,
         method: 'GET',
+        namespace: 'spinner-on-cart',
         success: (response) => {
             $(modal).find('.error').remove();
             const elemExists = $(modal).find(`.${slug}`).length > 0;
@@ -111,6 +112,7 @@ const doSearch = function (elem, href) {
     $.ajax({
         url,
         method: 'GET',
+        namespace: 'spinner-on-cart',
         success: function (response) {
             $(modal).find(`.${slug}`).replaceWith(response);
             $(modal)
@@ -435,6 +437,7 @@ $(document).on('change', '.modal .order-change', function (e) {
             $.ajax({
                 url,
                 method: 'GET',
+                namespace: 'spinner-on-cart',
                 success: (response) => {
                     $(modal).find('.error').remove();
                     $(modal).find(`.${slug}`).replaceWith(response);
@@ -460,6 +463,7 @@ const updateTotalCost = function (modal) {
     $.ajax({
         url: `/getOrderTotalCost/${orderId}`,
         method: 'GET',
+        namespace: 'spinner-on-cart',
         success: (response) => {
             $(modal).find('.total-cost').remove();
             $(modal)
@@ -472,9 +476,8 @@ const updateTotalCost = function (modal) {
     });
 };
 
-$(document).on('ajaxStart', function () {
+$(document).on('ajaxStart.spinner-on-cart', function () {
     var modal = $('.modal:visible');
-
     if (modal.length) {
         $(modal)
             .find('.submit-btn')
@@ -484,7 +487,7 @@ $(document).on('ajaxStart', function () {
     }
 });
 
-$(document).on('ajaxStop', function () {
+$(document).on('ajaxStop.spinner-on-cart', function () {
     var modal = $('.modal:visible');
     $(modal)
         .find('.submit-btn')
@@ -503,3 +506,77 @@ $(document).on('ajaxStop', function () {
                 `,
         );
 });
+
+const loadPaymentModal = function (elem) {
+    const modal = $(elem).closest('.modal');
+    const modalFooter = $(elem).closest('.modal-footer');
+    const orderId = $(modal).find(`.project-in-order`).attr('orderId');
+    $(modal).find('.alert').remove();
+    if (!orderId) {
+        modalFooter.append(`
+          <div class="alert alert-danger mt-4 w-100" role="alert">
+            <h4 class="alert-title">Failed!</h4>
+            <div class="text-secondary text-break">No beneficiaries selected. </div>
+          </div>
+          `);
+        return;
+    }
+    let currentBtnHTML = $(elem).html();
+    $(elem).html(
+        `<span class="spinner-border spinner-border-sm me-2" role="status"></span>Updating Order`,
+    );
+    $.ajax({
+        url: `/checkout/${orderId}`,
+        method: 'GET',
+        success: (response) => {
+            $(elem).html(currentBtnHTML);
+            getPaymentModal(elem);
+        },
+        error: (error) => {
+            $(elem).html(currentBtnHTML);
+            modalFooter.append(`
+                <div class="alert alert-danger mt-4 w-100" role="alert">
+                  <h4 class="alert-title">Failed to load payment modal!</h4>
+                  <div class="text-secondary text-break">${error.responseText}</div>
+                </div>
+                `);
+        },
+    });
+};
+
+const getPaymentModal = function (elem) {
+    const modal = $(elem).closest('.modal');
+    const orderId = $(modal).find(`.project-in-order`).attr('orderId') || $(elem).attr('order-id');
+
+    if (!orderId) {
+        alert('No order found');
+        return;
+    }
+
+    const modalExists =
+        $(document).find(`#button-modal-payment-${orderId}`).length > 0;
+
+    if (modalExists) {
+        $(`#button-modal-payment-${orderId}`).trigger('click');
+        return;
+    }
+
+    let currentBtnHTML = $(elem).html();
+    $(elem).html(
+        `<span class="spinner-border spinner-border-sm me-2" role="status"></span>`,
+    );
+
+    $.ajax({
+        url: `/getPaymentModal/${orderId}`,
+        method: 'GET',
+        success: (response) => {
+            $(elem).html(currentBtnHTML);
+            $('footer').before(response);
+            $(`#button-modal-payment-${orderId}`).trigger('click');
+        },
+        error: (error) => {
+            $(elem).html(currentBtnHTML);
+            alert(error);
+        },
+    });
+};
