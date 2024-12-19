@@ -1,9 +1,5 @@
 # akeurope-db
 
-### New learning: MongoDB makes saving easy
-
-<img width="1410" alt="Screenshot 2024-12-18 at 3 52 00 AM" src="https://github.com/user-attachments/assets/2cc2241d-5e07-42cd-804b-25272b526914" />
-
 ### Create invoice
 
 <img width="1470" alt="Screenshot 2024-12-18 at 3 54 01 AM" src="https://github.com/user-attachments/assets/2ab8359e-4228-44e3-bcb8-b59b7036319f" />
