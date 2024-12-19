@@ -42,12 +42,16 @@ const searchBeneficiaries = function (elem) {
     }
 
     const projectExistsInOrder = $(modal).find(`.${slug}`).length > 0;
-    const orderAlreadyCreated = $(modal).find('.project-in-order').length > 0;
+    const orderAlreadyCreated =
+        $(modal).attr('order-id').length > 0 ||
+        $(modal).find('.project-in-order').length > 0;
 
     let url = `/getPaginatedEntriesForDraftOrder/${slug}/${customerId}?currency=${currency}&select=${select}&search=${search}`;
 
     if (orderAlreadyCreated) {
-        const orderId = $(modal).find(`.project-in-order`).attr('orderId');
+        const orderId =
+            $(modal).attr('order-id') ||
+            $(modal).find('.project-in-order').attr('orderId');
         if (projectExistsInOrder) {
             const toggleState = $(modal).find(`.${slug}`).attr('toggleState');
             url =
@@ -95,12 +99,12 @@ const loadEntriesInPaymentModal = function (elem, href) {
     const modal = $(elem).closest('.modal');
     const orderId = modal.attr('order-id');
     const projectSlug = $(elem).closest('.card').attr('project-slug');
-    const url = `/getPaginatedEntriesForPendingOrder/${orderId}/${projectSlug}${href}`
+    const url = `/getPaginatedEntriesForPendingOrder/${orderId}/${projectSlug}${href}`;
     $.ajax({
         url,
         method: 'GET',
         success: function (response) {
-            modal.find(`.${projectSlug}`).html(response);
+            modal.find(`.${projectSlug}`).replaceWith(response);
         },
         error: function (error) {
             alert(error.responseText);
@@ -142,6 +146,7 @@ const doSearch = function (elem, href) {
         method: 'GET',
         namespace: 'spinner-on-cart',
         success: function (response) {
+            console.log(response);
             $(modal).find(`.${slug}`).replaceWith(response);
             $(modal)
                 .find('.invoice-frame')
@@ -156,22 +161,10 @@ const doSearch = function (elem, href) {
 };
 
 const removeProject = function (elem) {
-    // const orderHasProjects =
-    // $(elem).closest('.project-in-order').siblings('.project-in-order')
-    // .length > 0;
     const href = '?deleteProject=true';
     doSearch(elem, href);
     $(elem).closest('.card').remove();
-
     return;
-
-    if (orderHasProjects) {
-        const href = '?deleteProject=true';
-    } else {
-        const href = '?removeProject=true';
-        doSearch(elem, href);
-        $('#search-results-payment-modal-entries').html('');
-    }
 };
 
 const selectAllSearchResults = function (elem) {
@@ -609,4 +602,19 @@ const getPaymentModal = function (elem) {
             alert(error);
         },
     });
+};
+
+const deleteOrder = function (elem) {
+    const orderId = $(elem).attr('order-id');
+    $.ajax({
+        url: `/deleteOrder/${orderId}`,
+        method: 'GET',
+        success: (response) => {
+            console.log(response);
+            $(elem).closest('tr').remove();
+        },
+        error: (error) => {
+            alert(error.responseText);
+        }
+    })
 };

@@ -29,6 +29,7 @@ const roles = {
         'editNotifications',
         'createOrders',
         'editOrders',
+        'deleteOrders',
         'viewInvoices',
     ],
     editor: [

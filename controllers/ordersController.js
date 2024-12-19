@@ -9,9 +9,9 @@ const {
     getSingleOrder,
     updateOrderStatus,
     addPaymentsToOrder,
-    openOrderProjectWithEntries
+    openOrderProjectWithEntries,
 } = require('../modules/orders');
-const { allProjects } = require('../modules/mw-data');
+const { generateInvoice, deleteInvoice } = require('../modules/invoice');
 
 exports.viewOrders = async (req, res) => {
     try {
@@ -148,8 +148,9 @@ exports.getPaymentModal = async (req, res) => {
         let order;
         if (checkOrder.status == 'draft') {
             const draftOrder = await getSingleOrder(req, res);
-            await updateOrderStatus(draftOrder, 'pending payment');
+            await generateInvoice(draftOrder);
             await addPaymentsToOrder(draftOrder);
+            await updateOrderStatus(req, 'pending payment');
             order = await Order.findById(req.params.orderId).lean();
         } else {
             order = checkOrder;
@@ -161,6 +162,21 @@ exports.getPaymentModal = async (req, res) => {
                 order,
             },
         });
+    } catch (error) {
+        console.log(error);
+        res.status(404).render('error', {
+            heading: 'Server Error',
+            error: error,
+        });
+    }
+};
+
+exports.deleteOrder = async (req, res) => {
+    try {
+        const orderId = req.params.orderId;
+        await deleteInvoice(orderId);
+        await Order.deleteOne({ _id: orderId });
+        res.status(200).send('Order & Invoice deleted!');
     } catch (error) {
         console.log(error);
         res.status(404).render('error', {

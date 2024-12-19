@@ -1,5 +1,5 @@
 <div class="modal modal-blur fade" id="{{#if data.order}}modal-{{data.order._id}}{{else}}modal-new-order{{/if}}"
-  tabindex="-1" style="display: none; padding-left: 0px;" aria-modal="true" role="dialog" entryId="">
+  tabindex="-1" style="display: none; padding-left: 0px;" aria-modal="true" role="dialog" {{#if data.order}}order-id="{{data.order._id}}"{{/if}}>
   <div class="modal-dialog modal-xl" role="document">
     <div class="modal-content">
       <div class="modal-header">

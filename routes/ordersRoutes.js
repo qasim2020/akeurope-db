@@ -10,5 +10,7 @@ router.get('/getEditOrderModal/:orderId', authenticate, authorize("viewOrders"),
 router.get('/getOrderTotalCost/:orderId', authenticate, authorize("viewOrders"), allProjects, ordersController.getOrderTotalCost);
 router.get('/checkout/:orderId', authenticate, authorize("editOrders"), allProjects, ordersController.checkout);
 router.get('/getPaymentModal/:orderId', authenticate, authorize("editOrders"), ordersController.getPaymentModal);
+router.get('/deleteOrder/:orderId', authenticate, authorize("deleteOrders"), ordersController.deleteOrder);
+
 
 module.exports = router;

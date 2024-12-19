@@ -297,11 +297,14 @@ const updateDraftOrder = async (req, res) => {
     let checkProject = await Project.findOne({ slug: req.params.slug }).lean();
     if (!checkProject)
         throw new Error(`Project "${req.params.slug}" not found`);
-
+    
     const orderId = req.query.orderId;
     const projectSlug = checkProject.slug;
-    const refreshInvoice = false;
-    const refreshTotal = false;
+
+    await Order.updateOne(
+        { _id: orderId },
+        { $set: { status: 'draft' } },
+    );
 
     if (req.query.customerId) {
         const customerId = req.query.customerId;
@@ -309,7 +312,6 @@ const updateDraftOrder = async (req, res) => {
             { _id: orderId },
             { $set: { customerId: customerId } },
         );
-        refreshInvoice = true;
     }
 
     if (req.query.currency) {
@@ -318,8 +320,6 @@ const updateDraftOrder = async (req, res) => {
             { _id: orderId },
             { $set: { currency: currency } },
         );
-        refreshInvoice = true;
-        refreshTotal = true;
     }
 
     if (req.query.months > 0) {
@@ -328,8 +328,6 @@ const updateDraftOrder = async (req, res) => {
             { _id: orderId, 'projects.slug': projectSlug },
             { $set: { 'projects.$.months': updatedMonths } },
         );
-        refreshInvoice = true;
-        refreshTotal = true;
     }
 
     if (req.query.subscriptions && !req.query.entryId) {
@@ -354,8 +352,6 @@ const updateDraftOrder = async (req, res) => {
                 },
             );
         }
-        refreshInvoice = true;
-        refreshTotal = true;
     }
 
     if (req.query.entryId && req.query.subscriptions) {
@@ -388,8 +384,6 @@ const updateDraftOrder = async (req, res) => {
                 },
             );
         }
-        refreshInvoice = true;
-        refreshTotal = true;
     }
 
     if (req.query.addProject) {
@@ -410,8 +404,6 @@ const updateDraftOrder = async (req, res) => {
                 $push: { projects: updatedProject },
             },
         );
-        refreshInvoice = true;
-        refreshTotal = true;
     }
 
     if (req.query.replaceProject) {
@@ -426,8 +418,6 @@ const updateDraftOrder = async (req, res) => {
                 $set: { 'projects.$': updatedProject },
             },
         );
-        refreshInvoice = true;
-        refreshTotal = true;
     }
 
     if (req.query.deleteProject) {
@@ -440,8 +430,6 @@ const updateDraftOrder = async (req, res) => {
         return {
             message: 'Project deleted from order!',
         };
-        refreshInvoice = true;
-        refreshTotal = true;
     }
 
     if (req.query.deleteOrder) {
@@ -449,8 +437,6 @@ const updateDraftOrder = async (req, res) => {
         return {
             message: 'Order deleted!',
         };
-        refreshInvoice = true;
-        refreshTotal = true;
     }
 
     const order = await fetchOrderByProject(req, res);
@@ -468,8 +454,6 @@ const updateDraftOrder = async (req, res) => {
         select,
         toggleState: req.query.toggleState,
         months: order.project.months,
-        refreshInvoice,
-        refreshTotal
     };
 };
 
@@ -579,7 +563,7 @@ const getSingleOrder = async (req, res) => {
 };
 
 const updateOrderStatus = async (req, status) => {
-    const orderId = req.params.orderId;
+    const orderId = req.params.orderId || req.query.orderId;
     await Order.updateOne({ _id: orderId }, { $set: { status: status } });
     return {
         message: 'Order status changed!',
