@@ -44,7 +44,7 @@ const searchBeneficiaries = function (elem) {
     const projectExistsInOrder = $(modal).find(`.${slug}`).length > 0;
     const orderAlreadyCreated = $(modal).find('.project-in-order').length > 0;
 
-    let url = `/getPaymentModalEntryData/${slug}/${customerId}?currency=${currency}&select=${select}&search=${search}`;
+    let url = `/getPaginatedEntriesForDraftOrder/${slug}/${customerId}?currency=${currency}&select=${select}&search=${search}`;
 
     if (orderAlreadyCreated) {
         const orderId = $(modal).find(`.project-in-order`).attr('orderId');
@@ -88,6 +88,26 @@ const searchBeneficiaries = function (elem) {
     });
 };
 
+const loadEntriesInPaymentModal = function (elem, href) {
+    if (!href) {
+        href = $(elem).attr('my-href');
+    }
+    const modal = $(elem).closest('.modal');
+    const orderId = modal.attr('order-id');
+    const projectSlug = $(elem).closest('.card').attr('project-slug');
+    const url = `/getPaginatedEntriesForPendingOrder/${orderId}/${projectSlug}${href}`
+    $.ajax({
+        url,
+        method: 'GET',
+        success: function (response) {
+            modal.find(`.${projectSlug}`).html(response);
+        },
+        error: function (error) {
+            alert(error.responseText);
+        },
+    });
+};
+
 const doSearch = function (elem, href) {
     const modal = $(elem).closest('.modal');
     $(modal).find('.total-cost').remove();
@@ -99,6 +119,14 @@ const doSearch = function (elem, href) {
         return;
     }
 
+    const isPaymentModal =
+        $(elem).closest('.card-footer').attr('page-type') == 'payment-modal';
+
+    if (isPaymentModal) {
+        loadEntriesInPaymentModal(elem, href);
+        return;
+    }
+
     if (!href) {
         href = $(elem).attr('my-href');
     }
@@ -107,7 +135,7 @@ const doSearch = function (elem, href) {
     const slug = $(elem).closest('.card').attr('projectSlug');
     const orderId = $(modal).find(`.${slug}`).attr('orderId');
     const toggleState = $(modal).find(`.${slug}`).attr('toggleState');
-    const url = `/getPaymentModalEntryData/${slug}/${customerId}${href}&orderId=${orderId}&toggleState=${toggleState}`;
+    const url = `/getPaginatedEntriesForDraftOrder/${slug}/${customerId}${href}&orderId=${orderId}&toggleState=${toggleState}`;
 
     $.ajax({
         url,
@@ -432,7 +460,7 @@ $(document).on('change', '.modal .order-change', function (e) {
             const orderId = $(modal).find(`.project-in-order`).attr('orderId');
             const slug = $(project).attr('projectSlug');
             const toggleState = $(modal).find(`.${slug}`).attr('toggleState');
-            const url = `/getPaymentModalEntryData/${slug}/${customerId}?customerId=${customerId}&currency=${currency}&orderId=${orderId}&select=${select}&search=${search}&toggleState=${toggleState}`;
+            const url = `/getPaginatedEntriesForDraftOrder/${slug}/${customerId}?customerId=${customerId}&currency=${currency}&orderId=${orderId}&select=${select}&search=${search}&toggleState=${toggleState}`;
 
             $.ajax({
                 url,
@@ -546,7 +574,9 @@ const loadPaymentModal = function (elem) {
 
 const getPaymentModal = function (elem) {
     const modal = $(elem).closest('.modal');
-    const orderId = $(modal).find(`.project-in-order`).attr('orderId') || $(elem).attr('order-id');
+    const orderId =
+        $(modal).find(`.project-in-order`).attr('orderId') ||
+        $(elem).attr('order-id');
 
     if (!orderId) {
         alert('No order found');
@@ -557,8 +587,8 @@ const getPaymentModal = function (elem) {
         $(document).find(`#button-modal-payment-${orderId}`).length > 0;
 
     if (modalExists) {
-        $(`#button-modal-payment-${orderId}`).trigger('click');
-        return;
+        $(`#button-modal-payment-${orderId}`).remove();
+        $(`#modal-payment-${orderId}`).remove();
     }
 
     let currentBtnHTML = $(elem).html();

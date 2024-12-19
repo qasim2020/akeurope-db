@@ -173,6 +173,7 @@ const calculationOnProject = async (projectOrdered, requestedCurrencyRate) => {
 
     let projectTotalSingleMonth = 0;
     let projectOrderedSingleMonth = 0;
+    let totalSubscriptionCosts = [];
 
     projectOriginal.fields = projectOriginal.fields.map((field) => {
         if (field.subscription == true) {
@@ -180,8 +181,9 @@ const calculationOnProject = async (projectOrdered, requestedCurrencyRate) => {
                 total = total + entry[field.name];
                 return total;
             }, 0);
+            const totalCost = parseFloat(colSum.toFixed(2));
             projectTotalSingleMonth = projectTotalSingleMonth + colSum;
-            Object.assign(field, { totalCost: parseFloat(colSum.toFixed(2)) });
+            Object.assign(field, { totalCost: totalCost });
         }
 
         if (field.subscription == true) {
@@ -192,14 +194,22 @@ const calculationOnProject = async (projectOrdered, requestedCurrencyRate) => {
                 return total;
             }, 0);
             projectOrderedSingleMonth = projectOrderedSingleMonth + colSum;
+            const totalCost = parseFloat(colSum.toFixed(2));
+            if (totalCost !== 0) {
+                totalSubscriptionCosts.push({
+                    fieldName: field.name,
+                    value: totalCost,
+                });
+            }
             Object.assign(field, {
-                totalOrderedCost: parseFloat(colSum.toFixed(2)),
+                totalOrderedCost: totalCost,
             });
         }
 
         return field;
     });
 
+    projectOriginal.totalSubscriptionCosts = totalSubscriptionCosts;
     projectOriginal.months = parseFloat(projectOrdered.months.toFixed(2));
     projectOriginal.totalCost = parseFloat(projectTotalSingleMonth.toFixed(2));
     projectOriginal.totalOrderedCost = parseFloat(
@@ -290,6 +300,8 @@ const updateDraftOrder = async (req, res) => {
 
     const orderId = req.query.orderId;
     const projectSlug = checkProject.slug;
+    const refreshInvoice = false;
+    const refreshTotal = false;
 
     if (req.query.customerId) {
         const customerId = req.query.customerId;
@@ -297,6 +309,7 @@ const updateDraftOrder = async (req, res) => {
             { _id: orderId },
             { $set: { customerId: customerId } },
         );
+        refreshInvoice = true;
     }
 
     if (req.query.currency) {
@@ -305,6 +318,8 @@ const updateDraftOrder = async (req, res) => {
             { _id: orderId },
             { $set: { currency: currency } },
         );
+        refreshInvoice = true;
+        refreshTotal = true;
     }
 
     if (req.query.months > 0) {
@@ -313,6 +328,8 @@ const updateDraftOrder = async (req, res) => {
             { _id: orderId, 'projects.slug': projectSlug },
             { $set: { 'projects.$.months': updatedMonths } },
         );
+        refreshInvoice = true;
+        refreshTotal = true;
     }
 
     if (req.query.subscriptions && !req.query.entryId) {
@@ -337,6 +354,8 @@ const updateDraftOrder = async (req, res) => {
                 },
             );
         }
+        refreshInvoice = true;
+        refreshTotal = true;
     }
 
     if (req.query.entryId && req.query.subscriptions) {
@@ -369,6 +388,8 @@ const updateDraftOrder = async (req, res) => {
                 },
             );
         }
+        refreshInvoice = true;
+        refreshTotal = true;
     }
 
     if (req.query.addProject) {
@@ -389,6 +410,8 @@ const updateDraftOrder = async (req, res) => {
                 $push: { projects: updatedProject },
             },
         );
+        refreshInvoice = true;
+        refreshTotal = true;
     }
 
     if (req.query.replaceProject) {
@@ -403,6 +426,8 @@ const updateDraftOrder = async (req, res) => {
                 $set: { 'projects.$': updatedProject },
             },
         );
+        refreshInvoice = true;
+        refreshTotal = true;
     }
 
     if (req.query.deleteProject) {
@@ -415,6 +440,8 @@ const updateDraftOrder = async (req, res) => {
         return {
             message: 'Project deleted from order!',
         };
+        refreshInvoice = true;
+        refreshTotal = true;
     }
 
     if (req.query.deleteOrder) {
@@ -422,6 +449,8 @@ const updateDraftOrder = async (req, res) => {
         return {
             message: 'Order deleted!',
         };
+        refreshInvoice = true;
+        refreshTotal = true;
     }
 
     const order = await fetchOrderByProject(req, res);
@@ -439,6 +468,8 @@ const updateDraftOrder = async (req, res) => {
         select,
         toggleState: req.query.toggleState,
         months: order.project.months,
+        refreshInvoice,
+        refreshTotal
     };
 };
 
@@ -531,6 +562,7 @@ const getSingleOrder = async (req, res) => {
                 orderId: order._id,
                 project: project,
                 entriesCount: countSubscribedEntries(allEntries),
+                allEntries,
                 entries: allEntries && allEntries.slice(0, 10),
                 toggleState: 'hide',
             };
@@ -556,7 +588,7 @@ const updateOrderStatus = async (req, status) => {
 
 const addPaymentsToOrder = async (order) => {
     for (const calcProject of order.projects) {
-        const { project, entries } = calcProject;
+        const { project, allEntries: entries } = calcProject;
         const projectSlug = project.slug;
         const fields = (await Project.findOne({ slug: projectSlug })).fields;
         const filteredEntries = entries.filter(
@@ -568,10 +600,16 @@ const addPaymentsToOrder = async (order) => {
             fields.forEach((field) => {
                 if (field.subscription == true) {
                     if (entry.selectedSubscriptions.includes(field.name)) {
-                        selectedSubscriptions.push({[field.name]: entry[field.name]});
+                        selectedSubscriptions.push({
+                            fieldName: field.name,
+                            value: entry[field.name],
+                        });
                     }
 
-                    allSubscriptions.push({[field.name]: entry[field.name]});
+                    allSubscriptions.push({
+                        fieldName: [field.name],
+                        value: entry[field.name],
+                    });
                 }
             });
             entry.selectedSubscriptionsPair = selectedSubscriptions;
@@ -586,13 +624,6 @@ const addPaymentsToOrder = async (order) => {
                 selectedSubscriptionsPair,
                 allSubscriptionsPair,
             } = entry;
-            console.log({
-                entryId,
-                totalCost,
-                selectedSubscriptions,
-                selectedSubscriptionsPair,
-                allSubscriptionsPair,
-            });
             await Order.updateOne(
                 { _id: order._id },
                 {
@@ -600,6 +631,8 @@ const addPaymentsToOrder = async (order) => {
                         totalCost: order.totalCost,
                         'projects.$[project].totalCostSingleMonth':
                             project.totalOrderedCost,
+                        'projects.$[project].totalSubscriptionCosts':
+                            project.totalSubscriptionCosts,
                         'projects.$[project].totalCostAllMonths':
                             project.totalOrderedCostAllMonths,
                         'projects.$[project].months': project.months,
@@ -622,8 +655,93 @@ const addPaymentsToOrder = async (order) => {
             );
         }
     }
+    await Order.updateOne(
+        { _id: order._id },
+        {
+            $pull: {
+                'projects.$[].entries': {
+                    $or: [
+                        { selectedSubscriptions: { $size: 0 } }, // Case 1: Empty array
+                        { selectedSubscriptions: { $exists: false } }, // Case 2: Missing key
+                    ],
+                },
+            },
+        },
+    );
+    console.log('pulled empty entries!');
     return {
         message: 'Order payments added!',
+    };
+};
+
+const openOrderProjectWithEntries = async (req, order) => {
+    order.customer = await Customer.findOne({
+        _id: order.customerId,
+    }).lean();
+
+    order.customer.previousPayments = await Order.find({
+        customerId: order.customerId,
+        status: 'paid',
+    });
+
+    for (const project of order.projects) {
+        const detail = await Project.findOne({ slug: project.slug }).lean();
+        const entryModel = await createDynamicModel(project.slug);
+
+        const pagination = createPagination({
+            req,
+            totalEntries: project.entries.length,
+            pageType: 'payment-modal',
+        });
+
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
+
+        project.entries = project.entries.slice(skip, skip + limit);
+
+        for (const entry of project.entries) {
+            entry.detail = await entryModel
+                .findOne({ _id: entry.entryId })
+                .lean();
+        }
+
+
+
+        project.detail = detail;
+        project.pagination = pagination;
+        project.entriesCount = countSubscribedEntries(project.entries);
+    }
+
+    return order;
+};
+
+const getPendingOrderEntries = async (req, res) => {
+    const orderId = req.params.orderId;
+    const projectSlug = req.params.slug;
+    const order = await Order.findById(orderId).lean();
+    const project = order.projects.find(project => project.slug === projectSlug);
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+    const pagination = createPagination({
+        req,
+        totalEntries: project.entries.length,
+        pageType: 'payment-modal',
+    });
+    const entryModel = await createDynamicModel(projectSlug);
+    project.entries = project.entries.slice(skip, skip + limit);
+    for (const entry of project.entries) {
+        entry.detail = await entryModel
+            .findOne({ _id: entry.entryId })
+            .lean();
+    };
+    project.detail = await Project.findOne({slug: projectSlug}).lean();
+    project.pagination = pagination;
+    debugger;
+    return {
+        order,
+        project
     };
 };
 
@@ -634,4 +752,6 @@ module.exports = {
     getSingleOrder,
     updateOrderStatus,
     addPaymentsToOrder,
+    openOrderProjectWithEntries,
+    getPendingOrderEntries,
 };

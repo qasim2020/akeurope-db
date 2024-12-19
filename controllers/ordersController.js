@@ -9,6 +9,7 @@ const {
     getSingleOrder,
     updateOrderStatus,
     addPaymentsToOrder,
+    openOrderProjectWithEntries
 } = require('../modules/orders');
 const { allProjects } = require('../modules/mw-data');
 
@@ -131,8 +132,8 @@ exports.getOrderTotalCost = async (req, res) => {
 
 exports.checkout = async (req, res) => {
     try {
-        const order = await getSingleOrder(req,res);
-        await updateOrderStatus(req,'pending payment');
+        const order = await getSingleOrder(req, res);
+        await updateOrderStatus(req, 'pending payment');
         await addPaymentsToOrder(order);
         res.status(200).send('Order checked out!');
     } catch (error) {
@@ -143,7 +144,17 @@ exports.checkout = async (req, res) => {
 
 exports.getPaymentModal = async (req, res) => {
     try {
-        const order = await getSingleOrder(req, res);
+        const checkOrder = await Order.findById(req.params.orderId).lean();
+        let order;
+        if (checkOrder.status == 'draft') {
+            const draftOrder = await getSingleOrder(req, res);
+            await updateOrderStatus(draftOrder, 'pending payment');
+            await addPaymentsToOrder(draftOrder);
+            order = await Order.findById(req.params.orderId).lean();
+        } else {
+            order = checkOrder;
+        }
+        order = await openOrderProjectWithEntries(req, order);
         res.render('partials/emptyPaymentModal', {
             layout: false,
             data: {

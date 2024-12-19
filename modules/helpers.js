@@ -95,6 +95,12 @@ const getValue = function(obj) {
     return Object.values(obj)[0];
 }
 
+const transformArrayOfObjects = function(arrayOfObjects) {
+    return arrayOfObjects.flatMap(obj =>
+        Object.entries(obj).map(([key, value]) => ({ key, value }))
+    );
+};
+
 const isEmptyObject = function(obj) {
     if (Object.keys(obj).length === 0) {
       return false;
@@ -163,6 +169,7 @@ module.exports = {
     getOptionsFromValues,
     getKey,
     getValue,
+    transformArrayOfObjects,
     isEmptyObject,
     findPrimaryKey,
     timeAgo,

@@ -1,5 +1,6 @@
-<div class="modal modal-blur fade" id="modal-payment-{{data.order._id}}" tabindex="-1"
-    style="display: none; padding-left: 0px;" aria-modal="true" role="dialog" entryId="">
+{{#with data.order as |order|}}
+<div class="modal modal-blur fade" id="modal-payment-{{order._id}}" tabindex="-1"
+    style="display: none; padding-left: 0px;" aria-modal="true" role="dialog" order-id="{{order._id}}">
     <div class="modal-dialog modal-xl" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -9,72 +10,52 @@
             <div class="modal-body">
                 <div class="row">
                     <div class="col-md-6">
-                        <div class="accordion" id="accordion-{{data.order._id}}">
+                        <div class="accordion" id="accordion-{{order._id}}">
                             <div class="accordion-item">
                                 <h2 class="accordion-header">
                                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                                        data-bs-target="#accordion-customer-{{data.order._id}}">
-                                        Customer: {{data.order.customer.name}}
+                                        data-bs-target="#accordion-customer-{{order._id}}">
+                                        <span class="page-pretitle">Customer: {{order.customer.name}}</span> 
                                     </button>
                                 </h2>
-                                <div id="accordion-customer-{{data.order._id}}" class="accordion-collapse collapse"
-                                    data-bs-parent="#accordion-{{data.order._id}}">
+                                <div id="accordion-customer-{{order._id}}" class="accordion-collapse collapse"
+                                    data-bs-parent="#accordion-{{order._id}}">
                                     <div class="accordion-body">
-                                        <div class="datagrid">
-                                            <div class="datagrid-item">
-                                                <div class="datagrid-title">Name</div>
-                                                <div class="datagrid-content">{{data.order.customer.name}}</div>
-                                            </div>
-                                            <div class="datagrid-item">
-                                                <div class="datagrid-title">Organization</div>
-                                                <div class="datagrid-content">{{data.order.customer.organization}}
-                                                </div>
-                                            </div>
-                                            <div class="datagrid-item">
-                                                <div class="datagrid-title">Location</div>
-                                                <div class="datagrid-content">{{data.order.customer.location}}</div>
-                                            </div>
-                                            <div class="datagrid-item">
-                                                <div class="datagrid-title">Previous payments</div>
-                                                <div class="datagrid-content">{{data.order.customer.payments}}</div>
-                                            </div>
-                                        </div>
+                                        <dl class="row">
+                                            <dt class="col-5">Name:</dt>
+                                            <dd class="col-7">{{order.customer.name}}</dd>
+                                            <dt class="col-5">Organization:</dt>
+                                            <dd class="col-7">{{order.customer.organization}}</dd>
+                                            <dt class="col-5">Location:</dt>
+                                            <dd class="col-7">{{order.customer.location}}</dd>
+                                            <dt class="col-5">Previous Orders:</dt>
+                                            <dd class="col-7">
+                                                {{#if order.customer.previousOrders}}
+                                                {{#each order.customer.previousOrders}}
+                                                <p>{{this.orderTotal}} {{this.currency}} on {{this.modifiedAt}}</p>
+                                                {{/each}}
+                                                {{else}}
+                                                No previous orders found
+                                                {{/if}}
+                                            </dd>
+                                        </dl>
                                     </div>
                                 </div>
                             </div>
-                            {{#each data.order.projects as |project|}}
+                            {{#each order.projects as |project|}}
                             <div class="accordion-item">
                                 <h2 class="accordion-header">
                                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                                        data-bs-target="#accordion-project-{{@index}}-{{../data.order._id}}">
-                                        {{project.project.name}}: {{project.project.totalOrderedCostAllMonths}}
-                                        {{project.project.selectedCurrency}}
+                                        data-bs-target="#accordion-project-{{@index}}-{{order._id}}">
+                                        <span class="page-pretitle">{{project.entriesCount}} x {{project.detail.name}} for {{project.months}} Month(s): {{project.totalCostAllMonths}}
+                                        {{order.currency}}</span>
                                     </button>
                                 </h2>
-                                <div id="accordion-project-{{@index}}-{{../data.order._id}}"
+                                <div id="accordion-project-{{@index}}-{{order._id}}"
                                     class="accordion-collapse collapse"
-                                    data-bs-parent="#accordion-{{../data.order._id}}">
+                                    data-bs-parent="#accordion-{{order._id}}">
                                     <div class="accordion-body">
-                                        <div class="datagrid">
-                                            <div class="datagrid-item">
-                                                <div class="datagrid-title">Project</div>
-                                                <div class="datagrid-content">{{project.project.name}}</div>
-                                            </div>
-                                            <div class="datagrid-item">
-                                                <div class="datagrid-title">Selected Beneficiaries</div>
-                                                <div class="datagrid-content">{{project.project.entriesCount}}</div>
-                                            </div>
-                                            <div class="datagrid-item">
-                                                <div class="datagrid-title">Months</div>
-                                                <div class="datagrid-content">{{project.project.months}}</div>
-                                            </div>
-                                            <div class="datagrid-item">
-                                                <div class="datagrid-title">Cost</div>
-                                                <div class="datagrid-content">
-                                                    {{project.project.totalOrderedCostAllMonths}}
-                                                    {{project.project.selectedCurrency}}</div>
-                                            </div>
-                                        </div>
+                                        {{> components/paymentModalEntriesInPendingOrder order=order project=project}}
                                     </div>
                                 </div>
                             </div>
@@ -82,12 +63,12 @@
                             <div class="accordion-item">
                                 <h2 class="accordion-header">
                                     <button class="accordion-button" type="button" data-bs-toggle="collapse"
-                                        data-bs-target="#accordion-invoice-{{data.order._id}}">
-                                        Invoice: {{data.order.totalCost}} {{data.order.currency}}
+                                        data-bs-target="#accordion-invoice-{{order._id}}">
+                                        <span class="page-pretitle">Invoice: {{order.totalCost}} {{order.currency}}</span>
                                     </button>
                                 </h2>
-                                <div id="accordion-invoice-{{data.order._id}}" class="accordion-collapse collapse show"
-                                    data-bs-parent="#accordion-{{data.order._id}}">
+                                <div id="accordion-invoice-{{order._id}}" class="accordion-collapse collapse show"
+                                    data-bs-parent="#accordion-{{order._id}}">
                                     <div class="accordion-body">
                                         <div class="datagrid">
                                             <div class="datagrid-item">
@@ -140,5 +121,7 @@
     </div>
 </div>
 
-<button href="#" class="btn btn-primary d-none" id="button-modal-payment-{{data.order._id}}" data-bs-toggle="modal"
-    data-bs-target="#modal-payment-{{data.order._id}}"></button>
+<button href="#" class="btn btn-primary d-none" id="button-modal-payment-{{order._id}}" data-bs-toggle="modal"
+    data-bs-target="#modal-payment-{{order._id}}"></button>
+
+{{/with}}

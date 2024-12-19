@@ -14,6 +14,7 @@ router.post('/project/entry/delete/:slug', authenticate, authorize("deleteEntry"
 router.get('/getSingleEntryData/:entryId/project/:slug', authenticate, authorize("editEntry"), entryController.getSingleEntryData);
 router.get('/getSingleEntryLogs/:entryId/project/:slug', authenticate, authorize("editEntry"), entryController.getSingleEntryLogs);
 
-router.get('/getPaymentModalEntryData/:slug/:customerId', authenticate, authorize('viewEntry'), entryController.getPaymentModalEntryData);
+router.get('/getPaginatedEntriesForDraftOrder/:slug/:customerId', authenticate, authorize('viewEntry'), entryController.getPaginatedEntriesForDraftOrder);
+router.get('/getPaginatedEntriesForPendingOrder/:orderId/:slug', authenticate, authorize('viewEntry'), entryController.getPaginatedEntriesForPendingOrder);
 
 module.exports = router;

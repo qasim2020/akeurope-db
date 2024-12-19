@@ -42,6 +42,7 @@ const OrderSchema = new mongoose.Schema(
                 totalCostAllMonths: {
                     type: Number
                 },
+                totalSubscriptionCosts: [Object],
                 entries: [
                     {
                         entryId: mongoose.Schema.Types.ObjectId,

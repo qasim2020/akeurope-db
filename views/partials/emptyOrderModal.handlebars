@@ -70,7 +70,7 @@
             <div class="search-results-payment-modal-entries">
               {{#if data.order}}
               {{#each data.order.projects}}
-              {{> components/paymentModalEntryData data=this}}
+              {{> components/paymentModalEntriesInDraftOrder data=this}}
               {{/each}}
               {{> components/orderTotalCost}}
               {{/if}}

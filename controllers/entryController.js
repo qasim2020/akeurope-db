@@ -14,6 +14,7 @@ const { getChanges } = require('../modules/getChanges');
 const {
     createDraftOrder,
     updateDraftOrder,
+    getPendingOrderEntries
 } = require('../modules/orders');
 
 function extractCloudinaryPublicId(url) {
@@ -375,7 +376,7 @@ exports.getSingleEntryLogs = async (req, res) => {
     }
 };
 
-exports.getPaymentModalEntryData = async (req, res) => {
+exports.getPaginatedEntriesForDraftOrder = async (req, res) => {
     try {
         let output;
 
@@ -385,7 +386,7 @@ exports.getPaymentModalEntryData = async (req, res) => {
             output = await updateDraftOrder(req, res);
         }
 
-        res.render('partials/components/paymentModalEntryData', {
+        res.render('partials/components/paymentModalEntriesInDraftOrder', {
             layout: false,
             data: output,
         });
@@ -393,6 +394,23 @@ exports.getPaymentModalEntryData = async (req, res) => {
         console.log(error);
         res.status(500).json({
             error: 'Error while create draft order',
+            details: error.message,
+        });
+    }
+};
+
+exports.getPaginatedEntriesForPendingOrder = async (req, res) => {
+    try {
+        const {order, project} = await getPendingOrderEntries(req,res);
+        res.render('partials/components/paymentModalEntriesInPendingOrder', {
+            layout: false,
+            order,
+            project
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            error: 'Error getting paginated entries',
             details: error.message,
         });
     }
