@@ -1,30 +1,38 @@
 # akeurope-db
 
-### Feature 1: Collapsable sidebar
+### New learning: MongoDB makes saving easy
+
+<img width="1410" alt="Screenshot 2024-12-18 at 3 52 00 AM" src="https://github.com/user-attachments/assets/2cc2241d-5e07-42cd-804b-25272b526914" />
+
+### Create invoice
+
+<img width="1470" alt="Screenshot 2024-12-18 at 3 54 01 AM" src="https://github.com/user-attachments/assets/2ab8359e-4228-44e3-bcb8-b59b7036319f" />
+
+### Collapsable sidebar
 
 <img width="853" alt="Screenshot 2024-12-02 at 4 43 36 PM" src="https://github.com/user-attachments/assets/2fbbc6f6-bd17-4008-ae6e-49242e75f2ab">
 
-### Feature 1: Notifications & Logs on dashboard
+### Notifications & Logs on dashboard
 
 <img width="1920" alt="Screenshot 2024-11-20 at 4 33 32 PM" src="https://github.com/user-attachments/assets/67ea84ce-c2c2-4b4e-aa6f-5a2e742c8de8">
 
-### Feature 1: Auth
+### Auth
 
 Login, reset password, sign up
 
 <img width="508" alt="Screenshot 2024-11-04 at 12 35 08 AM" src="https://github.com/user-attachments/assets/baf9d5b3-032b-4b66-89c6-5e884f57d89b">
 
-### Feature 2: Create Projects
+### Create Projects
 
 Dynamically create projects, where each project has a unique field.
 
 <img width="1920" alt="Screenshot 2024-11-04 at 12 31 26 AM" src="https://github.com/user-attachments/assets/eae0cc03-bdc3-43c1-9197-4c2000a68353">
 
-### Feature 2: Bulk upload data into projects
+### Bulk upload data into projects
 
 <img width="818" alt="Screenshot 2024-11-04 at 12 33 44 AM" src="https://github.com/user-attachments/assets/7a9550c3-2b85-4a21-b1f7-a6008b5782b6">
 
-### Feature 3: Role based access control
+### Role based access control
 
 3 kinds of roles; admin, editor and viewer
 
