@@ -43,7 +43,7 @@ const searchBeneficiaries = function (elem) {
 
     const projectExistsInOrder = $(modal).find(`.${slug}`).length > 0;
     const orderAlreadyCreated =
-        $(modal).attr('order-id').length > 0 ||
+        $(modal).attr('order-id') !== undefined ||
         $(modal).find('.project-in-order').length > 0;
 
     let url = `/getPaginatedEntriesForDraftOrder/${slug}/${customerId}?currency=${currency}&select=${select}&search=${search}`;
@@ -79,6 +79,7 @@ const searchBeneficiaries = function (elem) {
                     .append(response);
             }
             const orderId = $(modal).find('.project-in-order').attr('orderId');
+            $(modal).attr( { "order-id" : orderId } );
             updateTotalCost(modal);
             if (!orderId) return;
             $(modal)
@@ -112,9 +113,8 @@ const loadEntriesInPaymentModal = function (elem, href) {
     });
 };
 
-const doSearch = function (elem, href) {
+const doSearch = function (elem, href, refreshAll) {
     const modal = $(elem).closest('.modal');
-    $(modal).find('.total-cost').remove();
     const isDashboardPage =
         $(elem).closest('.card-footer').attr('page-type') == 'orders';
 
@@ -146,8 +146,8 @@ const doSearch = function (elem, href) {
         method: 'GET',
         namespace: 'spinner-on-cart',
         success: function (response) {
-            console.log(response);
             $(modal).find(`.${slug}`).replaceWith(response);
+            if (refreshAll == false) return;
             $(modal)
                 .find('.invoice-frame')
                 .attr({ src: `/invoice/${orderId}` })
@@ -162,7 +162,7 @@ const doSearch = function (elem, href) {
 
 const removeProject = function (elem) {
     const href = '?deleteProject=true';
-    doSearch(elem, href);
+    doSearch(elem, href, true);
     $(elem).closest('.card').remove();
     return;
 };
@@ -299,7 +299,7 @@ const toggleColumnSelect = function (elem) {
     const href =
         $(elem).closest('.card').attr('my-href') +
         `&subscriptions=${subscriptions}`;
-    doSearch(elem, href);
+    doSearch(elem, href, true);
 };
 
 const toggleCostSelect = function (elem) {
@@ -358,7 +358,7 @@ const toggleCostSelect = function (elem) {
     const href =
         $(elem).closest('.card').attr('my-href') +
         `&entryId=${entryId}&subscriptions=${subscriptions}`;
-    doSearch(elem, href);
+    doSearch(elem, href, true);
 };
 
 const selectColRowHeading = function (elem) {
@@ -490,6 +490,7 @@ const updateTotalCost = function (modal) {
             $(modal)
                 .find('.search-results-payment-modal-entries')
                 .append(response);
+            $('#data-container').find('.page-item.active > a').click();
         },
         error: (error) => {
             alert(error.responseText);
@@ -497,7 +498,7 @@ const updateTotalCost = function (modal) {
     });
 };
 
-$(document).on('ajaxStart.spinner-on-cart', function () {
+$(document).on('ajaxStart.spinner-on-cart', function (event, xhr) {
     var modal = $('.modal:visible');
     if (modal.length) {
         $(modal)
@@ -508,7 +509,7 @@ $(document).on('ajaxStart.spinner-on-cart', function () {
     }
 });
 
-$(document).on('ajaxStop.spinner-on-cart', function () {
+$(document).on('ajaxStop.spinner-on-cart', function (event) {
     var modal = $('.modal:visible');
     $(modal)
         .find('.submit-btn')
@@ -615,6 +616,30 @@ const deleteOrder = function (elem) {
         },
         error: (error) => {
             alert(error.responseText);
-        }
-    })
+        },
+    });
+};
+
+const changeOrderStatus = function (elem) {
+    const orderId = $(elem).closest('.modal').attr('order-id');
+    if (!orderId) {
+        alert('Order does not exist!');
+        return;
+    }
+    const status = $(elem).attr('value');
+    const data = {
+        status,
+    };
+    $.ajax({
+        url: `/changeOrderStatus/${orderId}`,
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(data),
+        success: (response) => {
+            console.log(response);
+        },
+        error: (error) => {
+            alert(error.responseText);
+        },
+    });
 };

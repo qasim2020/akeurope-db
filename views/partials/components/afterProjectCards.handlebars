@@ -1,0 +1,45 @@
+{{#if data.order.projects}}
+<div class="total-cost">
+    <div class="card {{#unless data.order}} d-none {{/unless}}">
+        <div class="card-header d-flex justify-content-between border-0 text-red">
+            <div class="card-title">Total Cost</div>
+            <div class="card-title">{{data.order.totalCost}} {{data.order.currency}}</div>
+        </div>
+    </div>
+
+    <div class="order-actions mt-3">
+
+        <button class="btn mb-3 w-100 btn-outline" onclick="emailInvoice(this)">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                class="icon icon-tabler icons-tabler-outline icon-tabler-mail">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                <path d="M3 7a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v10a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-10z" />
+                <path d="M3 7l9 6l9 -6" />
+            </svg>
+            Email Invoice to Customer <span class="d-none d-xl-block ms-1">({{data.order.customer.email}})</span>
+        </button>
+
+        <div class="mb-3">
+            <label class="form-label">Change Order Status</label>
+            <div class="btn-group flex-wrap w-100" role="group">
+                <input value="draft" onclick="changeOrderStatus(this)" type="radio" class="btn-check" name="btn-radio-basic"
+                    id="btn-radio-basic-1" autocomplete="off" {{#if (eq data.order.status 'draft' )}}checked="" {{/if}}>
+                <label for="btn-radio-basic-1" type="button" class="btn">Draft</label>
+                <input value="pending payment" onclick="changeOrderStatus(this)" type="radio" class="btn-check" name="btn-radio-basic"
+                    id="btn-radio-basic-2" autocomplete="off" {{#if (eq data.order.status 'pending payment'
+                    )}}checked="" {{/if}}>
+                <label for="btn-radio-basic-2" type="button" class="btn">Pending payment</label>
+                <input value="processing" onclick="changeOrderStatus(this)" type="radio" class="btn-check" name="btn-radio-basic"
+                    id="btn-radio-basic-3" autocomplete="off" {{#if (eq data.order.status 'processing' )}}checked=""
+                    {{/if}}>
+                <label for="btn-radio-basic-3" type="button" class="btn">Processing</label>
+                <input value="paid" onclick="changeOrderStatus(this)" type="radio" class="btn-check" name="btn-radio-basic"
+                    id="btn-radio-basic-4" autocomplete="off" {{#if (eq data.order.status 'paid' )}}checked="" {{/if}}>
+                <label for="btn-radio-basic-4" type="button" class="btn">Paid</label>
+            </div>
+        </div>
+
+    </div>
+    {{/if}}
+</div>

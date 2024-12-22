@@ -115,7 +115,7 @@ exports.getEditOrderModal = async (req, res) => {
 exports.getOrderTotalCost = async (req, res) => {
     try {
         const order = await getSingleOrder(req, res);
-        res.render('partials/components/orderTotalCost', {
+        res.render('partials/components/afterProjectCards', {
             layout: false,
             data: {
                 order,
@@ -171,6 +171,27 @@ exports.getPaymentModal = async (req, res) => {
     }
 };
 
+exports.changeOrderStatus = async (req, res) => {
+    try {
+        const orderId = req.params.orderId;
+        const { status } = req.body;
+        await Order.updateOne(
+            { _id: orderId },
+            {
+                $set: {
+                    status: status,
+                },
+            },
+        );
+        res.status(200).send('Order status changed!');
+    } catch (error) {
+        console.log(error);
+        res.status(404).send({
+            error: error,
+        });
+    }
+};
+
 exports.deleteOrder = async (req, res) => {
     try {
         const orderId = req.params.orderId;
@@ -179,8 +200,7 @@ exports.deleteOrder = async (req, res) => {
         res.status(200).send('Order & Invoice deleted!');
     } catch (error) {
         console.log(error);
-        res.status(404).render('error', {
-            heading: 'Server Error',
+        res.status(404).send({
             error: error,
         });
     }

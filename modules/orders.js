@@ -297,14 +297,11 @@ const updateDraftOrder = async (req, res) => {
     let checkProject = await Project.findOne({ slug: req.params.slug }).lean();
     if (!checkProject)
         throw new Error(`Project "${req.params.slug}" not found`);
-    
+
     const orderId = req.query.orderId;
     const projectSlug = checkProject.slug;
 
-    await Order.updateOne(
-        { _id: orderId },
-        { $set: { status: 'draft' } },
-    );
+    await Order.updateOne({ _id: orderId }, { $set: { status: 'draft' } });
 
     if (req.query.customerId) {
         const customerId = req.query.customerId;
@@ -690,8 +687,6 @@ const openOrderProjectWithEntries = async (req, order) => {
                 .lean();
         }
 
-
-
         project.detail = detail;
         project.pagination = pagination;
         project.entriesCount = countSubscribedEntries(project.entries);
@@ -704,7 +699,9 @@ const getPendingOrderEntries = async (req, res) => {
     const orderId = req.params.orderId;
     const projectSlug = req.params.slug;
     const order = await Order.findById(orderId).lean();
-    const project = order.projects.find(project => project.slug === projectSlug);
+    const project = order.projects.find(
+        (project) => project.slug === projectSlug,
+    );
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
@@ -716,16 +713,14 @@ const getPendingOrderEntries = async (req, res) => {
     const entryModel = await createDynamicModel(projectSlug);
     project.entries = project.entries.slice(skip, skip + limit);
     for (const entry of project.entries) {
-        entry.detail = await entryModel
-            .findOne({ _id: entry.entryId })
-            .lean();
-    };
-    project.detail = await Project.findOne({slug: projectSlug}).lean();
+        entry.detail = await entryModel.findOne({ _id: entry.entryId }).lean();
+    }
+    project.detail = await Project.findOne({ slug: projectSlug }).lean();
     project.pagination = pagination;
     debugger;
     return {
         order,
-        project
+        project,
     };
 };
 
