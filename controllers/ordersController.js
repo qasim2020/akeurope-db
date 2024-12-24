@@ -122,48 +122,6 @@ exports.getOrderTotalCost = async (req, res) => {
             },
         });
     } catch (error) {
-        console.log(error);
-        res.status(404).render('error', {
-            heading: 'Server Error',
-            error: error,
-        });
-    }
-};
-
-exports.checkout = async (req, res) => {
-    try {
-        const order = await getSingleOrder(req, res);
-        await updateOrderStatus(req, 'pending payment');
-        await addPaymentsToOrder(order);
-        res.status(200).send('Order checked out!');
-    } catch (error) {
-        console.log(error);
-        res.status(404).send(error);
-    }
-};
-
-exports.getPaymentModal = async (req, res) => {
-    try {
-        const checkOrder = await Order.findById(req.params.orderId).lean();
-        let order;
-        if (checkOrder.status == 'draft') {
-            const draftOrder = await getSingleOrder(req, res);
-            await generateInvoice(draftOrder);
-            await addPaymentsToOrder(draftOrder);
-            await updateOrderStatus(req, 'pending payment');
-            order = await Order.findById(req.params.orderId).lean();
-        } else {
-            order = checkOrder;
-        }
-        order = await openOrderProjectWithEntries(req, order);
-        res.render('partials/emptyPaymentModal', {
-            layout: false,
-            data: {
-                order,
-            },
-        });
-    } catch (error) {
-        console.log(error);
         res.status(404).render('error', {
             heading: 'Server Error',
             error: error,
@@ -175,15 +133,24 @@ exports.changeOrderStatus = async (req, res) => {
     try {
         const orderId = req.params.orderId;
         const { status } = req.body;
-        await Order.updateOne(
-            { _id: orderId },
+        const order = await Order.findOneAndUpdate(
+            { _id: orderId }, 
             {
                 $set: {
                     status: status,
                 },
             },
+            {
+                new: true, 
+                lean: true, 
+            }
         );
-        res.status(200).send('Order status changed!');
+        res.status(200).render('partials/components/invoice-status-buttons', {
+            layout: false,
+            data: {
+                order
+            }
+        });
     } catch (error) {
         console.log(error);
         res.status(404).send({
@@ -205,3 +172,44 @@ exports.deleteOrder = async (req, res) => {
         });
     }
 };
+
+// exports.checkout = async (req, res) => {
+//     try {
+//         const order = await getSingleOrder(req, res);
+//         await updateOrderStatus(req, 'pending payment');
+//         await addPaymentsToOrder(order);
+//         res.status(200).send('Order checked out!');
+//     } catch (error) {
+//         console.log(error);
+//         res.status(404).send(error);
+//     }
+// };
+
+// exports.getPaymentModal = async (req, res) => {
+//     try {
+//         const checkOrder = await Order.findById(req.params.orderId).lean();
+//         let order;
+//         if (checkOrder.status == 'draft') {
+//             const draftOrder = await getSingleOrder(req, res);
+//             await generateInvoice(draftOrder);
+//             await addPaymentsToOrder(draftOrder);
+//             await updateOrderStatus(req, 'pending payment');
+//             order = await Order.findById(req.params.orderId).lean();
+//         } else {
+//             order = checkOrder;
+//         }
+//         order = await openOrderProjectWithEntries(req, order);
+//         res.render('partials/emptyPaymentModal', {
+//             layout: false,
+//             data: {
+//                 order,
+//             },
+//         });
+//     } catch (error) {
+//         console.log(error);
+//         res.status(404).render('error', {
+//             heading: 'Server Error',
+//             error: error,
+//         });
+//     }
+// };

@@ -101,6 +101,11 @@ const transformArrayOfObjects = function(arrayOfObjects) {
     );
 };
 
+const getValueOfFieldInArray = function(array, fieldName) {
+    const fieldObject = array.find(item => item.fieldName === fieldName);
+    return fieldObject ? fieldObject.value : null; 
+}
+
 const isEmptyObject = function(obj) {
     if (Object.keys(obj).length === 0) {
       return false;
@@ -175,5 +180,6 @@ module.exports = {
     timeAgo,
     camelCaseToNormalString,
     getSvgForFirstLetter,
-    regexMatch
+    regexMatch,
+    getValueOfFieldInArray
   };

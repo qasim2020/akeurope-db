@@ -1,5 +1,5 @@
 <div class="modal modal-blur fade" id="{{#if data.order}}modal-{{data.order._id}}{{else}}modal-new-order{{/if}}"
-  tabindex="-1" style="display: none; padding-left: 0px;" aria-modal="true" role="dialog" {{#if
+  tabindex="-1" style="display: none; padding-left: 0px;" role="dialog" {{#if
   data.order}}order-id="{{data.order._id}}" {{/if}}>
   <div class="modal-dialog modal-xl" role="document">
     <div class="modal-content">
@@ -71,7 +71,7 @@
             <div class="search-results-payment-modal-entries">
               {{#if data.order}}
               {{#each data.order.projects}}
-              {{> components/paymentModalEntriesInDraftOrder data=this}}
+              {{> components/paymentModalEntriesInDraftOrder project=this order=../data.order}}
               {{/each}}
               {{> components/afterProjectCards}}
               {{/if}}

@@ -47,9 +47,8 @@ const OrderSchema = new mongoose.Schema(
                     {
                         entryId: mongoose.Schema.Types.ObjectId,
                         selectedSubscriptions: [String],
-                        totalCost: {
-                            type: Number
-                        },
+                        totalCost: Number,
+                        totalCostAllSubscriptions: Number,
                         selectedSubscriptionsPair: [Object],
                         allSubscriptionsPair: [Object]
                     },

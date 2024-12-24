@@ -133,7 +133,7 @@ const drawTable = (doc, projects, startY, order) => {
     projects.forEach((val) => {
         const project = val.project;
         y += 20;
-        doc.fontSize(12).text(project.name, 50, y);
+        doc.fontSize(12).text(project.detail.name, 50, y);
         doc.text(val.entriesCount, 250, y);
         doc.text(project.months, 180, y);
         doc.text(project.totalOrderedCostAllMonths, 350, y);

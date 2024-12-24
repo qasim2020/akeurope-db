@@ -8,8 +8,8 @@ router.get('/orders/', authenticate, authorize("viewOrders"), allProjects, order
 router.get('/getOrdersData/', authenticate, authorize("viewOrders"), allProjects, ordersController.getOrdersData);
 router.get('/getEditOrderModal/:orderId', authenticate, authorize("viewOrders"), ordersController.getEditOrderModal);
 router.get('/getOrderTotalCost/:orderId', authenticate, authorize("viewOrders"), allProjects, ordersController.getOrderTotalCost);
-router.get('/checkout/:orderId', authenticate, authorize("editOrders"), allProjects, ordersController.checkout);
-router.get('/getPaymentModal/:orderId', authenticate, authorize("editOrders"), ordersController.getPaymentModal);
+// router.get('/checkout/:orderId', authenticate, authorize("editOrders"), allProjects, ordersController.checkout);
+// router.get('/getPaymentModal/:orderId', authenticate, authorize("editOrders"), ordersController.getPaymentModal);
 router.post('/changeOrderStatus/:orderId', authenticate, authorize("editOrders"), ordersController.changeOrderStatus);
 router.get('/deleteOrder/:orderId', authenticate, authorize("deleteOrders"), ordersController.deleteOrder);
 

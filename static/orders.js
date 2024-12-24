@@ -64,11 +64,12 @@ const searchBeneficiaries = function (elem) {
         url = url + `&toggleState=hide`;
     }
 
+    startSpinner(modal);
     $.ajax({
         url,
         method: 'GET',
-        namespace: 'spinner-on-cart',
         success: (response) => {
+            endSpinner(modal);
             $(modal).find('.error').remove();
             const elemExists = $(modal).find(`.${slug}`).length > 0;
             if (elemExists) {
@@ -79,7 +80,7 @@ const searchBeneficiaries = function (elem) {
                     .append(response);
             }
             const orderId = $(modal).find('.project-in-order').attr('orderId');
-            $(modal).attr( { "order-id" : orderId } );
+            $(modal).attr({ 'order-id': orderId });
             updateTotalCost(modal);
             if (!orderId) return;
             $(modal)
@@ -88,6 +89,7 @@ const searchBeneficiaries = function (elem) {
                 .removeClass('d-none');
         },
         error: (error) => {
+            endSpinner(modal);
             alert(error.responseText);
         },
     });
@@ -114,6 +116,7 @@ const loadEntriesInPaymentModal = function (elem, href) {
 };
 
 const doSearch = function (elem, href, refreshAll) {
+    return;
     const modal = $(elem).closest('.modal');
     const isDashboardPage =
         $(elem).closest('.card-footer').attr('page-type') == 'orders';
@@ -455,11 +458,12 @@ $(document).on('change', '.modal .order-change', function (e) {
             const toggleState = $(modal).find(`.${slug}`).attr('toggleState');
             const url = `/getPaginatedEntriesForDraftOrder/${slug}/${customerId}?customerId=${customerId}&currency=${currency}&orderId=${orderId}&select=${select}&search=${search}&toggleState=${toggleState}`;
 
+            startSpinner(modal);
             $.ajax({
                 url,
                 method: 'GET',
-                namespace: 'spinner-on-cart',
                 success: (response) => {
+                    endSpinner(modal);
                     $(modal).find('.error').remove();
                     $(modal).find(`.${slug}`).replaceWith(response);
                     $(modal)
@@ -469,6 +473,7 @@ $(document).on('change', '.modal .order-change', function (e) {
                     updateTotalCost(modal);
                 },
                 error: (error) => {
+                    startSpinner(modal);
                     alert(error.responseText);
                 },
             });
@@ -481,11 +486,12 @@ const updateTotalCost = function (modal) {
         $(modal).find('.total-cost').remove();
         return;
     }
+    startSpinner(modal);
     $.ajax({
         url: `/getOrderTotalCost/${orderId}`,
         method: 'GET',
-        namespace: 'spinner-on-cart',
         success: (response) => {
+            endSpinner(modal);
             $(modal).find('.total-cost').remove();
             $(modal)
                 .find('.search-results-payment-modal-entries')
@@ -493,24 +499,21 @@ const updateTotalCost = function (modal) {
             $('#data-container').find('.page-item.active > a').click();
         },
         error: (error) => {
+            endSpinner(modal);
             alert(error.responseText);
         },
     });
 };
 
-$(document).on('ajaxStart.spinner-on-cart', function (event, xhr) {
-    var modal = $('.modal:visible');
-    if (modal.length) {
-        $(modal)
-            .find('.submit-btn')
-            .html(
-                `<span class="spinner-border spinner-border-sm" role="status"></span>`,
-            );
-    }
-});
+const startSpinner = function (modal) {
+    $(modal)
+        .find('.submit-btn')
+        .html(
+            `<span class="spinner-border spinner-border-sm" role="status"></span>`,
+        );
+};
 
-$(document).on('ajaxStop.spinner-on-cart', function (event) {
-    var modal = $('.modal:visible');
+const endSpinner = function (modal) {
     $(modal)
         .find('.submit-btn')
         .html(
@@ -527,7 +530,7 @@ $(document).on('ajaxStop.spinner-on-cart', function (event) {
                   </svg>
                 `,
         );
-});
+};
 
 const loadPaymentModal = function (elem) {
     const modal = $(elem).closest('.modal');
@@ -622,6 +625,7 @@ const deleteOrder = function (elem) {
 
 const changeOrderStatus = function (elem) {
     const orderId = $(elem).closest('.modal').attr('order-id');
+    const modal = $(elem).closest('.modal');
     if (!orderId) {
         alert('Order does not exist!');
         return;
@@ -636,7 +640,7 @@ const changeOrderStatus = function (elem) {
         contentType: 'application/json',
         data: JSON.stringify(data),
         success: (response) => {
-            console.log(response);
+            $(modal).find('.invoice-status').html(response);
         },
         error: (error) => {
             alert(error.responseText);

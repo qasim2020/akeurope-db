@@ -14,8 +14,10 @@ const { getChanges } = require('../modules/getChanges');
 const {
     createDraftOrder,
     updateDraftOrder,
-    getPendingOrderEntries
+    getPendingOrderEntries,
+    addPaymentsToOrder
 } = require('../modules/orders');
+const Order = require('../models/Order');
 
 function extractCloudinaryPublicId(url) {
     const parts = url.split('/');
@@ -378,6 +380,7 @@ exports.getSingleEntryLogs = async (req, res) => {
 
 exports.getPaginatedEntriesForDraftOrder = async (req, res) => {
     try {
+
         let output;
 
         if (!req.query.orderId) {
@@ -385,13 +388,12 @@ exports.getPaginatedEntriesForDraftOrder = async (req, res) => {
         } else {
             output = await updateDraftOrder(req, res);
         }
-
+        // addPaymentsToOrder(output);
         res.render('partials/components/paymentModalEntriesInDraftOrder', {
             layout: false,
             data: output,
         });
     } catch (error) {
-        console.log(error);
         res.status(500).json({
             error: 'Error while create draft order',
             details: error.message,
