@@ -182,8 +182,6 @@ const updateDraftOrder = async (req, res) => {
     if (!checkProject)
         throw new Error(`Project "${req.params.slug}" not found`);
 
-    const projectSlug = checkProject.slug;
-
     const order = await runQueriesOnOrder(req, res);
 
     if (!order.totalCost) {

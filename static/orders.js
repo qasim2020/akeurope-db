@@ -648,3 +648,35 @@ const changeOrderStatus = function (elem) {
         },
     });
 };
+
+const emailInvoice = function (elem) {
+    const modal = $(elem).closest('.modal');
+    const orderId = $(modal).attr('order-id');
+    if (!orderId) {
+        alert('no order id found in modal');
+        return;
+    }
+    $(modal).find('.alert').remove();
+
+    const currentBtnHTML = $(elem).html();
+    $(elem).html(
+        `<span class="spinner-border spinner-border-sm me-2" role="status"></span> Sending email...`,
+    );
+    $.ajax({
+        url: `/emailInvoice/${orderId}`,
+        method: 'POST',
+        contentType: 'application/json',
+        success: (response) => {
+            $(elem).html(currentBtnHTML);
+            $(modal).find('.total-cost').append(`
+            <div class="alert alert-success w-100" role="alert">
+              <h4 class="alert-title">Done!</h4>
+              <div class="text-secondary">${response}</div>
+            </div>
+                `);
+        },
+        error: (error) => {
+            alert(error.responseText);
+        },
+    });
+};

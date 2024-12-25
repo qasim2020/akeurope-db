@@ -147,15 +147,15 @@ const runQueriesOnOrder = async (req, res) => {
     }
 
     if (req.query.deleteProject) {
-        await Order.updateOne(
+        order = await Order.findOneAndUpdate(
             { _id: orderId, 'projects.slug': projectSlug },
             {
                 $pull: { projects: { slug: projectSlug } },
             },
+            {
+                new: true, lean: true
+            }
         );
-        return {
-            message: 'Project deleted from order!',
-        };
     }
 
     if (req.query.deleteOrder) {

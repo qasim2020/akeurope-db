@@ -11,7 +11,7 @@ const {
     addPaymentsToOrder,
     openOrderProjectWithEntries,
 } = require('../modules/orders');
-const { generateInvoice, deleteInvoice } = require('../modules/invoice');
+const { generateInvoice, deleteInvoice, sendInvoiceToCustomer} = require('../modules/invoice');
 
 exports.viewOrders = async (req, res) => {
     try {
@@ -173,6 +173,20 @@ exports.deleteOrder = async (req, res) => {
         });
     }
 };
+
+exports.emailInvoice = async(req,res) => {
+    try {
+        const order = await Order.findById(req.params.orderId).lean();
+        const customer = await Customer.findById(order.customerId).lean();
+        await sendInvoiceToCustomer(order, customer);
+        res.status(200).send('Email sent successfully!');
+    } catch (error) {
+        console.log(error);
+        res.status(404).send({
+            error: error
+        })
+    }
+}
 
 // exports.checkout = async (req, res) => {
 //     try {

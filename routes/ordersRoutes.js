@@ -12,6 +12,7 @@ router.get('/getOrderTotalCost/:orderId', authenticate, authorize("viewOrders"),
 // router.get('/getPaymentModal/:orderId', authenticate, authorize("editOrders"), ordersController.getPaymentModal);
 router.post('/changeOrderStatus/:orderId', authenticate, authorize("editOrders"), ordersController.changeOrderStatus);
 router.get('/deleteOrder/:orderId', authenticate, authorize("deleteOrders"), ordersController.deleteOrder);
+router.post('/emailInvoice/:orderId', authenticate, authorize('viewOrders'), ordersController.emailInvoice);
 
 
 module.exports = router;

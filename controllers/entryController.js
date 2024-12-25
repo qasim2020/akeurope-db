@@ -381,7 +381,6 @@ exports.getSingleEntryLogs = async (req, res) => {
 exports.getPaginatedEntriesForDraftOrder = async (req, res) => {
     try {
 
-        debugger;
         if (!req.query.orderId) {
             const orderId = await createDraftOrder(req, res);
             req.query.orderId = orderId;
@@ -392,9 +391,11 @@ exports.getPaginatedEntriesForDraftOrder = async (req, res) => {
         const orderInDb = await Order.findOne({ _id: req.query.orderId }).lean();
         const order = await formatOrder(req,orderInDb);
         const project = order.projects.find(project => project.slug == req.params.slug);
-        Object.assign(project, {
-            detail: await Project.findOne({slug: project.slug}).lean()
-        });
+        if (project) {
+            Object.assign(project, {
+                detail: await Project.findOne({slug: project.slug}).lean()
+            });    
+        }
 
         res.render('partials/components/paymentModalEntriesInDraftOrder', {
             layout: false,

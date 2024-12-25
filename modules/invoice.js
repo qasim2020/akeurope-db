@@ -3,6 +3,8 @@ const fs = require('fs-extra');
 const path = require('path');
 const Order = require('../models/Order');
 const Customer = require('../models/Customer');
+const nodemailer = require('nodemailer');
+const handlebars = require('handlebars');
 
 const generateInvoice = async (order) => {
     const invoiceDir = path.join(__dirname, '../invoices');
@@ -168,4 +170,48 @@ const deleteInvoice = async (orderId) => {
     return deletePath(invoicePath);
 };
 
-module.exports = { generateInvoice, deleteInvoice, deletePath };
+const sendInvoiceToCustomer = async(order, customer)=> {
+    const invoicesDirectory = './invoices';
+    const invoiceFilename = `${customer.email}_order_no_${order.orderNo}_order_total_${order.totalCost}.pdf`;
+    const invoicePath = path.join(invoicesDirectory, invoiceFilename);
+
+    let transporter = nodemailer.createTransport({
+        host: process.env.EMAIL_HOST,
+        port: process.env.EMAIL_PORT,
+        secure: true, 
+        auth: {
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS
+        },
+    });
+
+    const templatePath = path.join(__dirname, '../views/emails/invoice.handlebars');
+    const templateSource = await fs.readFile(templatePath, 'utf8');
+    const compiledTemplate = handlebars.compile(templateSource);
+
+    const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: customer.email,
+        subject: `Invoice from Akeurope - ${order.totalCost}`,
+        html: compiledTemplate({
+            name: customer.name,
+        }),
+        attachments: [
+            {
+                filename: invoiceFilename,
+                path: invoicePath
+            }
+        ]
+    };
+
+    try {
+        await transporter.sendMail(mailOptions);
+        console.log('Invoice sent!');
+        return true;
+    } catch (err) {
+        throw new Error(`Failed to send email: ${err.message}`);
+    }
+
+}
+
+module.exports = { generateInvoice, deleteInvoice, deletePath, sendInvoiceToCustomer };
