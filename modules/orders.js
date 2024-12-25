@@ -9,6 +9,7 @@ const { runQueriesOnOrder } = require('../modules/orderUpdates');
 const {
     getOldestPaidEntries,
     makeProjectForOrder,
+    getDateOfLastPayment
 } = require('../modules/ordersFetchEntries');
 
 const createPagination = ({
@@ -164,18 +165,6 @@ const calculationOnProject = async (projectOrdered, requestedCurrencyRate) => {
     };
 };
 
-const savePaymentsInOrderAfterFormatting = async (
-    order,
-    project,
-    allEntries,
-) => {
-    project.allEntries = allEntries;
-    order.totalCost = project.totalOrderedCost;
-    order.projects = [];
-    order.projects.push(project);
-    await addPaymentsToOrder(order);
-    return true;
-};
 
 const updateDraftOrder = async (req, res) => {
     let checkProject = await Project.findOne({ slug: req.params.slug }).lean();
@@ -323,6 +312,7 @@ const formatOrder = async (req, order) => {
             entry.detail = await entryModel
                 .findOne({ _id: entry.entryId })
                 .lean();
+            entry.lastPaid = await getDateOfLastPayment(entry.entryId);
         }
 
         project.detail = detail;
@@ -505,7 +495,5 @@ module.exports = {
     addPaymentsToOrder,
     openOrderProjectWithEntries,
     getPendingOrderEntries,
-    formatOrder,
-    getOldestPaidEntries,
-    makeProjectForOrder,
+    formatOrder
 };

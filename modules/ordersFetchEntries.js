@@ -1,75 +1,103 @@
 const { generateSearchQuery } = require('../modules/generateSearchQuery');
 const { createDynamicModel } = require('../models/createDynamicModel');
 
-const Payment = require('../models/Payment');
+const Order = require('../models/Order');
 const Subscription = require('../models/Subscription');
+
+const getDateOfLastPayment = async (entryId) => {
+    const lastPaidOrder = await Order.aggregate([
+        { $unwind: '$projects' },
+        { $unwind: '$projects.entries' },
+        {
+            $match: {
+                'projects.entries.entryId': entryId,
+                'projects.entries.totalCost': { $gt: 0 },
+                status: 'paid',
+            },
+        },
+        { $sort: { createdAt: 1 } },  
+        {
+            $group: {
+                _id: '$projects.entries.entryId',
+                lastPaid: { $first: '$createdAt' }, 
+            },
+        },
+    ]);
+    
+    const lastPaid = lastPaidOrder.length > 0 ? lastPaidOrder[0].lastPaid : null;
+    
+    return lastPaid;
+}
 
 const getOldestPaidEntries = async (req, project) => {
     const DynamicModel = await createDynamicModel(project.slug);
     const { searchQuery, fieldFilters } = generateSearchQuery(req, project);
     const selectCount = parseInt(req.query.select) || 50;
 
-    const lastPayments = await Payment.aggregate([
-        { $match: { entryId: { $in: [] } } },
-        { $sort: { date: 1 } },
+    const lastOrders = await Order.aggregate([
+        { $unwind: '$projects' },
+        { $unwind: '$projects.entries' },
+        {
+            $match: {
+                'projects.entries.totalCost': { $gt: 0 },
+                status: 'paid',
+            },
+        },
+        { $sort: { createdAt: 1 } },
         {
             $group: {
-                _id: '$entryId',
-                lastPaid: { $first: '$date' },
+                _id: '$projects.entries.entryId',
+                lastPaid: { $first: '$createdAt' },
             },
         },
     ]);
 
-    let paidEntryIds = lastPayments.map((payment) => payment._id);
-    let neverPaidCount = selectCount - paidEntryIds.length;
+    let paidEntryIds = lastOrders.map((order) => order._id);
 
-    let entriesWithPayments = [];
-    if (paidEntryIds.length > 0) {
-        entriesWithPayments = await DynamicModel.find({
-            _id: { $in: paidEntryIds },
+    const countNotPaid = await DynamicModel.countDocuments({
+        _id: { $nin: paidEntryIds },
+        ...searchQuery,
+    });
+
+    let entriesToPay = [];
+    if (countNotPaid > selectCount) {
+        entriesToPay = await DynamicModel.find({
+            _id: { $nin: paidEntryIds },
             ...searchQuery,
-        }).lean();
-    }
-
-    let entriesWithoutPayments = [];
-    if (neverPaidCount > 0) {
-        entriesWithoutPayments = await DynamicModel.find(searchQuery)
-            .limit(neverPaidCount)
+        })
+            .limit(selectCount)
             .lean();
     }
 
-    const subscriptions = await Subscription.find({
-        entryId: {
-            $in: paidEntryIds.concat(entriesWithoutPayments.map((e) => e._id)),
-        },
-    }).lean();
 
-    const lastPaymentsMap = Object.fromEntries(
-        lastPayments.map(({ _id, lastPaid }) => [_id.toString(), lastPaid]),
-    );
-
-    const subscriptionsMap = Object.fromEntries(
-        subscriptions.map((sub) => [sub.entryId.toString(), sub]),
-    );
-
-    entriesWithPayments.forEach((entry) => {
-        entry.lastPaid = lastPaymentsMap[entry._id.toString()] || null;
-        entry.subscriptions = subscriptionsMap[entry._id.toString()] || null;
-    });
-
-    entriesWithoutPayments.forEach((entry) => {
-        entry.lastPaid = null;
-        entry.subscriptions = subscriptionsMap[entry._id.toString()] || null;
-    });
-
-    let allEntries = [...entriesWithoutPayments, ...entriesWithPayments];
+    if (countNotPaid <= selectCount) {
+        let entriesWithPayments = [];
+        let entriesWithOutPayments = [];
+        const pickFromNotPaid = countNotPaid;
+        const pickFromPaid = selectCount - pickFromNotPaid;
+        entriesWithOutPayments = await DynamicModel.find({
+            _id: { $nin: paidEntryIds },
+            ...searchQuery,
+        })
+        .limit(pickFromNotPaid)
+        .lean();
+        if (pickFromPaid > 0) {
+            paidEntryIds = paidEntryIds.slice(0,pickFromPaid);
+            entriesWithPayments = await DynamicModel.find({
+                _id: { $in: paidEntryIds },
+                ...searchQuery,
+            })
+            .limit(pickFromPaid)
+            .lean();
+        }
+        entriesToPay =  [...entriesWithOutPayments, ...entriesWithPayments];
+    }
 
     return {
         project,
-        allEntries,
+        allEntries: entriesToPay,
     };
 };
-
 
 const makeProjectForOrder = (project, allEntries) => {
     return {
@@ -90,5 +118,4 @@ const makeProjectForOrder = (project, allEntries) => {
     };
 };
 
-
-module.exports = { getOldestPaidEntries, makeProjectForOrder };
+module.exports = { getOldestPaidEntries, makeProjectForOrder, getDateOfLastPayment };

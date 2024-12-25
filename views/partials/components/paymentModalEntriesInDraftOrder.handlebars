@@ -1,7 +1,7 @@
 {{#if project.entries}}
 
-<div class="card mb-3 project-in-order {{project.slug}}" orderId="{{order._id}}"
-    projectSlug="{{project.slug}}" toggleState="{{project.toggleState}}"
+<div class="card mb-3 project-in-order {{project.slug}}" orderId="{{order._id}}" projectSlug="{{project.slug}}"
+    toggleState="{{project.toggleState}}"
     my-href="?months={{project.months}}&page={{project.pagination.currentPage}}&limit={{project.pagination.limit}}&search={{project.pagination.search}}&sortBy={{project.pagination.sort.sortBy}}&orderBy={{project.pagination.sort.order}}{{#if project.pagination.filtersQuery}}&{{project.pagination.filtersQuery}}{{/if}}">
     <div class="card-header flex-wrap border-0">
         <div class="card-title w-100 d-flex">
@@ -138,6 +138,7 @@
 
                         </th>
                         {{/each}}
+                        <th>Last paid</th>
                         {{#each project.detail.fields}}
                         {{#if (eq this.subscription false)}}
                         {{#if (eq this.visible true)}}
@@ -147,7 +148,6 @@
                         {{/if}}
                         {{/if}}
                         {{/each}}
-                        <th>Last paid</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -202,6 +202,17 @@
                         </td>
                         {{/each}}
 
+                        <td>
+                            {{log entry}}
+                            {{#if entry.lastPaid}}
+                            <span class="badge bg-green me-2"></span>
+                            {{formatTime entry.lastPaid}}
+                            {{else}}
+                            <span class="badge bg-danger me-2"></span>
+                            Never
+                            {{/if}}
+                        </td>
+
                         {{#each ../project.detail.fields as |field|}}
                         {{#if (eq field.subscription false)}}
                         {{#if (eq field.visible true)}}
@@ -215,15 +226,6 @@
                         {{/if}}
                         {{/if}}
                         {{/each}}
-                        <td>
-                            {{#if entry.lastPaid}}
-                            <span class="badge bg-green me-2"></span>
-                            {{entry.lastPaid}}
-                            {{else}}
-                            <span class="badge bg-danger me-2"></span>
-                            Never
-                            {{/if}}
-                        </td>
                     </tr>
                     {{/each}}
                 </tbody>

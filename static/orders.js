@@ -680,3 +680,15 @@ const emailInvoice = function (elem) {
         },
     });
 };
+
+const toggleInvoice = function(elem) {
+    const modal = $(elem).closest('.modal');
+    const invoiceIsClosed = $(modal).find('.invoice').hasClass('d-none');
+    if (invoiceIsClosed) {
+        $(modal).find('.invoice').attr({class: 'col-xl-6 col-12 invoice'});
+        $(modal).find('.opposite-invoice').attr({class: 'col-xl-6 col-12 opposite-invoice'})
+    } else {
+        $(modal).find('.invoice').attr({class: 'd-none invoice'});
+        $(modal).find('.opposite-invoice').attr({class: 'col-12 opposite-invoice'})
+    }
+}
