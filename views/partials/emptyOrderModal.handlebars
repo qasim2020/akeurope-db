@@ -16,7 +16,7 @@
           <div class="col-xl-6 col-12 opposite-invoice">
             <div class="mb-3">
               <label class="form-label">Select Customer</label>
-              <select name="customerId" id="" class="form-select order-change">
+              <select name="customerId"  class="form-select order-change">
                 {{#each data.customers}}
                 <option value="{{this._id}}" {{#if (eq this.email ../data.order.customer.email)}}selected{{/if}}>
                   {{this.name}}</option>
@@ -29,7 +29,7 @@
             </div>
             <div class="mb-3">
               <label class="form-label">Select Currency</label>
-              <select name="currency" id="" class="form-select order-change">
+              <select name="currency" class="form-select order-change">
                 <option value="USD" {{#if (eq data.order.currency 'USD' )}}selected{{/if}}>USD ($)</option>
                 <option value="NOK" {{#if (eq data.order.currency 'NOK' )}}selected{{/if}}>NOK (kr)</option>
                 <option value="GBP" {{#if (eq data.order.currency 'GBP' )}}selected{{/if}}>GBP (£)</option>

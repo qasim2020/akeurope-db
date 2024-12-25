@@ -625,6 +625,7 @@ const deleteOrder = function (elem) {
 };
 
 const changeOrderStatus = function (elem) {
+    console.log('here');
     const orderId = $(elem).closest('.modal').attr('order-id');
     const modal = $(elem).closest('.modal');
     if (!orderId) {
@@ -641,6 +642,8 @@ const changeOrderStatus = function (elem) {
         contentType: 'application/json',
         data: JSON.stringify(data),
         success: (response) => {
+            console.log({orderId});
+            console.log($(elem));
             $(modal).find('.invoice-status').html(response);
         },
         error: (error) => {
