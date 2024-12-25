@@ -8,7 +8,7 @@ const generateInvoice = async (order) => {
     const invoiceDir = path.join(__dirname, '../invoices');
     const invoicePath = path.join(
         invoiceDir,
-        `${order.customer.email}_order_no_${order.orderNo}.pdf`,
+        `${order.customer.email}_order_no_${order.orderNo}_order_total_${order.totalCost}.pdf`,
     );
 
     await fs.ensureDir(invoiceDir);
@@ -130,18 +130,16 @@ const drawTable = (doc, projects, startY, order) => {
     y += 14;
 
     // Table rows
-    projects.forEach((val) => {
-        const project = val.project;
+    projects.forEach((project) => {
         y += 20;
         doc.fontSize(12).text(project.detail.name, 50, y);
-        doc.text(val.entriesCount, 250, y);
+        doc.text(project.entriesCount, 250, y);
         doc.text(project.months, 180, y);
-        doc.text(project.totalOrderedCostAllMonths, 350, y);
+        doc.text(project.totalCostAllMonths, 350, y);
     });
 
     return y;
 };
-
 
 function deletePath(filePath) {
     if (fs.existsSync(filePath)) {
@@ -159,17 +157,15 @@ function deletePath(filePath) {
     }
 }
 
-const deleteInvoice = async(orderId) => {
-    const order = await Order.findOne({_id: orderId});
-    const customer = await Customer.findOne({_id: order.customerId});
-    const customerEmail = customer.email;
-    const orderNo = order.orderNo;
+const deleteInvoice = async (orderId) => {
+    const order = await Order.findOne({ _id: orderId });
+    const customer = await Customer.findOne({ _id: order.customerId });
     const invoiceDir = path.join(__dirname, '../invoices');
     const invoicePath = path.join(
         invoiceDir,
-        `${customerEmail}_order_no_${orderNo}.pdf`,
+        `${customer.email}_order_no_${order.orderNo}_order_total_${order.totalCost}.pdf`,
     );
     return deletePath(invoicePath);
-}
+};
 
-module.exports = { generateInvoice, deleteInvoice };
+module.exports = { generateInvoice, deleteInvoice, deletePath };

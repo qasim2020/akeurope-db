@@ -136,12 +136,6 @@
       success: function (response) {
         $("footer").before(response);
         $(`#button-${orderId}`).trigger("click");
-        $(`#modal-${orderId}`).on('shown.bs.modal', function () {
-          $(this).find('.project-in-order').each(function () {
-            const href = $(this).attr('my-href');
-            doSearch(this, href, false);
-          });
-        });
       },
       error: function (xhr, status, error) {
         alert(xhr.responseText);

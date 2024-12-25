@@ -15,7 +15,7 @@ const {
     createDraftOrder,
     updateDraftOrder,
     getPendingOrderEntries,
-    addPaymentsToOrder
+    formatOrder,
 } = require('../modules/orders');
 const Order = require('../models/Order');
 
@@ -381,21 +381,31 @@ exports.getSingleEntryLogs = async (req, res) => {
 exports.getPaginatedEntriesForDraftOrder = async (req, res) => {
     try {
 
-        let output;
-
+        debugger;
         if (!req.query.orderId) {
-            output = await createDraftOrder(req, res);
+            const orderId = await createDraftOrder(req, res);
+            req.query.orderId = orderId;
         } else {
-            output = await updateDraftOrder(req, res);
+            await updateDraftOrder(req, res);
         }
-        // addPaymentsToOrder(output);
+
+        const orderInDb = await Order.findOne({ _id: req.query.orderId }).lean();
+        const order = await formatOrder(req,orderInDb);
+        const project = order.projects.find(project => project.slug == req.params.slug);
+        Object.assign(project, {
+            detail: await Project.findOne({slug: project.slug}).lean()
+        });
+
         res.render('partials/components/paymentModalEntriesInDraftOrder', {
             layout: false,
-            data: output,
+            project,
+            order
         });
+
     } catch (error) {
+        console.log(error);
         res.status(500).json({
-            error: 'Error while create draft order',
+            error: 'Error getting paginated order',
             details: error.message,
         });
     }

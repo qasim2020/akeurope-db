@@ -36,12 +36,9 @@ const OrderSchema = new mongoose.Schema(
                     type: Number,
                     required: true,
                 },
-                totalCostSingleMonth: {
-                    type: Number
-                },
-                totalCostAllMonths: {
-                    type: Number
-                },
+                totalCostSingleMonth: Number,
+                totalCostAllMonths: Number,
+                totalCost: Number,
                 totalSubscriptionCosts: [Object],
                 entries: [
                     {
@@ -49,8 +46,7 @@ const OrderSchema = new mongoose.Schema(
                         selectedSubscriptions: [String],
                         totalCost: Number,
                         totalCostAllSubscriptions: Number,
-                        selectedSubscriptionsPair: [Object],
-                        allSubscriptionsPair: [Object]
+                        costs: [Object],
                     },
                 ],
             },

@@ -116,7 +116,6 @@ const loadEntriesInPaymentModal = function (elem, href) {
 };
 
 const doSearch = function (elem, href, refreshAll) {
-    return;
     const modal = $(elem).closest('.modal');
     const isDashboardPage =
         $(elem).closest('.card-footer').attr('page-type') == 'orders';
@@ -126,13 +125,13 @@ const doSearch = function (elem, href, refreshAll) {
         return;
     }
 
-    const isPaymentModal =
-        $(elem).closest('.card-footer').attr('page-type') == 'payment-modal';
+    // const isPaymentModal =
+    //     $(elem).closest('.card-footer').attr('page-type') == 'payment-modal';
 
-    if (isPaymentModal) {
-        loadEntriesInPaymentModal(elem, href);
-        return;
-    }
+    // if (isPaymentModal) {
+    //     loadEntriesInPaymentModal(elem, href);
+    //     return;
+    // }
 
     if (!href) {
         href = $(elem).attr('my-href');
@@ -144,11 +143,13 @@ const doSearch = function (elem, href, refreshAll) {
     const toggleState = $(modal).find(`.${slug}`).attr('toggleState');
     const url = `/getPaginatedEntriesForDraftOrder/${slug}/${customerId}${href}&orderId=${orderId}&toggleState=${toggleState}`;
 
+    startSpinner(modal);
     $.ajax({
         url,
         method: 'GET',
         namespace: 'spinner-on-cart',
         success: function (response) {
+            endSpinner(modal);
             $(modal).find(`.${slug}`).replaceWith(response);
             if (refreshAll == false) return;
             $(modal)

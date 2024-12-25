@@ -88,32 +88,29 @@
             <table class="table card-table table-vcenter text-nowrap datatable">
                 <thead>
                     <tr>
-                        {{#if (neq project.totalCostAllMonths 0)}}
                         <th>
                             <button
-                                class="btn btn-sm btn-icon px-2 font-sm text-uppercase fs-6 strong {{#if (eq project.totalOrderedCost data.project.totalCost)}}bg-green-lt{{/if}} text-start"
+                                class="btn btn-sm btn-icon px-2 font-sm text-uppercase fs-6 strong {{#if (eq project.totalCostSingleMonth project.totalCost)}}bg-green-lt{{/if}} text-start"
                                 onclick="toggleColumnSelect(this)">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
                                     fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                                     stroke-linejoin="round"
-                                    class="icon icon-tabler icons-tabler-outline icon-tabler-check me-2 {{#if (neq data.project.totalOrderedCost data.project.totalCost)}}d-none{{/if}}">
+                                    class="icon icon-tabler icons-tabler-outline icon-tabler-check me-2 {{#if (neq project.totalCostSingleMonth project.totalCost)}}d-none{{/if}}">
                                     <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                                     <path d="M5 12l5 5l10 -10" />
                                 </svg>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
                                     fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                                     stroke-linejoin="round"
-                                    class="icon icon-tabler icons-tabler-outline icon-tabler-plus me-2 {{#if (eq data.project.totalOrderedCost data.project.totalCost)}}d-none{{/if}}">
+                                    class="icon icon-tabler icons-tabler-outline icon-tabler-plus me-2 {{#if (eq project.totalCostSingleMonth project.totalCost)}}d-none{{/if}}">
                                     <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                                     <path d="M12 5l0 14" />
                                     <path d="M5 12l14 0" />
                                 </svg>
-                                Total <br> {{project.totalCostAllMonths}} {{order.currency}}
+                                Total <br> {{project.totalCost}} {{order.currency}}
                             </button>
                         </th>
-                        {{/if}}
-                        {{#each project.detail.fields}}
-                        {{#if (eq this.subscription true)}}
+                        {{#each project.totalSubscriptionCosts}}
                         <th class="">
                             {{#if (neq this.totalCost 0)}}
 
@@ -135,12 +132,11 @@
                                     <path d="M12 5l0 14" />
                                     <path d="M5 12l14 0" />
                                 </svg>
-                                {{this.actualName}} <br> {{this.totalCost}} {{../data.project.selectedCurrency}}
+                                {{this.actualName}} <br> {{this.totalCost}} {{../order.currency}}
                             </button>
                             {{/if}}
 
                         </th>
-                        {{/if}}
                         {{/each}}
                         {{#each project.detail.fields}}
                         {{#if (eq this.subscription false)}}
@@ -156,8 +152,7 @@
                 </thead>
                 <tbody>
                     {{#each project.entries as |entry|}}
-                    <tr entry-id="{{entry._id}}">
-                        {{#if (neq entry.totalCost 0)}}
+                    <tr entry-id="{{entry.entryId}}">
                         <td>
                             <button
                                 class="btn btn-icon btn-sm px-2 {{#if (eq entry.totalCost entry.totalCostAllSubscriptions)}}bg-green-lt{{/if}}"
@@ -177,38 +172,34 @@
                                     <path d="M12 5l0 14" />
                                     <path d="M5 12l14 0" />
                                 </svg>
-                                {{entry.totalCost}} {{../order.currency}}
+                                {{entry.totalCostAllSubscriptions}} {{../order.currency}}
                             </button>
                         </td>
-                        {{/if}}
-                        {{#each ../project.detail.fields as |field|}}
-                        {{#if (eq field.subscription true)}}
+                        {{#each entry.costs as |cost|}}
                         <td>
-                            {{#if (lookup entry.detail field.name)}}
-                            <button subscriptionName="{{field.name}}"
-                                class="btn btn-icon btn-sm px-2 {{#if (findInArray entry.selectedSubscriptions field.name)}}bg-green-lt{{/if}}"
+                            {{#if (neq cost.totalCost 0)}}
+                            <button subscriptionName="{{cost.fieldName}}"
+                                class="btn btn-icon btn-sm px-2 {{#if (eq cost.totalCost cost.totalOrderedCost)}}bg-green-lt{{/if}}"
                                 onclick="toggleCostSelect(this)">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
                                     fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                                     stroke-linejoin="round"
-                                    class="icon icon-tabler icons-tabler-outline icon-tabler-check me-2 {{#unless (findInArray entry.selectedSubscriptions field.name)}}d-none{{/unless}}">
+                                    class="icon icon-tabler icons-tabler-outline icon-tabler-check me-2 {{#if (neq cost.totalCost cost.totalOrderedCost)}}d-none{{/if}}">
                                     <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                                     <path d="M5 12l5 5l10 -10" />
                                 </svg>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
                                     fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                                     stroke-linejoin="round"
-                                    class="icon icon-tabler icons-tabler-outline icon-tabler-plus me-2 {{#if (findInArray entry.selectedSubscriptions field.name)}}d-none{{/if}}">
+                                    class="icon icon-tabler icons-tabler-outline icon-tabler-plus me-2 {{#if (eq cost.totalCost cost.totalOrderedCost)}}d-none{{/if}}">
                                     <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                                     <path d="M12 5l0 14" />
                                     <path d="M5 12l14 0" />
                                 </svg>
-                                {{log entry}}
-                                {{getValueOfFieldInArray entry.allSubscriptionsPair field.name}} {{../../order.currency}}
+                                {{cost.totalCost}} {{../../order.currency}}
                             </button>
                             {{/if}}
                         </td>
-                        {{/if}}
                         {{/each}}
 
                         {{#each ../project.detail.fields as |field|}}
@@ -238,14 +229,14 @@
                 </tbody>
             </table>
         </div>
-        {{> dataNavigationFooter}}
+        {{> dataNavigationFooter data=project}}
     </div>
 </div>
 
 {{else}}
 <div class="card m-auto error mb-3">
     <div class="card-header">
-        <div class="strong">Found no matching results in Project: {{data.project.name}}!</div>
+        <div class="strong">Found no matching results in Project: {{project.detail.name}}!</div>
     </div>
 </div>
 {{/if}}

@@ -147,8 +147,8 @@
           <td>{{capitalizeFirstLetter order.status}}</td>
           <td>
             {{#each order.projects}}
-            <span class="badge bg-green-lt">{{this.project.totalOrderedCostAllMonths}} {{this.project.selectedCurrency}}
-              in {{this.project.name}} </span>
+            <span class="badge bg-green-lt">{{this.totalCostAllMonths}} {{../order.currency}}
+              in {{this.details.name}} </span>
             {{/each}}
           </td>
           <td> {{order.totalCost}} {{order.currency}}</td>

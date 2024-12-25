@@ -122,6 +122,7 @@ exports.getOrderTotalCost = async (req, res) => {
             },
         });
     } catch (error) {
+        console.log(error);
         res.status(404).render('error', {
             heading: 'Server Error',
             error: error,
