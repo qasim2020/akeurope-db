@@ -7,7 +7,7 @@ const nodemailer = require('nodemailer');
 const handlebars = require('handlebars');
 
 const generateInvoice = async (order) => {
-    const invoiceDir = path.join(__dirname, '../invoices');
+    const invoiceDir = path.join(__dirname, '../../invoices');
     const invoicePath = path.join(
         invoiceDir,
         `${order.customer.email}_order_no_${order.orderNo}_order_total_${order.totalCost}.pdf`,
@@ -162,7 +162,7 @@ function deletePath(filePath) {
 const deleteInvoice = async (orderId) => {
     const order = await Order.findOne({ _id: orderId });
     const customer = await Customer.findOne({ _id: order.customerId });
-    const invoiceDir = path.join(__dirname, '../invoices');
+    const invoiceDir = path.join(__dirname, '../../invoices');
     const invoicePath = path.join(
         invoiceDir,
         `${customer.email}_order_no_${order.orderNo}_order_total_${order.totalCost}.pdf`,

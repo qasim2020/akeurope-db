@@ -46,7 +46,7 @@ exports.viewOrders = async (req, res) => {
 
 exports.viewOrder = async (req, res) => {
     try {
-        const { order } = await getSingleOrder(req, res);
+        const order = await getSingleOrder(req, res);
         res.render('order', {
             layout: 'dashboard',
             data: {

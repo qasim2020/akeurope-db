@@ -32,7 +32,7 @@ exports.getInvoice = async (req, res) => {
             });
             return;
         }
-        const invoiceDir = path.join(__dirname, '../invoices');
+        const invoiceDir = path.join(__dirname, '../../invoices');
 
         const filename = `${order.customer.email}_order_no_${order.orderNo}_order_total_${order.totalCost}.pdf`;
 

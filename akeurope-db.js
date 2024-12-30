@@ -34,6 +34,7 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(express.json({ limit: '50mb' }));
 app.use(
   session({
+    name: 'akeurope-db-id',
     secret: process.env.SESSION_SECRET, 
     resave: false,
     saveUninitialized: false,
