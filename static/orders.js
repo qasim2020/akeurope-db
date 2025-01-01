@@ -125,14 +125,6 @@ const doSearch = function (elem, href, refreshAll) {
         return;
     }
 
-    // const isPaymentModal =
-    //     $(elem).closest('.card-footer').attr('page-type') == 'payment-modal';
-
-    // if (isPaymentModal) {
-    //     loadEntriesInPaymentModal(elem, href);
-    //     return;
-    // }
-
     if (!href) {
         href = $(elem).attr('my-href');
     }
@@ -157,6 +149,7 @@ const doSearch = function (elem, href, refreshAll) {
                 .attr({ src: `/invoice/${orderId}` })
                 .removeClass('d-none');
             updateTotalCost(modal);
+            refreshContainers(modal);
         },
         error: function (error) {
             alert(error.responseText);
@@ -625,7 +618,6 @@ const deleteOrder = function (elem) {
 };
 
 const changeOrderStatus = function (elem) {
-    console.log('here');
     const orderId = $(elem).closest('.modal').attr('order-id');
     const modal = $(elem).closest('.modal');
     if (!orderId) {
@@ -642,9 +634,8 @@ const changeOrderStatus = function (elem) {
         contentType: 'application/json',
         data: JSON.stringify(data),
         success: (response) => {
-            console.log({orderId});
-            console.log($(elem));
             $(modal).find('.invoice-status').html(response);
+            refreshContainers(modal);
         },
         error: (error) => {
             alert(error.responseText);

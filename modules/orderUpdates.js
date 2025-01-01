@@ -1,21 +1,72 @@
 const Project = require('../models/Project');
 const Customer = require('../models/Customer');
-const Payment = require('../models/Payment');
 const Order = require('../models/Order');
-const { getOldestPaidEntries, makeProjectForOrder } = require('../modules/ordersFetchEntries');
+const { logTemplates } = require('../modules/logTemplates');
+const { saveLog } = require('../modules/logAction');
+const {
+    getOldestPaidEntries,
+    makeProjectForOrder,
+} = require('../modules/ordersFetchEntries');
+const { createDynamicModel } = require('../models/createDynamicModel');
+const { camelCaseWithCommaToNormalString } = require('../modules/helpers');
 
 const runQueriesOnOrder = async (req, res) => {
+    let order;
     const orderId = req.query.orderId;
     const projectSlug = req.params.slug;
     const checkProject = await Project.findOne({ slug: projectSlug }).lean();
+    const existingOrder = await Order.findById(req.query.orderId).lean();
+    const existingCustomer = await Customer.findById(
+        existingOrder.customerId,
+    ).lean();
 
     if (req.query.customerId) {
         const customerId = req.query.customerId;
+
         order = await Order.findOneAndUpdate(
             { _id: orderId },
             { $set: { customerId: customerId } },
             { new: true, lean: true },
         );
+
+        const newCustomer = await Customer.findById(order.customerId).lean();
+
+        if (existingCustomer.email != newCustomer.email) {
+            await saveLog(
+                logTemplates({
+                    type: 'customerRemovedFromOrder',
+                    entity: existingCustomer,
+                    order,
+                    customer: existingCustomer,
+                    actor: req.session.user,
+                }),
+            );
+
+            await saveLog(
+                logTemplates({
+                    type: 'customerAddedToOrder',
+                    entity: newCustomer,
+                    order,
+                    customer: newCustomer,
+                    actor: req.session.user,
+                }),
+            );
+
+            await saveLog(
+                logTemplates({
+                    type: 'orderCustomerChanged',
+                    entity: order,
+                    changes: [
+                        {
+                            key: 'customer',
+                            oldValue: existingCustomer.email,
+                            newValue: newCustomer.email,
+                        },
+                    ],
+                    actor: req.session.user,
+                }),
+            );
+        }
     }
 
     if (req.query.currency) {
@@ -25,6 +76,23 @@ const runQueriesOnOrder = async (req, res) => {
             { $set: { currency: currency } },
             { new: true, lean: true },
         );
+
+        if (order.currency != existingOrder.currency) {
+            await saveLog(
+                logTemplates({
+                    type: 'orderCurrencyChanged',
+                    entity: order,
+                    changes: [
+                        {
+                            key: 'currency',
+                            oldValue: existingOrder.currency,
+                            newValue: currency,
+                        },
+                    ],
+                    actor: req.session.user,
+                }),
+            );
+        }
     }
 
     if (req.query.months > 0) {
@@ -66,6 +134,22 @@ const runQueriesOnOrder = async (req, res) => {
                 },
             );
         }
+
+        await saveLog(
+            logTemplates({
+                type: 'orderColumnSubscriptionChanged',
+                entity: order,
+                order,
+                project: checkProject,
+                changes: [
+                    {
+                        key: 'Subscriptions',
+                        newValue: subscriptions,
+                    },
+                ],
+                actor: req.session.user,
+            }),
+        );
     }
 
     if (req.query.entryId && req.query.subscriptions) {
@@ -102,6 +186,52 @@ const runQueriesOnOrder = async (req, res) => {
                 },
             );
         }
+
+        const project = existingOrder.projects.find(
+            (p) => p.slug === projectSlug,
+        );
+        project.detail = checkProject;
+        if (project) {
+            const entry = project.entries.find((e) => e.entryId.toString() === entryId);
+            if (entry) {
+                const existingSubscriptions =
+                    entry.selectedSubscriptions.join(',');
+                const model = await createDynamicModel(project.slug);
+                const entryDetail = await model.findById(entry.entryId).lean();
+                await saveLog(
+                    logTemplates({
+                        type: 'entrySubscriptionChanged',
+                        entity: entryDetail,
+                        order,
+                        project,
+                        changes: [
+                            {
+                                key: 'Subscriptions',
+                                oldValue: camelCaseWithCommaToNormalString(existingSubscriptions),
+                                newValue: camelCaseWithCommaToNormalString(subscriptions),
+                            },
+                        ],
+                        actor: req.session.user,
+                    }),
+                );
+                await saveLog(
+                    logTemplates({
+                        type: 'orderEntrySubscriptionChanged',
+                        entity: order,
+                        entry: entryDetail,
+                        project,
+                        changes: [
+                            {
+                                key: 'Subscriptions',
+                                oldValue: camelCaseWithCommaToNormalString(existingSubscriptions),
+                                newValue: camelCaseWithCommaToNormalString(subscriptions),
+                            },
+                        ],
+                        actor: req.session.user,
+                    }),
+                );
+            }
+        }
     }
 
     if (req.query.addProject) {
@@ -109,13 +239,16 @@ const runQueriesOnOrder = async (req, res) => {
             req,
             checkProject,
         );
-        const updatedProject = await makeProjectForOrder(project, allEntries);
+
         await Order.updateOne(
             { _id: orderId, 'projects.slug': projectSlug },
             {
                 $pull: { projects: { slug: projectSlug } },
             },
         );
+
+        const updatedProject = await makeProjectForOrder(project, allEntries);
+
         order = await Order.findOneAndUpdate(
             { _id: orderId },
             {
@@ -125,6 +258,21 @@ const runQueriesOnOrder = async (req, res) => {
                 new: true,
                 lean: true,
             },
+        );
+
+        const newProject = await Project.findOne({
+            slug: updatedProject.slug,
+        }).lean();
+
+        newProject.selection = updatedProject;
+
+        await saveLog(
+            logTemplates({
+                type: 'orderProjectSelection',
+                entity: order,
+                project: newProject,
+                actor: req.session.user,
+            }),
         );
     }
 
@@ -144,6 +292,18 @@ const runQueriesOnOrder = async (req, res) => {
                 lean: true,
             },
         );
+        const newProject = await Project.findOne({
+            slug: updatedProject.slug,
+        }).lean();
+        newProject.selection = updatedProject;
+        await saveLog(
+            logTemplates({
+                type: 'orderProjectSelection',
+                entity: order,
+                project: newProject,
+                actor: req.session.user,
+            }),
+        );
     }
 
     if (req.query.deleteProject) {
@@ -153,13 +313,32 @@ const runQueriesOnOrder = async (req, res) => {
                 $pull: { projects: { slug: projectSlug } },
             },
             {
-                new: true, lean: true
-            }
+                new: true,
+                lean: true,
+            },
+        );
+        await saveLog(
+            logTemplates({
+                type: 'orderProjectRemoved',
+                entity: checkProject,
+                order,
+                project: checkProject,
+                actor: req.session.user,
+            }),
         );
     }
 
     if (req.query.deleteOrder) {
         await Order.deleteOne({ _id: orderId });
+
+        await saveLog(
+            logTemplates({
+                type: 'orderDeleted',
+                entity: existingOrder,
+                actor: req.session.user,
+            }),
+        );
+
         return {
             message: 'Order deleted!',
         };

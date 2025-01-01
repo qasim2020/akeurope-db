@@ -9,8 +9,10 @@ const { runQueriesOnOrder } = require('../modules/orderUpdates');
 const {
     getOldestPaidEntries,
     makeProjectForOrder,
-    getDateOfLastPayment
+    getDateOfLastPayment,
 } = require('../modules/ordersFetchEntries');
+const { saveLog } = require('./logAction');
+const { logTemplates } = require('./logTemplates');
 
 const createPagination = ({
     req,
@@ -165,20 +167,36 @@ const calculationOnProject = async (projectOrdered, requestedCurrencyRate) => {
     };
 };
 
-
 const updateDraftOrder = async (req, res) => {
-    let checkProject = await Project.findOne({ slug: req.params.slug }).lean();
+    const checkProject = await Project.findOne({
+        slug: req.params.slug,
+    }).lean();
     if (!checkProject)
         throw new Error(`Project "${req.params.slug}" not found`);
 
-    const order = await runQueriesOnOrder(req, res);
+    const checkOrder = await Order.findById(req.query.orderId).lean();
 
-    if (!order.totalCost) {
-        return true;
-    }
+    const order = await runQueriesOnOrder(req, res);
 
     const calculatedOrder = await calculateOrder(order);
     await addPaymentsToOrder(calculatedOrder);
+
+    if (checkOrder.totalCost != calculatedOrder.totalCost) {
+        await saveLog(
+            logTemplates({
+                type: 'orderTotalCostChanged',
+                entity: order,
+                changes: [
+                    {
+                        key: 'totalCost',
+                        oldValue: `${checkOrder.totalCost} ${checkOrder.currency}`,
+                        newValue: `${calculatedOrder.totalCost} ${calculatedOrder.currency}`,
+                    },
+                ],
+                actor: req.session.user,
+            }),
+        );
+    }
 
     return true;
 };
@@ -205,6 +223,25 @@ const createDraftOrder = async (req, res) => {
         });
 
         await order.save();
+
+        await saveLog(
+            logTemplates({
+                type: 'orderCreated',
+                entity: order,
+                actor: req.session.user,
+            }),
+        );
+
+        project.selection = updatedProject;
+
+        await saveLog(
+            logTemplates({
+                type: 'orderProjectSelection',
+                entity: order,
+                project,
+                actor: req.session.user,
+            }),
+        );
 
         const leanOrder = order.toObject();
         const calculatedOrder = await calculateOrder(leanOrder);
@@ -340,12 +377,30 @@ const getSingleOrder = async (req, res) => {
     return order;
 };
 
-const updateOrderStatus = async (req, status) => {
+const updateOrderStatus = async (req, res) => {
     const orderId = req.params.orderId || req.query.orderId;
-    await Order.updateOne({ _id: orderId }, { $set: { status: status } });
-    return {
-        message: 'Order status changed!',
-    };
+    const { status } = req.body;
+    const checkOrder = await Order.findById(orderId).lean();
+    const order = await Order.findOneAndUpdate(
+        { _id: orderId },
+        { $set: { status: status } },
+        { new: true, lean: true },
+    );
+    await saveLog(
+        logTemplates({
+            type: 'orderStatusChanged',
+            entity: order,
+            changes: [
+                {
+                    key: 'status',
+                    oldValue: checkOrder.status,
+                    newValue: order.status,
+                },
+            ],
+            actor: req.session.user,
+        }),
+    );
+    return order;
 };
 
 const addPaymentsToOrder = async (order) => {
@@ -495,5 +550,5 @@ module.exports = {
     addPaymentsToOrder,
     openOrderProjectWithEntries,
     getPendingOrderEntries,
-    formatOrder
+    formatOrder,
 };

@@ -3,14 +3,14 @@
     <h3 class="card-title">Updates</h3>
   </div>
 
-  {{#with data.entryLogs as |log|}}
+  {{#with data.orderLogs as |log|}}
   <div class="card-header d-flex align-items-center">
     <p class="m-0 text-secondary">Page <span>{{log.currentPage}}</span> of <span>{{log.totalPages}}</span></p>
     <ul class="pagination m-0 ms-auto">
       <li class="page-item {{#if (eq log.hasPrevPage false)}}disabled{{/if}}">
         <a class="page-link" tabindex="-1" aria-disabled="true"
-          my-href="/getSingleEntryLogs/{{../data.entry._id}}/project/{{../data.project.slug}}?page={{dec log.currentPage}}"
-          onclick="getEntryLogs(this)">
+          my-href="/getSingleOrderLogs/{{../data.order._id}}?page={{dec log.currentPage}}"
+          onclick="getOrderLogs(this)">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
             <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
@@ -21,14 +21,14 @@
       {{#each log.pagesArray}}
       <li class="page-item {{#if (eq log.currentPage this)}}active{{/if}}">
         <a class="page-link"
-          my-href="/getCustomerLogs/{{../../data.customer._id}}/project/{{../data.project.slug}}?page={{this}}"
-          onclick="getEntryLogs(this)">{{this}}</a>
+          my-href="/getSingleOrderLogs/{{../../data.order._id}}?page={{this}}"
+          onclick="getOrderLogs(this)">{{this}}</a>
       </li>
       {{/each}}
       <li class="page-item {{#if (eq log.hasNextPage false)}}disabled{{/if}}">
         <a class="page-link" tabindex="-1" aria-disabled="true"
-          my-href="/getSingleEntryLogs/{{../data.entry._id}}/project/{{../data.project.slug}}?page={{inc log.currentPage}}"
-          onclick="getEntryLogs(this)">
+          my-href="/getSingleOrderLogs/{{../data.order._id}}?page={{inc log.currentPage}}"
+          onclick="getOrderLogs(this)">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
             <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
@@ -40,10 +40,10 @@
   </div>
   {{/with}}
   <div class="card-body">
-    {{#if data.entryLogs}}
+    {{#if data.orderLogs}}
     <ul class="steps steps-vertical">
-      {{#each data.entryLogs.logs as |log|}}
-      {{> components/showLogSteps log=log showActor=true showEntity=false}}
+      {{#each data.orderLogs.logs as |log|}}
+      {{> components/showLogSteps log=log showActor=true showEntity=true}}
       {{/each}}
     </ul>
     {{else}}

@@ -1,76 +1,60 @@
- {{#each data.activity.logs as |log|}}
-    <div class="list-group-item">
-        <div class="row">
-            <div class="col-auto">
-                <a href="/{{log.actorType}}/{{log.actor._id}}">
-                    <span class="avatar">{{getFirstTwoLetters log.actor.name}}</span>
-                </a>
-            </div>
-            <div class="col">
-            <div class="">
-                {{#if log.entity.name}}
-                    {{#if (eq log.entityType 'entry')}}
-                        <a href="{{log.url}}">{{log.entity.name}}</a> 
-                        {{lowerCaseFirstLetter log.action}}
-                        {{#if log.project}} in <a href="/project/{{log.project.slug}}">{{log.project.name}}</a> project {{/if}}
-                    {{/if}}
-                    {{#if (eq log.entityType 'project')}}
-                        <a href="{{log.url}}">{{log.entity.name}}</a> 
-                        {{lowerCaseFirstLetter log.action}} project
-                        {{#if log.project}} in <a href="/project/{{log.project.slug}}">{{log.project.name}}</a> project {{/if}}
-                    {{/if}}
-                    {{#if (eq log.entityType 'customer')}}
-                        {{log.action}} in
-                        <a href="{{log.url}}">{{log.entity.name}}</a> 
-                        {{#if log.project}} in <a href="/project/{{log.project.slug}}">{{log.project.name}}</a> project {{/if}}
-                    {{/if}}
-                    {{#if (eq log.entityType 'user')}}
-                        {{log.action}} in
-                        <a href="{{log.url}}">{{log.entity.name}}</a> 
-                        {{#if log.project}} in <a href="/project/{{log.project.slug}}">{{log.project.name}}</a> project {{/if}}
-                    {{/if}}
-                {{else}}
-                <a href="{{log.url}}" class="">{{log.action}}</a> {{#if log.project}} in <a href="/project/{{log.project.slug}}">{{log.project.name}}</a> project {{/if}}
-                {{/if}}
-                {{#if log.changes}}
-                    {{#each log.changes}}
-                    <br>
-                    <span class="badge bg-green-lt"></b3>{{camelCaseToNormalString this.key}}</span>
-                        {{#if this.oldValue}}
-                        <span class="text-decoration-line-through">{{this.oldValue}}</span>
-                        <span>{{this.newValue}}</span>
-                        {{/if}}
-                        {{#if this.changes}}
-                            {{#each this.changes as |change|}}
-                                {{#if this.details}}
-                                <span class="badge bg-grey-lt">{{this.fieldName}}</span>
-                                <span class="text-strong">{{capitalizeFirstLetter this.action}}</span>
-                                {{else}}
-                                <span class="badge bg-grey-lt">{{camelCaseToNormalString this.key}}</span>
-                                <span class="text-decoration-line-through">{{this.oldValue}}</span>
-                                <span>{{this.newValue}}</span>
-                                {{/if}}
-                            {{/each}}
-                        {{/if}}
-                    {{/each}}
-                {{/if}}
-            </div>
-            <div class="text-secondary">{{timeAgo log.timestamp}}</div>
-            </div>
-            <div class="col-auto align-self-center">
+<div class="card-body">
+    {{#if data.activity.logs}}
+    <ul class="steps steps-vertical steps-red">
+        {{#each data.activity.logs as |log|}}
+        <li class="step-item">
+            <div class="d-flex align-items-center mb-1">
+
                 {{#if (eq log.color 'red')}}
-                <div class="status-dot bg-red d-block"></div>
+                <div class="status-dot bg-red d-block me-2"></div>
                 {{/if}}
                 {{#if (eq log.color 'blue')}}
-                <div class="status-dot bg-blue d-block"></div>
+                <div class="status-dot bg-blue d-block me-2"></div>
                 {{/if}}
                 {{#if (eq log.color 'green')}}
-                <div class="status-dot bg-green d-block"></div>
+                <div class="status-dot bg-green d-block me-2"></div>
                 {{/if}}
                 {{#if (eq log.color 'grey')}}
-                <div class="status-dot bg-grey d-block"></div>
+                <div class="status-dot bg-grey d-block me-2"></div>
+                {{/if}}
+
+                <span class="badge">{{formatTime log.timestamp}}</span><span
+                    class="badge bg-transparent fs-5 mx-1">by</span><span class="badge"><a
+                        href="/{{log.actorType}}/{{log.actor._id}}">{{log.actor.name}}</a></span>
+            </div>
+            <div class="">
+                {{{log.action}}}
+                {{#if log.changes}}
+                {{#each log.changes}}
+                <br>
+                <span class="badge bg-green-lt mt-1"></b3>{{camelCaseToNormalString this.key}}</span>
+                {{#if this.oldValue}}
+                <span class="text-decoration-line-through">{{this.oldValue}}</span>
+                {{/if}}
+                {{#if this.newValue}}
+                <span>{{this.newValue}}</span>
+                {{/if}}
+                {{#if this.changes}}
+                {{#each this.changes as |change|}}
+                {{#if this.details}}
+                <span class="badge bg-grey-lt">{{this.fieldName}}</span>
+                <span class="text-strong">{{capitalizeFirstLetter this.action}}</span>
+                {{else}}
+                <span class="badge bg-grey-lt">{{camelCaseToNormalString this.key}}</span>
+                <span class="text-decoration-line-through">{{this.oldValue}}</span>
+                <span>{{this.newValue}}</span>
+                {{/if}}
+                {{/each}}
+                {{/if}}
+                {{/each}}
                 {{/if}}
             </div>
-        </div>
+        </li>
+        {{/each}}
+    </ul>
+    {{else}}
+    <div class="text-center">
+        <p>No logs stored for this entity!</p>
     </div>
-{{/each}}
+    {{/if}}
+</div>

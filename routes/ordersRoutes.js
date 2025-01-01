@@ -55,7 +55,20 @@ router.get(
     '/order/:orderId',
     authenticate,
     authorize('viewOrders'),
+    allProjects,
     ordersController.viewOrder,
+);
+router.get(
+    '/getSingleOrderLogs/:orderId',
+    authenticate,
+    authorize('viewOrders'),
+    ordersController.getSingleOrderLogs,
+);
+router.get(
+    '/getOrderData/:orderId',
+    authenticate,
+    authorize('viewOrders'),
+    ordersController.getOrderData,
 );
 
 module.exports = router;

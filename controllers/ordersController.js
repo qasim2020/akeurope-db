@@ -1,7 +1,12 @@
 const Customer = require('../models/Customer');
 const Project = require('../models/Project');
 const Order = require('../models/Order');
-const { saveLog, customerLogs, visibleLogs } = require('../modules/logAction');
+const {
+    saveLog,
+    customerLogs,
+    visibleLogs,
+    orderLogs,
+} = require('../modules/logAction');
 const { logTemplates } = require('../modules/logTemplates');
 const { getChanges } = require('../modules/getChanges');
 const {
@@ -11,7 +16,12 @@ const {
     addPaymentsToOrder,
     openOrderProjectWithEntries,
 } = require('../modules/orders');
-const { generateInvoice, deleteInvoice, sendInvoiceToCustomer} = require('../modules/invoice');
+const {
+    generateInvoice,
+    deleteInvoice,
+    sendInvoiceToCustomer,
+} = require('../modules/invoice');
+const Log = require('../models/Log');
 
 exports.viewOrders = async (req, res) => {
     try {
@@ -56,9 +66,29 @@ exports.viewOrder = async (req, res) => {
                     req.session.user.role.slice(1),
                 role: req.userPermissions,
                 logs: await visibleLogs(req, res),
+                orderLogs: await orderLogs(req, res),
                 sidebarCollapsed: req.session.sidebarCollapsed,
                 projects: req.allProjects,
+                customers: await Customer.find().lean(),
                 activeMenu: 'orders',
+                order,
+            },
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(404).render('error', {
+            heading: 'Server Error',
+            error: error,
+        });
+    }
+};
+
+exports.getOrderData = async (req, res) => {
+    try {
+        const order = await getSingleOrder(req, res); 
+        res.render('partials/showOrder', {
+            layout: false,
+            data: {
                 order,
             },
         });
@@ -132,25 +162,12 @@ exports.getOrderTotalCost = async (req, res) => {
 
 exports.changeOrderStatus = async (req, res) => {
     try {
-        const orderId = req.params.orderId;
-        const { status } = req.body;
-        const order = await Order.findOneAndUpdate(
-            { _id: orderId }, 
-            {
-                $set: {
-                    status: status,
-                },
-            },
-            {
-                new: true, 
-                lean: true, 
-            }
-        );
+        const order = await updateOrderStatus(req,res);
         res.status(200).render('partials/components/invoice-status-buttons', {
             layout: false,
             data: {
-                order
-            }
+                order,
+            },
         });
     } catch (error) {
         console.log(error);
@@ -174,7 +191,7 @@ exports.deleteOrder = async (req, res) => {
     }
 };
 
-exports.emailInvoice = async(req,res) => {
+exports.emailInvoice = async (req, res) => {
     try {
         const order = await Order.findById(req.params.orderId).lean();
         const customer = await Customer.findById(order.customerId).lean();
@@ -183,10 +200,27 @@ exports.emailInvoice = async(req,res) => {
     } catch (error) {
         console.log(error);
         res.status(404).send({
-            error: error
-        })
+            error: error,
+        });
     }
-}
+};
+
+exports.getSingleOrderLogs = async (req, res) => {
+    try {
+        res.render('partials/showOrderLogs', {
+            layout: false,
+            data: {
+                order: { _id: req.params.orderId },
+                orderLogs: await orderLogs(req, res),
+            },
+        });
+    } catch (error) {
+        res.status(500).json({
+            error: 'Error occured while fetching logs',
+            details: error.message,
+        });
+    }
+};
 
 // exports.checkout = async (req, res) => {
 //     try {

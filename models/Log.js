@@ -7,7 +7,6 @@ const logSchema = new mongoose.Schema({
     actorId: mongoose.Schema.Types.ObjectId,
     action: String,
     changes: [],
-    url: String, 
     timestamp: { type: Date, default: Date.now },
     color: String,
     isNotification: { type: Boolean, default: false },

@@ -144,6 +144,19 @@ const camelCaseToNormalString = function(string) {
     .replace(/^./, str => str.toUpperCase());
 }
 
+const camelCaseWithCommaToNormalString = function(string) {
+    string = string ? string : "";
+    return string
+        .split(',')
+        .map(part =>
+            part
+                .trim() 
+                .replace(/([a-z])([A-Z])/g, '$1 $2') 
+                .replace(/^./, str => str.toUpperCase()) 
+        )
+        .join(', ');
+}
+
 const getSvgForFirstLetter = function(str) {
     if (!str || typeof str !== 'string') return '<svg></svg>'; 
     const firstLetter = str.trim().charAt(0).toLowerCase(); 
@@ -179,6 +192,7 @@ module.exports = {
     findPrimaryKey,
     timeAgo,
     camelCaseToNormalString,
+    camelCaseWithCommaToNormalString,
     getSvgForFirstLetter,
     regexMatch,
     getValueOfFieldInArray
