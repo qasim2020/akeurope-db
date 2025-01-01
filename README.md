@@ -1,5 +1,9 @@
 # akeurope-db
 
+### View Single Invoice with History
+
+<img width="1470" alt="Screenshot 2025-01-01 at 8 36 57 PM" src="https://github.com/user-attachments/assets/ec9c2626-32b7-4430-9bca-668a447a8432" />
+
 ### Create invoice
 
 <img width="1470" alt="Screenshot 2024-12-18 at 3 54 01 AM" src="https://github.com/user-attachments/assets/2ab8359e-4228-44e3-bcb8-b59b7036319f" />
