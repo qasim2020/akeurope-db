@@ -206,14 +206,7 @@ const findConnectedIds = async (logs) => {
             log.entity = await User.findById(log.entityId).lean();
         } else if (log.entityType == 'customer') {
             log.entity = await Customer.findById(log.entityId).lean();
-        } else if (log.entityType == 'project') {
-            log.entity = await Project.findById(log.entityId).lean();
-        } else if (log.entityType == 'entry') {
-            const slug = log.url.split('/').pop();
-            const model = await createDynamicModel(slug);
-            log.entity = await model.findById(log.entityId).lean();
-            log.project = await Project.findOne({ slug: slug }).lean();
-        }
+        } 
     }
     return logs;
 };

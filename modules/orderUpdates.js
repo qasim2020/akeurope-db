@@ -134,7 +134,6 @@ const runQueriesOnOrder = async (req, res) => {
                 },
             );
         }
-
         await saveLog(
             logTemplates({
                 type: 'orderColumnSubscriptionChanged',
@@ -144,12 +143,37 @@ const runQueriesOnOrder = async (req, res) => {
                 changes: [
                     {
                         key: 'Subscriptions',
-                        newValue: subscriptions,
+                        newValue: camelCaseWithCommaToNormalString(subscriptions),
                     },
                 ],
                 actor: req.session.user,
             }),
         );
+
+        const project = existingOrder.projects.find(
+            (p) => p.slug === projectSlug,
+        );
+        project.detail = checkProject;
+        const model = await createDynamicModel(project.slug);
+        for (const entryInOrder of project.entries) {
+            const entry = await model.findById(entryInOrder.entryId).lean();
+            await saveLog(
+                logTemplates({
+                    type: 'entrySubscriptionChanged',
+                    entity: entry,
+                    order,
+                    project,
+                    changes: [
+                        {
+                            key: 'Subscriptions',
+                            oldValue: camelCaseWithCommaToNormalString(entryInOrder.selectedSubscriptions.join(',')),
+                            newValue: camelCaseWithCommaToNormalString(subscriptions),
+                        },
+                    ],
+                    actor: req.session.user,
+                }),
+            );
+        }
     }
 
     if (req.query.entryId && req.query.subscriptions) {

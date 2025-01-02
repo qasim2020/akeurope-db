@@ -13,6 +13,7 @@ const {
 } = require('../modules/ordersFetchEntries');
 const { saveLog } = require('./logAction');
 const { logTemplates } = require('./logTemplates');
+const { capitalizeFirstLetter } = require('./helpers');
 
 const createPagination = ({
     req,
@@ -363,6 +364,9 @@ const formatOrder = async (req, order) => {
 const getSingleOrder = async (req, res) => {
     const checkOrder = await Order.findOne({ _id: req.params.orderId }).lean();
     let order;
+    if (!checkOrder) {
+        return false;
+    }
     if (checkOrder.totalCost == undefined) {
         const calculatedOrder = await calculateOrder(checkOrder);
         await addPaymentsToOrder(calculatedOrder);
@@ -393,8 +397,8 @@ const updateOrderStatus = async (req, res) => {
             changes: [
                 {
                     key: 'status',
-                    oldValue: checkOrder.status,
-                    newValue: order.status,
+                    oldValue: capitalizeFirstLetter(checkOrder.status),
+                    newValue: capitalizeFirstLetter(order.status),
                 },
             ],
             actor: req.session.user,

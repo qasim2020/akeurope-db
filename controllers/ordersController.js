@@ -180,7 +180,13 @@ exports.changeOrderStatus = async (req, res) => {
 exports.deleteOrder = async (req, res) => {
     try {
         const orderId = req.params.orderId;
+        const order = await Order.findById(orderId).lean();
         await deleteInvoice(orderId);
+        await saveLog(logTemplates({
+            type: 'orderDeleted',
+            entity: order,
+            actor: req.session.user,
+        }))
         await Order.deleteOne({ _id: orderId });
         res.status(200).send('Order & Invoice deleted!');
     } catch (error) {

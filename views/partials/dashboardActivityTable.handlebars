@@ -1,55 +1,8 @@
 <div class="card-body">
     {{#if data.activity.logs}}
-    <ul class="steps steps-vertical steps-red">
+    <ul class="steps steps-vertical">
         {{#each data.activity.logs as |log|}}
-        <li class="step-item">
-            <div class="d-flex align-items-center mb-1">
-
-                {{#if (eq log.color 'red')}}
-                <div class="status-dot bg-red d-block me-2"></div>
-                {{/if}}
-                {{#if (eq log.color 'blue')}}
-                <div class="status-dot bg-blue d-block me-2"></div>
-                {{/if}}
-                {{#if (eq log.color 'green')}}
-                <div class="status-dot bg-green d-block me-2"></div>
-                {{/if}}
-                {{#if (eq log.color 'grey')}}
-                <div class="status-dot bg-grey d-block me-2"></div>
-                {{/if}}
-
-                <span class="badge">{{formatTime log.timestamp}}</span><span
-                    class="badge bg-transparent fs-5 mx-1">by</span><span class="badge"><a
-                        href="/{{log.actorType}}/{{log.actor._id}}">{{log.actor.name}}</a></span>
-            </div>
-            <div class="">
-                {{{log.action}}}
-                {{#if log.changes}}
-                {{#each log.changes}}
-                <br>
-                <span class="badge bg-green-lt mt-1"></b3>{{camelCaseToNormalString this.key}}</span>
-                {{#if this.oldValue}}
-                <span class="text-decoration-line-through">{{this.oldValue}}</span>
-                {{/if}}
-                {{#if this.newValue}}
-                <span>{{this.newValue}}</span>
-                {{/if}}
-                {{#if this.changes}}
-                {{#each this.changes as |change|}}
-                {{#if this.details}}
-                <span class="badge bg-grey-lt">{{this.fieldName}}</span>
-                <span class="text-strong">{{capitalizeFirstLetter this.action}}</span>
-                {{else}}
-                <span class="badge bg-grey-lt">{{camelCaseToNormalString this.key}}</span>
-                <span class="text-decoration-line-through">{{this.oldValue}}</span>
-                <span>{{this.newValue}}</span>
-                {{/if}}
-                {{/each}}
-                {{/if}}
-                {{/each}}
-                {{/if}}
-            </div>
-        </li>
+        {{>components/showLogSteps log=log}}
         {{/each}}
     </ul>
     {{else}}

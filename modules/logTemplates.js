@@ -178,7 +178,7 @@ const logTemplates = ({
             order && project && changes
                 ? {
                       ...commons('entry', entity._id),
-                      action: `Subscription changed for entry <a href="/entry/${entity._id}/project/${project.slug}">${entity.name}</a> in project <a href="/project/${project.slug}">${project.detail.name}</a> of <a href="/order/${order._id}">invoice-${order.orderNo}</a>`,
+                      action: `Subscription changed for entry <a href="/entry/${entity._id}/project/${project.slug}">${entity.name}</a> in project <a href="/project/${project.slug}">${project.detail ? project.detail.name : project.name}</a> of <a href="/order/${order._id}">invoice-${order.orderNo}</a>`,
                       changes,
                       color: 'blue',
                   }
@@ -248,9 +248,9 @@ const logTemplates = ({
             changes,
             color: 'blue',
         },
-        orderDeleted: order && {
+        orderDeleted: {
             ...commons('order', entity._id),
-            action: `<a href="/order/${order._id}">invoice-${order.orderNo}</a> deleted`,
+            action: `<a href="/order/${entity._id}">Invoice-${entity.orderNo}</a> deleted`,
             color: 'red',
         },
     };

@@ -6,6 +6,7 @@
         <h2 class="page-title"> Invoice
         </h2>
       </div>
+      {{#if data.order}}
       <div class="col-auto ms-auto d-print-none">
         <div class="btn-list">
           <a href="#" class="btn btn-primary d-none d-md-inline-block" id="#editOrder" data-bs-toggle="modal"
@@ -35,6 +36,7 @@
           </a>
         </div>
       </div>
+      {{/if}}
     </div>
   </div>
 </div>
@@ -50,11 +52,11 @@
 <script src="/static/orders.js"></script>
 <script>
 
-  const refreshContainers = function(modal) {
-   const hrefOrder = `/getOrderData/${$(modal).attr('order-id')}`;
-   loadOrderInContainer(modal, hrefOrder);
-   const hrefLogs = `/getSingleOrderLogs/${$(modal).attr('order-id')}?page=1`;
-   getOrderLogs(modal, hrefLogs);
+  const refreshContainers = function (modal) {
+    const hrefOrder = `/getOrderData/${$(modal).attr('order-id')}`;
+    loadOrderInContainer(modal, hrefOrder);
+    const hrefLogs = `/getSingleOrderLogs/${$(modal).attr('order-id')}?page=1`;
+    getOrderLogs(modal, hrefLogs);
   }
 
   const loadOrderInContainer = function (elem, href) {
