@@ -5,6 +5,7 @@ const logTemplates = ({
     project,
     order,
     entry,
+    color,
     customer,
     changes,
 }) => {
@@ -143,7 +144,7 @@ const logTemplates = ({
         userAcceptedInvite: {
             ...commons('user', entity._id),
             action: `Administrator <a href="/user/${entity._id}">${entity.name}</a> accepted invite`,
-            color: 'blue',
+            color: 'green',
             isNotification: true,
         },
         sentEmailUserInvite: {
@@ -156,7 +157,7 @@ const logTemplates = ({
         orderCreated: {
             ...commons('order', entity._id),
             action: `New <a href="/order/${entity._id}">invoice-${entity.orderNo}</a> created`,
-            color: 'red',
+            color: 'green',
         },
         customerRemovedFromOrder:
             order && customer
@@ -174,11 +175,70 @@ const logTemplates = ({
                       color: 'blue',
                   }
                 : null,
+        entryAddedToOrder:
+            order && project
+                ? {
+                      ...commons('entry', entity._id),
+                      action: `<a href="/entry/${entity._id}/project/${
+                          project.slug
+                      }">${entity.name}</a> in project <a href="/project/${
+                          project.slug
+                      }">${
+                          project.detail ? project.detail.name : project.name
+                      }</a> selected in <a href="/order/${order._id}">invoice-${
+                          order.orderNo
+                      }</a>`,
+                      changes,
+                      color: 'green',
+                  }
+                : null,
+        entryRemovedFromOrder:
+            order && project
+                ? {
+                      ...commons('entry', entity._id),
+                      action: `<a href="/entry/${entity._id}/project/${
+                          project.slug
+                      }">${entity.name}</a> in project <a href="/project/${
+                          project.slug
+                      }">${
+                          project.detail ? project.detail.name : project.name
+                      }</a> removed from <a href="/order/${
+                          order._id
+                      }">invoice-${order.orderNo}</a>`,
+                      changes,
+                      color: 'red',
+                  }
+                : null,
+        entryOrderStatusChanged:
+            order && project
+                ? {
+                      ...commons('entry', entity._id),
+                      action: `<a href="/entry/${entity._id}/project/${
+                          project.slug
+                      }">${entity.name}</a> in project <a href="/project/${
+                          project.slug
+                      }">${
+                          project.detail ? project.detail.name : project.name
+                      }</a> status changed in <a href="/order/${
+                          order._id
+                      }">invoice-${order.orderNo}</a>`,
+                      changes,
+                      color: color ? color : 'blue',
+                  }
+                : null,
         entrySubscriptionChanged:
             order && project && changes
                 ? {
                       ...commons('entry', entity._id),
-                      action: `Subscription changed for entry <a href="/entry/${entity._id}/project/${project.slug}">${entity.name}</a> in project <a href="/project/${project.slug}">${project.detail ? project.detail.name : project.name}</a> of <a href="/order/${order._id}">invoice-${order.orderNo}</a>`,
+                      action: `Subscription changed for <a href="/entry/${
+                          entity._id
+                      }/project/${project.slug}">${
+                          entity.name
+                      }</a> in project <a href="/project/${project.slug}">${
+                          project.detail ? project.detail.name : project.name
+                      }</a> of <a href="/order/${order._id}">invoice-${
+                          order.orderNo
+                      }</a>`,
                       changes,
                       color: 'blue',
                   }

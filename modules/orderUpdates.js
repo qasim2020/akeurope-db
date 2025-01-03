@@ -284,20 +284,39 @@ const runQueriesOnOrder = async (req, res) => {
             },
         );
 
-        const newProject = await Project.findOne({
-            slug: updatedProject.slug,
-        }).lean();
 
-        newProject.selection = updatedProject;
+        checkProject.selection = updatedProject;
 
         await saveLog(
             logTemplates({
                 type: 'orderProjectSelection',
                 entity: order,
-                project: newProject,
+                project: checkProject,
                 actor: req.session.user,
             }),
         );
+
+        updatedProject.detail = checkProject;
+        const model = await createDynamicModel(project.slug);
+        for (const entryInOrder of updatedProject.entries) {
+            const entry = await model.findById(entryInOrder.entryId).lean();
+            debugger;
+            await saveLog(
+                logTemplates({
+                    type: 'entrySubscriptionChanged',
+                    entity: entry,
+                    order,
+                    project: updatedProject,
+                    changes: [
+                        {
+                            key: 'Subscriptions',
+                            newValue: camelCaseWithCommaToNormalString(entryInOrder.selectedSubscriptions.join(',')),
+                        },
+                    ],
+                    actor: req.session.user,
+                }), 
+            ); 
+        }
     }
 
     if (req.query.replaceProject) {
@@ -316,6 +335,7 @@ const runQueriesOnOrder = async (req, res) => {
                 lean: true,
             },
         );
+
         const newProject = await Project.findOne({
             slug: updatedProject.slug,
         }).lean();
@@ -328,8 +348,38 @@ const runQueriesOnOrder = async (req, res) => {
                 actor: req.session.user,
             }),
         );
-    }
+        
+        updatedProject.detail = checkProject;
+        const model = await createDynamicModel(project.slug);
 
+        const oldProject = existingOrder.projects.find(p => p.slug === checkProject.slug);
+        oldProject.detail = checkProject;
+        for (const entryInOrder of oldProject.entries) {
+            const entry = await model.findById(entryInOrder.entryId).lean();
+            await saveLog(
+                logTemplates({
+                    type: 'entryRemovedFromOrder',
+                    entity: entry,
+                    order,
+                    project: oldProject,
+                    actor: req.session.user,
+                }), 
+            ); 
+        }
+
+        for (const entryInOrder of updatedProject.entries) {
+            const entry = await model.findById(entryInOrder.entryId).lean();
+            await saveLog(
+                logTemplates({
+                    type: 'entryAddedToOrder',
+                    entity: entry,
+                    order,
+                    project: updatedProject,
+                    actor: req.session.user,
+                }), 
+            ); 
+        }
+    }
     if (req.query.deleteProject) {
         order = await Order.findOneAndUpdate(
             { _id: orderId, 'projects.slug': projectSlug },
@@ -344,28 +394,27 @@ const runQueriesOnOrder = async (req, res) => {
         await saveLog(
             logTemplates({
                 type: 'orderProjectRemoved',
-                entity: checkProject,
+                entity: order,
                 order,
                 project: checkProject,
                 actor: req.session.user,
             }),
         );
-    }
-
-    if (req.query.deleteOrder) {
-        await Order.deleteOne({ _id: orderId });
-
-        await saveLog(
-            logTemplates({
-                type: 'orderDeleted',
-                entity: existingOrder,
-                actor: req.session.user,
-            }),
-        );
-
-        return {
-            message: 'Order deleted!',
-        };
+        const oldProject = existingOrder.projects.find(p => p.slug === checkProject.slug);
+        oldProject.detail = checkProject;
+        const model = await createDynamicModel(project.slug); 
+        for (const entryInOrder of oldProject.entries) {
+            const entry = await model.findById(entryInOrder.entryId).lean();
+            await saveLog(
+                logTemplates({
+                    type: 'entryRemovedFromOrder',
+                    entity: entry,
+                    order,
+                    project: oldProject,
+                    actor: req.session.user,
+                }), 
+            ); 
+        }
     }
 
     return order;

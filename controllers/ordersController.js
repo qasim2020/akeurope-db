@@ -22,6 +22,7 @@ const {
     sendInvoiceToCustomer,
 } = require('../modules/invoice');
 const Log = require('../models/Log');
+const { createDynamicModel } = require('../models/createDynamicModel');
 
 exports.viewOrders = async (req, res) => {
     try {
@@ -85,7 +86,7 @@ exports.viewOrder = async (req, res) => {
 
 exports.getOrderData = async (req, res) => {
     try {
-        const order = await getSingleOrder(req, res); 
+        const order = await getSingleOrder(req, res);
         res.render('partials/showOrder', {
             layout: false,
             data: {
@@ -162,7 +163,7 @@ exports.getOrderTotalCost = async (req, res) => {
 
 exports.changeOrderStatus = async (req, res) => {
     try {
-        const order = await updateOrderStatus(req,res);
+        const order = await updateOrderStatus(req, res);
         res.status(200).render('partials/components/invoice-status-buttons', {
             layout: false,
             data: {
@@ -182,11 +183,29 @@ exports.deleteOrder = async (req, res) => {
         const orderId = req.params.orderId;
         const order = await Order.findById(orderId).lean();
         await deleteInvoice(orderId);
-        await saveLog(logTemplates({
-            type: 'orderDeleted',
-            entity: order,
-            actor: req.session.user,
-        }))
+        await saveLog(
+            logTemplates({
+                type: 'orderDeleted',
+                entity: order,
+                actor: req.session.user,
+            }),
+        );
+        for (const project of order.projects) {
+            project.detail = await Project.findOne({slug: project.slug}).lean();
+            const model = await createDynamicModel(project.slug);
+            for (const entryInOrder of project.entries) {
+                const entry = await model.findById(entryInOrder.entryId).lean();
+                await saveLog(
+                    logTemplates({
+                        type: 'entryRemovedFromOrder',
+                        entity: entry,
+                        order,
+                        project,
+                        actor: req.session.user,
+                    }),
+                );
+            }
+        };
         await Order.deleteOne({ _id: orderId });
         res.status(200).send('Order & Invoice deleted!');
     } catch (error) {

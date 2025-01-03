@@ -5,6 +5,7 @@ const Order = require('../models/Order');
 const Customer = require('../models/Customer');
 const nodemailer = require('nodemailer');
 const handlebars = require('handlebars');
+const { Error } = require('mongoose');
 
 const generateInvoice = async (order) => {
     const invoiceDir = path.join(__dirname, '../../invoices');
@@ -161,6 +162,9 @@ function deletePath(filePath) {
 
 const deleteInvoice = async (orderId) => {
     const order = await Order.findOne({ _id: orderId });
+    if (!order) {
+        throw new Error('Order does not exist');
+    }
     const customer = await Customer.findOne({ _id: order.customerId });
     const invoiceDir = path.join(__dirname, '../../invoices');
     const invoicePath = path.join(

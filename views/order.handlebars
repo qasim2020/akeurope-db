@@ -6,7 +6,7 @@
         <h2 class="page-title"> Invoice
         </h2>
       </div>
-      {{#if data.order}}
+      {{#if data.order.customer}}
       <div class="col-auto ms-auto d-print-none">
         <div class="btn-list">
           <a href="#" class="btn btn-primary d-none d-md-inline-block" id="#editOrder" data-bs-toggle="modal"
@@ -48,7 +48,9 @@
     </div>
   </div>
 </div>
+{{#if data.order.customer}}
 {{> emptyOrderModal}}
+{{/if}}
 <script src="/static/orders.js"></script>
 <script>
 

@@ -361,7 +361,7 @@ exports.getSingleEntryLogs = async (req, res) => {
             _id: req.params.entryId,
         }).lean();
 
-        entry = fetchEntrySubscriptionsAndPayments(entry);
+        entry = await fetchEntrySubscriptionsAndPayments(entry);
         res.render('partials/showEntryLogs', {
             layout: false,
             data: {
@@ -380,7 +380,6 @@ exports.getSingleEntryLogs = async (req, res) => {
 
 exports.getPaginatedEntriesForDraftOrder = async (req, res) => {
     try {
-
         if (!req.query.orderId) {
             const orderId = await createDraftOrder(req, res);
             req.query.orderId = orderId;

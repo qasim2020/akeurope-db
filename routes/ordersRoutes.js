@@ -12,7 +12,7 @@ router.get(
     ordersController.viewOrders,
 );
 router.get(
-    '/getOrdersData/',
+    '/getOrdersData',
     authenticate,
     authorize('viewOrders'),
     allProjects,

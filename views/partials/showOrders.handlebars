@@ -302,21 +302,18 @@
           d="M601.002 350.178C579.177 366.095 549.387 377.694 514.39 381.184C511.347 375.792 508.372 370.361 505.466 364.894C501.376 357.2 497.519 349.634 493.896 342.197C505.942 349.292 519.121 354.256 532.854 356.871C555.749 361.042 579.355 358.723 601.002 350.178Z"
           fill="black" opacity="0.1"></path>
       </svg></div>
-    <p class="empty-title">No results found</p>
-    <p class="empty-subtitle text-secondary">
-      Try adjusting your search or filter to find what you're looking for.
-    </p>
+    <p class="empty-title">No payments found</p>
     {{#if (findInArray data.role "createCustomers")}}
     <div class="empty-action">
       <a href="#" class="btn btn-primary d-none d-sm-inline-block" id="" data-bs-toggle="modal"
-        data-bs-target="#modal-new-customer">
+        data-bs-target="#modal-new-order">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
           stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
           <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
           <path d="M12 5l0 14"></path>
           <path d="M5 12l14 0"></path>
         </svg>
-        Add your first customer
+        Add your first invoice
       </a>
     </div>
     {{/if}}

@@ -36,8 +36,8 @@
               <path d="M14 20l-4 0" />
             </svg>
           </a>
-          {{#if (findInArray data.role "createCustomers")}}
-          <a href="#" class="btn btn-primary d-none d-md-inline-block" id="#createNewCustomer" data-bs-toggle="modal"
+          {{#if (findInArray data.role "createOrders")}}
+          <a href="#" class="btn btn-primary d-none d-md-inline-block" id="createNewOrder" data-bs-toggle="modal"
             data-bs-target="#modal-new-order">
             <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24"
               stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
@@ -103,11 +103,16 @@
 
   }
 
-  const loadOrderInContainer = function (elem, href) {
+  const refreshContainers = function (modal) {
+    const hrefOrder = "?refresh=true";
+    loadOrdersInContainer(modal, hrefOrder);
+  }
+
+  const loadOrdersInContainer = function (elem, href) {
     if (!href) {
       href = $(elem).attr("my-href");
     }
-    const url = `/getOrdersData/${href}`;
+    const url = `/getOrdersData${href}`;
     $.ajax({
       url,
       method: 'GET',
@@ -127,6 +132,14 @@
 
     if (modalExists) {
       return $(`#button-${orderId}`).trigger("click");
+    }
+
+    const isCreateModal = $(document).find(`.modal[order-id=${orderId}]`).length > 0;
+    console.log({isCreateModal});
+    if (isCreateModal) {
+      const modal = new bootstrap.Modal(document.getElementById('modal-new-order'))
+      modal.show();
+      return;
     }
 
     $.ajax({

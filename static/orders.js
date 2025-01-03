@@ -87,6 +87,7 @@ const searchBeneficiaries = function (elem) {
                 .find('.invoice-frame')
                 .attr({ src: `/invoice/${orderId}` })
                 .removeClass('d-none');
+            refreshContainers(modal);
         },
         error: (error) => {
             endSpinner(modal);
@@ -121,7 +122,7 @@ const doSearch = function (elem, href, refreshAll) {
         $(elem).closest('.card-footer').attr('page-type') == 'orders';
 
     if (isDashboardPage) {
-        loadOrderInContainer(elem, href);
+        loadOrdersInContainer(elem, href);
         return;
     }
 

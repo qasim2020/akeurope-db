@@ -175,10 +175,13 @@ const updateDraftOrder = async (req, res) => {
     if (!checkProject)
         throw new Error(`Project "${req.params.slug}" not found`);
 
-    const checkOrder = await Order.findById(req.query.orderId).lean();
-
     const order = await runQueriesOnOrder(req, res);
 
+    if (!order) {
+        return true;
+    }
+
+    const checkOrder = await Order.findById(req.query.orderId).lean();
     const calculatedOrder = await calculateOrder(order);
     await addPaymentsToOrder(calculatedOrder);
 
@@ -365,7 +368,7 @@ const getSingleOrder = async (req, res) => {
     const checkOrder = await Order.findOne({ _id: req.params.orderId }).lean();
     let order;
     if (!checkOrder) {
-        return false;
+        return { _id: req.params.orderId };
     }
     if (checkOrder.totalCost == undefined) {
         const calculatedOrder = await calculateOrder(checkOrder);
@@ -404,6 +407,33 @@ const updateOrderStatus = async (req, res) => {
             actor: req.session.user,
         }),
     );
+    if (checkOrder.status != order.status) {
+        for (const project of order.projects) {
+            const model = await createDynamicModel(project.slug);
+            project.detail = await Project.findOne({slug: project.slug}).lean();
+            for (const entryInOrder of project.entries) {
+                const entry = await model.findById(entryInOrder.entryId).lean();
+                await saveLog(
+                    logTemplates({
+                        type: 'entryOrderStatusChanged',
+                        entity: entry,
+                        order,
+                        project,
+                        actor: req.session.user,
+                        color: order.status == 'paid' ? 'green' : 'blue',
+                        changes: [
+                            {
+                                key: 'status',
+                                oldValue: capitalizeFirstLetter(checkOrder.status),
+                                newValue: capitalizeFirstLetter(order.status),
+                            },
+                        ],
+                    }), 
+                );
+            }
+        }
+    };
+    
     return order;
 };
 
