@@ -39,10 +39,10 @@
         <br>
         <span class="badge bg-green-lt mt-1"></b3>{{camelCaseToNormalString this.key}}</span>
         {{#if this.oldValue}}
-        <span class="text-decoration-line-through">{{this.oldValue}}</span>
+        <span class="text-decoration-line-through">{{{this.oldValue}}}</span>
         {{/if}}
         {{#if this.newValue}}
-        <span>{{this.newValue}}</span>
+        <span>{{{this.newValue}}}</span>
         {{/if}}
         {{#if this.changes}}
         {{#each this.changes as |change|}}

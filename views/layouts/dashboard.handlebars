@@ -279,7 +279,7 @@
         <div class="collapse navbar-collapse" id="sidebar-menu">
           <ul class="navbar-nav pt-lg-3">
             <li class="nav-item">
-              <a class="nav-link {{#if (eq " dashboard" data.activeMenu)}} bg-azure-lt {{/if}}" href="/dashboard">
+              <a class="nav-link {{#if (eq 'dashboard' data.activeMenu)}} bg-azure-lt {{/if}}" href="/dashboard">
                 <span
                   class="nav-link-icon d-lg-inline-block"><!-- Download SVG icon from http://tabler-icons.io/i/home -->
                   <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24"
@@ -297,7 +297,7 @@
             </li>
 
             <li class="nav-item">
-              <a class="nav-link {{#if (eq " customers" data.activeMenu)}}bg-azure-lt{{/if}}" href="/customers">
+              <a class="nav-link {{#if (eq 'customers' data.activeMenu)}}bg-azure-lt{{/if}}" href="/customers">
                 <span class="nav-link-icon d-lg-inline-block">
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -363,10 +363,8 @@
             </li>
 
 
-            <li class="nav-item dropdown show">
-              <a class="nav-link {{#if (eq 'orders' data.activeMenu)}}bg-azure-lt{{/if}} dropdown-toggle"
-                href="#navbar-help" data-bs-toggle="dropdown" data-bs-auto-close="false" role="button"
-                aria-expanded="false">
+            <li class="nav-item">
+              <a class="nav-link {{#if (eq 'orders' data.activeMenu)}}bg-azure-lt{{/if}}" href="/orders" rel="noopener">
                 <span class="nav-link-icon d-lg-inline-block">
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -379,42 +377,13 @@
                   </svg>
                 </span>
                 <span class="nav-link-title">
-                  Payments
+                  Invoices
                 </span>
               </a>
-
-              <div class="dropdown-menu show">
-                <a class="nav-link {{#if (eq 'orders' data.activeMenu)}}bg-azure-lt{{/if}}" href="/orders"
-                  rel="noopener">
-                  <span class="nav-link-icon d-lg-inline-block">
-                    {{{getSvgForFirstLetter 'orders'}}}
-                  </span>
-                  <span class="nav-link-title">
-                    Orders
-                  </span>
-                </a>
-                <a class="nav-link" href="/invoices" target="_blank" rel="noopener">
-                  <span class="nav-link-icon d-lg-inline-block">
-                    {{{getSvgForFirstLetter 'invoices'}}}
-                  </span>
-                  <span class="nav-link-title">
-                    Invoices
-                  </span>
-                </a>
-                <a class="nav-link" href="/subscriptions">
-                  <span class="nav-link-icon d-lg-inline-block">
-                    {{{getSvgForFirstLetter 'subscriptions'}}}
-                  </span>
-                  <span class="nav-link-title">
-                    Subscriptions
-                  </span>
-                </a>
-              </div>
             </li>
 
-
             <li class="nav-item">
-              <a class="nav-link {{#if (eq " users" data.activeMenu)}} bg-azure-lt {{/if}}" href="/users">
+              <a class="nav-link {{#if (eq 'users' data.activeMenu)}} bg-azure-lt {{/if}}" href="/users">
                 <span
                   class="nav-link-icon d-lg-inline-block"><!-- Download SVG icon from http://tabler-icons.io/i/checkbox -->
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
@@ -469,7 +438,7 @@
         <div class="">
           <ul class="navbar-nav pt-lg-3">
             <li class="nav-item">
-              <a class="nav-link {{#if (eq " dashboard" data.activeMenu)}} bg-azure-lt {{/if}}" href="/dashboard"
+              <a class="nav-link {{#if (eq 'dashboard' data.activeMenu)}} bg-azure-lt {{/if}}" href="/dashboard"
                 data-bs-toggle="tooltip" data-bs-title="Dashboard">
                 <span
                   class="nav-link-icon d-md-none d-lg-inline-block"><!-- Download SVG icon from http://tabler-icons.io/i/home -->
@@ -485,7 +454,7 @@
             </li>
 
             <li class="nav-item">
-              <a class="nav-link {{#if (eq " customers" data.activeMenu)}}bg-azure-lt{{/if}}" href="/customers"
+              <a class="nav-link {{#if (eq 'customers' data.activeMenu)}}bg-azure-lt{{/if}}" href="/customers"
                 data-bs-toggle="tooltip" data-bs-title="Customers">
                 <span class="nav-link-icon d-md-none d-lg-inline-block">
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
@@ -506,7 +475,7 @@
             </li>
 
             <li class="nav-item">
-              <a class="nav-link {{#if (eq " allProjects" data.activeMenu)}}bg-azure-lt{{/if}}" href="/projects"
+              <a class="nav-link {{#if (eq 'allProjects' data.activeMenu)}}bg-azure-lt{{/if}}" href="/projects"
                 data-bs-toggle="tooltip" data-bs-title="All Projects">
                 <span class="nav-link-icon d-md-none d-lg-inline-block">
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
@@ -524,7 +493,7 @@
             </li>
 
             <li class="nav-item">
-              <a class="nav-link {{#if (eq " allProjects" data.activeMenu)}} bg-azure-lt {{/if}}" href="/projects"
+              <a class="nav-link {{#if (eq 'allProjects' data.activeMenu)}} bg-azure-lt {{/if}}" href="/projects"
                 data-bs-toggle="tooltip" data-bs-title="All Projects">
                 <span class="nav-link-icon d-md-none d-lg-inline-block">
                   {{{getSvgForFirstLetter 'all projects'}}}
@@ -545,8 +514,8 @@
 
             <li class="nav-item">
               <a class="nav-link {{#if (eq 'orders' data.activeMenu)}}bg-azure-lt{{/if}}" href="/orders"
-                data-bs-toggle="tooltip" data-bs-title="Orders">
-                <span class="nav-link-icon d-md-none d-lg-inline-block">
+                data-bs-toggle="tooltip" data-bs-title="Invoices">
+                <span class="nav-link-icon d-lg-inline-block">
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                     class="icon icon-tabler icons-tabler-outline icon-tabler-credit-card">
@@ -561,32 +530,7 @@
             </li>
 
             <li class="nav-item">
-              <a class="nav-link {{#if (eq 'orders' data.activeMenu)}} bg-azure-lt {{/if}}" href="/orders"
-                data-bs-toggle="tooltip" data-bs-title="Orders">
-                <span class="nav-link-icon d-md-none d-lg-inline-block">
-                  {{{getSvgForFirstLetter 'orders'}}}
-                </span>
-              </a>
-            </li>
-
-            <li class="nav-item">
-              <a class="nav-link" href="/invoices" data-bs-toggle="tooltip" data-bs-title="Invoices">
-                <span class="nav-link-icon d-md-none d-lg-inline-block">
-                  {{{getSvgForFirstLetter 'invoices'}}}
-                </span>
-              </a>
-            </li>
-
-            <li class="nav-item">
-              <a class="nav-link" href="/subscriptions" data-bs-toggle="tooltip" data-bs-title="Subscriptions">
-                <span class="nav-link-icon d-md-none d-lg-inline-block">
-                  {{{getSvgForFirstLetter 'subscriptions'}}}
-                </span>
-              </a>
-            </li>
-
-            <li class="nav-item">
-              <a class="nav-link {{#if (eq " users" data.activeMenu)}} bg-azure-lt {{/if}}" href="/users"
+              <a class="nav-link {{#if (eq 'users' data.activeMenu)}} bg-azure-lt {{/if}}" href="/users"
                 data-bs-toggle="tooltip" data-bs-title="Administrators">
                 <span class="nav-link-icon d-md-none d-lg-inline-block">
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"

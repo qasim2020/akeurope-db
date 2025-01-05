@@ -2,7 +2,6 @@
   <div class="card-header">
     <h3 class="card-title">Updates</h3>
   </div>
-  {{log data.entry}}
   {{#with data.entryLogs as |log|}}
   <div class="card-header d-flex align-items-center">
     <p class="m-0 text-secondary">Page <span>{{log.currentPage}}</span> of <span>{{log.totalPages}}</span></p>

@@ -34,6 +34,21 @@ const runQueriesOnOrder = async (req, res) => {
         if (existingCustomer.email != newCustomer.email) {
             await saveLog(
                 logTemplates({
+                    type: 'orderCustomerChanged',
+                    entity: order,
+                    changes: [
+                        {
+                            key: 'customer',
+                            oldValue: `<a href="/customer/${existingCustomer._id}">${existingCustomer.name}</a>`,
+                            newValue: `<a href="/customer/${newCustomer._id}">${newCustomer.name}</a>`,
+                        },
+                    ],
+                    actor: req.session.user,
+                }),
+            );
+
+            await saveLog(
+                logTemplates({
                     type: 'customerRemovedFromOrder',
                     entity: existingCustomer,
                     order,
@@ -48,21 +63,6 @@ const runQueriesOnOrder = async (req, res) => {
                     entity: newCustomer,
                     order,
                     customer: newCustomer,
-                    actor: req.session.user,
-                }),
-            );
-
-            await saveLog(
-                logTemplates({
-                    type: 'orderCustomerChanged',
-                    entity: order,
-                    changes: [
-                        {
-                            key: 'customer',
-                            oldValue: existingCustomer.email,
-                            newValue: newCustomer.email,
-                        },
-                    ],
                     actor: req.session.user,
                 }),
             );
@@ -143,7 +143,8 @@ const runQueriesOnOrder = async (req, res) => {
                 changes: [
                     {
                         key: 'Subscriptions',
-                        newValue: camelCaseWithCommaToNormalString(subscriptions),
+                        newValue:
+                            camelCaseWithCommaToNormalString(subscriptions),
                     },
                 ],
                 actor: req.session.user,
@@ -166,8 +167,11 @@ const runQueriesOnOrder = async (req, res) => {
                     changes: [
                         {
                             key: 'Subscriptions',
-                            oldValue: camelCaseWithCommaToNormalString(entryInOrder.selectedSubscriptions.join(',')),
-                            newValue: camelCaseWithCommaToNormalString(subscriptions),
+                            oldValue: camelCaseWithCommaToNormalString(
+                                entryInOrder.selectedSubscriptions.join(','),
+                            ),
+                            newValue:
+                                camelCaseWithCommaToNormalString(subscriptions),
                         },
                     ],
                     actor: req.session.user,
@@ -216,7 +220,9 @@ const runQueriesOnOrder = async (req, res) => {
         );
         project.detail = checkProject;
         if (project) {
-            const entry = project.entries.find((e) => e.entryId.toString() === entryId);
+            const entry = project.entries.find(
+                (e) => e.entryId.toString() === entryId,
+            );
             if (entry) {
                 const existingSubscriptions =
                     entry.selectedSubscriptions.join(',');
@@ -231,8 +237,13 @@ const runQueriesOnOrder = async (req, res) => {
                         changes: [
                             {
                                 key: 'Subscriptions',
-                                oldValue: camelCaseWithCommaToNormalString(existingSubscriptions),
-                                newValue: camelCaseWithCommaToNormalString(subscriptions),
+                                oldValue: camelCaseWithCommaToNormalString(
+                                    existingSubscriptions,
+                                ),
+                                newValue:
+                                    camelCaseWithCommaToNormalString(
+                                        subscriptions,
+                                    ),
                             },
                         ],
                         actor: req.session.user,
@@ -247,8 +258,13 @@ const runQueriesOnOrder = async (req, res) => {
                         changes: [
                             {
                                 key: 'Subscriptions',
-                                oldValue: camelCaseWithCommaToNormalString(existingSubscriptions),
-                                newValue: camelCaseWithCommaToNormalString(subscriptions),
+                                oldValue: camelCaseWithCommaToNormalString(
+                                    existingSubscriptions,
+                                ),
+                                newValue:
+                                    camelCaseWithCommaToNormalString(
+                                        subscriptions,
+                                    ),
                             },
                         ],
                         actor: req.session.user,
@@ -284,7 +300,6 @@ const runQueriesOnOrder = async (req, res) => {
             },
         );
 
-
         checkProject.selection = updatedProject;
 
         await saveLog(
@@ -300,22 +315,15 @@ const runQueriesOnOrder = async (req, res) => {
         const model = await createDynamicModel(project.slug);
         for (const entryInOrder of updatedProject.entries) {
             const entry = await model.findById(entryInOrder.entryId).lean();
-            debugger;
             await saveLog(
                 logTemplates({
-                    type: 'entrySubscriptionChanged',
+                    type: 'entryAddedToOrder',
                     entity: entry,
                     order,
                     project: updatedProject,
-                    changes: [
-                        {
-                            key: 'Subscriptions',
-                            newValue: camelCaseWithCommaToNormalString(entryInOrder.selectedSubscriptions.join(',')),
-                        },
-                    ],
                     actor: req.session.user,
-                }), 
-            ); 
+                }),
+            );
         }
     }
 
@@ -348,12 +356,15 @@ const runQueriesOnOrder = async (req, res) => {
                 actor: req.session.user,
             }),
         );
-        
+
         updatedProject.detail = checkProject;
         const model = await createDynamicModel(project.slug);
 
-        const oldProject = existingOrder.projects.find(p => p.slug === checkProject.slug);
+        const oldProject = existingOrder.projects.find(
+            (p) => p.slug === checkProject.slug,
+        );
         oldProject.detail = checkProject;
+
         for (const entryInOrder of oldProject.entries) {
             const entry = await model.findById(entryInOrder.entryId).lean();
             await saveLog(
@@ -363,8 +374,8 @@ const runQueriesOnOrder = async (req, res) => {
                     order,
                     project: oldProject,
                     actor: req.session.user,
-                }), 
-            ); 
+                }),
+            );
         }
 
         for (const entryInOrder of updatedProject.entries) {
@@ -376,10 +387,11 @@ const runQueriesOnOrder = async (req, res) => {
                     order,
                     project: updatedProject,
                     actor: req.session.user,
-                }), 
-            ); 
+                }),
+            );
         }
     }
+
     if (req.query.deleteProject) {
         order = await Order.findOneAndUpdate(
             { _id: orderId, 'projects.slug': projectSlug },
@@ -400,9 +412,11 @@ const runQueriesOnOrder = async (req, res) => {
                 actor: req.session.user,
             }),
         );
-        const oldProject = existingOrder.projects.find(p => p.slug === checkProject.slug);
+        const oldProject = existingOrder.projects.find(
+            (p) => p.slug === checkProject.slug,
+        );
         oldProject.detail = checkProject;
-        const model = await createDynamicModel(project.slug); 
+        const model = await createDynamicModel(oldProject.slug);
         for (const entryInOrder of oldProject.entries) {
             const entry = await model.findById(entryInOrder.entryId).lean();
             await saveLog(
@@ -412,8 +426,8 @@ const runQueriesOnOrder = async (req, res) => {
                     order,
                     project: oldProject,
                     actor: req.session.user,
-                }), 
-            ); 
+                }),
+            );
         }
     }
 

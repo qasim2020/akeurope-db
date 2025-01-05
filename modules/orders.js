@@ -247,6 +247,33 @@ const createDraftOrder = async (req, res) => {
             }),
         );
 
+        updatedProject.detail = project;
+
+        const model = await createDynamicModel(updatedProject.slug);
+        for (const entryInOrder of updatedProject.entries) {
+            const entry = await model.findById(entryInOrder.entryId).lean();
+            await saveLog(
+                logTemplates({
+                    type: 'entryAddedToOrder',
+                    entity: entry,
+                    order,
+                    project,
+                    actor: req.session.user,
+                }),
+            );
+        };
+
+        const customer = await Customer.findById(order.customerId).lean();
+        await saveLog(
+            logTemplates({
+                type: 'customerAddedToOrder',
+                entity: customer,
+                order,
+                customer,
+                actor: req.session.user,
+            }),
+        );
+
         const leanOrder = order.toObject();
         const calculatedOrder = await calculateOrder(leanOrder);
         await addPaymentsToOrder(calculatedOrder);
@@ -410,7 +437,9 @@ const updateOrderStatus = async (req, res) => {
     if (checkOrder.status != order.status) {
         for (const project of order.projects) {
             const model = await createDynamicModel(project.slug);
-            project.detail = await Project.findOne({slug: project.slug}).lean();
+            project.detail = await Project.findOne({
+                slug: project.slug,
+            }).lean();
             for (const entryInOrder of project.entries) {
                 const entry = await model.findById(entryInOrder.entryId).lean();
                 await saveLog(
@@ -424,20 +453,32 @@ const updateOrderStatus = async (req, res) => {
                         changes: [
                             {
                                 key: 'status',
-                                oldValue: capitalizeFirstLetter(checkOrder.status),
+                                oldValue: capitalizeFirstLetter(
+                                    checkOrder.status,
+                                ),
                                 newValue: capitalizeFirstLetter(order.status),
                             },
                         ],
-                    }), 
+                    }),
                 );
             }
         }
-    };
-    
+    }
+
     return order;
 };
 
 const addPaymentsToOrder = async (order) => {
+    if (order.projects.length == 0) {
+        await Order.updateOne(
+            { _id: order._id },
+            {
+                $set: {
+                    totalCost: order.totalCost,
+                },
+            },
+        );
+    };
     for (const project of order.projects) {
         const projectSlug = project.slug;
         const entries = project.allEntries;

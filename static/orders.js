@@ -126,6 +126,12 @@ const doSearch = function (elem, href, refreshAll) {
         return;
     }
 
+    const isOrderPage = $(elem).closest('.project-in-order-page').length > 0;
+    if (isOrderPage) {
+        loadEntriesInProjectCard(elem, href);
+        return;
+    }
+
     if (!href) {
         href = $(elem).attr('my-href');
     }

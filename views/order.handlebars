@@ -1,9 +1,9 @@
 <div class="page-header d-print-none">
-  <div class="container-xl">
+  <div class="mt-3 mx-3">
     <div class="row g-2 align-items-center">
       <div class="col">
         <div class="page-pretitle"> Overview </div>
-        <h2 class="page-title"> Invoice
+        <h2 class="page-title"> Invoice {{data.order.orderNo}}
         </h2>
       </div>
       {{#if data.order.customer}}
@@ -40,7 +40,8 @@
     </div>
   </div>
 </div>
-<div class="container-xl pt-4" id="data-container">
+<div class="m-3 pt-4" id="data-container">
+  {{> showOrderEntries}}
   <div class="row row-deck row-cards">
     {{> showOrder}}
     <div class="d-block col-12 col-md-6">
@@ -59,6 +60,11 @@
     loadOrderInContainer(modal, hrefOrder);
     const hrefLogs = `/getSingleOrderLogs/${$(modal).attr('order-id')}?page=1`;
     getOrderLogs(modal, hrefLogs);
+    const elems = $('.project-in-order-page').find('.page-item.active > a');
+    for (const elem of elems) {
+      const hrefEntries = $(elem).attr('my-href');
+      loadEntriesInProjectCard(elem, hrefEntries);
+    }
   }
 
   const loadOrderInContainer = function (elem, href) {
@@ -71,6 +77,27 @@
       method: 'GET',
       success: function (response) {
         $(`#order-container`).replaceWith(response);
+      },
+      error: function (error) {
+        alert(error.responseText);
+      }
+    });
+  }
+
+  const loadEntriesInProjectCard = function (elem, href) {
+    if (!href) {
+      href = $(elem).attr("my-href");
+    }
+    const projectCard = $(elem).closest('.project-in-order-page');
+    const slug = $(elem).closest('.project-in-order-page').attr('project-slug');
+    const orderId = $(elem).closest('.project-in-order-page').attr('order-id');
+    const customerId = $(elem).closest('.project-in-order-page').attr('customer-id');
+    const url = `/getPaginatedEntriesForOrderPage/${slug}/${customerId}${href}&orderId=${orderId}`;
+    $.ajax({
+      url,
+      method: 'GET',
+      success: function (response) {
+        $(projectCard).replaceWith(response);
       },
       error: function (error) {
         alert(error.responseText);

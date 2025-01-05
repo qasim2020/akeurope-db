@@ -1,5 +1,6 @@
 const { createDynamicModel } = require('../models/createDynamicModel');
 const Project = require('../models/Project');
+const Order = require('../models/Order');
 const Customer = require('../models/Customer');
 const Log = require('../models/Log');
 const User = require('../models/User');
@@ -137,7 +138,16 @@ const userLogs = async (req, res) => {
 
 const customerLogs = async (req, res) => {
     try {
-        const query = { entityId: req.params.customerId };
+        const orders = await Order.find({
+            customerId: req.params.customerId,
+        }).lean();
+
+        const query = {
+            $or: [
+                { entityId: req.params.customerId },
+                { entityId: { $in: orders.map((order) => order._id) } },
+            ],
+        };
 
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 10;
@@ -167,7 +177,7 @@ const customerLogs = async (req, res) => {
     }
 };
 
-const orderLogs = async (req,res) => {
+const orderLogs = async (req, res) => {
     try {
         const query = { entityId: req.params.orderId };
 
@@ -196,8 +206,8 @@ const orderLogs = async (req,res) => {
     } catch (error) {
         console.log(error);
         return error;
-    } 
-}
+    }
+};
 
 const findConnectedIds = async (logs) => {
     for (const log of logs) {
@@ -206,7 +216,7 @@ const findConnectedIds = async (logs) => {
             log.entity = await User.findById(log.entityId).lean();
         } else if (log.entityType == 'customer') {
             log.entity = await Customer.findById(log.entityId).lean();
-        } 
+        }
     }
     return logs;
 };

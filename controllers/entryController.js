@@ -387,21 +387,57 @@ exports.getPaginatedEntriesForDraftOrder = async (req, res) => {
             await updateDraftOrder(req, res);
         }
 
-        const orderInDb = await Order.findOne({ _id: req.query.orderId }).lean();
-        const order = await formatOrder(req,orderInDb);
-        const project = order.projects.find(project => project.slug == req.params.slug);
+        const orderInDb = await Order.findOne({
+            _id: req.query.orderId,
+        }).lean();
+        const order = await formatOrder(req, orderInDb);
+        const project = order.projects.find(
+            (project) => project.slug == req.params.slug,
+        );
         if (project) {
             Object.assign(project, {
-                detail: await Project.findOne({slug: project.slug}).lean()
-            });    
+                detail: await Project.findOne({ slug: project.slug }).lean(),
+            });
         }
 
         res.render('partials/components/paymentModalEntriesInDraftOrder', {
             layout: false,
             project,
-            order
+            order,
         });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            error: 'Error getting paginated order',
+            details: error.message,
+        });
+    }
+};
 
+exports.getPaginatedEntriesForOrderPage = async (req, res) => {
+    try {
+        const orderInDb = await Order.findOne({
+            _id: req.query.orderId,
+        }).lean();
+        const order = await formatOrder(req, orderInDb);
+        const project = order.projects.find(
+            (project) => project.slug == req.params.slug,
+        );
+        if (project) {
+            Object.assign(project, {
+                detail: await Project.findOne({ slug: project.slug }).lean(),
+            });
+        }
+
+        order.projects = [project];
+
+        res.render('partials/showOrderEntries', {
+            layout: false,
+            data: {
+                project,
+                order,
+            },
+        });
     } catch (error) {
         console.log(error);
         res.status(500).json({
@@ -413,11 +449,11 @@ exports.getPaginatedEntriesForDraftOrder = async (req, res) => {
 
 exports.getPaginatedEntriesForPendingOrder = async (req, res) => {
     try {
-        const {order, project} = await getPendingOrderEntries(req,res);
+        const { order, project } = await getPendingOrderEntries(req, res);
         res.render('partials/components/paymentModalEntriesInPendingOrder', {
             layout: false,
             order,
-            project
+            project,
         });
     } catch (error) {
         console.log(error);
