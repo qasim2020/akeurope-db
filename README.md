@@ -1,5 +1,9 @@
 # akeurope-db
 
+### Search date based entries 
+
+<img width="1446" alt="Screenshot 2025-01-06 at 6 38 20 PM" src="https://github.com/user-attachments/assets/1ae730c0-7b87-4e3a-a5a0-85b63ae57415" />
+
 ### View Single Invoice with History
 
 <img width="1470" alt="Screenshot 2025-01-01 at 8 36 57 PM" src="https://github.com/user-attachments/assets/ec9c2626-32b7-4430-9bca-668a447a8432" />
