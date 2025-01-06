@@ -2,57 +2,80 @@
     <div class="" id="accordion-filters">
         <div class="accordion-item" stop-changing-header="true">
             <h2 class="accordion-header" id="heading-1">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-1" aria-expanded="false">
-                <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-adjustments me-2"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 10a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" /><path d="M6 4v4" /><path d="M6 12v8" /><path d="M10 16a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" /><path d="M12 4v10" /><path d="M12 18v2" /><path d="M16 7a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" /><path d="M18 4v1" /><path d="M18 9v11" /></svg>
-                Filters
-            </button>
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#collapse-1" aria-expanded="false">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="icon icon-tabler icons-tabler-outline icon-tabler-adjustments me-2">
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                        <path d="M4 10a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+                        <path d="M6 4v4" />
+                        <path d="M6 12v8" />
+                        <path d="M10 16a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+                        <path d="M12 4v10" />
+                        <path d="M12 18v2" />
+                        <path d="M16 7a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+                        <path d="M18 4v1" />
+                        <path d="M18 9v11" />
+                    </svg>
+                    Filters
+                </button>
             </h2>
-            <div id="collapse-1" class="accordion-collapse collapse {{#if data.pagination.showFilters}}show{{/if}}" data-bs-parent="#accordion-filters" style="">
+            <div id="collapse-1" class="accordion-collapse collapse {{#if data.pagination.showFilters}}show{{/if}}"
+                data-bs-parent="#accordion-filters" style="">
                 <div class="accordion-body mt-4 filters">
                     <div class="row">
                         <div class="col-12 col-md-4 mb-2">
                             <label class="form-label">Search in field</label>
                             <div class="input-group">
                                 {{#if (isEmptyObject data.pagination.fieldFilters)}}
-                                    {{#with (getKey data.pagination.fieldFilters) as |key|}}
-                                        {{#each ../data.fields as |field|}}
-                                                {{#if (eq this.name key)}}
-                                                    <button type="button" class="btn dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" my-name="{{field.name}}">
-                                                    {{field.actualName}}
-                                                    </button>
-                                                {{/if}}
-                                        {{/each}}
-                                    {{/with}}
-                                    <div class="dropdown-menu" style="">
-                                        {{#each data.project.fields}}
-                                        <a class="dropdown-item" href="#" my-name="{{this.name}}" my-actual-name="{{this.actualName}}" my-type="{{this.type}}" {{#if this.options}}my-options="{{getOptionsFromValues this.options}}"{{/if}}>
-                                            {{this.actualName}}
-                                        </a>
-                                        {{/each}}
-                                    </div>
-                                    {{#with (getValue data.pagination.fieldFilters) as |value|}}
-                                        {{#with (getKey ../data.pagination.fieldFilters) as |key|}}
-                                            {{#each ../../data.fields as |field|}}
-                                                {{#if (eq field.name key)}}
-                                                    {{#with field.name as |name|}}
-                                                        {{#with field.type as |type|}}
-                                                            {{#with field.actualName as |actualName|}}
+                                {{#with (getKey data.pagination.fieldFilters) as |key|}}
+                                {{#each ../data.fields as |field|}}
+                                {{#if (eq this.name key)}}
+                                <button type="button" class="btn dropdown-toggle" data-bs-toggle="dropdown"
+                                    aria-haspopup="true" aria-expanded="false" my-name="{{field.name}}">
+                                    {{field.actualName}}
+                                </button>
+                                {{/if}}
+                                {{/each}}
+                                {{/with}}
+                                <div class="dropdown-menu" style="">
+                                    {{#each data.project.fields}}
+                                    <a class="dropdown-item" href="#" my-name="{{this.name}}"
+                                        my-actual-name="{{this.actualName}}" my-type="{{this.type}}" {{#if
+                                        this.options}}my-options="{{getOptionsFromValues this.options}}" {{/if}}>
+                                        {{this.actualName}}
+                                    </a>
+                                    {{/each}}
+                                </div>
+                                {{#with (getValue data.pagination.fieldFilters) as |value|}}
+                                {{#with (getKey ../data.pagination.fieldFilters) as |key|}}
+                                {{#each ../../data.fields as |field|}}
+                                {{#if (eq field.name key)}}
+                                {{#with field.name as |name|}}
+                                {{#with field.type as |type|}}
+                                {{#with field.actualName as |actualName|}}
                                 {{#if (eq type 'date')}}
-                                <input type="date" class="form-control" aria-label="search by column name" value="{{value}}">
+                                {{log value}}
+                                <input type="text" class="form-control dateInput" aria-label="search by column date"
+                                    placeholder="> 2025 etc" value="{{stringifyDate value}}" query="{{json value}}"/>
                                 {{/if}}
                                 {{#if (eq type 'number')}}
-                                <input type="number" class="form-control" aria-label="search by column name" placeholder="Only numbers" value="{{value}}">
+                                <input type="number" class="form-control" aria-label="search by column name"
+                                    placeholder="Only numbers" value="{{value}}">
                                 {{/if}}
                                 {{#if (eq type 'string')}}
-                                <input type="text" class="form-control" aria-label="search by column name" placeholder="Text values" value="{{value}}"/>
+                                <input type="text" class="form-control" aria-label="search by column name"
+                                    placeholder="Text values" value="{{value}}" />
                                 {{/if}}
-                                                                {{#if field.options}}
-                                                                    {{#with (getOptionsFromValues field.options) as |options|}}
+                                {{#if field.options}}
+                                {{#with (getOptionsFromValues field.options) as |options|}}
 
                                 {{#if (eq type 'boolean')}}
                                 <select class="form-select">
                                     {{#each field.options}}
-                                    <option value="{{this.value}}" {{#if (eq this.value value)}}selected{{/if}}>{{this.value}}</option>
+                                    <option value="{{this.value}}" {{#if (eq this.value value)}}selected{{/if}}>
+                                        {{this.value}}</option>
                                     {{/each}}
                                 </select>
                                 {{/if}}
@@ -60,54 +83,61 @@
                                 {{#if (eq type 'dropdown')}}
                                 <select class="form-select">
                                     {{#each field.options}}
-                                    <option value="{{this.value}}" {{#if (eq this.value value)}}selected{{/if}}>{{this.value}}</option>
+                                    <option value="{{this.value}}" {{#if (eq this.value value)}}selected{{/if}}>
+                                        {{this.value}}</option>
                                     {{/each}}
                                 </select>
                                 {{/if}}
-                                                                    {{/with}}
-                                                                {{/if}}
-                                                            {{/with}}
-                                                        {{/with}}
-                                                    {{/with}}
-                                                {{/if}}
-                                            {{/each}}
-                                        {{/with}}
-                                    {{/with}}
-                                    
+                                {{/with}}
+                                {{/if}}
+                                {{/with}}
+                                {{/with}}
+                                {{/with}}
+                                {{/if}}
+                                {{/each}}
+                                {{/with}}
+                                {{/with}}
+
                                 {{else}}
-                                    <button type="button" class="btn dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" my-name="{{data.project.fields.0.name}}">
+                                <button type="button" class="btn dropdown-toggle" data-bs-toggle="dropdown"
+                                    aria-haspopup="true" aria-expanded="false" my-name="{{data.project.fields.0.name}}">
                                     {{data.project.fields.0.actualName}}
-                                    </button>
-                                    <div class="dropdown-menu" style="">
-                                        {{#each data.project.fields}}
-                                        <a class="dropdown-item" href="#" my-name="{{this.name}}" my-actual-name="{{this.actualName}}" my-type="{{this.type}}" {{#if this.options}}my-options="{{getOptionsFromValues this.options}}"{{/if}}>
-                                            {{this.actualName}}
-                                        </a>
-                                        {{/each}}
-                                    </div>
-                                    {{#if (eq data.project.fields.0.type 'date')}}
-                                    <input type="date" class="form-control" aria-label="search by column name" placeholder="">
-                                    {{/if}}
-                                    {{#if (eq data.project.fields.0.type 'boolean')}}
-                                    <select class="form-select">
-                                        {{#each data.project.fields.0.options}}
-                                        <option value="{{this.value}}">{{this.value}}</option>
-                                        {{/each}}
-                                    </select>
-                                    {{/if}}
-                                    {{#if (eq data.project.fields.0.type 'number')}}
-                                    <input type="number" class="form-control" aria-label="search by column name" placeholder="Only numbers">
-                                    {{/if}}
-                                    {{#if (eq data.project.fields.0.type 'dropdown')}}
-                                    <select class="form-select">
-                                        {{#each data.project.fields.0.options}}
-                                        <option value="{{this}}">{{this}}</option>
-                                        {{/each}}
-                                    </select>
-                                    {{/if}}
-                                    {{#if (eq data.project.fields.0.type 'string')}}
-                                    <input type="text" class="form-control" aria-label="search by column name" placeholder="Text values"/>
-                                    {{/if}}
+                                </button>
+                                <div class="dropdown-menu" style="">
+                                    {{#each data.project.fields}}
+                                    <a class="dropdown-item" href="#" my-name="{{this.name}}"
+                                        my-actual-name="{{this.actualName}}" my-type="{{this.type}}" {{#if
+                                        this.options}}my-options="{{getOptionsFromValues this.options}}" {{/if}}>
+                                        {{this.actualName}}
+                                    </a>
+                                    {{/each}}
+                                </div>
+                                {{#if (eq data.project.fields.0.type 'date')}}
+                                <input type="text" class="form-control dateInput" aria-label="search by column date"
+                                    placeholder="> 2023 etc" value="{{stringifyDate this.value}}"/>
+                                {{/if}}
+                                {{#if (eq data.project.fields.0.type 'boolean')}}
+                                <select class="form-select">
+                                    {{#each data.project.fields.0.options}}
+                                    <option value="{{this.value}}">{{this.value}}</option>
+                                    {{/each}}
+                                </select>
+                                {{/if}}
+                                {{#if (eq data.project.fields.0.type 'number')}}
+                                <input type="number" class="form-control" aria-label="search by column name"
+                                    placeholder="Only numbers">
+                                {{/if}}
+                                {{#if (eq data.project.fields.0.type 'dropdown')}}
+                                <select class="form-select">
+                                    {{#each data.project.fields.0.options}}
+                                    <option value="{{this}}">{{this}}</option>
+                                    {{/each}}
+                                </select>
+                                {{/if}}
+                                {{#if (eq data.project.fields.0.type 'string')}}
+                                <input type="text" class="form-control" aria-label="search by column name"
+                                    placeholder="Text values" />
+                                {{/if}}
                                 {{/if}}
                             </div>
                         </div>
@@ -115,25 +145,27 @@
                             <label class="form-label">Sort by</label>
                             <select class="form-select">
                                 {{#each data.project.fields}}
-                                <option value="{{this.name}}" {{#if (eq ../data.pagination.sort.sortBy this.name)}}selected{{/if}}>{{this.actualName}}</option>
+                                <option value="{{this.name}}" {{#if (eq ../data.pagination.sort.sortBy
+                                    this.name)}}selected{{/if}}>{{this.actualName}}</option>
                                 {{/each}}
                             </select>
                         </div>
                         <div class="col-12 col-md-3 mb-2">
                             <label class="form-label">Order by</label>
                             <div class="btn-group w-100" role="group">
-                                <input type="radio" class="btn-check" name="btn-radio-basic" id="btn-radio-basic-1" autocomplete="off" {{#if (eq data.pagination.sort.order "asc")}}checked=""{{/if}}>
+                                <input type="radio" class="btn-check" name="btn-radio-basic" id="btn-radio-basic-1"
+                                    autocomplete="off" {{#if (eq data.pagination.sort.order "asc" )}}checked="" {{/if}}>
                                 <label for="btn-radio-basic-1" type="button" class="btn">Newest</label>
-                                <input type="radio" class="btn-check" name="btn-radio-basic" id="btn-radio-basic-2" autocomplete="off" {{#if (eq data.pagination.sort.order "desc")}}checked=""{{/if}}>
+                                <input type="radio" class="btn-check" name="btn-radio-basic" id="btn-radio-basic-2"
+                                    autocomplete="off" {{#if (eq data.pagination.sort.order "desc" )}}checked=""
+                                    {{/if}}>
                                 <label for="btn-radio-basic-2" type="button" class="btn">Oldest</label>
                             </div>
                         </div>
                         <div class="col-3 col-md-1 mb-2 d-flex align-items-end">
-                            <button 
-                            class="btn btn-primary w-100" 
-                            my-href="?page=1&limit={{data.pagination.limit}}&search={{data.pagination.search}}&showSearchBar=true&showFilters=true"
-                            onclick="doFilterSearch(this)"
-                            >Go!</button>
+                            <button class="btn btn-primary w-100"
+                                my-href="?page=1&limit={{data.pagination.limit}}&search={{data.pagination.search}}&showSearchBar=true&showFilters=true"
+                                onclick="doFilterSearch(this)">Go!</button>
                         </div>
                     </div>
                 </div>

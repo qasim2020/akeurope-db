@@ -1,52 +1,50 @@
-const Project = require("../models/Project");
-const Payment = require("../models/Payment");
-const Subscription = require("../models/Subscription");
+const Project = require('../models/Project');
+const Payment = require('../models/Payment');
+const Subscription = require('../models/Subscription');
 
-const { createDynamicModel } = require("../models/createDynamicModel");
-const { generatePagination } = require("../modules/generatePagination");
-const { generateSearchQuery } = require("../modules/generateSearchQuery");
+const { createDynamicModel } = require('../models/createDynamicModel');
+const { generatePagination } = require('../modules/generatePagination');
+const { generateSearchQuery } = require('../modules/generateSearchQuery');
 
-const fetchEntrySubscriptionsAndPayments = async function(entry) {
-
+const fetchEntrySubscriptionsAndPayments = async function (entry) {
     if (!entry) {
         return null;
     }
 
     const entryId = entry._id;
-  
-    const payments = await Payment.find({ entryId })
-      .sort({ date: -1 }) 
-      .lean();
-  
+
+    const payments = await Payment.find({ entryId }).sort({ date: -1 }).lean();
+
     const subscription = await Subscription.find({ entryId }).lean();
-  
+
     entry.payments = payments || null;
     entry.subscriptions = subscription || null;
     return entry;
-    
-}
+};
 
-const fetchEntryDetailsFromPaymentsAndSubscriptions = async function(entries) {
+const fetchEntryDetailsFromPaymentsAndSubscriptions = async function (entries) {
     const entryIds = entries.map((entry) => entry._id);
     const lastPayments = await Payment.aggregate([
         { $match: { entryId: { $in: entryIds } } },
-        { $sort: { date: -1 } }, 
+        { $sort: { date: -1 } },
         {
             $group: {
-                _id: "$entryId", 
-                lastPaid: { $first: "$date" }, 
+                _id: '$entryId',
+                lastPaid: { $first: '$date' },
             },
         },
     ]);
 
-    const subscriptions = await Subscription.find({ entryId: { $in: entryIds } }).lean();
+    const subscriptions = await Subscription.find({
+        entryId: { $in: entryIds },
+    }).lean();
 
     const lastPaymentsMap = Object.fromEntries(
-        lastPayments.map(({ _id, lastPaid }) => [_id.toString(), lastPaid])
+        lastPayments.map(({ _id, lastPaid }) => [_id.toString(), lastPaid]),
     );
 
     const subscriptionsMap = Object.fromEntries(
-        subscriptions.map((sub) => [sub.entryId.toString(), sub])
+        subscriptions.map((sub) => [sub.entryId.toString(), sub]),
     );
 
     entries.forEach((entry) => {
@@ -55,9 +53,9 @@ const fetchEntryDetailsFromPaymentsAndSubscriptions = async function(entries) {
     });
 
     return entries;
-}
+};
 
-const projectEntries = async function(req, res) {
+const projectEntries = async function (req, res) {
     const project = await Project.findOne({ slug: req.params.slug }).lean();
     if (!project) throw new Error(`Project "${req.params.slug}" not found`);
 
@@ -74,12 +72,12 @@ const projectEntries = async function(req, res) {
     const { searchQuery, fieldFilters } = generateSearchQuery(req, project);
 
     const filtersQuery = new URLSearchParams(fieldFilters).toString();
-
+    
     let entries = await DynamicModel.find(searchQuery)
-      .sort(sortOptions)
-      .skip(skip)
-      .limit(limit)
-      .lean();
+        .sort(sortOptions)
+        .skip(skip)
+        .limit(limit)
+        .lean();
 
     entries = await fetchEntryDetailsFromPaymentsAndSubscriptions(entries);
 
@@ -87,8 +85,8 @@ const projectEntries = async function(req, res) {
     const totalPages = Math.ceil(totalEntries / limit);
 
     return {
-        entries, 
-        project, 
+        entries,
+        project,
         pagination: {
             totalEntries,
             totalPages,
@@ -97,17 +95,18 @@ const projectEntries = async function(req, res) {
             startIndex: totalEntries == 0 ? 0 : skip + 1,
             endIndex: Math.min(skip + limit, totalEntries),
             pagesArray: generatePagination(totalPages, page),
-            sort: { 
-              sortBy, 
-              order: req.query.orderBy == undefined ? "asc" : req.query.orderBy
+            sort: {
+                sortBy,
+                order:
+                    req.query.orderBy == undefined ? 'asc' : req.query.orderBy,
             },
             search: req.query.search,
             filtersQuery,
             fieldFilters: fieldFilters == {} ? undefined : fieldFilters,
             showSearchBar: req.query.showSearchBar,
-            showFilters: req.query.showFilters
-        }
-    }
+            showFilters: req.query.showFilters,
+        },
+    };
 };
 
-module.exports = { projectEntries, fetchEntrySubscriptionsAndPayments};
+module.exports = { projectEntries, fetchEntrySubscriptionsAndPayments };

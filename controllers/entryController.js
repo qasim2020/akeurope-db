@@ -70,6 +70,7 @@ exports.getData = async (req, res) => {
             },
         });
     } catch (error) {
+        console.log(error);
         res.status(500).json({
             error: 'An error occurred while fetching entries partial',
             details: error.message,

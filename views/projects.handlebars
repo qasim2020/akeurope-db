@@ -293,7 +293,7 @@
     $('.accordion-button').addClass('collapsed');
     $('.accordion-collapse').removeClass('show').collapse('hide');
     $(this).closest(".modal-body").find(".accordion").append(`
-    <div class="accordion-item">
+    <div class="accordion-item accordion-edit-project">
       <h2 class="accordion-header d-flex justify-content-between" id="">
         <button class="accordion-button " type="button" data-bs-toggle="collapse" data-bs-target="#collapse-${projectSlug}-${fieldNo}" aria-expanded="true">
           Field # ${fieldNo}
@@ -345,7 +345,7 @@
     addSubscriptionField(accordion);
   })
   
-  $(document).on("change keyup", ".accordion-item input, .accordion-item .form-select", function() {
+  $(document).on("change keyup", ".accordion-edit-project input, .accordion-edit-project .form-select", function () {
     clearMsgs(this);
     if ($(this).hasClass("form-select")) {
         addOptions(this);

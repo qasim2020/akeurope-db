@@ -310,7 +310,7 @@
     $('.accordion-button').addClass('collapsed');
     $('.accordion-collapse').removeClass('show').collapse('hide');
     $(this).closest(".modal-body").find(".accordion").append(`
-    <div class="accordion-item">
+    <div class="accordion-item accordion-edit-project">
       <h2 class="accordion-header d-flex justify-content-between" id="">
         <button class="accordion-button " type="button" data-bs-toggle="collapse" data-bs-target="#collapse-${projectSlug}-${fieldNo}" aria-expanded="true">
           Field # ${fieldNo}
@@ -358,7 +358,7 @@
     })
   })
 
-  $(document).on("change keyup", ".accordion-item input, .accordion-item .form-select", function () {
+  $(document).on("change keyup", ".accordion-edit-project input, .accordion-edit-project .form-select", function () {
     clearMsgs(this);
     if ($(this).hasClass("form-select")) {
       addOptions(this);
@@ -780,6 +780,7 @@
   })
 
   // Load the edit entry modal
+
   $(document).on("click", ".edit-entry", function (e) {
 
     const entryId = $(this).attr("entry-id");
@@ -881,7 +882,7 @@
 
     let newInput;
     if (type === 'date') {
-      newInput = `<input type="date" class="form-control" aria-label="search by column name" placeholder="">`;
+      newInput = `<input type="text" class="form-control dateInput" aria-label="search by date" placeholder="e.g > 2020" />`;
     } else if (type === 'boolean') {
       newInput = `<select class="form-select" aria-label="search by column name">
                         ${options.map(option => `<option value="${option}">${option}</option>`).join('')}
@@ -903,12 +904,114 @@
     $(this).closest('.input-group').find('.dropdown-toggle').attr({ 'my-name': $(this).attr('my-name') }).text($(this).attr('my-actual-name'));
   });
 
+  $(document).on('input', '.dateInput', function (event) {
+    const inputValue = event.target.value.trim();
+
+    // Regular expression to detect conditions like > Jan 2023, = 2023, etc.
+    const conditionPattern = /^(>|<|>=|<=|=)?\s*(\d{1,2}\s+[A-Za-z]{3,9}\s+\d{4}|\d{4}|\s*[A-Za-z]{3,9}\s+\d{4})$/i;
+
+    // Regular expression to detect various date formats (supporting full and short formats)
+    const datePattern = /^(?:\d{1,2}\s+[A-Za-z]{3,9}(?:\s+\d{4})?|[A-Za-z]{3,9}\s+\d{1,2}\s+\d{4}|(?:\d{4})\s+[A-Za-z]{3,9}\s+\d{1,2})$/i;
+
+    // Check if the input matches a condition pattern (e.g., '> Jan 2023', '<= 2024')
+    if (conditionPattern.test(inputValue)) {
+
+      console.log("Valid date detected: ", inputValue);  // Handle valid date formats like '20 Jan 2023', '2023 Jan 20', etc.
+      const query = parseDateCondition(inputValue, conditionPattern);
+      if (query) {
+        console.log("MongoDB query: ", query.date);  // Constructed MongoDB query
+        $(this).attr('query', JSON.stringify(query.date)); 
+        $(this).attr('stop-search', false);
+        $(this).attr('stop-search-msg', "Valid date format");
+      } else {
+        $(this).attr('stop-search', true);
+        $(this).attr('stop-search-msg', "Invalid date format");
+      }
+
+    }
+    else {
+      console.log("Invalid input");  // Invalid input
+    }
+  })
+
+  function parseDateCondition(input, conditionPattern) {
+    const match = input.trim().match(conditionPattern);
+
+    if (match) {
+
+      const operator = match[1] || "=";  // Default to equality (=) if no operator is provided
+      const dateStr = match[2].trim();
+      let date;
+
+      // Case 1: If the input is just a year (e.g., "2023")
+      if (/^\d{4}$/.test(dateStr)) {  // Only a year (e.g., "2023")
+        date = new Date(`${dateStr}-01-01T00:00:00.000Z`);  // Start of the year
+      }
+      // Case 2: If the input is "Month Day Year" (e.g., "20 Jan 2023")
+      else if (/^\d{1,2}\s+[A-Za-z]{3,9}\s+\d{4}$/.test(dateStr)) {  // Example: "20 Jan 2023"
+        const [day, month, year] = dateStr.split(" ");
+        const months = {
+          Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5,
+          Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11
+        };
+        const monthIndex = months[month];
+        date = new Date(Date.UTC(year, monthIndex, day));  // UTC date to avoid timezone issues
+      }
+      // Case 3: If the input is "Month Year" (e.g., "Jan 2023")
+      else if (/^[A-Za-z]{3,9}\s+\d{4}$/.test(dateStr)) {  // Example: "Jan 2023"
+        const [month, year] = dateStr.split(" ");
+        const months = {
+          Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5,
+          Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11
+        };
+        const monthIndex = months[month];
+        date = new Date(Date.UTC(year, monthIndex, 1));  // Start of the month
+      }
+
+      if (date == "Invalid Date") {
+        console.log("Invalid date format");
+        return null;
+      }
+
+      // Construct the MongoDB query based on the operator
+      let query = {};
+      switch (operator) {
+        case ">":
+          query.date = { $gt: date };
+          break;
+        case ">=":
+          query.date = { $gte: date };
+          break;
+        case "<":
+          query.date = { $lt: date };
+          break;
+        case "<=":
+          query.date = { $lte: date };
+          break;
+        case "=":
+        default:
+          query.date = { $eq: date };  
+          break;
+      }
+
+      return query;
+    }
+
+    return null;  
+  }
+
   const doFilterSearch = function (elem) {
 
     const parentElem = $(elem).closest(".filters");
 
     const searchField = $(parentElem).find(".dropdown-toggle").attr('my-name');
-    const searchValue = $(parentElem).find(".input-group input, .input-group select").val().trim();
+    const valueElem = $(parentElem).find(".input-group input, .input-group select");
+    if (valueElem.attr('stop-search') == true) {
+      alert(valueElem.attr('stop-search-msg'));
+      return;
+    }
+
+    const searchValue = valueElem.hasClass('dateInput') ? valueElem.attr('query') : valueElem.val().trim();
     const sortBy = $(parentElem).find(".sortBy .form-select").val();
     const orderBy = $(parentElem).find("input[name='btn-radio-basic']:checked").attr("id") === "btn-radio-basic-1" ? "asc" : "desc";
 
