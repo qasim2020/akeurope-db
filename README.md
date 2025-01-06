@@ -1,5 +1,9 @@
 # akeurope-db
 
+### Order View
+
+<img width="1470" alt="Screenshot 2025-01-06 at 6 40 18 PM" src="https://github.com/user-attachments/assets/a4441056-22b9-4db1-b246-43a03b7289db" />
+
 ### Search date based entries 
 
 <img width="1446" alt="Screenshot 2025-01-06 at 6 38 20 PM" src="https://github.com/user-attachments/assets/1ae730c0-7b87-4e3a-a5a0-85b63ae57415" />
