@@ -230,7 +230,7 @@ exports.emailInvoice = async (req, res) => {
     }
 };
 
-exports.getSingleOrderLogs = async (req, res) => {
+exports.getOrderLogs = async (req, res) => {
     try {
         res.render('partials/showOrderLogs', {
             layout: false,

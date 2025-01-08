@@ -59,10 +59,10 @@ router.get(
     ordersController.viewOrder,
 );
 router.get(
-    '/getSingleOrderLogs/:orderId',
+    '/getOrderLogs/:orderId',
     authenticate,
     authorize('viewOrders'),
-    ordersController.getSingleOrderLogs,
+    ordersController.getOrderLogs,
 );
 router.get(
     '/getOrderData/:orderId',

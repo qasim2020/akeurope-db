@@ -150,13 +150,20 @@ const doSearch = function (elem, href, refreshAll) {
         success: function (response) {
             endSpinner(modal);
             $(modal).find(`.${slug}`).replaceWith(response);
-            if (refreshAll == false) return;
-            $(modal)
-                .find('.invoice-frame')
-                .attr({ src: `/invoice/${orderId}` })
-                .removeClass('d-none');
-            updateTotalCost(modal);
-            refreshContainers(modal);
+
+            const isPagination = $(elem).closest('.pagination').length > 0;
+            if (isPagination) {
+                return console.log('stopping refresh because its pagination');
+            }
+
+            if (refreshAll == true) {
+                $(modal)
+                    .find('.invoice-frame')
+                    .attr({ src: `/invoice/${orderId}` })
+                    .removeClass('d-none');
+                updateTotalCost(modal);
+                refreshContainers(modal);
+            }
         },
         error: function (error) {
             alert(error.responseText);
@@ -497,7 +504,6 @@ const updateTotalCost = function (modal) {
             $(modal)
                 .find('.search-results-payment-modal-entries')
                 .append(response);
-            $('#data-container').find('.page-item.active > a').click();
         },
         error: (error) => {
             endSpinner(modal);
@@ -682,14 +688,18 @@ const emailInvoice = function (elem) {
     });
 };
 
-const toggleInvoice = function(elem) {
+const toggleInvoice = function (elem) {
     const modal = $(elem).closest('.modal');
     const invoiceIsClosed = $(modal).find('.invoice').hasClass('d-none');
     if (invoiceIsClosed) {
-        $(modal).find('.invoice').attr({class: 'col-xl-6 col-12 invoice'});
-        $(modal).find('.opposite-invoice').attr({class: 'col-xl-6 col-12 opposite-invoice'})
+        $(modal).find('.invoice').attr({ class: 'col-xl-6 col-12 invoice' });
+        $(modal)
+            .find('.opposite-invoice')
+            .attr({ class: 'col-xl-6 col-12 opposite-invoice' });
     } else {
-        $(modal).find('.invoice').attr({class: 'd-none invoice'});
-        $(modal).find('.opposite-invoice').attr({class: 'col-12 opposite-invoice'})
+        $(modal).find('.invoice').attr({ class: 'd-none invoice' });
+        $(modal)
+            .find('.opposite-invoice')
+            .attr({ class: 'col-12 opposite-invoice' });
     }
-}
+};

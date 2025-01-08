@@ -5,6 +5,11 @@ const eq = function (a, b) {
     return a === b;
 };
 
+const gt = function (a, b) {
+    console.log(a,b);
+    return a > b;
+};
+
 const compareIds = function (a, b) {
     if (!a || !b) return false;
     return a.toString() === b.toString();
@@ -228,6 +233,7 @@ const json = function (value) {
 
 module.exports = {
     eq,
+    gt,
     compareIds,
     inc,
     dec,

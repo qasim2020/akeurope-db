@@ -56,22 +56,19 @@
 <script>
 
   const refreshContainers = function (modal) {
+    console.log('refreshing containers');
     const hrefOrder = `/getOrderData/${$(modal).attr('order-id')}`;
     loadOrderInContainer(modal, hrefOrder);
-    const hrefLogs = `/getSingleOrderLogs/${$(modal).attr('order-id')}?page=1`;
+    const hrefLogs = `/getOrderLogs/${$(modal).attr('order-id')}?page=1`;
     getOrderLogs(modal, hrefLogs);
-    const elems = $('.project-in-order-page').find('.page-item.active > a');
-    for (const elem of elems) {
-      const hrefEntries = $(elem).attr('my-href');
-      loadEntriesInProjectCard(elem, hrefEntries);
-    }
+    const hrefProjects = `/getOrderProjects/{{data.order._id}}`;
+    loadOrderProjects(hrefProjects);
   }
 
   const loadOrderInContainer = function (elem, href) {
     if (!href) {
       href = $(elem).attr("my-href");
     }
-    console.log(href);
     $.ajax({
       url: href,
       method: 'GET',
@@ -84,7 +81,24 @@
     });
   }
 
+  const loadOrderProjects = function (href) {
+    if (!href) {
+      return alert('no href provided');
+    }
+    $.ajax({
+      url: href,
+      method: 'GET',
+      success: function (response) {
+        $('#projects-container').replaceWith(response);
+      },
+      error: function (error) {
+        alert(error.responseText);
+      }
+    });
+  }
+
   const loadEntriesInProjectCard = function (elem, href) {
+    console.log(elem,href);
     if (!href) {
       href = $(elem).attr("my-href");
     }
@@ -92,7 +106,8 @@
     const slug = $(elem).closest('.project-in-order-page').attr('project-slug');
     const orderId = $(elem).closest('.project-in-order-page').attr('order-id');
     const customerId = $(elem).closest('.project-in-order-page').attr('customer-id');
-    const url = `/getPaginatedEntriesForOrderPage/${slug}/${customerId}${href}&orderId=${orderId}`;
+    const toggleState = $(elem).closest('.project-body').hasClass('d-none') ? 'open' : 'close';
+    const url = `/getPaginatedEntriesForOrderPage/${slug}/${customerId}${href}&orderId=${orderId}&toggleState=${toggleState}`;
     $.ajax({
       url,
       method: 'GET',
@@ -107,7 +122,6 @@
 
   const getOrderLogs = function (elem, href) {
     href = href || $(elem).attr("my-href");
-    console.log(href);
     $.ajax({
       url: href,
       method: 'GET',
@@ -142,6 +156,19 @@
       }
     });
   }
+
+  const toggleProject = function (elem) {
+    const projectCard = $(elem).closest('.project-in-order-page');
+    const projectBody = $(projectCard).find('.project-body');
+    $(projectBody).toggleClass('d-none');
+  }
+
+  $(document).ajaxStart(function () {
+    $(document).ajaxSend(function (event, jqXHR, settings) {
+      console.log("URL:", settings.url);
+    });
+  });
+
 
 
 </script>
