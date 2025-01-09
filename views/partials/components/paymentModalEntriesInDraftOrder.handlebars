@@ -40,7 +40,7 @@
                     <path d="M5 12l14 0" />
                 </svg>
             </button>
-            <button class="btn btn-icon btn-sm" {{#if (neq (dec project.months) 0)}} onclick="doSearch(this)"
+            <button class="btn btn-icon btn-sm" {{#if (neq (dec project.months) 0)}} onclick="doSearch(this,'',true)"
                 my-href="?months={{dec project.months}}&page={{project.pagination.currentPage}}&limit={{project.pagination.limit}}&search={{project.pagination.search}}&sortBy={{project.pagination.sort.sortBy}}&orderBy={{project.pagination.sort.order}}{{#if project.pagination.filtersQuery}}&{{project.pagination.filtersQuery}}{{/if}}"
                 {{/if}}>
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
@@ -51,7 +51,7 @@
                 </svg>
             </button>
             <span class="mx-2 strong">{{project.months}}</span>
-            <button class="btn btn-icon btn-sm" onclick="doSearch(this)"
+            <button class="btn btn-icon btn-sm" onclick="doSearch(this,'',true)"
                 my-href="?months={{inc project.months}}&page={{project.pagination.currentPage}}&limit={{project.pagination.limit}}&search={{project.pagination.search}}&sortBy={{project.pagination.sort.sortBy}}&orderBy={{project.pagination.sort.order}}{{#if project.pagination.filtersQuery}}&{{project.pagination.filtersQuery}}{{/if}}">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"

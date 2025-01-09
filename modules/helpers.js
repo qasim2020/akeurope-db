@@ -6,7 +6,6 @@ const eq = function (a, b) {
 };
 
 const gt = function (a, b) {
-    console.log(a,b);
     return a > b;
 };
 

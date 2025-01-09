@@ -34,7 +34,7 @@ exports.getInvoice = async (req, res) => {
         }
         const invoiceDir = path.join(__dirname, '../../invoices');
 
-        const filename = `${order.customer.email}_order_no_${order.orderNo}_order_total_${order.totalCost}.pdf`;
+        const filename = `order_no_${order.orderNo}_order_total_${order.totalCost}.pdf`;
 
         const invoicePath = path.join(
             invoiceDir,
@@ -42,7 +42,7 @@ exports.getInvoice = async (req, res) => {
         );
 
         const regex = new RegExp(
-            `^${order.customer.email}_order_no_${order.orderNo}.*\\.pdf$`,
+            `order_no_${order.orderNo}.*\\.pdf$`,
         );
 
         const getMatchingFiles = (directory, regex) => {

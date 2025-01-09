@@ -9,7 +9,7 @@
     <ul class="pagination m-0 ms-auto">
       <li class="page-item {{#if (eq log.hasPrevPage false)}}disabled{{/if}}">
         <a class="page-link" tabindex="-1" aria-disabled="true"
-          my-href="/getSingleOrderLogs/{{../data.order._id}}?page={{dec log.currentPage}}"
+          my-href="/getOrderLogs/{{../data.order._id}}?page={{dec log.currentPage}}"
           onclick="getOrderLogs(this)">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
@@ -21,13 +21,13 @@
       {{#each log.pagesArray}}
       <li class="page-item {{#if (eq log.currentPage this)}}active{{/if}}">
         <a class="page-link"
-          my-href="/getSingleOrderLogs/{{../../data.order._id}}?page={{this}}"
+          my-href="/getOrderLogs/{{../../data.order._id}}?page={{this}}"
           onclick="getOrderLogs(this)">{{this}}</a>
       </li>
       {{/each}}
       <li class="page-item {{#if (eq log.hasNextPage false)}}disabled{{/if}}">
         <a class="page-link" tabindex="-1" aria-disabled="true"
-          my-href="/getSingleOrderLogs/{{../data.order._id}}?page={{inc log.currentPage}}"
+          my-href="/getOrderLogs/{{../data.order._id}}?page={{inc log.currentPage}}"
           onclick="getOrderLogs(this)">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
