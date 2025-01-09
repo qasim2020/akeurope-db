@@ -7,6 +7,7 @@ const { createDynamicModel } = require('../models/createDynamicModel');
 const {
     projectEntries,
     fetchEntrySubscriptionsAndPayments,
+    getPaidOrdersByEntryId,
 } = require('../modules/projectEntries');
 const { saveLog, visibleLogs, entryLogs } = require('../modules/logAction');
 const { logTemplates } = require('../modules/logTemplates');
@@ -309,6 +310,7 @@ exports.entry = async (req, res) => {
                 entryLogs: await entryLogs(req, res),
                 sidebarCollapsed: req.session.sidebarCollapsed,
                 customers: await Customer.find().lean(),
+                payments: await getPaidOrdersByEntryId(req),
             },
         });
     } catch (error) {
@@ -424,8 +426,10 @@ exports.getOrderProjects = async (req, res) => {
         const order = await formatOrder(req, orderInDb);
 
         for (const project of order.projects) {
-            project.detail = await Project.findOne({ slug: project.slug }).lean();
-        };
+            project.detail = await Project.findOne({
+                slug: project.slug,
+            }).lean();
+        }
 
         res.render('partials/showOrderEntries', {
             layout: false,
@@ -487,6 +491,18 @@ exports.getPaginatedEntriesForPendingOrder = async (req, res) => {
         console.log(error);
         res.status(500).json({
             error: 'Error getting paginated entries',
+            details: error.message,
+        });
+    }
+};
+
+exports.getSingleEntryPayments = async (req, res) => {
+    try {
+        return await getPaidOrdersByEntryId(req);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            error: 'Error getting paid entries',
             details: error.message,
         });
     }

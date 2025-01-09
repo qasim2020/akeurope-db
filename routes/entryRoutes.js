@@ -11,8 +11,9 @@ router.post('/project/entry/:slug', authenticate, authorize("createEntry"), entr
 router.post('/project/entry/update/:slug/:id', authenticate, authorize("updateEntry"), entryController.updateEntry);
 router.post('/project/entry/delete/:slug', authenticate, authorize("deleteEntry"), entryController.deleteEntry);
 
-router.get('/getSingleEntryData/:entryId/project/:slug', authenticate, authorize("editEntry"), entryController.getSingleEntryData);
-router.get('/getSingleEntryLogs/:entryId/project/:slug', authenticate, authorize("editEntry"), entryController.getSingleEntryLogs);
+router.get('/getSingleEntryData/:entryId/project/:slug', authenticate, authorize("viewEntry"), entryController.getSingleEntryData);
+router.get('/getSingleEntryLogs/:entryId/project/:slug', authenticate, authorize("viewEntry"), entryController.getSingleEntryLogs);
+router.get('/getSingleEntryPayments/:entryId/project/:slug', authenticate, authorize("viewEntry"), entryController.getSingleEntryPayments);
 
 router.get('/getPaginatedEntriesForDraftOrder/:slug/:customerId', authenticate, authorize('viewEntry'), entryController.getPaginatedEntriesForDraftOrder);
 router.get('/getPaginatedEntriesForOrderPage/:slug/:customerId', authenticate, authorize('viewEntry'), entryController.getPaginatedEntriesForOrderPage);

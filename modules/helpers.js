@@ -230,6 +230,13 @@ const json = function (value) {
     return JSON.stringify(value);
 };
 
+const expiresOn = (createdAt, months) => {
+    if (!createdAt || !months || months <= 0) {
+        throw new Error('Invalid input: createdAt and months must be valid');
+    }
+    return moment(createdAt).add(months, 'months').format('DD-MM-YYYY');
+};
+
 module.exports = {
     eq,
     gt,
@@ -261,4 +268,5 @@ module.exports = {
     getValueOfFieldInArray,
     stringifyDate,
     json,
+    expiresOn,
 };
