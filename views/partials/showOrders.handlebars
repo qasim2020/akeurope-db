@@ -144,7 +144,9 @@
           <td>{{order.orderNo}}</td>
           <td>{{formatDate order.createdAt}}</td>
           <td>{{order.customer.name}}</td>
-          <td>{{capitalizeFirstLetter order.status}}</td>
+          <td>
+            {{{getOrderIcon order.status}}} {{capitalizeFirstLetter order.status}}
+          </td>
           <td>
             {{#each order.projects}}
             <span class="badge bg-green-lt">{{this.totalCostAllMonths}} {{../order.currency}}

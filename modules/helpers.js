@@ -1,5 +1,6 @@
 const moment = require('moment');
-const getLetterIcon = require('../modules/letterIcons');
+const getLetterIcon = require('../modules/iconLetter');
+const getOrderIcon = require('../modules/iconOrder');
 
 const eq = function (a, b) {
     return a === b;
@@ -269,4 +270,5 @@ module.exports = {
     stringifyDate,
     json,
     expiresOn,
+    getOrderIcon
 };

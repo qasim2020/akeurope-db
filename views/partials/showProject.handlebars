@@ -15,10 +15,13 @@
   </div>
   <div class="card-body">
     <div class="datagrid">
-
       {{#each ../data.fields}}
       <div class="datagrid-item">
+        {{#if this.subscription}}
+        <div class="datagrid-title text-danger fw-bold">{{this.actualName}}</div>
+        {{else}}
         <div class="datagrid-title">{{this.actualName}}</div>
+        {{/if}}
         <div class="datagrid-content">
 
           {{#if (eq this.type "boolean")}}
@@ -49,6 +52,8 @@
           <span>No file uploaded</span>
           {{/if}}
 
+          {{else if this.subscription}}
+          <span class="text-danger fw-bold">{{lookup entry this.name}} <sup>{{../../data.project.currency}} / Month</sup></span>
           {{else}}
           {{lookup entry this.name}}
           {{/if}}
@@ -79,7 +84,11 @@
         <tr>
           <th></th>
           {{#each data.fields}}
+          {{#if this.subscription}}
+          <th class="text-danger fw-bold">{{this.actualName}}</div>
+          {{else}}
           <th>{{this.actualName}}</th>
+          {{/if}}
           {{/each}}
         </tr>
       </thead>
@@ -155,6 +164,8 @@
           <td class="{{#if (neq @key 0)}}text-secondary{{/if}}"> <span>No file uploaded</span> </td>
           {{/if}}
 
+          {{else if this.subscription}}
+          <td class="text-danger fw-bold">{{lookup entry this.name}}<sup class="ms-1">{{../../data.project.currency}} / Month</sup></td>
           {{else}}
           <td class="{{#if (neq @key 0)}}text-secondary{{/if}}"> {{lookup entry this.name}} </td>
           {{/if}}

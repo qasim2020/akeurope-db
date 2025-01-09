@@ -4,6 +4,9 @@
       <div class="col">
         <div class="page-pretitle"> Overview </div>
         <h2 class="page-title"> Invoice {{data.order.orderNo}}
+          <span class="ms-2 d-flex">
+            {{{getOrderIcon data.order.status}}}
+          </span>
         </h2>
       </div>
       {{#if data.order.customer}}
@@ -98,7 +101,7 @@
   }
 
   const loadEntriesInProjectCard = function (elem, href) {
-    console.log(elem,href);
+    console.log(elem, href);
     if (!href) {
       href = $(elem).attr("my-href");
     }

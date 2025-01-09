@@ -291,6 +291,7 @@ exports.entry = async (req, res) => {
         }).lean();
 
         entry = await fetchEntrySubscriptionsAndPayments(entry);
+        entry.currency = project.currency;
 
         res.render('entry', {
             layout: 'dashboard',

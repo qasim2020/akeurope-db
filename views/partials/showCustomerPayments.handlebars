@@ -19,7 +19,7 @@
           <td><a href="/order/{{this._id}}">{{this.orderNo}}</a></td>
           <td>{{formatDate this.createdAt}}</td>
           <td>{{this.totalCost}} {{this.currency}}</td>
-          <td>{{capitalizeFirstLetter this.status}}</td>
+          <td>{{{getOrderIcon this.status}}} {{capitalizeFirstLetter this.status}}</td>
         </tr>
         {{/each}}
       </tbody>
