@@ -1,0 +1,34 @@
+<div class="modal modal-blur fade" id="modal-order-doc-{{data.order._id}}" tabindex="-1"
+    style="display: none; padding-left: 0px;" aria-modal="true" role="dialog" projSlug="new-entry"
+    order-id="{{data.order._id}}">
+    <div class="modal-dialog modal-lg" role="document" id="upload-doc">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Attach Documents to Invoice - {{data.order.orderNo}}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="dynamicForm">
+                    <div class="mb-3">
+
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <a href="#" class="btn link-secondary ms-auto" data-bs-dismiss="modal">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="icon icon-tabler icons-tabler-outline icon-tabler-x">
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                        <path d="M18 6l-12 12" />
+                        <path d="M6 6l12 12" />
+                    </svg>
+                    Close
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<button href="#" class="btn btn-primary d-none" id="button-order-doc-{{data.order._id}}" data-bs-toggle="modal"
+    data-bs-target="#modal-order-doc-{{data.order._id}}"></button>

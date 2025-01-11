@@ -67,7 +67,11 @@ app.use(orderRoutes);
 app.use(invoiceRoutes);
 
 app.get('/', (req, res) => {
-  res.redirect('/login');
+  if (req.session.user) {
+    return res.redirect('/dashboard');
+  } else {
+    res.redirect('/login');
+  }
 });
 
 const PORT = 3007;

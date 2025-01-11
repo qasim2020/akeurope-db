@@ -70,5 +70,11 @@ router.get(
     authorize('viewOrders'),
     ordersController.getOrderData,
 );
+router.get(
+    '/getEditOrderDocModal/:orderId',
+    authenticate,
+    authorize('editOrders'),
+    ordersController.getEditOrderDocModal,
+);
 
 module.exports = router;

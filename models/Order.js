@@ -12,6 +12,10 @@ const OrderSchema = new mongoose.Schema(
             type: mongoose.Schema.Types.ObjectId,
             required: true,
         },
+        connectedDocs: [{
+            name: String,
+            path: String
+        }],
         status: {
             type: String,
             enum: ['draft', 'pending payment', 'paid'],

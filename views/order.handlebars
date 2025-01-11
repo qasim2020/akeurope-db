@@ -46,7 +46,11 @@
 <div class="m-3 pt-4" id="data-container">
   {{> showOrderEntries}}
   <div class="row row-deck row-cards">
-    {{> showOrder}}
+    <div class="col-12 col-md-6 mb-auto d-flex flex-column">
+      {{> showOrderDocs}}
+      {{> showOrder}}
+      {{> showOrderInvoice}}
+    </div>
     <div class="d-block col-12 col-md-6">
       {{> showOrderLogs}}
     </div>
@@ -164,6 +168,28 @@
     const projectCard = $(elem).closest('.project-in-order-page');
     const projectBody = $(projectCard).find('.project-body');
     $(projectBody).toggleClass('d-none');
+  }
+
+  const getEditOrderDocModal = function(elem) {
+    const orderId = $(elem).attr("order-id");
+    const modalExists = $(document).find(`#button-order-doc-${orderId}`).length > 0;
+
+    if (modalExists) {
+      return $(`#button-order-doc-${orderId}`).trigger("click");
+    }
+
+    $.ajax({
+      url: `/getEditOrderDocModal/${orderId}`,
+      type: 'GET',
+      contentType: 'application/json',
+      success: function (response) {
+        $("footer").before(response);
+        $(`#button-order-doc-${orderId}`).trigger("click");
+      },
+      error: function (xhr, status, error) {
+        alert(xhr.responseText);
+      }
+    });
   }
 
   $(document).ajaxStart(function () {
