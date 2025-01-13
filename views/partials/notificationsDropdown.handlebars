@@ -8,24 +8,26 @@
         <div class="list-group-item">
             <div class="row">
                 <div class="col-auto">
-                    <a href="/user/{{log.actor._id}}">
+                    <a href="/{{log.actorType}}/{{log.actor._id}}">
                         <span class="avatar">{{getFirstTwoLetters log.actor.name}}</span>
                     </a>
                 </div>
                 <div class="col">
                     <div class="">
-                        {{#if log.entity.name}}
-                        {{log.action}} · <a href="{{log.url}}">{{log.entity.name}}</a>
-                        {{else}}
-                        <a href="{{log.url}}" class="">{{log.action}}</a>
-                        {{/if}}
+                        {{{log.action}}}
                     </div>
                     <div class="text-secondary">{{timeAgo log.timestamp}}</div>
                 </div>
                 <div class="col-auto align-self-center cursor-pointer">
                     <div class="col-auto">
                         <a class="list-group-item-actions" log-id="{{log._id}}" onclick="clearNotification(this)">
-                            <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-x"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M18 6l-12 12" /><path d="M6 6l12 12" /></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-x">
+                                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                <path d="M18 6l-12 12" />
+                                <path d="M6 6l12 12" />
+                            </svg>
                         </a>
                     </div>
                 </div>
@@ -41,7 +43,13 @@
     </div>
     <div class="card-body text-center">
         <button type="button" class="btn" onclick="$(this).closest('.dropdown-menu').removeClass('show');">
-            <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-x"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M18 6l-12 12" /><path d="M6 6l12 12" /></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                class="icon icon-tabler icons-tabler-outline icon-tabler-x">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                <path d="M18 6l-12 12" />
+                <path d="M6 6l12 12" />
+            </svg>
             Close
         </button>
     </div>

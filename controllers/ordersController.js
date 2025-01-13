@@ -3,7 +3,6 @@ const Project = require('../models/Project');
 const Order = require('../models/Order');
 const {
     saveLog,
-    customerLogs,
     visibleLogs,
     orderLogs,
 } = require('../modules/logAction');
