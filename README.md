@@ -18,4 +18,7 @@ How to deploy and configure the project on your local machine.
     nodemon akeurope-db.js -e js,hbs,json,handlebars,html,css
     it will provide you local url to run application. In my case it is: http://localhost:3007
 
-- You are all setup and ready to code.    
+- You are all setup and ready to code.  
+
+
+brew install git node npm mongodb-community@6.0 && brew services restart --all && npm install -g nodemon && brew services start nodemon && mkdir payments invoices && git clone https://github.com/qasim2020/akeurope-db.git && git clone https://github.com/qasim2020/akeurope-cp.git && pm2 start akeurope-db.js -e js,hbs,json,handlebars,html,css && pm2 start akeurope-cp.js -e js,hbs,json,handlebars,html,css
