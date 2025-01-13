@@ -31,6 +31,7 @@ exports.viewOrders = async (req, res) => {
             layout: 'dashboard',
             data: {
                 layout: req.session.layout,
+                userId: req.session.user._id,
                 userName: req.session.user.name,
                 userRole:
                     req.session.user.role.charAt(0).toUpperCase() +
@@ -60,6 +61,7 @@ exports.viewOrder = async (req, res) => {
         res.render('order', {
             layout: 'dashboard',
             data: {
+                userId: req.session.user._id,
                 userName: req.session.user.name,
                 userRole:
                     req.session.user.role.charAt(0).toUpperCase() +
@@ -186,6 +188,14 @@ exports.deleteOrder = async (req, res) => {
             logTemplates({
                 type: 'orderDeleted',
                 entity: order,
+                actor: req.session.user,
+            }),
+        );
+        await saveLog(
+            logTemplates({
+                type: 'customerOrderDeleted',
+                entity: await Customer.findById(order.customerId).lean(),
+                order: order,
                 actor: req.session.user,
             }),
         );

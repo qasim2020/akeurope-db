@@ -4,12 +4,12 @@
             <span class="badge">{{formatTime log.timestamp}}</span>
             <span class="badge bg-transparent fs-5">by</span>
             {{#if (eq log.actorType 'user')}}
-            <span class="badge">
-                <a href="/{{log.actorType}}/{{log.actor._id}}">{{log.actor.name}}</a>
+            <span class="badge bg-green-lt">
+                <a href="/{{log.actorType}}/{{log.actor._id}}" style="color: inherit;">{{log.actor.name}}</a>
             </span>
             {{else}}
             <span class="badge bg-red-lt">
-                <a href="/{{log.actorType}}/{{log.actor._id}}">{{log.actor.name}}</a>
+                <a href="/{{log.actorType}}/{{log.actor._id}}" style="color: inherit;">{{log.actor.name}}</a>
             </span> 
             {{/if}}
         </div>

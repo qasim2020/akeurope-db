@@ -23,7 +23,5 @@ async function fixIncompleteHtml() {
     console.log('HTML sanitization completed.');
 }
 
-console.log('starting...');
-
 mongoose();
 fixIncompleteHtml().catch(console.error);

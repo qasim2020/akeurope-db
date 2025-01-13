@@ -9,5 +9,6 @@ router.get('/getActivityData', authenticate, authorize('viewDashboard'), dashboa
 router.post('/renderPartial', dashboardController.renderPartial);
 router.post('/update-layout', dashboardController.updateLayout);
 router.post('/toggleSidebar', authenticate, authorize('viewDashboard'), dashboardController.toggleSideBar);
+router.get('/getFreshNotifications', authenticate, authorize('viewDashboard'), dashboardController.notifications);
 
 module.exports = router;

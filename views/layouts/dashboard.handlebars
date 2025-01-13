@@ -173,22 +173,8 @@
                 </path>
               </svg>
             </a>
-            <div class="nav-item dropdown d-none d-md-flex me-3">
-              <a href="#" class="nav-link px-0" data-bs-toggle="dropdown" tabindex="-1" aria-label="Show notifications">
-                <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24"
-                  stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                  <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                  <path d="M10 5a2 2 0 1 1 4 0a7 7 0 0 1 4 6v3a4 4 0 0 0 2 3h-16a4 4 0 0 0 2 -3v-3a7 7 0 0 1 4 -6">
-                  </path>
-                  <path d="M9 17v1a3 3 0 0 0 6 0v-1"></path>
-                </svg>
-                {{#if data.logs}}
-                <span class="badge bg-red notification-check"></span>
-                {{/if}}
-              </a>
-              <div class="dropdown-menu dropdown-menu-arrow dropdown-menu-end dropdown-menu-card">
-                {{> notificationsDropdown}}
-              </div>
+            <div class="nav-item dropdown d-none d-md-flex me-3 notifications-container">
+              {{> notificationsDropdown}}
             </div>
           </div>
           <div class="nav-item dropdown">
@@ -201,10 +187,7 @@
               </div>
             </a>
             <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-              <a href="#" class="dropdown-item">Status</a>
-              <a href="/profile" class="dropdown-item">Profile</a>
-              <div class="dropdown-divider"></div>
-              <a href="/profile/settings" class="dropdown-item">Settings</a>
+              <a href="/user/{{data.userId}}" class="dropdown-item">Settings</a>
               <a href="/logout" class="dropdown-item">Logout</a>
             </div>
           </div>
@@ -247,23 +230,8 @@
                 </path>
               </svg>
             </a>
-            <div class="nav-item dropdown d-flex me-3">
-              <a href="#" class="nav-link px-0" data-bs-toggle="dropdown" tabindex="-1" aria-label="Show notifications">
-                <!-- Download SVG icon from http://tabler-icons.io/i/bell -->
-                <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24"
-                  stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                  <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                  <path d="M10 5a2 2 0 1 1 4 0a7 7 0 0 1 4 6v3a4 4 0 0 0 2 3h-16a4 4 0 0 0 2 -3v-3a7 7 0 0 1 4 -6">
-                  </path>
-                  <path d="M9 17v1a3 3 0 0 0 6 0v-1"></path>
-                </svg>
-                {{#if data.logs}}
-                <span class="badge bg-red notification-check"></span>
-                {{/if}}
-              </a>
-              <div class="dropdown-menu dropdown-menu-arrow dropdown-menu-end dropdown-menu-card" style="width: 80vw;">
-                {{> notificationsDropdown}}
-              </div>
+            <div class="nav-item dropdown d-flex me-3 notifications-container">
+              {{> notificationsDropdown}}
             </div>
           </div>
           <div class="nav-item dropdown">
@@ -600,15 +568,14 @@
     </div>
   </div>
 
-  <!-- Tabler Core -->
   <script src="/tabler/js/tabler.min.js?1692870487" defer></script>
   <script src="/tabler/js/demo.min.js?1692870487" defer></script>
-
+  <script src="https://cdn.socket.io/4.6.0/socket.io.min.js"></script>
 
   <script>
 
     document.querySelector('.card').addEventListener('click', function (event) {
-      event.stopPropagation(); // Prevent the click from propagating to the parent
+      event.stopPropagation();
     });
 
     const clearNotification = function (elem) {
@@ -669,6 +636,26 @@
         }
       })
     }
+
+    const socket = io('http://localhost:3007');
+
+    socket.on('new-notification', (data) => {
+      console.log('new notification received from port 3007');
+      $.ajax({
+        url: '/getFreshNotifications',
+        method: 'GET',
+        success: (response) => {
+          $('.notifications-container').html(response);
+          document.querySelector('.card').addEventListener('click', function (event) {
+            event.stopPropagation();
+          });
+        },
+        error: (error) => {
+          console.log(error);
+          alert(error);
+        }
+      })
+    });
 
   </script>
 

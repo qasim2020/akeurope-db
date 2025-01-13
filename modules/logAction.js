@@ -18,6 +18,7 @@ const saveLog = async ({
     color,
     isNotification,
     isRead,
+    isReadByCustomer,
     expiresAt,
 }) => {
     try {
@@ -32,6 +33,7 @@ const saveLog = async ({
             url,
             isNotification,
             isRead,
+            isReadByCustomer,
             expiresAt,
             color,
         });
@@ -218,7 +220,6 @@ const findConnectedIds = async (logs) => {
         }
         if (log.actorType == 'customer') {
             log.actor = await Customer.findById(log.actorId).lean();
-            console.log(log);
         } else if (log.actorType == 'user') {
             log.actor = await User.findById(log.actorId).lean();
         }

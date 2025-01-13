@@ -1,6 +1,7 @@
 require('dotenv').config();
 
 const express = require('express');
+const http = require('http');
 const session = require('express-session');
 const flash = require('connect-flash');
 const mongoose = require('./config/db');
@@ -10,6 +11,8 @@ const path = require('path');
 const hbsHelpers = require('./modules/helpers');
 
 const MongoStore = require('connect-mongo');
+
+const { initSocket } = require('./sockets');
 
 const { router } = require('./routes/authRoutes');
 const authRoutes = require('./routes/authRoutes');
@@ -66,6 +69,7 @@ app.use(logRoutes);
 app.use(orderRoutes);
 app.use(invoiceRoutes);
 
+
 app.get('/', (req, res) => {
   if (req.session.user) {
     return res.redirect('/dashboard');
@@ -74,7 +78,11 @@ app.get('/', (req, res) => {
   }
 });
 
-const PORT = 3007;
-app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
+const server = http.createServer(app);
+const io = initSocket(server);
+app.set('socketio', io);
+server.listen('3007', () => {
+  console.log(`Server running on http://localhost:3007`);
+});
 
 module.exports = router;

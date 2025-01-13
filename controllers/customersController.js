@@ -30,6 +30,7 @@ exports.customers = async (req, res) => {
         layout: 'dashboard',
         data: {
             layout: req.session.layout,
+            userId: req.session.user._id,
             userName: req.session.user.name,
             userRole:
                 req.session.user.role.charAt(0).toUpperCase() +
@@ -417,6 +418,7 @@ exports.customer = async (req, res) => {
             layout: 'dashboard',
             data: {
                 layout: req.session.layout,
+                userId: req.session.user._id,
                 userName: req.session.user.name,
                 userRole:
                     req.session.user.role.charAt(0).toUpperCase() +

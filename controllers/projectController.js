@@ -100,6 +100,7 @@ exports.project = async(req,res) => {
     res.render('project', {
       layout: "dashboard",
       data: {
+        userId: req.session.user._id,
         userName: req.session.user.name,
         userRole: req.session.user.role.charAt(0).toUpperCase() + req.session.user.role.slice(1),
         project,

@@ -296,6 +296,7 @@ exports.entry = async (req, res) => {
         res.render('entry', {
             layout: 'dashboard',
             data: {
+                userId: req.session.user._id,
                 userName: req.session.user.name,
                 userRole:
                     req.session.user.role.charAt(0).toUpperCase() +

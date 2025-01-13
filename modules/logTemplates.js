@@ -1,3 +1,5 @@
+const { getOrderIcon } = require('../modules/helpers');
+
 const logTemplates = ({
     type,
     entity,
@@ -158,6 +160,9 @@ const logTemplates = ({
             ...commons('order', entity._id),
             action: `New <a href="/order/${entity._id}">Invoice-${entity.orderNo}</a> created`,
             color: 'green',
+            isNotification: true,
+            isRead: true,
+            isReadByCustomer: false,
         },
         customerRemovedFromOrder:
             order && customer
@@ -306,13 +311,34 @@ const logTemplates = ({
             ...commons('order', entity._id),
             action: `Status changed in <a href="/order/${entity._id}">Invoice-${entity.orderNo}</a>`,
             changes,
+            isNotification: true,
+            isRead: true,
+            isReadByCustomer: false,
             color: 'blue',
+        },
+        orderStatusChangedToPaid: {
+            ...commons('order', entity._id),
+            action: `<a href="/order/${entity._id}">Invoice-${entity.orderNo}</a> status changed to Paid`,
+            isNotification: true,
+            isRead: true,
+            isReadByCustomer: false,
+            color: 'green',
         },
         orderDeleted: {
             ...commons('order', entity._id),
             action: `<a href="/order/${entity._id}">Invoice-${entity.orderNo}</a> deleted`,
             color: 'red',
         },
+        customerOrderDeleted: order
+            ? {
+                  ...commons('customer', entity._id),
+                  action: `<a href="/order/${order._id}">Invoice-${order.orderNo}</a> deleted`,
+                  color: 'red',
+                  isRead: true,
+                  isReadByCustomer: false,
+                  isNotification: true,
+              }
+            : null,
     };
 
     if (templates[type] == null) {
