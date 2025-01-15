@@ -2,7 +2,7 @@
 
 <div id="projects-container">
 
-    {{#if (gt order.projects.length 0)}}
+    {{#if (gt order.totalCost 0)}}
 
     {{#each order.projects as |project|}}
     <div class="card mb-3 project-in-order-page" project-slug="{{project.slug}}" order-id="{{order._id}}"
@@ -82,7 +82,6 @@
                                 {{/if}}
                             </th>
                             {{/each}}
-                            <th>Last subscribed</th>
                             {{#each project.detail.fields}}
                             {{#if (eq this.subscription false)}}
                             <th class="">
@@ -125,7 +124,26 @@
                             {{#each entry.costs as |cost|}}
                             <td>
                                 {{#if (neq cost.totalCost 0)}}
-                                <button subscriptionName="{{cost.fieldName}}"
+                                {{#if cost.prevOrder}}
+                                <div class="fs-5 d-flex align-items-center">
+                                    <span class="me-1 cursor-pointer" data-bs-toggle="popover" data-bs-placement="top"
+                                        data-bs-content="Subscribed in <a class='' href='/order/{{cost.prevOrder.orderId}}'>Invoice-{{cost.prevOrder.orderNo}}</a> with expiry on {{formatDate cost.prevOrder.expiry}}."
+                                        data-bs-html="true">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                            stroke-linecap="round" stroke-linejoin="round"
+                                            class="icon icon-tabler icons-tabler-outline icon-tabler-lock">
+                                            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                            <path
+                                                d="M5 13a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v6a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2v-6z" />
+                                            <path d="M11 16a1 1 0 1 0 2 0a1 1 0 0 0 -2 0" />
+                                            <path d="M8 11v-4a4 4 0 1 1 8 0v4" />
+                                        </svg>
+                                    </span>
+                                    <span>{{cost.totalCost}} {{order.currency}}</span>
+                                </div>
+                                {{else}}
+                                <button
                                     class="btn btn-icon btn-sm px-2 {{#if (eq cost.totalCost cost.totalOrderedCost)}}bg-green-lt{{/if}}">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
                                         fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -137,18 +155,9 @@
                                     {{cost.totalCost}} {{order.currency}}
                                 </button>
                                 {{/if}}
-                            </td>
-                            {{/each}}
-
-                            <td>
-                                {{#if entry.lastPaid}}
-                                <span class="badge bg-green me-2"></span>
-                                {{formatTime entry.lastPaid}}
-                                {{else}}
-                                <span class="badge bg-danger me-2"></span>
-                                Never
                                 {{/if}}
                             </td>
+                            {{/each}}
 
                             {{#each project.detail.fields as |field|}}
                             {{#if (eq field.subscription false)}}
@@ -172,16 +181,6 @@
     </div>
     {{/each}}
 
-    {{else}}
-
-    <div class="card mb-3">
-        <div class="card-body">
-            <p class="empty-title">No beneficiaries found!</p>
-            <p class="empty-subtitle text-secondary">
-                Invoice has no projects selected.
-            </p>
-        </div>
-    </div>
     {{/if}}
 
 </div>

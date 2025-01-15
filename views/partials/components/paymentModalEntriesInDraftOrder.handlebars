@@ -138,7 +138,6 @@
 
                         </th>
                         {{/each}}
-                        <th>Last paid</th>
                         {{#each project.detail.fields}}
                         {{#if (eq this.subscription false)}}
                         {{#if (eq this.visible true)}}
@@ -178,6 +177,26 @@
                         {{#each entry.costs as |cost|}}
                         <td>
                             {{#if (neq cost.totalCost 0)}}
+
+                            {{#if cost.prevOrder}}
+                            <div class="fs-5 d-flex align-items-center">
+                                <span class="me-1 cursor-pointer" data-bs-toggle="popover" data-bs-placement="top"
+                                    data-bs-content="Already subscribed in <a class='' href='/order/{{cost.prevOrder.orderId}}'>Invoice-{{cost.prevOrder.orderNo}}</a>. Invoice will expire on {{formatDate cost.prevOrder.expiry}}."
+                                    data-bs-html="true">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        class="icon icon-tabler icons-tabler-outline icon-tabler-lock">
+                                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                        <path
+                                            d="M5 13a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v6a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2v-6z" />
+                                        <path d="M11 16a1 1 0 1 0 2 0a1 1 0 0 0 -2 0" />
+                                        <path d="M8 11v-4a4 4 0 1 1 8 0v4" />
+                                    </svg>
+                                </span>
+                                <span>{{cost.totalCost}} {{../../order.currency}}</span>
+                            </div>
+                            {{else}}
                             <button subscriptionName="{{cost.fieldName}}"
                                 class="btn btn-icon btn-sm px-2 {{#if (eq cost.totalCost cost.totalOrderedCost)}}bg-green-lt{{/if}}"
                                 onclick="toggleCostSelect(this)">
@@ -199,18 +218,10 @@
                                 {{cost.totalCost}} {{../../order.currency}}
                             </button>
                             {{/if}}
-                        </td>
-                        {{/each}}
 
-                        <td>
-                            {{#if entry.lastPaid}}
-                            <span class="badge bg-green me-2"></span>
-                            {{formatTime entry.lastPaid}}
-                            {{else}}
-                            <span class="badge bg-danger me-2"></span>
-                            Never
                             {{/if}}
                         </td>
+                        {{/each}}
 
                         {{#each ../project.detail.fields as |field|}}
                         {{#if (eq field.subscription false)}}
@@ -235,9 +246,11 @@
 </div>
 
 {{else}}
+
 <div class="card m-auto error mb-3">
     <div class="card-header">
         <div class="strong">Found no matching results in Project: {{project.detail.name}}!</div>
     </div>
 </div>
+
 {{/if}}

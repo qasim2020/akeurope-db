@@ -33,7 +33,6 @@
 
     .tooltip {
       z-index: 1050;
-      /* Lower than the modal's z-index */
     }
 
     .card-hover {
@@ -43,6 +42,17 @@
     .card-hover:hover {
       background-color: rgba(0, 123, 255, 0.1);
       transition: background-color 0.3s ease;
+    }
+
+    .modal .file {
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .modal .file:hover,
+    .modal .file.selected {
+      background-color: rgba(0, 123, 255, 0.1);
+      color: var(--tbl-text);
     }
 
     @media (min-width: 991.98px) {
@@ -675,6 +685,24 @@
       });
     }
 
+    function initializePopovers() {
+      var popoverTriggerList = Array.from(document.querySelectorAll('[data-bs-toggle="popover"]'));
+      popoverTriggerList.forEach(function (popoverTriggerEl) {
+        new bootstrap.Popover(popoverTriggerEl);
+      });
+    }
+
+    document.addEventListener('click', function (event) {
+      const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]');
+      popoverTriggerList.forEach(function (popoverTriggerEl) {
+        const popover = bootstrap.Popover.getInstance(popoverTriggerEl);
+        if (popover && popover._isShown && !popoverTriggerEl.contains(event.target)) {
+          popover.hide();
+        }
+      });
+    });
+
+    initializePopovers();
   </script>
 
 </body>

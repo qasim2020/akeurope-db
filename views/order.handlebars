@@ -56,10 +56,13 @@
     </div>
   </div>
 </div>
+
 {{#if data.order.customer}}
 {{> emptyOrderModal}}
 {{/if}}
+
 <script src="/static/orders.js"></script>
+<script src="/static/files.js"></script>
 <script>
 
   const refreshContainers = function (modal) {
@@ -120,6 +123,7 @@
       method: 'GET',
       success: function (response) {
         $(projectCard).replaceWith(response);
+        initializePopovers();
       },
       error: function (error) {
         alert(error.responseText);
@@ -157,6 +161,7 @@
       success: function (response) {
         $("footer").before(response);
         $(`#button-${orderId}`).trigger("click");
+        initializePopovers();
       },
       error: function (xhr, status, error) {
         alert(xhr.responseText);
@@ -170,21 +175,22 @@
     $(projectBody).toggleClass('d-none');
   }
 
-  const getEditOrderDocModal = function(elem) {
+  const getEditDocModal = function (elem) {
     const orderId = $(elem).attr("order-id");
-    const modalExists = $(document).find(`#button-order-doc-${orderId}`).length > 0;
+    const modalExists = $(document).find(`#button-file-upload-${orderId}`).length > 0;
 
     if (modalExists) {
-      return $(`#button-order-doc-${orderId}`).trigger("click");
+      $(`#button-file-upload-${orderId}`).remove();
+      $(`#modal-file-upload-${orderId}`).remove();
     }
 
     $.ajax({
-      url: `/getEditOrderDocModal/${orderId}`,
+      url: `/getFileUploadModal/${orderId}/order`,
       type: 'GET',
       contentType: 'application/json',
       success: function (response) {
         $("footer").before(response);
-        $(`#button-order-doc-${orderId}`).trigger("click");
+        $(`#button-file-upload-${orderId}`).trigger("click");
       },
       error: function (xhr, status, error) {
         alert(xhr.responseText);

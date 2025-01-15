@@ -21,6 +21,8 @@ const roles = {
         'deleteEntry',
         'uploadPdf',
         'uploadImage',
+        'uploadFile',
+        'viewFile',
         'viewCustomers',
         'createCustomers',
         'editCustomers',

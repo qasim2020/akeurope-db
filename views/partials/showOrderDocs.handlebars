@@ -2,31 +2,17 @@
 <div class="card mb-3">
     <div class="card-header d-flex justify-content-between">
         <h3 class="card-title">Connected Documents</h3>
-        <a href="#" class="btn btn-primary" onclick="getEditOrderDocModal(this)" order-id="{{order._id}}">Attach Document</a>
+        <a href="#" class="btn btn-primary" onclick="getEditDocModal(this)" order-id="{{order._id}}">Attach Document</a>
     </div>
     <div class="card-body">
-        {{!-- {{#each order.connectedDocs as |doc|}} --}}
         <div class="row">
-            <div class="col-md-3 text-center">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                    stroke-linecap="round" stroke-linejoin="round" width="48" height="48" stroke-width="1">
-                    <path d="M14 3v4a1 1 0 0 0 1 1h4"></path>
-                    <path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z"></path>
-                    <path d="M9 7l1 0"></path>
-                    <path d="M9 13l6 0"></path>
-                    <path d="M13 17l2 0"></path>
-                </svg>
-                <div class="file mt-1">
-                    <a href="{{doc.url}}" target="_blank">File Name</a>
-                    <br>
-                    <small>64kb</small>
-                </div>
+            {{!-- {{#each order.connectedDocs as |doc|}} --}}
+            <div class="col-6 col-md-3 text-center file unlinked" file-name="{{this.originalName}}"
+                onclick="getUnlinkedFile(this)">
+                {{> components/fileSkeleton}}
             </div>
-            <div class="col-md-3">Column 2</div>
-            <div class="col-md-3">Column 3</div>
-            <div class="col-md-3">Column 4</div>
+            {{!-- {{/each}} --}}
         </div>
-        {{!-- {{/each}} --}}
     </div>
 </div>
 

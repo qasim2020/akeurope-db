@@ -79,6 +79,7 @@ const searchBeneficiaries = function (elem) {
                     .find('.search-results-payment-modal-entries')
                     .append(response);
             }
+            initializePopovers();
             const orderId = $(modal).find('.project-in-order').attr('orderId');
             $(modal).attr({ 'order-id': orderId });
             updateTotalCost(modal);
@@ -150,6 +151,7 @@ const doSearch = function (elem, href, refreshAll) {
         success: function (response) {
             endSpinner(modal);
             $(modal).find(`.${slug}`).replaceWith(response);
+            initializePopovers();
 
             const isPagination = $(elem).closest('.pagination').length > 0;
             if (isPagination) {
@@ -166,6 +168,7 @@ const doSearch = function (elem, href, refreshAll) {
             }
         },
         error: function (error) {
+            endSpinner(modal);
             alert(error.responseText);
         },
     });

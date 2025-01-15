@@ -255,20 +255,3 @@ exports.getOrderLogs = async (req, res) => {
         });
     }
 };
-
-exports.getEditOrderDocModal = async (req, res) => {
-    try {
-        const order = await getSingleOrder(req, res);
-        res.render('partials/emptyOrderDocModal', {
-            layout: false,
-            data: {
-                order,
-            },
-        });
-    } catch (error) {
-        res.status(500).json({
-            error: 'Error occured while fetching logs',
-            details: error.message,
-        });
-    }
-};

@@ -9,11 +9,12 @@ const { runQueriesOnOrder } = require('../modules/orderUpdates');
 const {
     getOldestPaidEntries,
     makeProjectForOrder,
-    getDateOfLastPayment,
+    getPreviousOrdersForEntry,
 } = require('../modules/ordersFetchEntries');
 const { saveLog } = require('./logAction');
 const { logTemplates } = require('./logTemplates');
 const { capitalizeFirstLetter } = require('./helpers');
+const { fetchEntrySubscriptionsAndPayments } = require('./projectEntries');
 
 const createPagination = ({
     req,
@@ -261,7 +262,7 @@ const createDraftOrder = async (req, res) => {
                     actor: req.session.user,
                 }),
             );
-        };
+        }
 
         const customer = await Customer.findById(order.customerId).lean();
         await saveLog(
@@ -380,7 +381,26 @@ const formatOrder = async (req, order) => {
             entry.detail = await entryModel
                 .findOne({ _id: entry.entryId })
                 .lean();
-            entry.lastPaid = await getDateOfLastPayment(entry.entryId);
+            entry.lastPaid = await getPreviousOrdersForEntry(
+                entry.entryId,
+                order._id,
+            );
+            if (entry.lastPaid) {
+                for (const order of entry.lastPaid) {
+                    entry.costs = entry.costs.map((cost) => {
+                        if (
+                            order.selectedSubscriptions &&
+                            order.selectedSubscriptions.includes(cost.fieldName)
+                        ) {
+                            Object.assign(cost, {
+                                prevOrder: order,
+                            });
+                            return cost;
+                        }
+                        return cost;
+                    });
+                }
+            }
         }
 
         project.detail = detail;
@@ -420,7 +440,7 @@ const updateOrderStatus = async (req, res) => {
         { $set: { status: status } },
         { new: true, lean: true },
     );
-    
+
     if (checkOrder.status != order.status) {
         if (order.status == 'paid') {
             await saveLog(
@@ -429,7 +449,7 @@ const updateOrderStatus = async (req, res) => {
                     entity: order,
                     actor: req.session.user,
                 }),
-            ); 
+            );
         } else {
             await saveLog(
                 logTemplates({
@@ -445,7 +465,7 @@ const updateOrderStatus = async (req, res) => {
                     actor: req.session.user,
                 }),
             );
-        };   
+        }
         for (const project of order.projects) {
             const model = await createDynamicModel(project.slug);
             project.detail = await Project.findOne({
@@ -489,7 +509,7 @@ const addPaymentsToOrder = async (order) => {
                 },
             },
         );
-    };
+    }
     for (const project of order.projects) {
         const projectSlug = project.slug;
         const entries = project.allEntries;

@@ -149,6 +149,7 @@
       success: function (response) {
         $("footer").before(response);
         $(`#button-${orderId}`).trigger("click");
+        initializePopovers();
       },
       error: function (xhr, status, error) {
         alert(xhr.responseText);

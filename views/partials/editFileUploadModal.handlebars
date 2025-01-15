@@ -1,0 +1,134 @@
+<div class="modal modal-blur fade" id="modal-file-upload-{{data.entityId}}" tabindex="-1"
+    style="display: none; padding-left: 0px;" aria-modal="true" role="dialog" projSlug="new-entry"
+    order-id="{{data.order._id}}">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{{data.modal.header}}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6 col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <ul class="nav nav-tabs card-header-tabs" data-bs-toggle="tabs" role="tablist">
+                                    <li class="nav-item" role="presentation">
+                                        <a href="#tabs-files" class="nav-link active" data-bs-toggle="tab"
+                                            aria-selected="true" role="tab">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                                stroke-linecap="round" stroke-linejoin="round" class="icon me-2">
+                                                <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                                <path d="M5 12l-2 0l9 -9l9 9l-2 0"></path>
+                                                <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7"></path>
+                                                <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6"></path>
+                                            </svg>
+                                            View Files</a>
+                                    </li>
+                                    <li class="nav-item" role="presentation">
+                                        <a href="#tabs-properties" class="nav-link" data-bs-toggle="tab"
+                                            aria-selected="false" role="tab" tabindex="-1">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                                stroke-linecap="round" stroke-linejoin="round" class="icon me-2">
+                                                <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                                <path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0"></path>
+                                                <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2"></path>
+                                            </svg>
+                                            Properties</a>
+                                    </li>
+                                    <li class="nav-item" role="presentation">
+                                        <a href="#tabs-links" class="nav-link" data-bs-toggle="tab"
+                                            aria-selected="false" role="tab"
+                                            tabindex="-1"><!-- Download SVG icon from http://tabler.io/icons/icon/user -->
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                                stroke-linecap="round" stroke-linejoin="round" class="icon me-2">
+                                                <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                                <path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0"></path>
+                                                <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2"></path>
+                                            </svg>
+                                            Link</a>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="card-body">
+                                <div class="tab-content">
+                                    <div class="tab-pane active show" id="tabs-files" role="tabpanel">
+                                        <div class="row g-2">
+                                            {{#each data.linkedFiles}}
+                                            <div class="col-6 col-md-3 text-center file "
+                                                file-name="{{this.originalName}}" onclick="">
+                                                {{> components/fileSkeleton}}
+                                            </div>
+                                            {{> components/file}}
+                                            {{/each}}
+                                            {{#each data.unlinkedFiles}}
+                                            <div class="col-6 col-md-3 text-center file "
+                                                file-name="{{this.originalName}}" onclick="renderUnlinkedFile(this)">
+                                                {{> components/fileSkeleton}}
+                                            </div>
+                                            {{/each}}
+                                        </div>
+                                    </div>
+                                    <div class="tab-pane" id="tabs-properties" role="tabpanel">
+                                        <div class="row g-2">
+                                            {{#each data.linkedFiles}}
+                                            <div class="col-6 col-md-3 text-center file "
+                                                file-name="{{this.originalName}}" onclick="">
+                                                {{> components/fileSkeleton}}
+                                            </div>
+                                            {{> components/file}}
+                                            {{/each}}
+                                            {{#each data.unlinkedFiles}}
+                                            <div class="col-6 col-md-3 text-center file "
+                                                file-name="{{this.originalName}}" onclick="">
+                                                {{> components/fileSkeleton}}
+                                            </div>
+                                            {{/each}}
+                                        </div>
+                                    </div>
+                                    <div class="tab-pane" id="tabs-links" role="tabpanel">
+                                        <div class="row g-2">
+                                            {{#each data.linkedFiles}}
+                                            <div class="col-6 col-md-3 text-center file "
+                                                file-name="{{this.originalName}}" onclick="">
+                                                {{> components/fileSkeleton}}
+                                            </div>
+                                            {{> components/file}}
+                                            {{/each}}
+                                            {{#each data.unlinkedFiles}}
+                                            <div class="col-6 col-md-3 text-center file "
+                                                file-name="{{this.originalName}}" onclick="">
+                                                {{> components/fileSkeleton}}
+                                            </div>
+                                            {{/each}}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-12" id="file-container">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <a href="#" class="btn link-secondary ms-auto" data-bs-dismiss="modal">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="icon icon-tabler icons-tabler-outline icon-tabler-x">
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                        <path d="M18 6l-12 12" />
+                        <path d="M6 6l12 12" />
+                    </svg>
+                    Close
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<button href="#" class="btn btn-primary d-none" id="button-file-upload-{{data.entityId}}" data-bs-toggle="modal"
+    data-bs-target="#modal-file-upload-{{data.entityId}}"></button>

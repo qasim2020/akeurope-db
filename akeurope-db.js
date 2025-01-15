@@ -27,6 +27,7 @@ const customersRoutes = require('./routes/customersRoutes');
 const logRoutes = require('./routes/logRoutes');
 const orderRoutes = require('./routes/ordersRoutes');
 const invoiceRoutes = require('./routes/invoiceRoutes');
+const fileRoutes = require('./routes/filesRoutes');
 
 mongoose();
 
@@ -68,6 +69,7 @@ app.use(customersRoutes);
 app.use(logRoutes);
 app.use(orderRoutes);
 app.use(invoiceRoutes);
+app.use(fileRoutes);
 
 
 app.get('/', (req, res) => {
