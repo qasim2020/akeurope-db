@@ -69,15 +69,23 @@ const validateQuery = async (req, res) => {
             if (orders.length > 0) {
                 const validSubscriptions = subscriptions.filter(
                     (subscription) => {
-                        return !orders.some(
+                        const alreadySelected = orders.some(
                             (order) =>
                                 order.selectedSubscriptions.includes(
                                     subscription,
                                 ) && new Date(order.expiry) > new Date(),
                         );
+                        if (alreadySelected) return false;
+                        const costObject = entry.costs.find(
+                            (field) => field.fieldName === subscription,
+                        );
+                        console.log(costObject.totalCost);
+                        if (costObject.totalCost > 0) {
+                            return true;
+                        }
+                        return false;
                     },
                 );
-
                 excludedEntries.push({
                     entryId: entry.entryId,
                     validSubscriptions: validSubscriptions,
@@ -222,8 +230,8 @@ const getNonFullySubscribedEntries = async (
     const entries = await DynamicModel.find({
         _id: {
             $in: alreadySelectedEntries,
-            ...searchQuery,
         },
+        ...searchQuery,
     }).lean();
 
     const nonFullySubscribed = [];
@@ -481,8 +489,7 @@ const makeProjectForOrder = (project, allEntries) => {
                 selectedSubscriptions: project.fields
                     .filter((field) => {
                         const isSubscriptionValid =
-                            field.subscription &&
-                            entry[field.name];
+                            field.subscription && entry[field.name];
 
                         if (!entry.oldOrders || !isSubscriptionValid) {
                             return isSubscriptionValid;
