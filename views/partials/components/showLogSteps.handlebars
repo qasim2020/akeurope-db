@@ -7,8 +7,8 @@
             <span class="badge bg-blue-lt">
                 <a href="/dashboard" style="color: inherit;">{{log.actor.name}}</a>
             </span>
-            {{else if (eq removeLinks true)}}
-            <span class="badge">
+            {{else if (and (eq log.actor.role 'admin') (neq log.self.role 'admin'))}}
+            <span class="badge bg-green-lt">
                 {{log.actor.name}}
             </span>
             {{else if (eq log.actorType 'user')}}
@@ -55,12 +55,7 @@
         </div>
     </div>
     <div class="">
-        {{#if (eq removeLinks true)}}
-        {{log (removeLinksFromHtml log.action)}}
-        {{{removeLinksFromHtml log.action}}}
-        {{else}}
         {{{log.action}}}
-        {{/if}}
         {{#if log.changes}}
         {{#each log.changes}}
         <br>

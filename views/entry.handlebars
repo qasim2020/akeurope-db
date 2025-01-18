@@ -60,10 +60,8 @@
     <div class="d-block col-12 col-md-8">
       {{#if (findInArray data.role 'viewOrders')}}
       {{> showEntryPayments}}
-      {{> showEntryLogs}}
-      {{else}}
-      {{> showEntryLogs data=data removeLinks=true}}
       {{/if}}
+      {{> showEntryLogs}}
     </div>
   </div>
 </div>

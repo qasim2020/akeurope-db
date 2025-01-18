@@ -2,6 +2,7 @@ const moment = require('moment');
 const getLetterIcon = require('../modules/iconLetter');
 const getOrderIcon = require('../modules/iconOrder');
 const cheerio = require('cheerio');
+const roles = require('../modules/roles');
 
 const eq = function (a, b) {
     return a === b;
@@ -12,6 +13,7 @@ const gt = function (a, b) {
 };
 
 const and = function(a,b) {
+    console.log(a, b);
     return a && b;
 }
 

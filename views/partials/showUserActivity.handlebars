@@ -4,50 +4,58 @@
     <div class="card-header">
       <h3 class="card-title col-auto">Recent Activity</h3>
       <select class="ms-2 form-select" my-href="/getUserActivityData/{{data.user._id}}?page=1">
-        <option value="all" {{#if (eq data.userLogs.showBy 'all')}}selected{{/if}}>Show all</option>
-        <option value="actor" {{#if (eq data.userLogs.showBy 'actor')}}selected{{/if}}>by administrator</option>
-        <option value="entity" {{#if (eq data.userLogs.showBy 'entity')}}selected{{/if}}>on administrator</option>
+        <option value="all" {{#if (eq data.userLogs.showBy 'all' )}}selected{{/if}}>Show all</option>
+        <option value="actor" {{#if (eq data.userLogs.showBy 'actor' )}}selected{{/if}}>by administrator</option>
+        <option value="entity" {{#if (eq data.userLogs.showBy 'entity' )}}selected{{/if}}>on administrator</option>
       </select>
     </div>
     {{#with data.userLogs as |log|}}
     <div class="card-header d-flex align-items-center">
-        <p class="m-0 text-secondary">Page <span>{{log.currentPage}}</span> of <span>{{log.totalPages}}</span></p>
-        <ul class="pagination m-0 ms-auto">
-            <li class="page-item {{#if (eq log.hasPrevPage false)}}disabled{{/if}}">
-                <a class="page-link" tabindex="-1" aria-disabled="true"  my-href="/getUserActivityData/{{../data.user._id}}?showBy={{log.showBy}}&entityType={{log.entityType}}&page={{dec log.currentPage}}" onclick="getUserActivityData(this)">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M15 6l-6 6l6 6"></path></svg>
-                </a>
-            </li>
-            {{#each log.pagesArray}}
-            <li class="page-item {{#if (eq log.currentPage this)}}active{{/if}}">
-                <a class="page-link"  my-href="/getUserActivityData/{{../../data.user._id}}?showBy={{log.showBy}}&entityType={{log.entityType}}&page={{this}}" onclick="getUserActivityData(this)">{{this}}</a>
-            </li>
-            {{/each}}
-            <li class="page-item {{#if (eq log.hasNextPage false)}}disabled{{/if}}">
-                <a class="page-link" tabindex="-1" aria-disabled="true" my-href="/getUserActivityData/{{../data.user._id}}?showBy={{log.showBy}}&entityType={{log.entityType}}&page={{inc log.currentPage}}" onclick="getUserActivityData(this)">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M9 6l6 6l-6 6"></path></svg>
-                </a>
-            </li>
-        </ul>
+      <p class="m-0 text-secondary">Page <span>{{log.currentPage}}</span> of <span>{{log.totalPages}}</span></p>
+      <ul class="pagination m-0 ms-auto">
+        <li class="page-item {{#if (eq log.hasPrevPage false)}}disabled{{/if}}">
+          <a class="page-link" tabindex="-1" aria-disabled="true"
+            my-href="/getUserActivityData/{{../data.user._id}}?showBy={{log.showBy}}&entityType={{log.entityType}}&page={{dec log.currentPage}}"
+            onclick="getUserActivityData(this)">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
+              <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+              <path d="M15 6l-6 6l6 6"></path>
+            </svg>
+          </a>
+        </li>
+        {{#each log.pagesArray}}
+        <li class="page-item {{#if (eq log.currentPage this)}}active{{/if}}">
+          <a class="page-link"
+            my-href="/getUserActivityData/{{../../data.user._id}}?showBy={{log.showBy}}&entityType={{log.entityType}}&page={{this}}"
+            onclick="getUserActivityData(this)">{{this}}</a>
+        </li>
+        {{/each}}
+        <li class="page-item {{#if (eq log.hasNextPage false)}}disabled{{/if}}">
+          <a class="page-link" tabindex="-1" aria-disabled="true"
+            my-href="/getUserActivityData/{{../data.user._id}}?showBy={{log.showBy}}&entityType={{log.entityType}}&page={{inc log.currentPage}}"
+            onclick="getUserActivityData(this)">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
+              <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+              <path d="M9 6l6 6l-6 6"></path>
+            </svg>
+          </a>
+        </li>
+      </ul>
     </div>
     {{/with}}
     <div class="card-body">
       {{#if data.userLogs.logs}}
       <ul class="steps steps-vertical">
         {{#each data.userLogs.logs as |log|}}
-          {{#if (compareIds log.entityId ../data.user._id)}}
-            {{#if (compareIds log.actorId ../data.user._id)}}
-              {{> components/showLogSteps log=log showActor=false showEntity=false}}
-            {{else}}
-              {{> components/showLogSteps log=log showActor=true showEntity=false}}
-            {{/if}}
-          {{else}}
-          {{> components/showLogSteps log=log showActor=false showEntity=true}}
-          {{/if}}
+        {{> components/showLogSteps log=log }}
         {{/each}}
       </ul>
       {{else}}
-      <div class="text-center py-4"><p>No logs found!</p></div>
+      <div class="text-center py-4">
+        <p>No logs found!</p>
+      </div>
       {{/if}}
     </div>
   </div>

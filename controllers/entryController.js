@@ -369,7 +369,6 @@ exports.getSingleEntryLogs = async (req, res) => {
         entry = await fetchEntrySubscriptionsAndPayments(entry);
         res.render('partials/showEntryLogs', {
             layout: false,
-            removeLinks: req.userPermissions.includes('viewOrders') ? false : true,
             data: {
                 entryLogs: await entryLogs(req, res),
                 project,

@@ -137,7 +137,7 @@ const userLogs = async (req, userId) => {
 
     return {
         showBy: req.query.showBy || 'all',
-        logs: await findConnectedIds(logs),
+        logs: await findConnectedIds(logs, req),
         pagesArray: generatePagination(totalPages, page),
         currentPage: page,
         totalPages,
@@ -222,7 +222,6 @@ const orderLogs = async (req, res) => {
 };
 
 const findConnectedIds = async (logs, req) => {
-    // const url = req && req.originalUrl;
 
     for (const log of logs) {
         if (log.entityType == 'user') {
@@ -237,6 +236,7 @@ const findConnectedIds = async (logs, req) => {
             const testOne = log.actor._id.toString();
             const testTwo = req && req.session.user._id.toString();
             log.actorIsSelf = testOne === testTwo;
+            log.self = req && req.session.user;
         }
     }
 

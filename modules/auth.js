@@ -32,7 +32,7 @@ const authorize = (permission) => {
                 if (!test) {
                     return res.status(401).render('error', {
                         heading: 'Unauthorized',
-                        error: `Unauthorized: ${userRole} can't ${permission}`,
+                        error: `Insufficient permissions to view another Admin`,
                     });
                 }
             } else {
