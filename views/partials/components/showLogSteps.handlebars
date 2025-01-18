@@ -8,13 +8,19 @@
                 <a href="/dashboard" style="color: inherit;">{{log.actor.name}}</a>
             </span>
             {{else if (eq removeLinks true)}}
-            <span class="badge bg-red-lt">
+            <span class="badge">
                 {{log.actor.name}}
             </span>
             {{else if (eq log.actorType 'user')}}
-            <span class="badge bg-red-lt">
-                <a href="/{{log.actorType}}/{{log.actor._id}}" style="color: inherit;">{{log.actor.name}}</a>
-            </span>
+                {{#if (eq log.actor.role 'admin')}}
+                <span class="badge bg-green-lt">
+                    <a href="/{{log.actorType}}/{{log.actor._id}}" style="color: inherit;">{{log.actor.name}}</a>
+                </span>
+                {{else}}
+                <span class="badge bg-blue-lt">
+                    <a href="/{{log.actorType}}/{{log.actor._id}}" style="color: inherit;">{{log.actor.name}}</a>
+                </span>
+                {{/if}}
             {{else if (eq log.actorType 'customer')}}
             <span class="badge bg-red-lt">
                 <a href="/{{log.actorType}}/{{log.actor._id}}" style="color: inherit;">{{log.actor.name}}</a>
