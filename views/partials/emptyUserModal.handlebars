@@ -1,8 +1,9 @@
-<div class="modal modal-blur fade" id="modal-new-user" tabindex="-1" style="display: none; padding-left: 0px;" aria-modal="true" role="dialog">
+<div class="modal modal-blur fade" id="modal-new-user" tabindex="-1" style="display: none; padding-left: 0px;"
+    aria-modal="true" role="dialog">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">New user</h5>
+                <h5 class="modal-title">Create New Administrator</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
@@ -14,67 +15,97 @@
                     <label class="form-label">Email</label>
                     <input type="email" class="form-control email" name="email" placeholder="email@gmail.com" />
                 </div>
-                <label class="form-label">Role</label>
-                <div class="form-selectgroup-boxes row mb-3 role">
-                    <div class="">
-                        <label class="form-selectgroup-item">
-                        <input type="radio" name="report-type" value="viewer" class="form-selectgroup-input" checked="" />
-                        <span class="form-selectgroup-label d-flex align-items-center p-3">
-                          <span class="me-3">
-                            <span class="form-selectgroup-check"></span>
-                          </span>
-                          <span class="form-selectgroup-label-content">
-                            <span class="form-selectgroup-title strong mb-1">Viewer</span>
-                            <span class="d-block text-secondary">Can view pages only. Doesn't have edit access to any thing.</span>
-                          </span>
-                        </span>
+                <div class="mb-3">
+                    <label class="form-label">Assign Projects</label>
+                    <div class="form-selectgroup form-selectgroup-boxes d-flex flex-column projects">
+                        {{#each data.projects as |project|}}
+                        {{#if (eq 'active' project.status)}}
+                        <label class="form-selectgroup-item flex-fill">
+                            <input type="checkbox" name="projects" value="{{project.slug}}"
+                                class="form-selectgroup-input">
+                            <div class="form-selectgroup-label d-flex align-items-center p-3">
+                                <div class="me-3">
+                                    <span class="form-selectgroup-check"></span>
+                                </div>
+                                <div class="form-selectgroup-label-content d-flex align-items-center">
+                                    <div class="font-weight-medium">{{project.name}}</div>
+                                </div>
+                            </div>
                         </label>
-                    </div>
-                    <div class="">
-                        <label class="form-selectgroup-item">
-                          <input type="radio" name="report-type" value="editor" class="form-selectgroup-input" />
-                          <span class="form-selectgroup-label d-flex align-items-center p-3">
-                              <span class="me-3">
-                                  <span class="form-selectgroup-check"></span>
-                              </span>
-                              <span class="form-selectgroup-label-content">
-                                  <span class="form-selectgroup-title strong mb-1" >Editor</span>
-                                  <span class="d-block text-secondary">Can create, edit, update, bulk upload and delete entries of a project.</span>
-                              </span>
-                          </span>
-                        </label>
-                    </div>
-                    <div class="">
-                        <label class="form-selectgroup-item">
-                          <input type="radio" name="report-type" value="admin" class="form-selectgroup-input" />
-                          <span class="form-selectgroup-label d-flex align-items-center p-3">
-                              <span class="me-3">
-                                  <span class="form-selectgroup-check"></span>
-                              </span>
-                              <span class="form-selectgroup-label-content">
-                                  <span class="form-selectgroup-title strong mb-1" >Admin</span>
-                                  <span class="d-block text-secondary">Can create projects, customers, administrators and has full access.</span>
-                              </span>
-                          </span>
-                        </label>
+                        {{/if}}
+                        {{/each}}
                     </div>
                 </div>
-                
-            </div>
+                <div class="mb-3">
+                    <label class="form-label">Role</label>
+                    <div class="form-selectgroup-boxes row mb-3 role">
+                        <div class="">
+                            <label class="form-selectgroup-item">
+                                <input type="radio" name="report-type" value="viewer" class="form-selectgroup-input"
+                                    checked="" />
+                                <span class="form-selectgroup-label d-flex align-items-center p-3">
+                                    <span class="me-3">
+                                        <span class="form-selectgroup-check"></span>
+                                    </span>
+                                    <span class="form-selectgroup-label-content">
+                                        <span class="form-selectgroup-title strong mb-1">Viewer</span>
+                                        <span class="d-block text-secondary">Can view pages only. Doesn't have edit
+                                            access
+                                            to any thing.</span>
+                                    </span>
+                                </span>
+                            </label>
+                        </div>
+                        <div class="">
+                            <label class="form-selectgroup-item">
+                                <input type="radio" name="report-type" value="editor" class="form-selectgroup-input" />
+                                <span class="form-selectgroup-label d-flex align-items-center p-3">
+                                    <span class="me-3">
+                                        <span class="form-selectgroup-check"></span>
+                                    </span>
+                                    <span class="form-selectgroup-label-content">
+                                        <span class="form-selectgroup-title strong mb-1">Editor</span>
+                                        <span class="d-block text-secondary">Can create, edit, update, bulk upload and
+                                            delete entries of a project.</span>
+                                    </span>
+                                </span>
+                            </label>
+                        </div>
+                        <div class="">
+                            <label class="form-selectgroup-item">
+                                <input type="radio" name="report-type" value="admin" class="form-selectgroup-input" />
+                                <span class="form-selectgroup-label d-flex align-items-center p-3">
+                                    <span class="me-3">
+                                        <span class="form-selectgroup-check"></span>
+                                    </span>
+                                    <span class="form-selectgroup-label-content">
+                                        <span class="form-selectgroup-title strong mb-1">Admin</span>
+                                        <span class="d-block text-secondary">Can create projects, customers,
+                                            administrators
+                                            and has full access.</span>
+                                    </span>
+                                </span>
+                            </label>
+                        </div>
+                    </div>
 
-          <div class="modal-footer">
-              <a href="#" class="btn btn-link link-secondary" data-bs-dismiss="modal">
-                Cancel
-              </a>
-              <a href="#" class="btn btn-primary ms-auto" onclick="saveNewUser(this)">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                      <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                      <path d="M12 5l0 14"></path>
-                      <path d="M5 12l14 0"></path>
-                  </svg>
-                  Create user
-              </a>
-          </div>
-      </div>
-  </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <a href="#" class="btn btn-link link-secondary" data-bs-dismiss="modal">
+                    Cancel
+                </a>
+                <a href="#" class="btn btn-primary ms-auto" onclick="saveNewUser(this)">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24"
+                        stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                        <path d="M12 5l0 14"></path>
+                        <path d="M5 12l14 0"></path>
+                    </svg>
+                    Create user
+                </a>
+            </div>
+        </div>
+    </div>
 </div>

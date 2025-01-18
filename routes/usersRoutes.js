@@ -6,7 +6,7 @@ const usersController = require('../controllers/usersController');
 
 router.get('/users', authenticate, authorize("viewUsers"), allProjects, usersController.users);
 router.get('/getUsersData', authenticate, authorize("viewUsers"), usersController.getData);
-router.get('/getUserModal/:userId', authenticate, authorize("editUsers"), usersController.editModal);
+router.get('/getUserModal/:userId', authenticate, authorize("editUsers"), allProjects, usersController.editModal);
 router.post('/users/create', authenticate, authorize("createUsers"), usersController.createUser);
 router.post('/users/update/:userId', authenticate, authorize("updateUsers"), usersController.updateUser);
 router.post('/users/delete/:userId', authenticate, authorize("deleteUsers"), usersController.deleteUser);

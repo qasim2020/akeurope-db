@@ -42,7 +42,7 @@
     {{#if data.entryLogs}}
     <ul class="steps steps-vertical">
       {{#each data.entryLogs.logs as |log|}}
-      {{> components/showLogSteps log=log showActor=true showEntity=false}}
+      {{> components/showLogSteps log=log removeLinks=../removeLinks}}
       {{/each}}
     </ul>
     {{else}}

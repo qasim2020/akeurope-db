@@ -1,4 +1,4 @@
- <div class="card-body">
+<div class="card-body">
     <ul class="steps steps-blue steps-counter my-4">
         <li class="step-item active">Download Template</li>
         <li class="step-item">Upload File</li>
@@ -35,7 +35,7 @@
 <div class="card-body">
     <ul class="pagination ">
         <li class="page-item page-next ">
-            <a class="page-link next cursor-pointer" data-url="/uploadExcel/step-2/{{data.project.slug}}">
+            <a class="page-link next cursor-pointer" onclick="moveNext(this)" data-url="/uploadExcel/step-2/{{data.project.slug}}">
                 <div class="page-item-subtitle">next</div>
                 <div class="page-item-title">Upload Template</div>
             </a>

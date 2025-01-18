@@ -1,24 +1,38 @@
-const { visibleLogs, activtyByEntityType } = require('../modules/logAction');
+const User = require('../models/User');
+const {
+    visibleLogs,
+    activtyByEntityType,
+    userLogs,
+} = require('../modules/logAction');
 
 exports.showDashboard = async (req, res) => {
-    res.render('dashboard', {
-        layout: 'dashboard',
-        data: {
-            userId: req.session.user._id,
-            userId: req.session.user._id,
-            userName: req.session.user.name,
-            userRole:
-                req.session.user.role.charAt(0).toUpperCase() +
-                req.session.user.role.slice(1),
-            activeMenu: 'dashboard',
-            projects: req.allProjects,
-            logs: await visibleLogs(req, res),
-            activity: await activtyByEntityType(req, res),
-            sidebarCollapsed: req.session.sidebarCollapsed
-                ? req.session.sidebarCollapsed
-                : false,
-        },
-    });
+    try {
+        res.render('user', {
+            layout: 'dashboard',
+            data: {
+                layout: req.session.layout,
+                userEmail: req.session.user.email,
+                userId: req.session.user._id,
+                userName: req.session.user.name,
+                userRole:
+                    req.session.user.role.charAt(0).toUpperCase() +
+                    req.session.user.role.slice(1),
+                activeMenu: 'dashboard',
+                projects: req.allProjects,
+                role: req.userPermissions,
+                logs: await visibleLogs(req, res),
+                userLogs: await userLogs(req, req.session.user._id),
+                user: await User.findById(req.session.user._id).lean(),
+                sidebarCollapsed: req.session.sidebarCollapsed,
+            },
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(404).render('error', {
+            heading: 'Server error',
+            error,
+        });
+    }
 };
 
 exports.getActivityData = async (req, res) => {
@@ -69,16 +83,16 @@ exports.toggleSideBar = async (req, res) => {
     });
 };
 
-exports.notifications = async (req,res) => {
+exports.notifications = async (req, res) => {
     try {
         res.render('partials/notificationsDropdown', {
             layout: false,
             data: {
-                logs: await visibleLogs(req,res)
-            }
-        })
+                logs: await visibleLogs(req, res),
+            },
+        });
     } catch (error) {
         console.log(error);
         res.status(400).send(error.toString());
     }
-}
+};

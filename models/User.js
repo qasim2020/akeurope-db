@@ -8,6 +8,7 @@ const UserSchema = new mongoose.Schema({
   role: { type: String, enum: ['admin', 'editor', 'viewer'], default: 'viewer' },
   status: { type: String, default: 'pending' },
   invitationStatus: { type: Boolean, default: false },
+  projects: [String],
   resetPasswordToken: String,
   resetPasswordExpires: Date,
   inviteToken: String,

@@ -61,7 +61,17 @@ const updateLog = async ({ logId, updates }) => {
 
 const entryLogs = async (req, res) => {
     try {
-        const query = { entityId: req.params.entryId };
+        
+        let query;
+
+        if (req.userPermissions.includes('viewOrders')) {
+            query = { entityId: req.params.entryId };
+        } else {
+            query = {
+                entityId: req.params.entryId,
+                entityType: { $ne: 'order' },
+            };
+        }
 
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 10;
@@ -76,7 +86,7 @@ const entryLogs = async (req, res) => {
         const totalPages = Math.ceil(total / limit);
 
         return {
-            logs: await findConnectedIds(logs),
+            logs: await findConnectedIds(logs, req),
             pagesArray: generatePagination(totalPages, page),
             currentPage: page,
             totalPages,
@@ -91,26 +101,26 @@ const entryLogs = async (req, res) => {
     }
 };
 
-const userLogs = async (req, res) => {
+const userLogs = async (req, userId) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     let query;
     if (req.query.showBy == 'actor') {
         query = {
-            actorId: req.params.userId,
+            actorId: userId,
         };
     } else if (req.query.showBy == 'entity') {
         query = {
-            entityId: req.params.userId,
+            entityId: userId,
         };
     } else {
         query = {
             $or: [
                 {
-                    entityId: req.params.userId,
+                    entityId: userId,
                 },
                 {
-                    actorId: req.params.userId,
+                    actorId: userId,
                 },
             ],
         };
@@ -211,7 +221,9 @@ const orderLogs = async (req, res) => {
     }
 };
 
-const findConnectedIds = async (logs) => {
+const findConnectedIds = async (logs, req) => {
+    // const url = req && req.originalUrl;
+
     for (const log of logs) {
         if (log.entityType == 'user') {
             log.entity = await User.findById(log.entityId).lean();
@@ -222,8 +234,12 @@ const findConnectedIds = async (logs) => {
             log.actor = await Customer.findById(log.actorId).lean();
         } else if (log.actorType == 'user') {
             log.actor = await User.findById(log.actorId).lean();
+            const testOne = log.actor._id.toString();
+            const testTwo = req && req.session.user._id.toString();
+            log.actorIsSelf = testOne === testTwo;
         }
     }
+
     return logs;
 };
 

@@ -1,41 +1,65 @@
 <div class="page-header d-print-none">
-  <div class="container-xl">
-    <div class="col-lg-7 m-auto">
-        <div class="col text-center">
-            <p class="text-secondary">{{data.project.name}}</p>
-            <h2 class="">Bulk Upload</h2>
-        </div>
-        <div class="card" id="data-container">
-            {{> uploadExcelOne}}
+    <div class="container-xl">
+        <div class="col-lg-10 m-auto">
+            <div class="col text-center">
+                <p class="text-secondary">{{data.project.name}}</p>
+                <h2 class="">Bulk Upload</h2>
+            </div>
+            <div class="card" id="data-container">
+                {{> uploadExcelOne}}
+            </div>
         </div>
     </div>
-  </div>
 </div>
 
-
 <script>
-    $(document).on("click", ".next, .prev", function(e) {
-        let url = $(this).attr("data-url");
+
+    const moveNext = function (elem) {
+        navigation(elem);
+    }
+
+    const moveBack = function (elem) {
+        navigation(elem);
+    }
+
+    const navigation = function (elem) {
+        let url = $(elem).attr("data-url");
+
+        if (!elem) {
+            console.error('No URL provided!');
+            return;
+        }
+
+        let currentHTML = $(elem).html();
+
+        $(elem).html(`
+        <div class="page-item-subtitle">
+            <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+        </div>
+        <div class="page-item-title">Processing Request</div>
+        `);
 
         $.ajax({
-            url: url, 
+            url: url,
             method: 'GET',
-            success: function(response) {
+            success: function (response) {
+                $(elem).html(currentHTML);
                 $("#data-container").html(response);
             },
-            error: function(error) {
+            error: function (error) {
+                $(elem).html(currentHTML);
+                console.error('AJAX Error:', error);
                 alert(error.responseText);
             }
-        }); 
-    });
+        });
+    };
 
-
-    const uploadExcel = function(elem) {
+    const uploadExcel = function (elem) {
 
         const fileInput = $('#excelFile')[0];
 
         $('#excelFile').removeClass("is-invalid");
-        $(elem).closest(".card").find(".invalid-feedback").removeClass("invalid-feedback");
+        $(elem).closest(".card").find(".invalid-feedback").remove();
 
         if (!fileInput.files.length) {
             $('#excelFile').addClass("is-invalid");
@@ -47,28 +71,39 @@
         const formData = new FormData();
         formData.append('excelFile', fileInput.files[0]);
 
+
+        let currentHTML = $(elem).html();
+
+        $(elem).html(`
+        <div class="page-item-subtitle">
+            <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+        </div>
+        <div class="page-item-title">Processing Request</div>
+        `);
+
         $.ajax({
-            url: '/uploadExcel/{{data.project.slug}}', 
+            url: '/uploadExcel/{{data.project.slug}}',
             type: 'POST',
             data: formData,
-            processData: false, 
-            contentType: false, 
-            success: function(response) {
-                stepThree(response);
+            processData: false,
+            contentType: false,
+            success: function (response) {
+                stepThree(response, elem, currentHTML);
             },
-            error: function(error) {
+            error: function (error) {
+                $(elem).html(currentHTML);
                 alert('Error uploading file.');
                 console.error(error);
             }
         });
     };
 
-    const stepThree = function(msg) {
+    const stepThree = function (msg, elem, currentHTML) {
         $.ajax({
             url: '/renderPartial',
             type: 'POST',
             data: JSON.stringify({
-                partialName: 'uploadExcelThree',  
+                partialName: 'uploadExcelThree',
                 data: {
                     msg,
                     slug: '{{data.project.slug}}',
@@ -76,12 +111,15 @@
                 }
             }),
             contentType: 'application/json',
-            success: function(response) {
+            success: function (response) {
                 $("#data-container").html(response);
+                $(elem).html(currentHTML);
             },
-            error: function(error) {
+            error: function (error) {
+                $(elem).html(currentHTML);
                 alert('Error rendering partial:', error);
             }
         });
     }
+
 </script>

@@ -10,22 +10,52 @@
       <!-- Page title actions -->
       <div class="col-auto ms-auto d-print-none">
         <div class="btn-list">
-           <a href="#" class="btn btn-secondary-outline d-none d-md-inline-block" onclick="toggleLayout(this)">
-            <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-square-toggle-horizontal"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M22 12h-20" /><path d="M4 14v-8a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v8" /><path d="M18 20a2 2 0 0 0 2 -2" /><path d="M4 18a2 2 0 0 0 2 2" /><path d="M14 20l-4 0" /></svg>
+          <a href="#" class="btn btn-secondary-outline d-none d-md-inline-block" onclick="toggleLayout(this)">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+              class="icon icon-tabler icons-tabler-outline icon-tabler-square-toggle-horizontal">
+              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+              <path d="M22 12h-20" />
+              <path d="M4 14v-8a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v8" />
+              <path d="M18 20a2 2 0 0 0 2 -2" />
+              <path d="M4 18a2 2 0 0 0 2 2" />
+              <path d="M14 20l-4 0" />
+            </svg>
             Toggle layout
           </a>
           <a href="#" class="btn btn-secondary-outline d-md-none btn-icon" onclick="toggleLayout(this)">
-            <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-square-toggle-horizontal"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M22 12h-20" /><path d="M4 14v-8a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v8" /><path d="M18 20a2 2 0 0 0 2 -2" /><path d="M4 18a2 2 0 0 0 2 2" /><path d="M14 20l-4 0" /></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+              class="icon icon-tabler icons-tabler-outline icon-tabler-square-toggle-horizontal">
+              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+              <path d="M22 12h-20" />
+              <path d="M4 14v-8a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v8" />
+              <path d="M18 20a2 2 0 0 0 2 -2" />
+              <path d="M4 18a2 2 0 0 0 2 2" />
+              <path d="M14 20l-4 0" />
+            </svg>
           </a>
           {{#if (findInArray data.role "createProject")}}
-          <a href="#" class="btn btn-primary d-none d-md-inline-block" id="" data-bs-toggle="modal" data-bs-target="#modal-new-project">
+          <a href="#" class="btn btn-primary d-none d-md-inline-block" id="" data-bs-toggle="modal"
+            data-bs-target="#modal-new-project">
             <!-- Download SVG icon from http://tabler-icons.io/i/plus -->
-            <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"> <path stroke="none" d="M0 0h24v24H0z" fill="none" /> <path d="M12 5l0 14" /> <path d="M5 12l14 0" /> </svg> 
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24"
+              stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+              <path d="M12 5l0 14" />
+              <path d="M5 12l14 0" />
+            </svg>
             Create new project
           </a>
-          <a href="#" class="btn btn-primary d-md-none btn-icon" data-bs-toggle="modal" data-bs-target="#modal-new-project" aria-label="Create new project">
+          <a href="#" class="btn btn-primary d-md-none btn-icon" data-bs-toggle="modal"
+            data-bs-target="#modal-new-project" aria-label="Create new project">
             <!-- Download SVG icon from http://tabler-icons.io/i/plus -->
-            <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"> <path stroke="none" d="M0 0h24v24H0z" fill="none" /> <path d="M12 5l0 14" /> <path d="M5 12l14 0" /> </svg> 
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24"
+              stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+              <path d="M12 5l0 14" />
+              <path d="M5 12l14 0" />
+            </svg>
           </a>
           {{/if}}
         </div>
@@ -40,20 +70,20 @@
 </div>
 
 {{#if (findInArray data.role "createProject")}}
-  {{> emptyProjectModal}}
+{{> emptyProjectModal}}
 {{/if}}
 
 <script>
 
   function toCamelCase(str) {
     return str
-        .toLowerCase()                
-        .replace(/[^a-zA-Z0-9]+(.)/g, 
-            (match, chr) => chr.toUpperCase() 
-        );
-    }
+      .toLowerCase()
+      .replace(/[^a-zA-Z0-9]+(.)/g,
+        (match, chr) => chr.toUpperCase()
+      );
+  }
 
-  const resetModal = function(modal) {
+  const resetModal = function (modal) {
     $(modal).find("input, .form-control").removeClass("is-invalid");
     $(modal).find("input, .form-control").removeClass("is-valid");
     $(modal).find(".invalid-feedback").remove();
@@ -64,15 +94,15 @@
     return true;
   }
 
-  const checkModalValidity = function(modal) {
+  const checkModalValidity = function (modal) {
     let isValid = [];
-    $(modal).find("input").each( (key, val) => {
+    $(modal).find("input").each((key, val) => {
       if ($(val).val() == "") {
         $(val).addClass("is-invalid");
         if ($(val).siblings(".form-control").length > 0) {
           $(val).siblings(".form-control").addClass("is-invalid");
         }
-        if ($(val).closest(".accordion-item").length > 0) { 
+        if ($(val).closest(".accordion-item").length > 0) {
           $(val).closest(".accordion-item").addClass("bg-red-lt");
         }
         if ($(val).siblings("span").length > 0) {
@@ -100,40 +130,40 @@
 
   }
 
-  const getModalFilledData = function(modal) {
+  const getModalFilledData = function (modal) {
     const name = $(modal).find(".project-name").val();
     const slug = $(modal).find(".project-slug").val();
     const location = $(modal).find(".project-location").val();
     const status = $(modal).find(".project-status").find("input:checked").val();
     const currency = $(modal).find(".project-sub-cost-currency").val();
 
-    const fields = $(modal).find(".accordion-item").map( (key, val) => {
-        let options = [];
-        if ( $(val).find(".dynamic-options").length > 0 ) {
-            $(val).find(".dynamic-options input").each( (key, dynamicField) => {
-                options.push({
-                    label: $(dynamicField).attr("data-label"),
-                    value: $(dynamicField).val()
-                })
-            });
-        }
-        return {
-            name: toCamelCase($(val).find("input:first").val()), 
-            actualName: $(val).find("input:first").val(),
-            type: $(val).find(".form-select").val(),
-            options: options.length > 0 ? options : undefined,
-            primary: $(modal).find(".primary-field input").val() == $(val).find("input:first").val(),
-            visible: checkVisibleField( $(val).find("input:first").val(), $(modal) ),
-            subscription: checkSubscriptionField( $(val).find("input:first").val(), $(modal) )
-        }
+    const fields = $(modal).find(".accordion-item").map((key, val) => {
+      let options = [];
+      if ($(val).find(".dynamic-options").length > 0) {
+        $(val).find(".dynamic-options input").each((key, dynamicField) => {
+          options.push({
+            label: $(dynamicField).attr("data-label"),
+            value: $(dynamicField).val()
+          })
+        });
+      }
+      return {
+        name: toCamelCase($(val).find("input:first").val()),
+        actualName: $(val).find("input:first").val(),
+        type: $(val).find(".form-select").val(),
+        options: options.length > 0 ? options : undefined,
+        primary: $(modal).find(".primary-field input").val() == $(val).find("input:first").val(),
+        visible: checkVisibleField($(val).find("input:first").val(), $(modal)),
+        subscription: checkSubscriptionField($(val).find("input:first").val(), $(modal))
+      }
     }).get();
-    
+
     return {
-      name, status, location, slug, currency, fields, 
+      name, status, location, slug, currency, fields,
     }
   }
 
-  const showEditProjectModal = function(elem) {
+  const showEditProjectModal = function (elem) {
 
     const projId = $(elem).attr("project-id");
 
@@ -146,37 +176,37 @@
     $.ajax({
       url: `/getProjectModal/${projId}`,
       type: 'GET',
-      contentType: 'application/json', 
-      success: function(response) {
+      contentType: 'application/json',
+      success: function (response) {
         $("footer").before(response);
         $(`#button-${projId}`).trigger("click");
-          let allAccordions = $(".accordion").length - 1;
-          let el = document.querySelectorAll(".accordion")[allAccordions];
-          new Sortable(el, {
-            animation: 100,
-            group: '.accordion',
-            draggable: '.accordion-item',
-            handle: '.accordion-header',
-            sort: true,
-            filter: '.sortable-disabled',
-            chosenClass: 'active'
-          });
+        let allAccordions = $(".accordion").length - 1;
+        let el = document.querySelectorAll(".accordion")[allAccordions];
+        new Sortable(el, {
+          animation: 100,
+          group: '.accordion',
+          draggable: '.accordion-item',
+          handle: '.accordion-header',
+          sort: true,
+          filter: '.sortable-disabled',
+          chosenClass: 'active'
+        });
       },
-      error: function(xhr, status, error) {
+      error: function (xhr, status, error) {
         alert(xhr.responseText);
       }
     });
 
   }
 
-  const updateProject = function(elem) {
+  const updateProject = function (elem) {
 
     const modal = $(elem).closest(".modal");
 
     resetModal(modal);
     const isValidModal = checkModalValidity(modal);
     if (isValidModal == false) return;
-    const data = getModalFilledData(modal);    
+    const data = getModalFilledData(modal);
 
     let currentBtnHTML = $(elem).html();
     $(elem).html(`<span class="spinner-border spinner-border-sm" role="status"></span>`);
@@ -184,15 +214,15 @@
     const id = $(modal).attr("projId");
 
     $.ajax({
-      url: `/project/update/${id}`, 
+      url: `/project/update/${id}`,
       type: 'POST',
-      contentType: 'application/json', 
+      contentType: 'application/json',
       data: JSON.stringify(data),
-      success: function(response) {
+      success: function (response) {
         $(elem).html(currentBtnHTML);
         window.location.href = "/projects";
       },
-      error: function(xhr, status, error) {
+      error: function (xhr, status, error) {
         $(elem).html(currentBtnHTML);
         $(".modal-footer").append(`
         <div class="w-100 d-block alert alert-danger mt-4" role="alert">
@@ -200,32 +230,32 @@
           <div class="text-secondary">${xhr.responseText}</div>
         </div>`);
       }
-    }); 
+    });
 
   };
 
-  const createNewProject = function(elem) {
+  const createNewProject = function (elem) {
 
     const modal = $("#create-project");
-    
+
     resetModal(modal);
     const isValidModal = checkModalValidity(modal);
     if (isValidModal == false) return;
-    const data = getModalFilledData(modal);    
+    const data = getModalFilledData(modal);
 
     let currentBtnHTML = $(elem).html();
     $(elem).html(`<span class="spinner-border spinner-border-sm me-2" role="status"></span>`);
 
     $.ajax({
-      url: '/project/create', 
+      url: '/project/create',
       type: 'POST',
-      contentType: 'application/json', 
+      contentType: 'application/json',
       data: JSON.stringify(data),
-      success: function(response) {
+      success: function (response) {
         $(elem).html(currentBtnHTML);
         window.location.href = "/projects";
       },
-      error: function(xhr, status, error) {
+      error: function (xhr, status, error) {
         $(elem).html(currentBtnHTML);
         $(".modal-footer").append(`
         <div class="w-100 d-block alert alert-danger mt-4" role="alert">
@@ -237,7 +267,7 @@
 
   }
 
-  const highlightRepeatingValues = function($container) {
+  const highlightRepeatingValues = function ($container) {
     const valueCounts = new Map();
     let hasRepeatingValues = false;
 
@@ -272,23 +302,23 @@
     return hasRepeatingValues;
   }
 
-  document.addEventListener('DOMContentLoaded', function() {
-      let el = document.querySelector('.accordion');
-      if (el) {
-          new Sortable(el, {
-            animation: 100,
-            group: '.accordion',
-            draggable: '.accordion-item',
-            handle: '.accordion-header',
-            sort: true,
-            filter: '.sortable-disabled',
-            chosenClass: 'active'
-          });
-      }
+  document.addEventListener('DOMContentLoaded', function () {
+    let el = document.querySelector('.accordion');
+    if (el) {
+      new Sortable(el, {
+        animation: 100,
+        group: '.accordion',
+        draggable: '.accordion-item',
+        handle: '.accordion-header',
+        sort: true,
+        filter: '.sortable-disabled',
+        chosenClass: 'active'
+      });
+    }
   });
 
-  $(document).on("click", ".add-project-field", function(e) {
-    let projectSlug=$(this).closest(".modal").attr("projSlug");
+  $(document).on("click", ".add-project-field", function (e) {
+    let projectSlug = $(this).closest(".modal").attr("projSlug");
     let fieldNo = $(this).closest(".modal-body").find(".accordion-button").length + 1;
     $('.accordion-button').addClass('collapsed');
     $('.accordion-collapse').removeClass('show').collapse('hide');
@@ -331,24 +361,24 @@
     `);
   })
 
-  $(document).on("click", ".delete-project-field", function(e) {
+  $(document).on("click", ".delete-project-field", function (e) {
     const accordion = $(this).closest(".accordion");
     let modal = $(this).closest(".modal");
     let projectSlug = modal.attr("projSlug");
     $(this).closest(".accordion-item").remove();
-    modal.find(".accordion-item").each( (key, val) => {
-      $(val).find(".accordion-button").attr({"data-bs-target": `#collapse-${projectSlug}-${key+1}`});
-      $(val).find(".accordion-collapse").attr({id: `collapse-${projectSlug}-${key+1}`})
+    modal.find(".accordion-item").each((key, val) => {
+      $(val).find(".accordion-button").attr({ "data-bs-target": `#collapse-${projectSlug}-${key + 1}` });
+      $(val).find(".accordion-collapse").attr({ id: `collapse-${projectSlug}-${key + 1}` })
     });
     addVisibleField(accordion);
     addPrimaryField(accordion);
     addSubscriptionField(accordion);
   })
-  
+
   $(document).on("change keyup", ".accordion-edit-project input, .accordion-edit-project .form-select", function () {
     clearMsgs(this);
     if ($(this).hasClass("form-select")) {
-        addOptions(this);
+      addOptions(this);
     }
     addVisibleField(this);
     addPrimaryField(this);
@@ -363,17 +393,17 @@
     `);
   })
 
-  const addPrimaryField = function(elem) {
-    let allFields = $(elem).closest(".modal").find(".accordion-item").map( (key, val) => {
-        const inputType = $(val).find(".form-select:first").val();
-        if (/^(string|textarea|number)$/.test(inputType)) {
-          return $(val).find("input:first").val() 
-        } else {
-          return null;
-        }
-      }).filter(val => val != null);
+  const addPrimaryField = function (elem) {
+    let allFields = $(elem).closest(".modal").find(".accordion-item").map((key, val) => {
+      const inputType = $(val).find(".form-select:first").val();
+      if (/^(string|textarea|number)$/.test(inputType)) {
+        return $(val).find("input:first").val()
+      } else {
+        return null;
+      }
+    }).filter(val => val != null);
     let html = ``;
-    allFields.each( (key, val) => {
+    allFields.each((key, val) => {
       if (val.length > 0) {
         html += `<span class="p-2 badge cursor-pointer me-2 my-1" onclick="setPrimaryField(this)">${val}</span>`;
       }
@@ -385,35 +415,35 @@
     $(elem).closest(".modal").find(".primary-field .invalid-feedback").remove();
   }
 
-  const addVisibleField = function(elem) {
-    let allFields = $(elem).closest(".modal").find(".accordion-item").map( (key, val) => {
-      return $(val).find("input:first").val() 
+  const addVisibleField = function (elem) {
+    let allFields = $(elem).closest(".modal").find(".accordion-item").map((key, val) => {
+      return $(val).find("input:first").val()
     });
     let html = ``;
-    allFields.each( (key, val) => {
+    allFields.each((key, val) => {
       if (val.length > 0) {
         html += `<span class="p-2 badge cursor-pointer me-2 my-1" onclick="setVisibleField(this)">${val}</span>`;
       }
     });
     $(elem).closest(".modal").find(".visible-field-selectors").html(html);
-    $(elem).closest(".modal").find(".visible-field input").removeClass("is-valid").val(""); 
-    $(elem).closest(".modal").find(".visible-field .form-control").removeClass("is-valid"); 
-    $(elem).closest(".modal").find(".visible-field .form-control").removeClass("is-invalid"); 
+    $(elem).closest(".modal").find(".visible-field input").removeClass("is-valid").val("");
+    $(elem).closest(".modal").find(".visible-field .form-control").removeClass("is-valid");
+    $(elem).closest(".modal").find(".visible-field .form-control").removeClass("is-invalid");
     $(elem).closest(".modal").find(".visible-field .invalid-feedback").remove();
   }
 
-  const addSubscriptionField = function(elem) {
+  const addSubscriptionField = function (elem) {
 
-    let allFields = $(elem).closest(".modal").find(".accordion-item").map( (key, val) => {
+    let allFields = $(elem).closest(".modal").find(".accordion-item").map((key, val) => {
       const inputType = $(val).find(".form-select:first").val();
       if (/^(number)$/.test(inputType)) {
-        return $(val).find("input:first").val() 
+        return $(val).find("input:first").val()
       } else {
         return null;
       }
     }).filter(val => val != null);
     let html = ``;
-    allFields.each( (key, val) => {
+    allFields.each((key, val) => {
       if (val.length > 0) {
         html += `<span class="p-2 badge cursor-pointer me-2 my-1" onclick="setSubscriptionField(this)">${val}</span>`;
       }
@@ -426,38 +456,38 @@
 
   }
 
-  const checkSubscriptionField = function(field, modal) {
-    const array = $(modal).find(".subscription-field").find(".bg-blue-lt").map( (key,val) => $(val).html()).get();
-    return array.includes(field); 
+  const checkSubscriptionField = function (field, modal) {
+    const array = $(modal).find(".subscription-field").find(".bg-blue-lt").map((key, val) => $(val).html()).get();
+    return array.includes(field);
   }
-  
-  const checkVisibleField = function(field, modal) {
-    const array = $(modal).find(".visible-field").find(".bg-blue-lt").map( (key,val) => $(val).html()).get();
+
+  const checkVisibleField = function (field, modal) {
+    const array = $(modal).find(".visible-field").find(".bg-blue-lt").map((key, val) => $(val).html()).get();
     return array.includes(field);
   };
 
-  const setPrimaryField = function(elem) {
+  const setPrimaryField = function (elem) {
     $(elem).siblings().removeClass("bg-blue-lt");
     $(elem).addClass("bg-blue-lt");
-    $(elem).closest(".primary-field").find("input").val( $(elem).html() );
+    $(elem).closest(".primary-field").find("input").val($(elem).html());
     clearMsgs(elem);
   }
 
-  const setVisibleField = function(elem) {
+  const setVisibleField = function (elem) {
     $(elem).toggleClass("bg-blue-lt");
-    const array = $(elem).closest(".visible-field").find(".bg-blue-lt").map( (key,val) => $(val).html()).get();
-    $(elem).closest(".visible-field").find("input").val( array.length > 0 ? array.join(','): '' ); 
+    const array = $(elem).closest(".visible-field").find(".bg-blue-lt").map((key, val) => $(val).html()).get();
+    $(elem).closest(".visible-field").find("input").val(array.length > 0 ? array.join(',') : '');
     clearMsgs(elem);
   }
 
-  const setSubscriptionField = function(elem) {
+  const setSubscriptionField = function (elem) {
     $(elem).toggleClass("bg-blue-lt");
-    const array = $(elem).closest(".subscription-field").find(".bg-blue-lt").map( (key,val) => $(val).html()).get();
-    $(elem).closest(".subscription-field").find("input").val( array.length > 0 ? array.join(','): '' ); 
+    const array = $(elem).closest(".subscription-field").find(".bg-blue-lt").map((key, val) => $(val).html()).get();
+    $(elem).closest(".subscription-field").find("input").val(array.length > 0 ? array.join(',') : '');
     clearMsgs(elem);
   }
-  
-  const clearMsgs = function(elem) {
+
+  const clearMsgs = function (elem) {
     $(elem).closest(".form-field").removeClass("bg-red-lt");
     $(elem).closest(".form-field").find(".invalid-feedback").remove();
     $(elem).closest(".form-field").find(".is-valid").removeClass("is-valid");
@@ -468,12 +498,12 @@
 
     $(elem).closest(".accordion-body").find(".dynamic-options").remove();
 
-    const fieldType = $(elem).val(); 
+    const fieldType = $(elem).val();
 
     let html = "";
 
     if (fieldType === "boolean") {
-        html += `
+      html += `
             <label class="form-label dynamic-options">Select boolean values</label>
             <div class="mb-3 dynamic-options">
 
@@ -502,7 +532,7 @@
             </div>
         `;
     } else if (fieldType === "dropdown") {
-        html += `
+      html += `
             <label class="form-label dynamic-options">Add / edit dropdown options</label>
             <div class="mb-3 dynamic-options">
                 <div class="row g-2">
@@ -524,7 +554,7 @@
 
     // Append the generated HTML to the appropriate container
     $(elem).closest(".accordion-body").find(".text-center").before(html); // Adjust the selector to your actual container
-}
+  }
 
   const addOption = function (elem) {
     let html = `
@@ -545,45 +575,45 @@
         </div>
         `;
     $(elem).closest(".accordion-body").find(".text-center").before(html);
-}
+  }
 
   const deleteOption = function (elem) {
     if ($(elem).closest(".accordion-body").find(".mb-3.dynamic-options").length == 1) {
-        return console.log("can't be deleted as this is the last option");
+      return console.log("can't be deleted as this is the last option");
     }
     $(elem).closest(".mb-3").remove();
-}
+  }
 
-  let newLayout = '{{data.layout}}' == 'grid' ? 'table' : 'grid'; 
+  let newLayout = '{{data.layout}}' == 'grid' ? 'table' : 'grid';
 
-  const toggleLayout = function(elem) {
-  $.ajax({
-    url: '/update-layout',
-    method: 'POST',
-    data: { layout: newLayout },
-    success: function(response) {
+  const toggleLayout = function (elem) {
+    $.ajax({
+      url: '/update-layout',
+      method: 'POST',
+      data: { layout: newLayout },
+      success: function (response) {
         showData();
-    },
-    error: function() {
+      },
+      error: function () {
         alert("Failed to update layout.");
-    }
-  });
-}
+      }
+    });
+  }
 
-  const showData = function() {
-  $.ajax({
-    url: '/getProjectsData',
-    method: 'GET',
-    success: function(response) {
-      newLayout = newLayout == 'grid' ? 'table' : 'grid'; 
-      $("#data-container").html(response);
-    },
-    error: function(error) {
+  const showData = function () {
+    $.ajax({
+      url: '/getProjectsData',
+      method: 'GET',
+      success: function (response) {
+        newLayout = newLayout == 'grid' ? 'table' : 'grid';
+        $("#data-container").html(response);
+      },
+      error: function (error) {
         alert("Failed to update layout.");
         console.log(error);
-    }
-  }); 
-}
+      }
+    });
+  }
 
 
 </script>

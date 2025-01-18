@@ -1,8 +1,10 @@
+const User = require('../models/User');
+
 const roles = {
     admin: [
-        'inviteUsers', 
-        'assignRoles', 
-        'viewDashboard', 
+        'inviteUsers',
+        'assignRoles',
+        'viewDashboard',
         'viewProject',
         'viewEntry',
         'viewUsers',
@@ -11,13 +13,13 @@ const roles = {
         'editUsers',
         'updateUsers',
         'deleteUsers',
-        'createProject', 
-        'editProject', 
-        'updateProject', 
-        'deleteProject', 
-        'createEntry', 
-        'editEntry', 
-        'updateEntry', 
+        'createProject',
+        'editProject',
+        'updateProject',
+        'deleteProject',
+        'createEntry',
+        'editEntry',
+        'updateEntry',
         'deleteEntry',
         'uploadPdf',
         'uploadImage',
@@ -33,35 +35,37 @@ const roles = {
         'editOrders',
         'deleteOrders',
         'viewInvoices',
+        'viewLogs',
+        'viewNotifications',
+        'editNotifications',
     ],
     editor: [
-        'viewDashboard', 
-        'viewProject',
-        'viewEntry',
-        'viewOrders',
-        'createEntry', 
-        'editEntry', 
-        'updateEntry', 
-        'deleteEntry',
-        'uploadPdf',
-        'uploadImage',
-        'editNotifications',
-        'createOrders',
-        'editOrders',
-        'viewInvoices',
-    ],
-    viewer: [
         'viewDashboard',
         'viewProject',
         'viewEntry',
-        'viewOrders',
-        'editNotifications',
-        'viewInvoices',
-    ]
+        'createEntry',
+        'editEntry',
+        'updateEntry',
+        'deleteEntry',
+        'uploadPdf',
+        'uploadImage',
+        'viewSelf',
+    ],
+    viewer: ['viewEntry'],
 };
 
-function hasPermission(role, permission) {
-    return roles[role]?.includes(permission);
+async function getDynamicPermissions(role, userId) {
+    const user = await User.findById(userId).lean();
+    return user?.projects || [];
 }
 
-module.exports = { roles, hasPermission };
+async function hasPermission(role, userId, permission) {
+    const staticPermissions = roles[role] || [];
+    const dynamicPermissions = await getDynamicPermissions(role, userId);
+
+    const allPermissions = [...staticPermissions, ...dynamicPermissions];
+
+    return allPermissions.includes(permission);
+}
+
+module.exports = { roles, hasPermission, getDynamicPermissions };

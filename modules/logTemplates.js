@@ -110,6 +110,7 @@ const logTemplates = ({
                       ...commons('entry', entity._id),
                       action: `Entry <a href="/entry/${entity._id}/project/${project.slug}">${entity.name}</a> updated in bulk upload in project <a href="/project/${project.slug}">${project.name}</a>`,
                       changes,
+                      color: 'blue',
                   }
                 : null,
         entryCreatedBulkUpload: project
@@ -117,6 +118,7 @@ const logTemplates = ({
                   ...commons('entry', entity._id),
                   action: `Entry <a href="/entry/${entity._id}/project/${project.slug}">${entity.name}</a> created in bulk upload in project <a href="/project/${project.slug}">${project.name}</a>`,
                   isNotification: false,
+                  color: 'blue'
               }
             : null,
         bulkUploadCompleted: {

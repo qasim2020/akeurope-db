@@ -3,14 +3,22 @@
         <div class="d-flex align-items-center">
             <span class="badge">{{formatTime log.timestamp}}</span>
             <span class="badge bg-transparent fs-5">by</span>
-            {{#if (eq log.actorType 'user')}}
-            <span class="badge bg-green-lt">
-                <a href="/{{log.actorType}}/{{log.actor._id}}" style="color: inherit;">{{log.actor.name}}</a>
+            {{#if (and log.actorIsSelf (neq log.actor.role 'admin'))}}
+            <span class="badge bg-blue-lt">
+                <a href="/dashboard" style="color: inherit;">{{log.actor.name}}</a>
             </span>
-            {{else}}
+            {{else if (eq removeLinks true)}}
+            <span class="badge bg-red-lt">
+                {{log.actor.name}}
+            </span>
+            {{else if (eq log.actorType 'user')}}
             <span class="badge bg-red-lt">
                 <a href="/{{log.actorType}}/{{log.actor._id}}" style="color: inherit;">{{log.actor.name}}</a>
-            </span> 
+            </span>
+            {{else if (eq log.actorType 'customer')}}
+            <span class="badge bg-red-lt">
+                <a href="/{{log.actorType}}/{{log.actor._id}}" style="color: inherit;">{{log.actor.name}}</a>
+            </span>
             {{/if}}
         </div>
         <div class="flex-grow-1 mx-2">
@@ -41,7 +49,12 @@
         </div>
     </div>
     <div class="">
+        {{#if (eq removeLinks true)}}
+        {{log (removeLinksFromHtml log.action)}}
+        {{{removeLinksFromHtml log.action}}}
+        {{else}}
         {{{log.action}}}
+        {{/if}}
         {{#if log.changes}}
         {{#each log.changes}}
         <br>

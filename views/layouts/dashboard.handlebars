@@ -183,9 +183,11 @@
                 </path>
               </svg>
             </a>
+            {{#if (findInArray data.role 'viewNotifications')}}
             <div class="nav-item dropdown d-none d-md-flex me-3 notifications-container">
               {{> notificationsDropdown}}
             </div>
+            {{/if}}
           </div>
           <div class="nav-item dropdown">
             <a href="#" class="nav-link d-flex lh-1 text-reset pr-4" data-bs-toggle="dropdown"
@@ -197,14 +199,12 @@
               </div>
             </a>
             <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-              <a href="/user/{{data.userId}}" class="dropdown-item">Settings</a>
               <a href="/logout" class="dropdown-item">Logout</a>
             </div>
           </div>
         </div>
       </div>
     </header>
-    <!-- Sidebar -->
     <aside
       class="navbar navbar-vertical navbar-expand-lg navbar {{#if (eq data.sidebarCollapsed true)}}d-lg-none{{/if}}">
       <div class="container-fluid">
@@ -240,9 +240,13 @@
                 </path>
               </svg>
             </a>
+
+            {{#if (findInArray data.role 'viewNotifications')}}
             <div class="nav-item dropdown d-flex me-3 notifications-container">
               {{> notificationsDropdown}}
             </div>
+            {{/if}}
+
           </div>
           <div class="nav-item dropdown">
             <a href="#" class="nav-link d-flex lh-1 text-reset p-0" data-bs-toggle="dropdown"
@@ -254,10 +258,6 @@
               </div>
             </a>
             <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-              <a href="#" class="dropdown-item">Status</a>
-              <a href="/profile" class="dropdown-item">Profile</a>
-              <div class="dropdown-divider"></div>
-              <a href="/profile/settings" class="dropdown-item">Settings</a>
               <a href="/logout" class="dropdown-item">Logout</a>
             </div>
           </div>
@@ -283,6 +283,7 @@
               </a>
             </li>
 
+            {{#if (findInArray data.role 'viewCustomers')}}
             <li class="nav-item">
               <a class="nav-link {{#if (eq 'customers' data.activeMenu)}}bg-azure-lt{{/if}}" href="/customers">
                 <span class="nav-link-icon d-lg-inline-block">
@@ -305,7 +306,9 @@
                 </span>
               </a>
             </li>
+            {{/if}}
 
+            {{#if (findInArray data.role 'viewProject')}}
             <li class="nav-item dropdown show">
               <a class="nav-link {{#if (eq 'allProjects' data.activeMenu)}}bg-azure-lt{{/if}} dropdown-toggle"
                 href="/projects" data-bs-toggle="dropdown" data-bs-auto-close="false" role="button"
@@ -326,6 +329,7 @@
                   Projects
                 </span>
               </a>
+
               <div class="dropdown-menu show">
                 <a href="/projects" class="nav-link {{#if (eq 'allProjects' data.activeMenu)}}bg-azure-lt{{/if}}">
                   <span class="nav-link-icon d-lg-inline-block">
@@ -348,8 +352,9 @@
                 {{/each}}
               </div>
             </li>
+            {{/if}}
 
-
+            {{#if (findInArray data.role 'viewOrders')}}
             <li class="nav-item">
               <a class="nav-link {{#if (eq 'orders' data.activeMenu)}}bg-azure-lt{{/if}}" href="/orders" rel="noopener">
                 <span class="nav-link-icon d-lg-inline-block">
@@ -368,7 +373,9 @@
                 </span>
               </a>
             </li>
+            {{/if}}
 
+            {{#if (findInArray data.role 'viewUsers')}}
             <li class="nav-item">
               <a class="nav-link {{#if (eq 'users' data.activeMenu)}} bg-azure-lt {{/if}}" href="/users">
                 <span
@@ -389,7 +396,9 @@
                 </span>
               </a>
             </li>
+            {{/if}}
 
+            {{#if (findInArray data.role 'viewSettings')}}
             <li class="nav-item">
               <a class="nav-link" href="/settings">
                 <span
@@ -408,6 +417,7 @@
                 </span>
               </a>
             </li>
+            {{/if}}
           </ul>
         </div>
 
@@ -440,6 +450,7 @@
               </a>
             </li>
 
+            {{#if (findInArray data.role 'viewCustomers')}}
             <li class="nav-item">
               <a class="nav-link {{#if (eq 'customers' data.activeMenu)}}bg-azure-lt{{/if}}" href="/customers"
                 data-bs-toggle="tooltip" data-bs-title="Customers">
@@ -460,7 +471,9 @@
                 </span>
               </a>
             </li>
+            {{/if}}
 
+            {{#if (findInArray data.role 'viewProject')}}
             <li class="nav-item">
               <a class="nav-link {{#if (eq 'allProjects' data.activeMenu)}}bg-azure-lt{{/if}}" href="/projects"
                 data-bs-toggle="tooltip" data-bs-title="All Projects">
@@ -489,6 +502,7 @@
             </li>
 
             {{#each data.projects}}
+            {{#if (findInArray ../data.role this.slug)}}
             <li class="nav-item">
               <a class="nav-link {{#if (eq this.slug ../data.activeMenu)}} bg-azure-lt {{/if}}"
                 href="/project/{{this.slug}}" data-bs-toggle="tooltip" data-bs-title="{{this.name}}">
@@ -497,8 +511,11 @@
                 </span>
               </a>
             </li>
+            {{/if}}
             {{/each}}
+            {{/if}}
 
+            {{#if (findInArray data.role 'viewOrders')}}
             <li class="nav-item">
               <a class="nav-link {{#if (eq 'orders' data.activeMenu)}}bg-azure-lt{{/if}}" href="/orders"
                 data-bs-toggle="tooltip" data-bs-title="Invoices">
@@ -515,7 +532,9 @@
                 </span>
               </a>
             </li>
+            {{/if}}
 
+            {{#if (findInArray data.role 'viewUsers')}}
             <li class="nav-item">
               <a class="nav-link {{#if (eq 'users' data.activeMenu)}} bg-azure-lt {{/if}}" href="/users"
                 data-bs-toggle="tooltip" data-bs-title="Administrators">
@@ -533,7 +552,9 @@
                 </span>
               </a>
             </li>
+            {{/if}}
 
+            {{#if (findInArray data.role 'viewSettings')}}
             <li class="nav-item">
               <a class="nav-link" href="/settings" data-bs-toggle="tooltip" data-bs-title="Settings">
                 <span class="nav-link-icon d-md-none d-lg-inline-block">
@@ -548,6 +569,7 @@
                 </span>
               </a>
             </li>
+            {{/if}}
           </ul>
         </div>
       </div>
@@ -584,7 +606,9 @@
 
   <script>
 
-    document.querySelector('.card').addEventListener('click', function (event) {
+    {{#if (findInArray data.role 'viewNotifications')}}
+    document.querySelector('.dropdown .card').addEventListener('click', function (event) {
+      console.log('stopping propagation');
       event.stopPropagation();
     });
 
@@ -618,6 +642,8 @@
         }
       })
     };
+
+    {{/if}}
 
     let sidebarCollapsed = `{{data.sidebarCollapsed}}`;
 
@@ -693,6 +719,7 @@
     }
 
     document.addEventListener('click', function (event) {
+      console.log('clicked in document');
       const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]');
       popoverTriggerList.forEach(function (popoverTriggerEl) {
         const popover = bootstrap.Popover.getInstance(popoverTriggerEl);
@@ -703,6 +730,13 @@
     });
 
     initializePopovers();
+
+    $(document).ajaxStart(function () {
+      $(document).ajaxSend(function (event, jqXHR, settings) {
+        console.log("URL:", settings.url);
+      });
+    });
+
   </script>
 
 </body>

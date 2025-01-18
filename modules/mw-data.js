@@ -7,9 +7,20 @@ const oneProject = async (req, res, next) => {
 };
 
 const allProjects = async (req, res, next) => {
-    let allProjects = await Project.find().lean();
+    let allProjects = await Project.find({slug: {$in: req.user?.projects}}).lean();
     req.allProjects = allProjects;
     next();
 };
 
-module.exports = { allProjects, oneProject };
+const authProject = async (req,res, next) => {
+    if (req.userPermissions.includes(req.params.slug)) {
+        next();
+    } else {
+        res.render('error',{
+            heading: 'Unauthorized',
+            error: 'You are not allowed to perform actions on this project'
+        });
+    }
+}
+
+module.exports = { allProjects, oneProject, authProject};

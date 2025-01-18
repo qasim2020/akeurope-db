@@ -20,7 +20,6 @@ exports.createProject = async(req,res) => {
       fields
     });
 
-
     await saveLog(logTemplates({ 
       type: 'projectCreated',
       entity: project,
@@ -93,6 +92,13 @@ exports.updateProject = async(req,res) => {
 
 exports.project = async(req,res) => {
   try {
+
+    if (!req.userPermissions.includes(req.params.slug)) {
+      return res.render('error', {
+        heading: 'Unauthorized',
+        error: 'You are not authorized to view this project',
+      })
+    }
 
     const { entries, project, pagination } = await projectEntries(req,res);
 

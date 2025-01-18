@@ -14,6 +14,8 @@ exports.uploadExcel = async(req,res) => {
             userId: req.session.user._id,
             userName: req.session.user.name,
             userRole: req.session.user.role.charAt(0).toUpperCase() + req.session.user.role.slice(1),
+            role: req.userPermissions,
+            sidebarCollapsed: req.session.sidebarCollapsed,
             projects: req.allProjects,
             project: req.oneProject,
             activeMenu: req.params.slug,

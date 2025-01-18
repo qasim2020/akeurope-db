@@ -1,6 +1,7 @@
 const moment = require('moment');
 const getLetterIcon = require('../modules/iconLetter');
 const getOrderIcon = require('../modules/iconOrder');
+const cheerio = require('cheerio');
 
 const eq = function (a, b) {
     return a === b;
@@ -9,6 +10,10 @@ const eq = function (a, b) {
 const gt = function (a, b) {
     return a > b;
 };
+
+const and = function(a,b) {
+    return a && b;
+}
 
 const compareIds = function (a, b) {
     if (!a || !b) return false;
@@ -150,6 +155,14 @@ const camelCaseToNormalString = function (string) {
         .replace(/^./, (str) => str.toUpperCase());
 };
 
+const kebabCaseToNormalString = function (string) {
+    string = string ? string : '';
+    return string
+        .split('-') // Split the string by hyphens
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1)) // Capitalize each word
+        .join(' '); // Join the words back with spaces
+};
+
 const camelCaseWithCommaToNormalString = function (string) {
     string = string ? string : '';
     return string
@@ -238,9 +251,27 @@ const expiresOn = (createdAt, months) => {
     return moment(createdAt).add(months, 'months').format('DD-MM-YYYY');
 };
 
+function removeLinksFromHtml(htmlString) {
+    try {
+        const parameters = ['project', 'user', 'customer', 'order'];
+        const $ = cheerio.load(htmlString);
+
+        parameters.forEach((param) => {
+            $(`a[href*="/${param}/"]`).each(function () {
+                $(this).replaceWith($(this).text());
+            });
+        });
+
+        return $.html();
+    } catch (error) {
+        return htmlString;
+    }
+}
+
 module.exports = {
     eq,
     gt,
+    and,
     compareIds,
     inc,
     dec,
@@ -263,6 +294,7 @@ module.exports = {
     findPrimaryKey,
     timeAgo,
     camelCaseToNormalString,
+    kebabCaseToNormalString,
     camelCaseWithCommaToNormalString,
     getSvgForFirstLetter,
     regexMatch,
@@ -270,5 +302,6 @@ module.exports = {
     stringifyDate,
     json,
     expiresOn,
-    getOrderIcon
+    getOrderIcon,
+    removeLinksFromHtml
 };

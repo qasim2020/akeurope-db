@@ -12,24 +12,46 @@
       <div class="col-auto ms-auto d-print-none">
         <div class="btn-list">
           <a href="#" class="btn btn-secondary-outline d-none d-md-inline-block" onclick="toggleLayout(this)">
-            <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-square-toggle-horizontal"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M22 12h-20" /><path d="M4 14v-8a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v8" /><path d="M18 20a2 2 0 0 0 2 -2" /><path d="M4 18a2 2 0 0 0 2 2" /><path d="M14 20l-4 0" /></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+              class="icon icon-tabler icons-tabler-outline icon-tabler-square-toggle-horizontal">
+              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+              <path d="M22 12h-20" />
+              <path d="M4 14v-8a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v8" />
+              <path d="M18 20a2 2 0 0 0 2 -2" />
+              <path d="M4 18a2 2 0 0 0 2 2" />
+              <path d="M14 20l-4 0" />
+            </svg>
             Toggle layout
           </a>
           <a href="#" class="btn btn-secondary-outline d-md-none btn-icon" onclick="toggleLayout(this)">
-            <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-square-toggle-horizontal"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M22 12h-20" /><path d="M4 14v-8a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v8" /><path d="M18 20a2 2 0 0 0 2 -2" /><path d="M4 18a2 2 0 0 0 2 2" /><path d="M14 20l-4 0" /></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+              class="icon icon-tabler icons-tabler-outline icon-tabler-square-toggle-horizontal">
+              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+              <path d="M22 12h-20" />
+              <path d="M4 14v-8a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v8" />
+              <path d="M18 20a2 2 0 0 0 2 -2" />
+              <path d="M4 18a2 2 0 0 0 2 2" />
+              <path d="M14 20l-4 0" />
+            </svg>
           </a>
           {{#if (findInArray data.role "createUsers")}}
-          <a href="#" class="btn btn-primary d-none d-md-inline-block" id="#createNewEntry" data-bs-toggle="modal" data-bs-target="#modal-new-user">
-            <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <a href="#" class="btn btn-primary d-none d-md-inline-block" id="#createNewEntry" data-bs-toggle="modal"
+            data-bs-target="#modal-new-user">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24"
+              stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
               <path stroke="none" d="M0 0h24v24H0z" fill="none" />
               <path d="M12 5l0 14" />
               <path d="M5 12l14 0" />
             </svg>
-            Create new user 
+            Create new user
           </a>
-          <a href="#" class="btn btn-primary d-md-none btn-icon" data-bs-toggle="modal" data-bs-target="#modal-new-entry" aria-label="modal-new-entry">
+          <a href="#" class="btn btn-primary d-md-none btn-icon" data-bs-toggle="modal"
+            data-bs-target="#modal-new-entry" aria-label="modal-new-entry">
             <!-- Download SVG icon from http://tabler-icons.io/i/plus -->
-            <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24"
+              stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
               <path stroke="none" d="M0 0h24v24H0z" fill="none" />
               <path d="M12 5l0 14" />
               <path d="M5 12l14 0" />
@@ -51,50 +73,50 @@
 {{/if}}
 
 <script>
-  let newLayout = '{{data.layout}}' == 'grid' ? 'table' : 'grid'; 
+  let newLayout = '{{data.layout}}' == 'grid' ? 'table' : 'grid';
 
-  const toggleLayout = function(elem) {
+  const toggleLayout = function (elem) {
     $.ajax({
       url: '/update-layout',
       method: 'POST',
       data: { layout: newLayout },
-      success: function(response) {
-          showData();
+      success: function (response) {
+        showData();
       },
-      error: function() {
-          alert("Failed to update layout.");
+      error: function () {
+        alert("Failed to update layout.");
       }
     });
   }
 
-  const showData = function() {
+  const showData = function () {
     $.ajax({
       url: '/getUsersData',
       method: 'GET',
-      success: function(response) {
-        newLayout = newLayout == 'grid' ? 'table' : 'grid'; 
+      success: function (response) {
+        newLayout = newLayout == 'grid' ? 'table' : 'grid';
         $("#data-container").html(response);
       },
-      error: function(error) {
-          alert(error.responseText);
+      error: function (error) {
+        alert(error.responseText);
       }
-    }); 
+    });
   }
 
-  const showDataAsSuch = function() {
+  const showDataAsSuch = function () {
     $.ajax({
       url: '/getUsersData',
       method: 'GET',
-      success: function(response) {
+      success: function (response) {
         $("#data-container").html(response);
       },
-      error: function(error) {
-          alert(error.responseText);
+      error: function (error) {
+        alert(error.responseText);
       }
-    }); 
+    });
   }
 
-  const getEditUserModal = function(elem) {
+  const getEditUserModal = function (elem) {
 
     const userId = $(elem).attr("user-id");
 
@@ -106,24 +128,38 @@
     $.ajax({
       url: `/getUserModal/${userId}`,
       type: 'GET',
-      contentType: 'application/json', 
-      success: function(response) {
+      contentType: 'application/json',
+      success: function (response) {
         $("footer").before(response);
         $(`#button-${userId}`).trigger("click");
       },
-      error: function(xhr, status, error) {
+      error: function (xhr, status, error) {
         alert(xhr.responseText);
       }
     });
 
   }
 
-  const saveNewUser = function(elem) {
+  const saveNewUser = function (elem) {
 
     const modal = $(elem).closest(".modal");
 
     if (!validateForm(modal)) {
       return false;
+    }
+
+    const projects = $(elem)
+      .closest(".modal")
+      .find(".projects input:checked")
+      .map((key, val) => $(val).val())
+      .get();
+
+    if (projects.length == 0) {
+      $(elem).closest(".modal").find(".projects").find(".form-selectgroup-label").addClass("border-red");
+      $(elem).closest(".modal").find(".projects").append(`<div class="d-block invalid-feedback">Invalid entry</div> `);
+      return false;
+    } else {
+      $(elem).closest(".modal").find(".projects").find(".form-selectgroup-label").removeClass("border-red");
     }
 
     const name = $(modal).find('.name').val();
@@ -134,11 +170,11 @@
     $(elem).html(`<span class="spinner-border spinner-border-sm" role="status"></span>`);
 
     $.ajax({
-      url: '/users/create', 
+      url: '/users/create',
       type: 'POST',
-      contentType: 'application/json', 
-      data: JSON.stringify({ name, email, role }),
-      success: function(response) {
+      contentType: 'application/json',
+      data: JSON.stringify({ name, email, role, projects }),
+      success: function (response) {
         $(elem).html(currentBtnHTML);
         $(modal).find(".modal-footer").append(`
         <div class="w-100 alert alert-success mt-4" role="alert">
@@ -147,7 +183,7 @@
         </div>`);
         showDataAsSuch();
       },
-      error: function(xhr, status, error) {
+      error: function (xhr, status, error) {
         $(elem).html(currentBtnHTML);
         if (xhr.status != 400) {
           $(modal).find(".modal-footer").append(`
@@ -157,7 +193,7 @@
           </div>`);
           return false;
         }
-        xhr.responseJSON.forEach( val => {
+        xhr.responseJSON.forEach(val => {
           if (!val.elem) {
             $(modal).find(".modal-footer").append(`
             <div class="w-100 alert alert-danger mt-4" role="alert">
@@ -172,15 +208,29 @@
           $(modal).find(val.elem).parent("div").append(`<div class="mb-2 invalid-feedback">${val.msg}</div> `);
         });
       }
-    }); 
+    });
   }
 
-  const updateUser = function(elem) {
+  const updateUser = function (elem) {
 
     const modal = $(elem).closest(".modal");
 
     if (!validateForm(modal)) {
       return false;
+    }
+
+    const projects = $(elem)
+      .closest(".modal")
+      .find(".projects input:checked")
+      .map((key, val) => $(val).val())
+      .get();
+
+    if (projects.length == 0) {
+      $(elem).closest(".modal").find(".projects").find(".form-selectgroup-label").addClass("border-red");
+      $(elem).closest(".modal").find(".projects").append(`<div class="d-block invalid-feedback">Please select at least one project</div> `);
+      return false;
+    } else {
+      $(elem).closest(".modal").find(".projects").find(".form-selectgroup-label").removeClass("border-red");
     }
 
     const name = $(modal).find('.name').val();
@@ -191,11 +241,11 @@
     $(elem).html(`<span class="spinner-border spinner-border-sm" role="status"></span>`);
 
     $.ajax({
-      url: `/users/update/${userId}`, 
+      url: `/users/update/${userId}`,
       type: 'POST',
-      contentType: 'application/json', 
-      data: JSON.stringify({ name, role }),
-      success: function(response) {
+      contentType: 'application/json',
+      data: JSON.stringify({ name, role, projects }),
+      success: function (response) {
         $(elem).html(currentBtnHTML);
         $(modal).find(".modal-footer").append(`
         <div class="w-100 alert alert-success mt-4" role="alert">
@@ -204,7 +254,7 @@
         </div>`);
         showDataAsSuch();
       },
-      error: function(xhr, status, error) {
+      error: function (xhr, status, error) {
         console.log(xhr, status, error);
         $(elem).html(currentBtnHTML);
         if (xhr.status != 400) {
@@ -215,7 +265,7 @@
           </div>`);
           return false;
         }
-        xhr.responseJSON.forEach( val => {
+        xhr.responseJSON.forEach(val => {
           if (!val.elem) {
             $(modal).find(".modal-footer").append(`
             <div class="w-100 alert alert-danger mt-4" role="alert">
@@ -230,11 +280,11 @@
           $(modal).find(val.elem).parent("div").append(`<div class="mb-2 invalid-feedback">${val.msg}</div> `);
         });
       }
-    }); 
+    });
 
   }
 
-  const validateForm = function(modal) {
+  const validateForm = function (modal) {
 
     let isValid = [];
 
@@ -245,7 +295,7 @@
     $(modal).find("span").removeClass("rounded-end");
     $(modal).find(".alert").remove();
 
-    $(modal).find("input").each( (key, val) => {
+    $(modal).find("input").each((key, val) => {
       if ($(val).val() == "") {
         $(val).addClass("is-invalid")
         if ($(val).siblings("span").length > 0) {
@@ -254,13 +304,13 @@
         } else {
           $(val).after(`<div class="invalid-feedback">Invalid entry</div> `);
         }
-      } 
+      }
       isValid.push($(val).val() != "");
     })
 
     const roleRadioBtn = $(modal).find(".role input:checked");
 
-    if ( $(roleRadioBtn).val() == undefined) {
+    if ($(roleRadioBtn).val() == undefined) {
       $(modal).find(".role").addClass("is-invalid");
       $(modal).find(".role").after(`<div class="invalid-feedback">Invalid entry</div> `);
       isValid.push(false)
@@ -275,22 +325,22 @@
 
   }
 
-  const deleteUser = function(elem) {
+  const deleteUser = function (elem) {
     const userId = $(elem).attr("user-id");
     $.ajax({
-      url: `/users/delete/${userId}`, 
+      url: `/users/delete/${userId}`,
       type: 'POST',
-      contentType: 'application/json', 
-      success: function(response) {
+      contentType: 'application/json',
+      success: function (response) {
         showDataAsSuch();
       },
-      error: function(xhr, status, error) {
+      error: function (xhr, status, error) {
         alert(xhr.responseText);
       }
     });
   }
 
-  const sendEmailInvite = function(elem) {
+  const sendEmailInvite = function (elem) {
 
     const userId = $(elem).attr("user-id");
 
@@ -303,11 +353,11 @@
     $(elem).html(`<span class="spinner-border spinner-border-sm" role="status"></span>`);
 
     $.ajax({
-      url: `/users/sendInvite`, 
+      url: `/users/sendInvite`,
       type: 'POST',
-      contentType: 'application/json', 
+      contentType: 'application/json',
       data: JSON.stringify({ userId }),
-      success: function(response) {
+      success: function (response) {
         $(elem).html(currentBtnHTML);
         $(elem).after(`
         <div class="w-100 alert alert-success mt-4" role="alert">
@@ -316,7 +366,7 @@
         </div>`);
         showDataAsSuch();
       },
-      error: function(xhr, status, error) {
+      error: function (xhr, status, error) {
         $(elem).html(currentBtnHTML);
         $(elem).siblings("input").addClass("is-invalid");
         $(elem).siblings("input").after(`<div class="invalid-feedback">${xhr.responseText}</div> `);
