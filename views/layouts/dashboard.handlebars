@@ -44,13 +44,13 @@
       transition: background-color 0.3s ease;
     }
 
-    .modal .file {
+    .file {
       border-radius: 4px;
       cursor: pointer;
     }
 
-    .modal .file:hover,
-    .modal .file.selected {
+    .file:hover,
+    .file.selected {
       background-color: rgba(0, 123, 255, 0.1);
       color: var(--tbl-text);
     }
@@ -583,7 +583,7 @@
             <div class="col-12 col-lg-auto mt-3 mt-lg-0">
               <ul class="list-inline list-inline-dots mb-0">
                 <li class="list-inline-item">
-                  Copyright &copy; 2024
+                  Copyright &copy; 2025
                   <a href="https://akeurope.org" class="link-secondary">Alkhidmat Europe</a>.
                   All rights reserved.
                 </li>
@@ -603,12 +603,12 @@
   <script src="/tabler/js/tabler.min.js?1692870487" defer></script>
   <script src="/tabler/js/demo.min.js?1692870487" defer></script>
   <script src="https://cdn.socket.io/4.6.0/socket.io.min.js"></script>
+  <script src="/static/files.js"></script>
 
   <script>
 
     {{#if (findInArray data.role 'viewNotifications')}}
     document.querySelector('.dropdown .card').addEventListener('click', function (event) {
-      console.log('stopping propagation');
       event.stopPropagation();
     });
 
@@ -719,7 +719,6 @@
     }
 
     document.addEventListener('click', function (event) {
-      console.log('clicked in document');
       const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]');
       popoverTriggerList.forEach(function (popoverTriggerEl) {
         const popover = bootstrap.Popover.getInstance(popoverTriggerEl);

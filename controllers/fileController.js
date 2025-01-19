@@ -6,13 +6,54 @@ const path = require('path');
 
 exports.upload = async (req, res) => {
     try {
+        const { links, category, name, path, mimeType } = req.body;
         const file = new File({
-            entityType: req.params.entityType,
-            entityId: req.params.entityId,
-            name: req.file.originalname,
-            path: req.file.path,
-            mimeType: req.file.mimetype,
+            links,
+            category,
+            name,
+            path,
+            mimeType,
         });
+        await file.save();
+        res.status(200).send('File uploaded successfully!');
+    } catch (error) {
+        console.log(error);
+        res.status(500).send(error.toString());
+    }
+};
+
+exports.uploadFileToEntry = async (req, res) => {
+    try {
+        const fileMulter = req.file;
+
+        if (!fileMulter) {
+            return res.status(400).json({ message: 'No file uploaded' });
+        }
+
+        const { entityId, entityType, entityUrl, category } = req.body;
+
+        const links = [
+            {
+                entityId,
+                entityType,
+                entityUrl,
+            },
+            {
+                entityId: req.session.user._id,
+                entityType: 'user',
+                entityUrl: `/user/${req.session.user._id}`,
+            },
+        ];
+
+        const file = new File({
+            links,
+            category,
+            name: fileMulter.filename,
+            size: fileMulter.size / 1000,
+            path: `/uploads/${fileMulter.filename}`,
+            mimeType: fileMulter.mimetype,
+        });
+
         await file.save();
         res.status(200).send('File uploaded successfully!');
     } catch (error) {
@@ -51,8 +92,23 @@ exports.filesByEntity = async (req, res) => {
 
 exports.file = async (req, res) => {
     try {
+
         const file = await File.findById(req.params.fileId).lean();
-        res.status(200).send(file);
+
+        if (!file) {
+            return res.status(404).send({ error: 'File not found' });
+        }
+
+        const dir = path.join(__dirname, '../../'); 
+        const filePath = path.join(dir, file.path);
+
+        res.sendFile(filePath, (err) => {
+            if (err) {
+                console.error('Error sending file:', err);
+                res.status(500).send({ error: 'Failed to send file' });
+            }
+        });
+
     } catch (error) {
         console.log(error);
         res.status(500).send(error.toString());
@@ -98,7 +154,7 @@ exports.delete = async (req, res) => {
     }
 };
 
-exports.getFileUploadModal = async (req, res) => {
+exports.getFileModal = async (req, res) => {
     try {
         const { entityType, entityId } = req.params;
         const linkedFiles = await File.find({ entityId }).lean();
@@ -108,14 +164,10 @@ exports.getFileUploadModal = async (req, res) => {
             const order = await Order.findById(entityId).lean();
             modal.header = `Attach Documents to Invoice-${order.orderNo}`;
         }
-        res.render('partials/editFileUploadModal', {
+        res.render('partials/editFileModal', {
             layout: false,
             data: {
-                entityId: req.params.entityId,
-                entityType: req.params.entityType,
-                modal,
-                linkedFiles,
-                unlinkedFiles,
+                file: await File.findById(req.params.fileId).lean(),
             },
         });
     } catch (error) {
@@ -151,10 +203,7 @@ exports.viewUnlinkedFile = async (req, res) => {
             return res.status(400).json({ error: 'fileName is required' });
         }
 
-        const directories = [
-            path.resolve(__dirname, '../../uploads'),
-            path.resolve(__dirname, '../../payments'),
-        ];
+        const directories = [path.resolve(__dirname, '../../uploads'), path.resolve(__dirname, '../../payments')];
 
         let filePath = null;
 
@@ -177,7 +226,7 @@ exports.viewUnlinkedFile = async (req, res) => {
             res.setHeader('Content-Type', 'application/pdf');
             return res.sendFile(filePath);
         } else if (supportedImageTypes.includes(fileExtension)) {
-            res.setHeader('Content-Type', `image/${fileExtension.slice(1)}`); // Remove dot from extension
+            res.setHeader('Content-Type', `image/${fileExtension.slice(1)}`);
             return res.sendFile(filePath);
         } else {
             return res.status(400).json({ error: 'Unsupported file type' });

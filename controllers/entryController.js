@@ -18,7 +18,9 @@ const {
     getPendingOrderEntries,
     formatOrder,
 } = require('../modules/orders');
+const { getEntityFiles } = require('../modules/filesUtils.js')
 const Order = require('../models/Order');
+const File = require('../models/File');
 
 function extractCloudinaryPublicId(url) {
     const parts = url.split('/');
@@ -307,6 +309,7 @@ exports.entry = async (req, res) => {
                 fields: project.fields,
                 layout: req.session.layout,
                 entry,
+                files: await File.find({ 'links.entityId': req.params.entryId }).lean(),
                 role: req.userPermissions,
                 logs: await visibleLogs(req, res),
                 entryLogs: await entryLogs(req, res),

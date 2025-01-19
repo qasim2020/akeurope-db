@@ -13,7 +13,6 @@ const gt = function (a, b) {
 };
 
 const and = function(a,b) {
-    console.log(a, b);
     return a && b;
 }
 
@@ -270,6 +269,19 @@ function removeLinksFromHtml(htmlString) {
     }
 }
 
+const concat = function() {
+    return Array.prototype.slice.call(arguments, 0, -1).join('');
+}
+
+const shortenFileName = function(string) {
+    if (string.length <= 10) {
+        return string;
+    }
+    const start = string.slice(0, 5); 
+    const end = string.slice(-4);    
+    return `${start}...${end}`;       
+}
+
 module.exports = {
     eq,
     gt,
@@ -305,5 +317,7 @@ module.exports = {
     json,
     expiresOn,
     getOrderIcon,
-    removeLinksFromHtml
+    removeLinksFromHtml,
+    concat,
+    shortenFileName,
 };

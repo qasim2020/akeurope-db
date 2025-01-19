@@ -1,7 +1,10 @@
 <div class="card" style="min-width: 30vw;">
     <div class="card-header">
-        <h3 class="card-title col-auto">Recent activity by</h3>
-        <select class="ms-2 form-select" my-href="/getActivityData?page=1">
+        <h3 class="card-title">Recent Activity</h3>
+    </div>
+    <div class="card-header d-flex align-items-center">
+        <p class="col-auto m-0 me-3">Filter activity by</p>
+        <select class="form-select" my-href="/getActivityData?page=1">
             <option value="">Show all</option>
             {{#each data.activity.entityTypes}}
             <option value="{{this}}" {{#if (eq this ../data.activity.entityType)}}selected{{/if}}>{{capitalizeFirstLetter this}}</option>

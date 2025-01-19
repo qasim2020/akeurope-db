@@ -2,63 +2,26 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const upload = multer();
+const { uploadFile } = require('../modules/uploadFile');
 const { authenticate, authorize } = require('../modules/auth');
 const fileController = require('../controllers/fileController');
 
-router.get(
-    '/files',
-    authenticate,
-    authorize('uploadFile'),
-    upload.single('pdf'),
-    fileController.files,
-);
-router.get(
-    '/filesByEntity/:entityId',
-    authenticate,
-    authorize('uploadFile'),
-    fileController.filesByEntity,
-);
-router.get(
-    '/file/:fileId',
-    authenticate,
-    authorize('uploadFile'),
-    fileController.file,
-);
-router.get(
-    '/unlinkedFile/:fileName',
-    authenticate,
-    authorize('uploadFile'),
-    fileController.unlinkedFile,
-);
-router.get('/viewUnlinkedFile/:fileName',
-    authenticate,
-    authorize('viewFile'),
-    fileController.viewUnlinkedFile,
-),
+router.get('/files', authenticate, authorize('viewFiles'), fileController.files);
+router.get('/filesByEntity/:entityId', authenticate, authorize('viewFiles'), fileController.filesByEntity);
+router.get('/file/:fileId', authenticate, authorize('viewFiles'), fileController.file);
 router.post(
-    '/fileUpload/:entityId/:entityType',
+    '/uploadFileToEntry',
     authenticate,
-    authorize('uploadFile'),
-    upload.single('pdf'),
-    fileController.upload,
+    authorize('uploadFiles'),
+    uploadFile.single('file'),
+    fileController.uploadFileToEntry,
 );
-router.post(
-    '/fileUpdate/:entityId/:fileId',
-    authenticate,
-    authorize('uploadFile'),
-    fileController.update,
-);
-router.post(
-    '/fileDelete/:entityId/:fileId',
-    authenticate,
-    authorize('uploadFile'),
-    fileController.delete,
-);
-router.get(
-    '/getFileUploadModal/:entityId/:entityType',
-    authenticate,
-    authorize('editOrders'),
-    fileController.getFileUploadModal,
-);
+router.post('/fileUpdate/:entityId/:fileId', authenticate, authorize('editFiles'), fileController.update);
+router.post('/fileDelete/:entityId/:fileId', authenticate, authorize('deleteFiles'), fileController.delete);
+
+router.get('/getFileModal/:fileId', authenticate, authorize('editFiles'), fileController.getFileModal);
+
+router.get('/unlinkedFile/:fileName', authenticate, authorize('viewFiles'), fileController.unlinkedFile);
+router.get('/viewUnlinkedFile/:fileName', authenticate, authorize('viewFiles'), fileController.viewUnlinkedFile);
 
 module.exports = router;

@@ -12,42 +12,11 @@ router.get(
     allProjects,
     entryController.entry,
 );
-router.get(
-    '/getEntryData/:slug',
-    authenticate,
-    authorize('viewEntry'),
-    authProject,
-    entryController.getData,
-);
-router.get(
-    '/getEntryModal/:slug/:id',
-    authenticate,
-    authorize('editEntry'),
-    allProjects,
-    authProject,
-    entryController.editModal,
-);
-router.post(
-    '/project/entry/:slug',
-    authenticate,
-    authorize('createEntry'),
-    authProject,
-    entryController.createEntry,
-);
-router.post(
-    '/project/entry/update/:slug/:id',
-    authenticate,
-    authorize('updateEntry'),
-    authProject,
-    entryController.updateEntry,
-);
-router.post(
-    '/project/entry/delete/:slug',
-    authenticate,
-    authorize('deleteEntry'),
-    authProject,
-    entryController.deleteEntry,
-);
+router.get('/getEntryData/:slug', authenticate, authorize('viewEntry'), authProject, entryController.getData);
+router.get('/getEntryModal/:slug/:id', authenticate, authorize('editEntry'), allProjects, authProject, entryController.editModal);
+router.post('/project/entry/:slug', authenticate, authorize('createEntry'), authProject, entryController.createEntry);
+router.post('/project/entry/update/:slug/:id', authenticate, authorize('updateEntry'), authProject, entryController.updateEntry);
+router.post('/project/entry/delete/:slug', authenticate, authorize('deleteEntry'), authProject, entryController.deleteEntry);
 
 router.get(
     '/getSingleEntryData/:entryId/project/:slug',
@@ -70,7 +39,6 @@ router.get(
     authProject,
     entryController.getSingleEntryPayments,
 );
-
 router.get(
     '/getPaginatedEntriesForDraftOrder/:slug/:customerId',
     authenticate,
@@ -85,12 +53,6 @@ router.get(
     authProject,
     entryController.getPaginatedEntriesForOrderPage,
 );
-router.get(
-    '/getOrderProjects/:orderId',
-    authenticate,
-    authorize('viewEntry'),
-    authProject,
-    entryController.getOrderProjects,
-);
+router.get('/getOrderProjects/:orderId', authenticate, authorize('viewEntry'), authProject, entryController.getOrderProjects);
 
 module.exports = router;

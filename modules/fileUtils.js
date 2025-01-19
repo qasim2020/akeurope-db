@@ -12,10 +12,7 @@ const truncateFileName = (fileName) => {
 
 const getUnlinkedFiles = async function () {
     try {
-        const directories = [
-            path.resolve(__dirname, '../../uploads'),
-            path.resolve(__dirname, '../../payments'),
-        ];
+        const directories = [path.resolve(__dirname, '../../uploads'), path.resolve(__dirname, '../../payments')];
 
         const allFiles = [];
         for (const directory of directories) {
@@ -35,10 +32,7 @@ const getUnlinkedFiles = async function () {
                             });
                         }
                     } catch (statError) {
-                        console.warn(
-                            `Error reading file stats: ${filePath}`,
-                            statError,
-                        );
+                        console.warn(`Error reading file stats: ${filePath}`, statError);
                     }
                 }
             } catch (error) {
@@ -59,10 +53,7 @@ const getUnlinkedFile = async (req, res) => {
         return res.status(400).json({ error: 'fileName is required' });
     }
 
-    const directories = [
-        path.resolve(__dirname, '../../uploads'),
-        path.resolve(__dirname, '../../payments'),
-    ];
+    const directories = [path.resolve(__dirname, '../../uploads'), path.resolve(__dirname, '../../payments')];
 
     let foundFile = null;
 
