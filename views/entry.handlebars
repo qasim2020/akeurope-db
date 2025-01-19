@@ -61,14 +61,10 @@
       {{> showEntryPayments}}
       {{/if}}
       {{#if (findInArray data.role 'viewFiles')}}
-      {{> showEntityFiles
-      files=data.entry.files
-      entityType="entry"
-      entityId=data.entry._id
-      entityUrl=(concat "/entry/" data.entry._id "/project/" data.project.slug)
-      fileUrl='/uploadFileToEntry'
-      category='general'
-      }}
+      <div class="card mb-3" id="files-container" entity-type="entry" entity-id="{{data.entry._id}}"
+        entity-url="/entry/{{data.entry._id}}/project/{{data.project.slug}}" file-url="/uploadFileToEntry" file-access="[editors]">
+        {{> showEntityFiles}}
+      </div>
       {{/if}}
       {{> showEntryLogs}}
     </div>

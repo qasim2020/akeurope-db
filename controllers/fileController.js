@@ -3,6 +3,9 @@ const { getUnlinkedFiles, getUnlinkedFile } = require('../modules/fileUtils');
 const Order = require('../models/Order');
 const fs = require('fs').promises;
 const path = require('path');
+const { createDynamicModel } = require('../models/createDynamicModel');
+const User = require('../models/User');
+const Customer = require('../models/Customer');
 
 exports.upload = async (req, res) => {
     try {
@@ -30,7 +33,7 @@ exports.uploadFileToEntry = async (req, res) => {
             return res.status(400).json({ message: 'No file uploaded' });
         }
 
-        const { entityId, entityType, entityUrl, category } = req.body;
+        const { entityId, entityType, entityUrl, category, access } = req.body;
 
         const links = [
             {
@@ -48,6 +51,7 @@ exports.uploadFileToEntry = async (req, res) => {
         const file = new File({
             links,
             category,
+            access,
             name: fileMulter.filename,
             size: fileMulter.size / 1000,
             path: `/uploads/${fileMulter.filename}`,
@@ -55,7 +59,8 @@ exports.uploadFileToEntry = async (req, res) => {
         });
 
         await file.save();
-        res.status(200).send('File uploaded successfully!');
+
+        res.status(200).send(file);
     } catch (error) {
         console.log(error);
         res.status(500).send(error.toString());
@@ -79,7 +84,7 @@ exports.filesByEntity = async (req, res) => {
     try {
         const sortOption = req.query.sort || 'createdAt';
         const files = await File.find({
-            entityId: req.params.entityId,
+            'links.entityId': req.params.entityId,
         }).sort({
             [sortOption]: -1,
         });
@@ -90,16 +95,41 @@ exports.filesByEntity = async (req, res) => {
     }
 };
 
+exports.renderEntityFiles = async (req, res) => {
+    try {
+        let files;
+        if (req.user?.role === 'admin') {
+            files = await File.find({ 'links.entityId': req.params.entityId }).sort({ uploadDate: -1 }).lean();
+        } else {
+            files = await File.find({ 'links.entityId': req.params.entityId, access: 'editors' }).sort({ uploadDate: -1 }).lean();
+        }
+        res.status(200).render('partials/showEntityFiles', {
+            layout: false,
+            data: {
+                files,
+            },
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).send(error.toString());
+    }
+};
+
 exports.file = async (req, res) => {
     try {
 
-        const file = await File.findById(req.params.fileId).lean();
+        let file;
+        if (req.user?.role === 'admin') {
+            file = await File.findById(req.params.fileId).lean();
+        } else {
+            file = await File.findOne({ _id: req.params.fileId, access: 'editors' }).lean();
+        }
 
         if (!file) {
             return res.status(404).send({ error: 'File not found' });
         }
 
-        const dir = path.join(__dirname, '../../'); 
+        const dir = path.join(__dirname, '../../');
         const filePath = path.join(dir, file.path);
 
         res.sendFile(filePath, (err) => {
@@ -108,7 +138,6 @@ exports.file = async (req, res) => {
                 res.status(500).send({ error: 'Failed to send file' });
             }
         });
-
     } catch (error) {
         console.log(error);
         res.status(500).send(error.toString());
@@ -117,57 +146,92 @@ exports.file = async (req, res) => {
 
 exports.update = async (req, res) => {
     try {
-        const { fileId, entityId } = req.params;
-        const { newName, newEntityId, newEntityType } = req.body;
-        const file = await File.findOne({ fileId, entityId });
+        const { fileId } = req.params;
+        const { name, category, access } = req.body;
+        const file = await File.findById(fileId);
         if (!file) return res.status(404).send('File not found');
 
-        const oldPath = file.path;
-        const newPath = oldPath.replace(file.name, newName);
+        if (req.user?.role === 'admin') {
+            file.name = name;
+            file.category = category;
+            file.access = access;
+        } else {
+            file.name = name;
+            file.category = category;
+        }
 
-        const fs = require('fs/promises');
-        await fs.rename(oldPath, newPath);
-
-        file.name = newName;
-        file.path = newPath;
-        file.entityId = newEntityId;
-        file.entityType = newEntityType;
         await file.save();
+
         res.status(200).send('File renamed successfully!');
     } catch (error) {
+        console.log(error);
         res.status(500).send('Error renaming file');
     }
 };
 
 exports.delete = async (req, res) => {
     try {
-        const { fileId, entityId } = req.params;
-        const file = await File.findOneAndDelete({ fileId, entityId });
+        const { fileId } = req.params;
+        
+        let file;
+
+        if (req.user?.role === 'admin') {
+            file = await File.findOneAndDelete({ _id: fileId });
+        } else {
+            file = await await File.findOneAndDelete({ _id: fileId, access: 'editors' });
+        } 
+
         if (!file) return res.status(404).send('File not found');
 
-        const fs = require('fs/promises');
-        await fs.unlink(file.path);
+        const dir = path.join(__dirname, '../../');
+        const filePath = path.join(dir, file.path);
+        await fs.unlink(filePath);
 
         res.status(200).send('File deleted successfully!');
     } catch (error) {
+        console.log(error);
         res.status(500).send('Error deleting file');
     }
 };
 
 exports.getFileModal = async (req, res) => {
     try {
-        const { entityType, entityId } = req.params;
-        const linkedFiles = await File.find({ entityId }).lean();
-        const unlinkedFiles = await getUnlinkedFiles();
-        let modal = {};
-        if (entityType == 'order') {
-            const order = await Order.findById(entityId).lean();
-            modal.header = `Attach Documents to Invoice-${order.orderNo}`;
+        let file;
+
+        if (req.user?.role === 'admin') {
+            file = await File.findById(req.params.fileId).lean();
+        } else {
+            file = await File.findOne({_id: req.params.fileId, access: 'editors'}).lean();
+        }  
+
+        if (!file) {
+            return res.status(404).send({ error: 'File not found' });
         }
+
+        for (const link of file.links) {
+            if (link.entityType === 'entry') {
+                link.entity = await Customer.findById(link.entityId).lean();
+                const parts = link.entityUrl.split('/');
+                const slug = parts[parts.length - 1];
+                const model = await createDynamicModel(slug);
+                link.entity = await model.findById(link.entityId).lean();
+                link.entityName = link.entity.name;
+            }
+            if (link.entityType === 'user') {
+                link.entity = await User.findById(link.entityId).lean();
+                link.entityName = link.entity.name;
+            }
+            if (link.entityType === 'customer') {
+                link.entity = await Customer.findById(link.entityId).lean();
+                link.entityName = link.entity.name;
+            }
+        }
+
         res.render('partials/editFileModal', {
             layout: false,
             data: {
-                file: await File.findById(req.params.fileId).lean(),
+                file,
+                role: req.userPermissions
             },
         });
     } catch (error) {

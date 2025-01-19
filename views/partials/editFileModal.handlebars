@@ -1,10 +1,23 @@
 <div class="modal modal-blur fade" id="modal-{{data.file._id}}" tabindex="-1" style="display: none; padding-left: 0px;"
-    aria-modal="true" role="dialog" projSlug="new-entry" order-id="{{data.order._id}}">
+    aria-modal="true" role="dialog" projSlug="new-entry" file-id="{{data.file._id}}">
     <div class="modal-dialog modal-xl" role="document">
         <div class="modal-content">
-            <div class="modal-header">
+            <div class="modal-header px-4">
                 <h5 class="modal-title">Manage Document</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <div class="ms-auto d-flex align-items-center">
+                    <button class="btn btn-outline-danger" onclick="deleteFile(this)">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="icon icon-tabler icons-tabler-outline icon-tabler-trash-x">
+                            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                            <path d="M4 7h16"></path>
+                            <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12"></path>
+                            <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3"></path>
+                            <path d="M10 12l4 4m0 -4l-4 4"></path>
+                        </svg>
+                        Delete this Document</button>
+                    <button type="button" class="btn btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
             </div>
             <div class="modal-body">
                 <div class="row">
@@ -19,8 +32,9 @@
                             <label class="form-label">Document Category</label>
                             <div class="form-selectgroup form-selectgroup-boxes p-1">
                                 <label class="form-selectgroup-item flex-fill">
-                                    <input type="radio" name="fileCategory" value="General"
-                                        class="form-selectgroup-input">
+                                    <input type="radio" name="fileCategory" value="general"
+                                        class="form-selectgroup-input" {{#if (eq data.file.category 'general'
+                                        )}}checked{{/if}}>
                                     <div class="form-selectgroup-label d-flex align-items-center p-3">
                                         <div class="me-3">
                                             <span class="form-selectgroup-check"></span>
@@ -31,20 +45,22 @@
                                     </div>
                                 </label>
                                 <label class="form-selectgroup-item flex-fill">
-                                    <input type="radio" name="fileCategory" value="Health"
-                                        class="form-selectgroup-input">
+                                    <input type="radio" name="fileCategory" value="health"
+                                        class="form-selectgroup-input" {{#if (eq data.file.category 'health'
+                                        )}}checked{{/if}}>
                                     <div class="form-selectgroup-label d-flex align-items-center p-3">
                                         <div class="me-3">
                                             <span class="form-selectgroup-check"></span>
                                         </div>
                                         <div>
-                                            Health
+                                            Health Report
                                         </div>
                                     </div>
                                 </label>
                                 <label class="form-selectgroup-item flex-fill">
-                                    <input type="radio" name="fileCategory" value="Invoice"
-                                        class="form-selectgroup-input">
+                                    <input type="radio" name="fileCategory" value="invoice"
+                                        class="form-selectgroup-input" {{#if (eq data.file.category 'invoice'
+                                        )}}checked{{/if}}>
                                     <div class="form-selectgroup-label d-flex align-items-center p-3">
                                         <div class="me-3">
                                             <span class="form-selectgroup-check"></span>
@@ -55,8 +71,9 @@
                                     </div>
                                 </label>
                                 <label class="form-selectgroup-item flex-fill">
-                                    <input type="radio" name="fileCategory" value="Payment Proof"
-                                        class="form-selectgroup-input">
+                                    <input type="radio" name="fileCategory" value="paymentProof"
+                                        class="form-selectgroup-input" {{#if (eq data.file.category 'paymentProof'
+                                        )}}checked{{/if}}>
                                     <div class="form-selectgroup-label d-flex align-items-center p-3">
                                         <div class="me-3">
                                             <span class="form-selectgroup-check"></span>
@@ -67,8 +84,9 @@
                                     </div>
                                 </label>
                                 <label class="form-selectgroup-item flex-fill">
-                                    <input type="radio" name="fileCategory" value="School Report"
-                                        class="form-selectgroup-input">
+                                    <input type="radio" name="fileCategory" value="schoolReport"
+                                        class="form-selectgroup-input" {{#if (eq data.file.category 'schoolReport'
+                                        )}}checked{{/if}}>
                                     <div class="form-selectgroup-label d-flex align-items-center p-3">
                                         <div class="me-3">
                                             <span class="form-selectgroup-check"></span>
@@ -79,8 +97,8 @@
                                     </div>
                                 </label>
                                 <label class="form-selectgroup-item flex-fill">
-                                    <input type="radio" name="fileCategory" value="Rent Report"
-                                        class="form-selectgroup-input">
+                                    <input type="radio" name="fileCategory" value="rent" class="form-selectgroup-input"
+                                        {{#if (eq data.file.category 'rent' )}}checked{{/if}}>
                                     <div class="form-selectgroup-label d-flex align-items-center p-3">
                                         <div class="me-3">
                                             <span class="form-selectgroup-check"></span>
@@ -91,8 +109,9 @@
                                     </div>
                                 </label>
                                 <label class="form-selectgroup-item flex-fill">
-                                    <input type="radio" name="fileCategory" value="Monthly Report"
-                                        class="form-selectgroup-input">
+                                    <input type="radio" name="fileCategory" value="monthlyReport"
+                                        class="form-selectgroup-input" {{#if (eq data.file.category 'monthlyReport'
+                                        )}}checked{{/if}}>
                                     <div class="form-selectgroup-label d-flex align-items-center p-3">
                                         <div class="me-3">
                                             <span class="form-selectgroup-check"></span>
@@ -105,32 +124,89 @@
                             </div>
                         </div>
 
+                        {{#if (findInArray data.role 'changeFilesAccess')}}
                         <div class="mb-3">
-                            <label class="form-label">Document Links</label>
-                            <div class="table-responsive">
-                                <table class="table table-striped">
-                                    <thead>
-                                        <tr>
-                                            <th>#</th>
-                                            <th>Entity Type</th>
-                                            <th>Entity ID</th>
-                                            <th>Entity URL</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="fileLinks">
-                                        {{#each data.file.links}}
-                                        <tr>
-                                            <td>{{inc @index}}</td>
-                                            <td>{{this.entityType}}</td>
-                                            <td>{{this.entityId}}</td>
-                                            <td><a href="{{this.entityUrl}}">{{this.entityUrl}}</a></td>
-                                        </tr>
-                                        {{/each}}
-                                    </tbody>
-                                </table>
+                            <label class="form-label">Document Access</label>
+                            <div class="form-selectgroup form-selectgroup-boxes d-flex flex-column projects">
+                                <label class="form-selectgroup-item flex-fill">
+                                    <input type="checkbox" name="fileAccess" value="editors"
+                                        class="form-selectgroup-input" {{#if (findInArray data.file.access 'editors'
+                                        )}}checked{{/if}}>
+                                    <div class="form-selectgroup-label d-flex align-items-center p-3">
+                                        <div class="me-3">
+                                            <span class="form-selectgroup-check"></span>
+                                        </div>
+                                        <div class="form-selectgroup-label-content d-flex align-items-center">
+                                            <div class="font-weight-medium">Visible to Project Editors</div>
+                                        </div>
+                                    </div>
+                                </label>
+                                <label class="form-selectgroup-item flex-fill">
+                                    <input type="checkbox" name="fileAccess" value="customers"
+                                        class="form-selectgroup-input" {{#if (findInArray data.file.access 'customers'
+                                        )}}checked{{/if}}>
+                                    <div class="form-selectgroup-label d-flex align-items-center p-3">
+                                        <div class="me-3">
+                                            <span class="form-selectgroup-check"></span>
+                                        </div>
+                                        <div class="form-selectgroup-label-content d-flex align-items-center">
+                                            <div class="font-weight-medium">Visible to Subscribed Customers</div>
+                                        </div>
+                                    </div>
+                                </label>
                             </div>
                         </div>
+                        {{/if}}
+
+                        <div class="">
+                            <button class="btn btn-primary" onclick="updateFile(this)">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    class="icon icon-tabler icons-tabler-outline icon-tabler-upload">
+                                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                    <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2" />
+                                    <path d="M7 9l5 -5l5 5" />
+                                    <path d="M12 4l0 12" />
+                                </svg>
+                                Save Changes
+                            </button>
+                            <button class="btn btn-outline-danger" onclick="deleteFile(this)">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    class="icon icon-tabler icons-tabler-outline icon-tabler-trash-x">
+                                    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                    <path d="M4 7h16"></path>
+                                    <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12"></path>
+                                    <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3"></path>
+                                    <path d="M10 12l4 4m0 -4l-4 4"></path>
+                                </svg>
+                                Delete this Document</button>
+                        </div>
+
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <hr>
+                            </div>
+                            <div class="col-auto fw-bold">
+                                <span>Document Links</span>
+                            </div>
+                            <div class="col">
+                                <hr>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            {{#each data.file.links}}
+                            <a class="card mb-2 text-blue fw-bold" href="{{this.entityUrl}}">
+                                <div class="card-body">{{this.entityName}}</div>
+                            </a>
+                            {{/each}}
+                        </div>
+
                     </div>
+
                     <div class="col-xl-6 col-12" id="file-container">
                         <iframe width="100%" height="755px" style="border: none;"
                             src="/file/{{data.file._id}}"></iframe>
@@ -138,18 +214,7 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <a href="#" class="btn btn-link link-secondary" data-bs-dismiss="modal"> Cancel </a>
-                <a href="#" class="btn btn-primary ms-auto" file-id="{{data.file._id}}" onclick="updateFile(this)">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                        class="icon icon-tabler icons-tabler-outline icon-tabler-upload">
-                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                        <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2" />
-                        <path d="M7 9l5 -5l5 5" />
-                        <path d="M12 4l0 12" />
-                    </svg>
-                    Update File
-                </a>
+                <a href="#" class="btn btn-link link-secondary close-modal" data-bs-dismiss="modal"> Close </a>
             </div>
         </div>
     </div>

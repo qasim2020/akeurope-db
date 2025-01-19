@@ -295,6 +295,14 @@ exports.entry = async (req, res) => {
         entry = await fetchEntrySubscriptionsAndPayments(entry);
         entry.currency = project.currency;
 
+        let files;
+
+        if (req.user?.role === 'admin') {
+            files = await File.find({ 'links.entityId': req.params.entryId }).lean();
+        } else {
+            files = await File.find({ 'links.entityId': req.params.entryId, access: 'editors' }).lean();
+        }  
+
         res.render('entry', {
             layout: 'dashboard',
             data: {
@@ -309,7 +317,7 @@ exports.entry = async (req, res) => {
                 fields: project.fields,
                 layout: req.session.layout,
                 entry,
-                files: await File.find({ 'links.entityId': req.params.entryId }).lean(),
+                files,
                 role: req.userPermissions,
                 logs: await visibleLogs(req, res),
                 entryLogs: await entryLogs(req, res),

@@ -22,10 +22,7 @@ const authorize = (permission) => {
                 return res.status(401).send('Unauthorized: No role assigned');
             }
 
-            if (
-                permission === 'viewUsers' &&
-                roles[userRole].includes('viewSelf')
-            ) {
+            if (permission === 'viewUsers' && roles[userRole].includes('viewSelf')) {
                 const testOne = req.user?._id.toString();
                 const testTwo = req.params.userId.toString();
                 const test = testOne === testTwo;
@@ -36,11 +33,7 @@ const authorize = (permission) => {
                     });
                 }
             } else {
-                const hasPermissionResult = await hasPermission(
-                    userRole,
-                    userId,
-                    permission,
-                );
+                const hasPermissionResult = await hasPermission(userRole, userId, permission);
                 if (!hasPermissionResult) {
                     return res.status(401).render('error', {
                         heading: 'Unauthorized',
@@ -49,10 +42,7 @@ const authorize = (permission) => {
                 }
             }
 
-            req.userPermissions = [
-                ...(roles[userRole] || []),
-                ...(userProjects || []),
-            ];
+            req.userPermissions = [...(roles[userRole] || []), ...(userProjects || [])];
 
             next();
         } catch (error) {

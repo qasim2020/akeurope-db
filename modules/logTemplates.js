@@ -341,6 +341,9 @@ const logTemplates = ({
                   isNotification: true,
               }
             : null,
+        // NEW CHANGES FROM 19 JAN 2025
+        
+
     };
 
     if (templates[type] == null) {
