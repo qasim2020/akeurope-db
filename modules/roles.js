@@ -65,7 +65,8 @@ const roles = {
 
 async function getDynamicPermissions(role, userId) {
     const user = await User.findById(userId).lean();
-    return user?.projects || [];
+    if (!user) throw new Error ('user not found while fetching role for user');
+    return user.projects || [];
 }
 
 async function hasPermission(role, userId, permission) {

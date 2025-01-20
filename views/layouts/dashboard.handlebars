@@ -608,7 +608,7 @@
   <script>
 
     {{#if (findInArray data.role 'viewNotifications')}}
-    document.querySelector('.dropdown .card').addEventListener('click', function (event) {
+    $(document).find('.dropdown .card').on('click', function (event) {
       event.stopPropagation();
     });
 

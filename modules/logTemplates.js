@@ -83,7 +83,7 @@ const logTemplates = ({
         entryCreated: project
             ? {
                   ...commons('entry', entity._id),
-                  action: `Entry <a href="/entry/${entity._id}/project/${project.slug}">${entity.name}</a> created in project <a href="/project/${project.slug}">${project.name}</a>`,
+                  action: `Entry <a href="/entry/${entity._id}/project/${project.slug}">${entity.name || entity.nameOfOrphan}</a> created in project <a href="/project/${project.slug}">${project.name}</a>`,
                   color: 'blue',
               }
             : null,
@@ -91,7 +91,7 @@ const logTemplates = ({
             project && changes
                 ? {
                       ...commons('entry', entity._id),
-                      action: `Entry <a href="/entry/${entity._id}/project/${project.slug}">${entity.name}</a> updated in project <a href="/project/${project.slug}">${project.name}</a>`,
+                      action: `Entry <a href="/entry/${entity._id}/project/${project.slug}">${entity.name || entity.nameOfOrphan}</a> updated in project <a href="/project/${project.slug}">${project.name}</a>`,
                       changes,
                       color: 'blue',
                   }
@@ -99,7 +99,7 @@ const logTemplates = ({
         entryDeleted: project
             ? {
                   ...commons('entry', entity._id),
-                  action: `Entry <a href="/entry/${entity._id}/project/${project.slug}">${entity.name}</a> deleted in project <a href="/project/${project.slug}">${project.name}</a>`,
+                  action: `Entry <a href="/entry/${entity._id}/project/${project.slug}">${entity.name || entity.nameOfOrphan}</a> deleted in project <a href="/project/${project.slug}">${project.name}</a>`,
                   color: 'red',
                   isNotification: true,
               }
@@ -108,7 +108,7 @@ const logTemplates = ({
             project && changes
                 ? {
                       ...commons('entry', entity._id),
-                      action: `Entry <a href="/entry/${entity._id}/project/${project.slug}">${entity.name}</a> updated in bulk upload in project <a href="/project/${project.slug}">${project.name}</a>`,
+                      action: `Entry <a href="/entry/${entity._id}/project/${project.slug}">${entity.name || entity.nameOfOrphan}</a> updated in bulk upload in project <a href="/project/${project.slug}">${project.name}</a>`,
                       changes,
                       color: 'blue',
                   }
@@ -116,7 +116,7 @@ const logTemplates = ({
         entryCreatedBulkUpload: project
             ? {
                   ...commons('entry', entity._id),
-                  action: `Entry <a href="/entry/${entity._id}/project/${project.slug}">${entity.name}</a> created in bulk upload in project <a href="/project/${project.slug}">${project.name}</a>`,
+                  action: `Entry <a href="/entry/${entity._id}/project/${project.slug}">${entity.name || entity.nameOfOrphan}</a> created in bulk upload in project <a href="/project/${project.slug}">${project.name}</a>`,
                   isNotification: false,
                   color: 'blue'
               }
@@ -188,7 +188,7 @@ const logTemplates = ({
                       ...commons('order', entity._id),
                       action: `<a href="/entry/${entity._id}/project/${
                           project.slug
-                      }">${entity.name}</a> in project <a href="/project/${
+                      }">${entity.name || entity.nameOfOrphan}</a> in project <a href="/project/${
                           project.slug
                       }">${
                           project.detail ? project.detail.name : project.name
@@ -205,7 +205,7 @@ const logTemplates = ({
                       ...commons('order', entity._id),
                       action: `<a href="/entry/${entity._id}/project/${
                           project.slug
-                      }">${entity.name}</a> in project <a href="/project/${
+                      }">${entity.name || entity.nameOfOrphan}</a> in project <a href="/project/${
                           project.slug
                       }">${
                           project.detail ? project.detail.name : project.name
@@ -240,7 +240,7 @@ const logTemplates = ({
                       action: `Subscription changed for <a href="/entry/${
                           entity._id
                       }/project/${project.slug}">${
-                          entity.name
+                          entity.name || entity.nameOfOrphan
                       }</a> in project <a href="/project/${project.slug}">${
                           project.detail ? project.detail.name : project.name
                       }</a> of <a href="/order/${order._id}">Invoice-${
@@ -254,7 +254,7 @@ const logTemplates = ({
             entry && project && changes
                 ? {
                       ...commons('order', entity._id),
-                      action: `Subscription changed of <a href="/entry/${entry._id}/project/${project.slug}">${entry.name}</a> in <a href="/project/${project.slug}">${project.detail.name}</a> of <a href="/order/${entity._id}">Invoice-${entity.orderNo}</a>`,
+                      action: `Subscription changed of <a href="/entry/${entry._id}/project/${project.slug}">${entry.name || entry.nameOfOrphan}</a> in <a href="/project/${project.slug}">${project.detail.name}</a> of <a href="/order/${entity._id}">Invoice-${entity.orderNo}</a>`,
                       changes,
                       color: 'blue',
                   }

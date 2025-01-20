@@ -46,6 +46,7 @@ const uploadNewFile = function (elem) {
                 },
                 error: function (xhr, status, error) {
                     alert(error);
+                    console.log(error);
                     console.error('Error uploading file:', error);
                 },
             });
@@ -114,6 +115,7 @@ const updateFile = function (elem) {
         success: (response) => {
             console.log(response);
             $(elem).html(elemHtml);
+            modal.modal('hide');
             renderFiles();
         },
         error: (error) => {

@@ -233,7 +233,7 @@ const findConnectedIds = async (logs, req) => {
             log.actor = await Customer.findById(log.actorId).lean();
         } else if (log.actorType == 'user') {
             log.actor = await User.findById(log.actorId).lean();
-            const testOne = log.actor._id.toString();
+            const testOne = log.actor && log.actor._id.toString();
             const testTwo = req && req.session.user._id.toString();
             log.actorIsSelf = testOne === testTwo;
             log.self = req && req.session.user;

@@ -65,6 +65,8 @@ exports.uploadFileToEntry = async (req, res) => {
             mimeType: fileMulter.mimetype,
         });
 
+        console.log(file);
+
         await file.save();
 
         res.status(200).send(file);

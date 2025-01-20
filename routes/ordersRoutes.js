@@ -16,5 +16,6 @@ router.post('/emailInvoice/:orderId', authenticate, authorize('viewOrders'), ord
 router.get('/order/:orderId', authenticate, authorize('viewOrders'), allProjects, ordersController.viewOrder);
 router.get('/getOrderLogs/:orderId', authenticate, authorize('viewOrders'), ordersController.getOrderLogs);
 router.get('/getOrderData/:orderId', authenticate, authorize('viewOrders'), ordersController.getOrderData);
+router.get('/getOrderProjects/:orderId', authenticate, authorize('viewEntry'), ordersController.getOrderProjects);
 
 module.exports = router;

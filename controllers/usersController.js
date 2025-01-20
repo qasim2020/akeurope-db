@@ -11,6 +11,26 @@ const { saveLog, visibleLogs, userLogs } = require('../modules/logAction');
 const { logTemplates } = require('../modules/logTemplates');
 const { getChanges } = require('../modules/getChanges');
 
+const mongoose = require('mongoose');
+const sessionCollection = mongoose.connection.collection('sessions');
+
+async function killUserSessions(userId) {
+  try {
+
+    const sessions = await sessionCollection.find().toArray();
+    for (const session of sessions) {
+      const sessionData = JSON.parse(session.session);
+      if (sessionData.user && sessionData.user._id === userId.toString()) {
+        await sessionCollection.deleteOne({ _id: session._id });
+        console.log(`Deleted session: ${session._id} for user: ${userId}`);
+      }
+    }
+    console.log('Session cleanup completed.');
+  } catch (error) {
+    console.error('Error deleting sessions:', error);
+  }
+}
+
 exports.users = async (req, res) => {
     try {
         const users = await User.find().lean();
@@ -219,6 +239,8 @@ exports.updateUser = async (req, res) => {
                 req.session.user = updatedUser;
                 res.status(200).send('refresh window');
                 return;
+            } else {
+                await killUserSessions(updatedUser._id);
             }
         }
 

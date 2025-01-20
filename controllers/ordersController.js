@@ -14,6 +14,7 @@ const {
     updateOrderStatus,
     addPaymentsToOrder,
     openOrderProjectWithEntries,
+    formatOrder,
 } = require('../modules/orders');
 const {
     generateInvoice,
@@ -251,6 +252,37 @@ exports.getOrderLogs = async (req, res) => {
     } catch (error) {
         res.status(500).json({
             error: 'Error occured while fetching logs',
+            details: error.message,
+        });
+    }
+};
+
+
+exports.getOrderProjects = async (req, res) => {
+    try {
+        const orderInDb = await Order.findOne({
+            _id: req.params.orderId,
+        }).lean();
+
+        const order = await formatOrder(req, orderInDb);
+
+        for (const project of order.projects) {
+            project.detail = await Project.findOne({
+                slug: project.slug,
+            }).lean();
+        }
+
+        res.render('partials/showOrderEntries', {
+            layout: false,
+            data: {
+                projects: order.projects ? order.projects : [],
+                order,
+            },
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            error: 'Error getting paginated order',
             details: error.message,
         });
     }

@@ -53,6 +53,6 @@ router.get(
     authProject,
     entryController.getPaginatedEntriesForOrderPage,
 );
-router.get('/getOrderProjects/:orderId', authenticate, authorize('viewEntry'), authProject, entryController.getOrderProjects);
+
 
 module.exports = router;
