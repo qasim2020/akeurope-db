@@ -127,7 +127,7 @@ exports.getEditOrderModal = async (req, res) => {
     try {
         const order = await getSingleOrder(req, res);
         const customers = await Customer.find().lean();
-        const projects = await Project.find({ status: 'active' }).lean();
+        const projects = await Project.find().lean();
         res.render('partials/emptyOrderModal', {
             layout: false,
             data: {
