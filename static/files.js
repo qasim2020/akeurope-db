@@ -151,7 +151,6 @@ const deleteFile = function (elem) {
 const renderFiles = function () {
     const entityId = $(document).find('#files-container').attr('entity-id');
     if (!entityId) {
-        debugger;
         $('#files-container');
         alert('no entity id found');
         return;

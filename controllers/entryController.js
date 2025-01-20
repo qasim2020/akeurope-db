@@ -297,12 +297,12 @@ exports.entry = async (req, res) => {
 
         let files;
 
-        if (req.user?.role === 'admin') {
-            files = await File.find({ 'links.entityId': req.params.entryId }).lean();
+        if (req.userPermissions.includes('changeFilesAccess')) {
+            files = await File.find({ 'links.entityId': req.params.entryId }).sort({ uploadDate: -1 }).lean();
         } else {
-            files = await File.find({ 'links.entityId': req.params.entryId, access: 'editors' }).lean();
-        }  
-
+            files = await File.find({ 'links.entityId': req.params.entryId, access: 'editors' }).sort({ uploadDate: -1 }).lean();
+        }
+        
         res.render('entry', {
             layout: 'dashboard',
             data: {

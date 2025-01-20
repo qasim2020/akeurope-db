@@ -24,12 +24,12 @@ const authorize = (permission) => {
 
             if (permission === 'viewUsers' && roles[userRole].includes('viewSelf')) {
                 const testOne = req.user?._id.toString();
-                const testTwo = req.params.userId.toString();
+                const testTwo = req.params && req.params.userId && req.params.userId.toString();
                 const test = testOne === testTwo;
                 if (!test) {
                     return res.status(401).render('error', {
                         heading: 'Unauthorized',
-                        error: `Insufficient permissions to view another Admin`,
+                        error: `You do not have sufficient permissions to view another Admin`,
                     });
                 }
             } else {

@@ -5,6 +5,7 @@
             <div class="modal-header px-4">
                 <h5 class="modal-title">Manage Document</h5>
                 <div class="ms-auto d-flex align-items-center">
+                    {{#if (findInArray data.role 'deleteFiles')}}
                     <button class="btn btn-outline-danger" onclick="deleteFile(this)">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -16,6 +17,7 @@
                             <path d="M10 12l4 4m0 -4l-4 4"></path>
                         </svg>
                         Delete this Document</button>
+                    {{/if}}
                     <button type="button" class="btn btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
             </div>
@@ -171,6 +173,7 @@
                                 </svg>
                                 Save Changes
                             </button>
+                            {{#if (findInArray data.role 'deleteFiles')}}
                             <button class="btn btn-outline-danger" onclick="deleteFile(this)">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
                                     fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -183,8 +186,9 @@
                                     <path d="M10 12l4 4m0 -4l-4 4"></path>
                                 </svg>
                                 Delete this Document</button>
+                            {{/if}}
                         </div>
-
+                        {{#if (findInArray data.role 'changeFilesAccess')}}
                         <div class="row align-items-center">
                             <div class="col">
                                 <hr>
@@ -204,6 +208,7 @@
                             </a>
                             {{/each}}
                         </div>
+                        {{/if}}
 
                     </div>
 

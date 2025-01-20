@@ -1,6 +1,4 @@
 const File = require('../models/File');
-const { getUnlinkedFiles, getUnlinkedFile } = require('../modules/fileUtils');
-const Order = require('../models/Order');
 const fs = require('fs').promises;
 const path = require('path');
 const { createDynamicModel } = require('../models/createDynamicModel');
@@ -33,7 +31,16 @@ exports.uploadFileToEntry = async (req, res) => {
             return res.status(400).json({ message: 'No file uploaded' });
         }
 
-        const { entityId, entityType, entityUrl, category, access } = req.body;
+        const { entityId, entityType, entityUrl, category } = req.body;
+
+        let access;
+        
+        if (req.userPermissions.includes('changeFilesAccess')) {
+            access = ['editors'];
+        } else {
+            access = ['editors', 'customers'];
+        }
+        
 
         const links = [
             {
@@ -98,7 +105,7 @@ exports.filesByEntity = async (req, res) => {
 exports.renderEntityFiles = async (req, res) => {
     try {
         let files;
-        if (req.user?.role === 'admin') {
+        if (req.userPermissions.includes('changeFilesAccess')) {
             files = await File.find({ 'links.entityId': req.params.entityId }).sort({ uploadDate: -1 }).lean();
         } else {
             files = await File.find({ 'links.entityId': req.params.entityId, access: 'editors' }).sort({ uploadDate: -1 }).lean();
@@ -151,13 +158,14 @@ exports.update = async (req, res) => {
         const file = await File.findById(fileId);
         if (!file) return res.status(404).send('File not found');
 
-        if (req.user?.role === 'admin') {
+        if (req.userPermissions.includes('changeFilesAccess')) {
             file.name = name;
             file.category = category;
             file.access = access;
         } else {
             file.name = name;
             file.category = category;
+            file.access = ['editors', 'customers'];
         }
 
         await file.save();
@@ -198,7 +206,7 @@ exports.getFileModal = async (req, res) => {
     try {
         let file;
 
-        if (req.user?.role === 'admin') {
+        if (req.userPermissions.includes('changeFilesAccess')) {
             file = await File.findById(req.params.fileId).lean();
         } else {
             file = await File.findOne({_id: req.params.fileId, access: 'editors'}).lean();
@@ -237,68 +245,6 @@ exports.getFileModal = async (req, res) => {
     } catch (error) {
         res.status(500).json({
             error: 'Error occured while fetching file modal',
-            details: error.message,
-        });
-    }
-};
-
-exports.unlinkedFile = async (req, res) => {
-    try {
-        const foundFile = await getUnlinkedFile(req, res);
-        return res.render('partials/components/showUnlinkedFile', {
-            layout: false,
-            data: {
-                file: foundFile,
-            },
-        });
-    } catch (error) {
-        res.status(500).json({
-            error: 'Error occurred while fetching the file',
-            details: error.message,
-        });
-    }
-};
-
-exports.viewUnlinkedFile = async (req, res) => {
-    try {
-        const { fileName } = req.params;
-
-        if (!fileName) {
-            return res.status(400).json({ error: 'fileName is required' });
-        }
-
-        const directories = [path.resolve(__dirname, '../../uploads'), path.resolve(__dirname, '../../payments')];
-
-        let filePath = null;
-
-        for (const directory of directories) {
-            const files = await fs.readdir(directory);
-            if (files.includes(fileName)) {
-                filePath = path.join(directory, fileName);
-                break;
-            }
-        }
-
-        if (!filePath) {
-            return res.status(404).json({ error: 'File not found' });
-        }
-
-        const fileExtension = path.extname(fileName).toLowerCase();
-        const supportedImageTypes = ['.jpg', '.jpeg', '.png', '.gif', '.svg'];
-
-        if (fileExtension === '.pdf') {
-            res.setHeader('Content-Type', 'application/pdf');
-            return res.sendFile(filePath);
-        } else if (supportedImageTypes.includes(fileExtension)) {
-            res.setHeader('Content-Type', `image/${fileExtension.slice(1)}`);
-            return res.sendFile(filePath);
-        } else {
-            return res.status(400).json({ error: 'Unsupported file type' });
-        }
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({
-            error: 'Error occurred while fetching unlinked file',
             details: error.message,
         });
     }
