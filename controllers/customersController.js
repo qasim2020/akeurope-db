@@ -18,14 +18,6 @@ const Order = require('../models/Order');
 exports.customers = async (req, res) => {
     const customers = await Customer.find().lean();
 
-    for (const customer of customers) {
-        customer.projects = await Promise.all(
-            customer.projects.map(async (val) => {
-                return await Project.findOne({ slug: val }).lean();
-            }),
-        );
-    }
-
     res.render('customers', {
         layout: 'dashboard',
         data: {
@@ -301,7 +293,7 @@ exports.sendInvite = async (req, res) => {
 
 exports.updateCustomer = async (req, res) => {
     try {
-        const { name, organization, location, status, projects } = req.body;
+        const { name, organization, location, status } = req.body;
 
         let check = [];
 
@@ -311,24 +303,6 @@ exports.updateCustomer = async (req, res) => {
                 msg: 'Name contains only letters and spaces and is at least three characters long',
             });
         }
-
-        await Promise.all(
-            projects.map(async (slug) => {
-                let project = await Project.findOne({ slug });
-                if (!project) {
-                    check.push({
-                        elem: '.projects',
-                        msg: `Project ${slug} was not foud!`,
-                    });
-                }
-                if (project.status == 'inactive') {
-                    check.push({
-                        elem: '.projects',
-                        msg: `Project ${slug} is not Active!`,
-                    });
-                }
-            }),
-        );
 
         const customer = await Customer.findById(req.params.customerId);
 
@@ -346,7 +320,6 @@ exports.updateCustomer = async (req, res) => {
             organization,
             location,
             status,
-            projects,
         };
 
         const changes = getChanges(customer, updatedFields);
@@ -384,12 +357,6 @@ exports.getLogs = async (req, res) => {
 exports.customer = async (req, res) => {
     try {
         const customer = await Customer.findById(req.params.customerId).lean();
-
-        customer.projectsOpened = await Promise.all(
-            customer.projects.map(async (val) => {
-                return await Project.findOne({ slug: val }).lean();
-            }),
-        );
 
         const orders = await Order.find({ customerId: req.params.customerId }).lean();
 

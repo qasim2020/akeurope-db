@@ -52,26 +52,6 @@
           </div>
         </div>
 
-        <div class="datagrid-item">
-          <div class="datagrid-title">Projects</div>
-          <div class="datagrid-content">
-            {{#each customer.projects}}
-            <a href="/project/{{this.slug}}" class="badge bg-red-lt mb-1">{{this.name}}</a> 
-            {{/each}}
-          </div>
-        </div>
-
-        <div class="datagrid-item">
-          <div class="datagrid-title">Subscriptions</div>
-          <div class="datagrid-content">
-            {{#if customer.subscriptions}}
-            <span>{{customer.subscriptions.length}}</span>
-            {{else}}
-            <span>0</span>
-            {{/if}}
-          </div>
-        </div>
-
     </div>
   </div>
   <div class="card-body">
@@ -96,8 +76,6 @@
               <th>Location</th>
               <th>Status</th>
               <th>Invite Status</th>
-              <th>Projects</th>
-              <th>Subscriptions</th>
             </tr>
         </thead>
         <tbody>
@@ -117,16 +95,6 @@
             <td>{{customer.location}}</td>
             <td>{{capitalizeFirstLetter customer.status}}</td>
             <td>{{customer.emailStatus}}</td>
-            <td>
-              {{#each customer.projects}}
-              <a href="/project/{{this.slug}}" class="badge bg-red-lt mb-1">{{this.name}}</a>
-              {{/each}}
-            </td>
-            {{#if customer.subscriptions}}
-            <td>{{customer.subscriptions.length}}</td>
-            {{else}}
-            <td>0</td>
-            {{/if}}
           </tr>
           {{/each}}
         </tbody>

@@ -143,22 +143,6 @@
         return total;
       }, {});
 
-
-    const projects = $(elem)
-      .closest(".modal")
-      .find(".projects input:checked")
-      .map((key, val) => $(val).val())
-      .get();
-
-    if (projects.length == 0) {
-      $(elem).closest(".modal").find(".projects").find(".form-selectgroup-label").addClass("border-red");
-      $(elem).closest(".modal").find(".projects").append(`<div class="d-block invalid-feedback">Invalid entry</div> `);
-      isValid.push(false);
-    } else {
-      $(elem).closest(".modal").find(".projects").find(".form-selectgroup-label").removeClass("border-red");
-    }
-
-    data.projects = projects;
     data.status = $(elem).closest(".modal").find(".customer-status input:checked").val();
 
     if (!data.status) {

@@ -44,7 +44,6 @@ const uploadNewFile = function (elem) {
                 },
                 error: function (xhr, status, error) {
                     alert(error);
-                    console.log(error);
                     console.error('Error uploading file:', error);
                 },
             });

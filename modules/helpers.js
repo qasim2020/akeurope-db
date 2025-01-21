@@ -150,7 +150,6 @@ const timeAgo = function (timestamp) {
 };
 
 const camelCaseToNormalString = function (string) {
-    console.log('camelcase helper');
     if (typeof string !== 'string') return;
     string = string ? string : '';
     return string
