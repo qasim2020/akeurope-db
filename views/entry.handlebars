@@ -63,7 +63,7 @@
       {{#if (findInArray data.role 'viewFiles')}}
       <div class="card mb-3" id="files-container" entity-type="entry" entity-id="{{data.entry._id}}"
         entity-url="/entry/{{data.entry._id}}/project/{{data.project.slug}}" file-url="/uploadFileToEntry" file-access="[editors]">
-        {{> showEntityFiles}}
+        {{> showEntityFiles data=data beneficiary=true}}
       </div>
       {{/if}}
       {{> showEntryLogs}}

@@ -32,9 +32,7 @@ exports.customers = async (req, res) => {
             layout: req.session.layout,
             userId: req.session.user._id,
             userName: req.session.user.name,
-            userRole:
-                req.session.user.role.charAt(0).toUpperCase() +
-                req.session.user.role.slice(1),
+            userRole: req.session.user.role.charAt(0).toUpperCase() + req.session.user.role.slice(1),
             activeMenu: 'customers',
             projects: req.allProjects,
             role: req.userPermissions,
@@ -124,15 +122,7 @@ exports.editModal = async (req, res) => {
 
 exports.createCustomer = async (req, res) => {
     try {
-        const {
-            name,
-            email,
-            organization,
-            location,
-            status,
-            projects,
-            customerId,
-        } = req.body;
+        const { name, email, organization, location, status, projects, customerId } = req.body;
 
         let check = [];
 
@@ -207,10 +197,7 @@ exports.createCustomer = async (req, res) => {
         });
 
         // Load and compile the Handlebars template
-        const templatePath = path.join(
-            __dirname,
-            '../views/emails/customerInvite.handlebars',
-        );
+        const templatePath = path.join(__dirname, '../views/emails/customerInvite.handlebars');
         const templateSource = await fs.readFile(templatePath, 'utf8');
         const compiledTemplate = handlebars.compile(templateSource);
 
@@ -262,11 +249,10 @@ exports.sendInvite = async (req, res) => {
         const inviteToken = crypto.randomBytes(32).toString('hex');
         const inviteExpires = moment().add(24, 'hours').toDate();
 
-        (customer.emailStatus = 'Email invite sent!'),
-            (customer.inviteToken = inviteToken);
+        customer.emailStatus = 'Email invite sent!';
+        customer.inviteToken = inviteToken;
         customer.inviteExpires = inviteExpires;
 
-        // Configure the SMTP transporter
         let transporter = nodemailer.createTransport({
             host: process.env.EMAIL_HOST,
             port: process.env.EMAIL_PORT,
@@ -277,11 +263,7 @@ exports.sendInvite = async (req, res) => {
             },
         });
 
-        // Load and compile the Handlebars template
-        const templatePath = path.join(
-            __dirname,
-            '../views/emails/customerInvite.handlebars',
-        );
+        const templatePath = path.join(__dirname, '../views/emails/customerInvite.handlebars');
         const templateSource = await fs.readFile(templatePath, 'utf8');
         const compiledTemplate = handlebars.compile(templateSource);
 
@@ -379,10 +361,7 @@ exports.updateCustomer = async (req, res) => {
                 }),
             );
 
-            await Customer.findByIdAndUpdate(
-                req.params.customerId,
-                updatedFields,
-            );
+            await Customer.findByIdAndUpdate(req.params.customerId, updatedFields);
         }
 
         res.status(200).send('Customer updated successfully!');
@@ -420,9 +399,7 @@ exports.customer = async (req, res) => {
                 layout: req.session.layout,
                 userId: req.session.user._id,
                 userName: req.session.user.name,
-                userRole:
-                    req.session.user.role.charAt(0).toUpperCase() +
-                    req.session.user.role.slice(1),
+                userRole: req.session.user.role.charAt(0).toUpperCase() + req.session.user.role.slice(1),
                 activeMenu: 'customers',
                 projects: req.allProjects,
                 role: req.userPermissions,

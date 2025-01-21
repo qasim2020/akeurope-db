@@ -11,7 +11,6 @@ const uploadNewFile = function (elem) {
     const entityType = $('#files-container').attr('entity-type');
     const entityUrl = $('#files-container').attr('entity-url');
     const fileUrl = $('#files-container').attr('file-url');
-    const access = $('#files-container').attr('file-access');
 
     const elemHtml = $(elem).html();
 
@@ -31,7 +30,6 @@ const uploadNewFile = function (elem) {
             formData.append('entityId', entityId);
             formData.append('entityType', entityType);
             formData.append('entityUrl', entityUrl);
-            formData.append('access', access);
 
             $.ajax({
                 url: fileUrl,

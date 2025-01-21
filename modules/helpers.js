@@ -150,6 +150,8 @@ const timeAgo = function (timestamp) {
 };
 
 const camelCaseToNormalString = function (string) {
+    console.log('camelcase helper');
+    if (typeof string !== 'string') return;
     string = string ? string : '';
     return string
         .replace(/([a-z])([A-Z])/g, '$1 $2')
@@ -159,9 +161,9 @@ const camelCaseToNormalString = function (string) {
 const kebabCaseToNormalString = function (string) {
     string = string ? string : '';
     return string
-        .split('-') // Split the string by hyphens
-        .map(word => word.charAt(0).toUpperCase() + word.slice(1)) // Capitalize each word
-        .join(' '); // Join the words back with spaces
+        .split('-') 
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1)) 
+        .join(' '); 
 };
 
 const camelCaseWithCommaToNormalString = function (string) {
