@@ -18,7 +18,7 @@
             <tr>
                 <th>File Name</th>
                 <th>Category</th>
-                <th>Access</th>
+                <th>Visibility</th>
                 <th>Size</th>
                 <th>Upload Date</th>
             </tr>
@@ -36,7 +36,7 @@
                     {{/each}}
                 </td>
                 <td>{{this.size}} Kb</td>
-                <td>{{formatDate this.uploadDate}}</td>
+                <td>{{formatDate this.createdAt}}</td>
             </tr>
             {{/each}}
         </tbody>

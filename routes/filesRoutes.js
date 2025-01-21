@@ -11,6 +11,7 @@ const fileController = require('../controllers/fileController');
 router.get('/filesByEntityRender/:entityId', authenticate, authorize('viewFiles'), fileController.renderEntityFiles);
 router.get('/file/:fileId', authenticate, authorize('viewFiles'), fileController.file);
 router.post('/uploadFileToEntry', authenticate, authorize('uploadFiles'), uploadFile.single('file'), fileController.uploadFileToEntry);
+router.post('/uploadFileToOrder', authenticate, authorize('uploadFiles'), uploadFile.single('file'), fileController.uploadFileToOrder);
 router.post('/fileUpdate/:fileId', authenticate, authorize('editFiles'), fileController.update);
 router.post('/fileDelete/:fileId', authenticate, authorize('deleteFiles'), fileController.delete);
 

@@ -68,7 +68,6 @@ const getFileModal = function (elem, fileId) {
         $(`#button-${fileId}`).remove();
     }
 
-
     $.ajax({
         url: `/getFileModal/${fileId}`,
         type: 'GET',
@@ -88,6 +87,7 @@ const updateFile = function (elem) {
 
     const fileId = $(modal).attr('file-id');
     const name = $(modal).find('[name=fileName]').val();
+    const notes = $(modal).find('[name=fileNotes').val();
     const category = $(modal).find('[name=fileCategory]:checked').val();
     const access = $(modal)
         .find('[name="fileAccess"]:checked')
@@ -110,7 +110,7 @@ const updateFile = function (elem) {
     $.ajax({
         url: `/fileUpdate/${fileId}`,
         method: 'POST',
-        data: JSON.stringify({ name, category, access }),
+        data: JSON.stringify({ name, category, notes, access }),
         contentType: 'application/json',
         success: (response) => {
             console.log(response);

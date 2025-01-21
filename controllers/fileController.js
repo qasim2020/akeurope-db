@@ -1,4 +1,5 @@
 const File = require('../models/File');
+const Order = require('../models/Order');
 const fs = require('fs').promises;
 const path = require('path');
 const { createDynamicModel } = require('../models/createDynamicModel');
@@ -76,6 +77,56 @@ exports.uploadFileToEntry = async (req, res) => {
     }
 };
 
+exports.uploadFileToOrder = async (req, res) => {
+    try {
+        const fileMulter = req.file;
+
+        if (!fileMulter) {
+            return res.status(400).json({ message: 'No file uploaded' });
+        }
+
+        const { entityId, entityType, entityUrl } = req.body;
+
+        let access;
+        
+        if (req.userPermissions.includes('changeFilesAccess')) {
+            access = ['customer'];
+        } else {
+            throw new Error('You are not authorized to add files to an invoice')
+        }
+        
+        const links = [
+            {
+                entityId,
+                entityType,
+                entityUrl,
+            },
+            {
+                entityId: req.session.user._id,
+                entityType: 'user',
+                entityUrl: `/user/${req.session.user._id}`,
+            },
+        ];
+
+        const file = new File({
+            links,
+            category: 'paymentProof',
+            access,
+            name: fileMulter.filename,
+            size: fileMulter.size / 1000,
+            path: `/uploads/${fileMulter.filename}`,
+            mimeType: fileMulter.mimetype,
+        });
+
+        await file.save();
+
+        res.status(200).send(file);
+    } catch (error) {
+        console.log(error);
+        res.status(500).send(error.toString());
+    }
+};
+
 exports.files = async (req, res) => {
     try {
         const sortOption = req.query.sort || 'createdAt';
@@ -108,9 +159,9 @@ exports.renderEntityFiles = async (req, res) => {
     try {
         let files;
         if (req.userPermissions.includes('changeFilesAccess')) {
-            files = await File.find({ 'links.entityId': req.params.entityId }).sort({ uploadDate: -1 }).lean();
+            files = await File.find({ 'links.entityId': req.params.entityId }).sort({ createdAt: -1 }).lean();
         } else {
-            files = await File.find({ 'links.entityId': req.params.entityId, access: 'editors' }).sort({ uploadDate: -1 }).lean();
+            files = await File.find({ 'links.entityId': req.params.entityId, access: 'editors' }).sort({ createdAt: -1 }).lean();
         }
         res.status(200).render('partials/showEntityFiles', {
             layout: false,
@@ -128,7 +179,7 @@ exports.file = async (req, res) => {
     try {
 
         let file;
-        if (req.user?.role === 'admin') {
+        if (req.userPermissions.includes('changeFilesAccess')) {
             file = await File.findById(req.params.fileId).lean();
         } else {
             file = await File.findOne({ _id: req.params.fileId, access: 'editors' }).lean();
@@ -156,17 +207,19 @@ exports.file = async (req, res) => {
 exports.update = async (req, res) => {
     try {
         const { fileId } = req.params;
-        const { name, category, access } = req.body;
+        const { name, category, access, notes } = req.body;
         const file = await File.findById(fileId);
         if (!file) return res.status(404).send('File not found');
 
         if (req.userPermissions.includes('changeFilesAccess')) {
             file.name = name;
             file.category = category;
+            file.notes = notes;
             file.access = access;
         } else {
             file.name = name;
             file.category = category;
+            file.notes = notes;
             file.access = ['editors', 'customers'];
         }
 
@@ -225,15 +278,19 @@ exports.getFileModal = async (req, res) => {
                 const slug = parts[parts.length - 1];
                 const model = await createDynamicModel(slug);
                 link.entity = await model.findById(link.entityId).lean();
-                link.entityName = link.entity.name;
+                link.entityName = link.entity && link.entity.name;;
             }
             if (link.entityType === 'user') {
                 link.entity = await User.findById(link.entityId).lean();
-                link.entityName = link.entity.name;
+                link.entityName = link.entity && link.entity.name;
             }
             if (link.entityType === 'customer') {
                 link.entity = await Customer.findById(link.entityId).lean();
-                link.entityName = link.entity.name;
+                link.entityName = link.entity && link.entity.name;
+            }
+            if (link.entityType === 'order') {
+                link.entity = await Order.findById(link.entityId).lean();
+                link.entityName = `Invoice-${link.entity && link.entity.orderNo}`;
             }
         }
 

@@ -31,6 +31,12 @@
                         </div>
 
                         <div class="mb-3">
+                            <label class="form-label" for="fileNotes">Document Notes</label>
+                            <textarea id="fileNotes" name="fileNotes" class="form-control"
+                                placeholder="Enter notes here" rows="4" required>{{data.file.notes}}</textarea>
+                        </div>
+
+                        <div class="mb-3">
                             <label class="form-label">Document Category</label>
                             <div class="form-selectgroup form-selectgroup-boxes p-1">
                                 <label class="form-selectgroup-item flex-fill">
@@ -152,7 +158,7 @@
                                             <span class="form-selectgroup-check"></span>
                                         </div>
                                         <div class="form-selectgroup-label-content d-flex align-items-center">
-                                            <div class="font-weight-medium">Visible to Subscribed Customers</div>
+                                            <div class="font-weight-medium">Visible to Subscribed Customer</div>
                                         </div>
                                     </div>
                                 </label>

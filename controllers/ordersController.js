@@ -1,11 +1,8 @@
 const Customer = require('../models/Customer');
 const Project = require('../models/Project');
 const Order = require('../models/Order');
-const {
-    saveLog,
-    visibleLogs,
-    orderLogs,
-} = require('../modules/logAction');
+const File = require('../models/File');
+const { saveLog, visibleLogs, orderLogs } = require('../modules/logAction');
 const { logTemplates } = require('../modules/logTemplates');
 const { getChanges } = require('../modules/getChanges');
 const {
@@ -16,11 +13,7 @@ const {
     openOrderProjectWithEntries,
     formatOrder,
 } = require('../modules/orders');
-const {
-    generateInvoice,
-    deleteInvoice,
-    sendInvoiceToCustomer,
-} = require('../modules/invoice');
+const { generateInvoice, deleteInvoice, sendInvoiceToCustomer } = require('../modules/invoice');
 const Log = require('../models/Log');
 const { createDynamicModel } = require('../models/createDynamicModel');
 
@@ -34,9 +27,7 @@ exports.viewOrders = async (req, res) => {
                 layout: req.session.layout,
                 userId: req.session.user._id,
                 userName: req.session.user.name,
-                userRole:
-                    req.session.user.role.charAt(0).toUpperCase() +
-                    req.session.user.role.slice(1),
+                userRole: req.session.user.role.charAt(0).toUpperCase() + req.session.user.role.slice(1),
                 activeMenu: 'orders',
                 projects: req.allProjects,
                 role: req.userPermissions,
@@ -64,9 +55,7 @@ exports.viewOrder = async (req, res) => {
             data: {
                 userId: req.session.user._id,
                 userName: req.session.user.name,
-                userRole:
-                    req.session.user.role.charAt(0).toUpperCase() +
-                    req.session.user.role.slice(1),
+                userRole: req.session.user.role.charAt(0).toUpperCase() + req.session.user.role.slice(1),
                 role: req.userPermissions,
                 logs: await visibleLogs(req, res),
                 orderLogs: await orderLogs(req, res),
@@ -75,6 +64,7 @@ exports.viewOrder = async (req, res) => {
                 customers: await Customer.find().lean(),
                 activeMenu: 'orders',
                 order,
+                files: await File.find({ 'links.entityId': req.params.orderId }).sort({ createdAt: -1 }).lean(),
             },
         });
     } catch (error) {
@@ -201,7 +191,7 @@ exports.deleteOrder = async (req, res) => {
             }),
         );
         for (const project of order.projects) {
-            project.detail = await Project.findOne({slug: project.slug}).lean();
+            project.detail = await Project.findOne({ slug: project.slug }).lean();
             const model = await createDynamicModel(project.slug);
             for (const entryInOrder of project.entries) {
                 const entry = await model.findById(entryInOrder.entryId).lean();
@@ -215,7 +205,7 @@ exports.deleteOrder = async (req, res) => {
                     }),
                 );
             }
-        };
+        }
         await Order.deleteOne({ _id: orderId });
         res.status(200).send('Order & Invoice deleted!');
     } catch (error) {
@@ -256,7 +246,6 @@ exports.getOrderLogs = async (req, res) => {
         });
     }
 };
-
 
 exports.getOrderProjects = async (req, res) => {
     try {

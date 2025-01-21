@@ -47,11 +47,16 @@
   {{> showOrderEntries}}
   <div class="row row-deck row-cards">
     <div class="col-12 col-md-6 mb-auto d-flex flex-column">
-      {{!-- {{> showOrderDocs}} --}}
       {{> showOrder}}
       {{> showOrderInvoice}}
     </div>
     <div class="d-block col-12 col-md-6">
+      {{#if (findInArray data.role 'viewFiles')}}
+      <div class="card mb-3" id="files-container" entity-type="order" entity-id="{{data.order._id}}"
+        entity-url="/order/{{data.order._id}}" file-url="/uploadFileToOrder">
+        {{> showEntityFiles}}
+      </div>
+      {{/if}}
       {{> showOrderLogs}}
     </div>
   </div>
@@ -62,7 +67,6 @@
 {{/if}}
 
 <script src="/static/orders.js"></script>
-<script src="/static/files.js"></script>
 <script>
 
   const refreshContainers = function (modal) {
