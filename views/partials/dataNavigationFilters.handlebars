@@ -56,7 +56,6 @@
                                 {{#with field.type as |type|}}
                                 {{#with field.actualName as |actualName|}}
                                 {{#if (eq type 'date')}}
-                                {{log value}}
                                 <input type="text" class="form-control dateInput" aria-label="search by column date"
                                     placeholder="> 2025 etc" value="{{stringifyDate value}}" query="{{json value}}"/>
                                 {{/if}}

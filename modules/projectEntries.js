@@ -73,7 +73,11 @@ const projectEntries = async function (req, res) {
 
     const { searchQuery, fieldFilters } = generateSearchQuery(req, project);
 
-    const filtersQuery = new URLSearchParams(fieldFilters).toString();
+    const serializedFilters = Object.fromEntries(
+        Object.entries(fieldFilters).map(([key, value]) => [key, JSON.stringify(value)])
+    );
+    
+    const filtersQuery = new URLSearchParams(serializedFilters).toString();
 
     let entries = await DynamicModel.find(searchQuery)
         .sort(sortOptions)
