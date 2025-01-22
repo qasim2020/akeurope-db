@@ -15,6 +15,25 @@ const { logTemplates } = require('../modules/logTemplates');
 const { getChanges } = require('../modules/getChanges');
 const Order = require('../models/Order');
 
+const sessionCollection = mongoose.connection.collection('sessions_customer_portal');
+
+async function killUserSessions(userId) {
+    try {
+  
+      const sessions = await sessionCollection.find().toArray();
+      for (const session of sessions) {
+        const sessionData = JSON.parse(session.session);
+        if (sessionData.user && sessionData.user._id === userId.toString()) {
+          await sessionCollection.deleteOne({ _id: session._id });
+          console.log(`Deleted session: ${session._id} for customer: ${userId}`);
+        }
+      }
+      console.log('Session cleanup completed.');
+    } catch (error) {
+      console.error('Error deleting sessions:', error);
+    }
+  }
+
 exports.customers = async (req, res) => {
     const customers = await Customer.find().lean();
 
@@ -335,6 +354,10 @@ exports.updateCustomer = async (req, res) => {
             );
 
             await Customer.findByIdAndUpdate(req.params.customerId, updatedFields);
+
+            if (status === 'blocked') {
+                await killUserSessions(customer._id);
+            }
         }
 
         res.status(200).send('Customer updated successfully!');

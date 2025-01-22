@@ -1,4 +1,6 @@
-<div class="modal modal-blur fade" id="modal-{{data.project.slug}}" tabindex="-1" style="display: none; padding-left: 0px;" aria-modal="true" role="dialog" projSlug="{{data.project.slug}}" projId="{{data.project._id}}">
+<div class="modal modal-blur fade" id="modal-{{data.project.slug}}" tabindex="-1"
+    style="display: none; padding-left: 0px;" aria-modal="true" role="dialog" projSlug="{{data.project.slug}}"
+    projId="{{data.project._id}}">
     <div class="modal-dialog modal-lg" role="document" id="">
         <div class="modal-content">
             <div class="modal-header">
@@ -8,63 +10,64 @@
             <div class="modal-body">
                 <div class="mb-3">
                     <label class="form-label">Name</label>
-                    <input type="text" class="form-control project-name" name="example-text-input" placeholder="Name of project" value="{{data.project.name}}"/>
+                    <input type="text" class="form-control project-name" name="example-text-input"
+                        placeholder="Name of project" value="{{data.project.name}}" />
                 </div>
 
                 <div class="mb-3">
                     <label class="form-label">Slug</label>
-                    <input type="text" class="form-control project-slug" name="example-text-input" placeholder="name-of-project" value="{{data.project.slug}}" disabled/>
+                    <input type="text" class="form-control project-slug" name="example-text-input"
+                        placeholder="name-of-project" value="{{data.project.slug}}" disabled />
                 </div>
 
                 <div class="mb-3">
                     <label class="form-label">Project location</label>
-                    <input type="text" class="form-control project-location" name="example-text-input" placeholder="Pakistan etc" value="{{data.project.location}}" />
+                    <input type="text" class="form-control project-location" name="example-text-input"
+                        placeholder="Pakistan etc" value="{{data.project.location}}" />
                 </div>
 
                 <div class="mb-3">
                     <label for="invoiceAmount" class="form-label">Project Currency</label>
-                      <select class="form-select form-control project-sub-cost-currency" name="currency">
-                        <option value="USD" {{#if (eq data.project.currency 'USD')}}selected{{/if}}>USD ($)</option>
-                        <option value="NOK" {{#if (eq data.project.currency 'NOK')}}selected{{/if}}>NOK (kr)</option>
-                        <option value="GBP" {{#if (eq data.project.currency 'GBP')}}selected{{/if}}>GBP (£)</option>
-                        <option value="EUR" {{#if (eq data.project.currency 'EUR')}}selected{{/if}}>EUR (€)</option>
-                        <option value="PKR" {{#if (eq data.project.currency 'PKR')}}selected{{/if}}>PKR (₨)</option>
-                        <option value="ILS" {{#if (eq data.project.currency 'ILS')}}selected{{/if}}>ILS (₪)</option>
-                        <option value="EGP" {{#if (eq data.project.currency 'EGP')}}selected{{/if}}>EGP (£)</option>
-                      </select>
+                    <select class="form-select form-control project-sub-cost-currency" name="currency">
+                        <option value="USD" {{#if (eq data.project.currency 'USD' )}}selected{{/if}}>USD ($)</option>
+                        <option value="NOK" {{#if (eq data.project.currency 'NOK' )}}selected{{/if}}>NOK (kr)</option>
+                        <option value="GBP" {{#if (eq data.project.currency 'GBP' )}}selected{{/if}}>GBP (£)</option>
+                        <option value="EUR" {{#if (eq data.project.currency 'EUR' )}}selected{{/if}}>EUR (€)</option>
+                        <option value="PKR" {{#if (eq data.project.currency 'PKR' )}}selected{{/if}}>PKR (₨)</option>
+                        <option value="ILS" {{#if (eq data.project.currency 'ILS' )}}selected{{/if}}>ILS (₪)</option>
+                        <option value="EGP" {{#if (eq data.project.currency 'EGP' )}}selected{{/if}}>EGP (£)</option>
+                    </select>
                 </div>
 
                 <label class="form-label">Project status</label>
                 <div class="form-selectgroup-boxes row mb-3 project-status">
                     <div class="col-lg-6">
                         <label class="form-selectgroup-item">
-                            <input type="radio" name="report-type" value="active" class="form-selectgroup-input" {{#if (eq data.project.status "active")}} checked="" {{/if}} />
+                            <input type="radio" name="report-type" value="active" class="form-selectgroup-input" {{#if
+                                (eq data.project.status "active" )}} checked="" {{/if}} />
                             <span class="form-selectgroup-label d-flex align-items-center p-3">
-                <span class="me-3">
-                  <span class="form-selectgroup-check"></span>
-                            </span>
-                            <span class="form-selectgroup-label-content">
-                  <span class="form-selectgroup-title strong mb-1">Active</span>
-                            <span class="d-block text-secondary">Project is editable for
-                    administrators and can be viewed by organizations</span>
-                            </span>
+                                <span class="me-3">
+                                    <span class="form-selectgroup-check"></span>
+                                </span>
+                                <span class="form-selectgroup-label-content">
+                                    <span class="form-selectgroup-title strong mb-1">Active</span>
+                                    <span class="d-block text-secondary">Project is accessible to customers portal while creating invoices.</span>
+                                </span>
                             </span>
                         </label>
                     </div>
                     <div class="col-lg-6">
                         <label class="form-selectgroup-item">
-                            <input type="radio" name="report-type" value="inactive" class="form-selectgroup-input" {{#if (eq data.project.status "inactive")}} checked="" {{/if}} />
+                            <input type="radio" name="report-type" value="inactive" class="form-selectgroup-input" {{#if
+                                (eq data.project.status "inactive" )}} checked="" {{/if}} />
                             <span class="form-selectgroup-label d-flex align-items-center p-3">
-                <span class="me-3">
-                  <span class="form-selectgroup-check"></span>
-                            </span>
-                            <span class="form-selectgroup-label-content">
-                  <span
-                    class="form-selectgroup-title strong mb-1"
-                  >Inactive</span>
-                            <span class="d-block text-secondary">Project is not published
-                    and can not be edited by administrators</span>
-                            </span>
+                                <span class="me-3">
+                                    <span class="form-selectgroup-check"></span>
+                                </span>
+                                <span class="form-selectgroup-label-content">
+                                    <span class="form-selectgroup-title strong mb-1">Inactive</span>
+                                    <span class="d-block text-secondary">Project is only visible to admins and selective-editors.</span>
+                                </span>
                             </span>
                         </label>
                     </div>
@@ -73,153 +76,215 @@
 
             </div>
             <div class="modal-body">
-              <label class="form-label">Enter project fields</label>
-              <p class="card-subtitle mb-3">Drag and drop the fields to change their order</p>
-              <div class="accordion" id="accordion-{{data.project.slug}}">
-                {{#each data.project.fields}}
-                <div class="accordion-item accordion-edit-project form-field">
-                  <h2 class="accordion-header d-flex justify-content-between" id="">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{../data.project.slug}}-{{@key}}" aria-expanded="true">
-                        <span class='d-none d-md-inline-block me-2'>Field is </span>
-                        <span class="badge bg-azure-lt me-2">{{this.actualName}}</span>
-                        <span class='d-none d-md-inline-block me-2'>with type of </span>
-                        <span class="badge bg-blue-lt">{{this.type}}</span>
-                    </button>
-                  </h2>
-                  <div id="collapse-{{../data.project.slug}}-{{@key}}" class="accordion-collapse collapse" data-bs-parent="#accordion-{{../data.project.slug}}">
-                    <div class="accordion-body pt-0">
-                      <div class="mb-3">
-                          <label class="form-label">Name</label>
-                          <input id="" type="text" class="form-control" name="example-text-input" placeholder="Field name" value="{{this.actualName}}" />
-                      </div>
-                      <div class="mb-3">
-                          <label class="form-label">Type</label>
-                          <select class="form-select">
-                            <option {{#if (eq this.type "string")}} selected {{/if}} value="string">String</option>
-                            <option {{#if (eq this.type "textarea")}} selected {{/if}} value="textarea">Long text</option>
-                            <option {{#if (eq this.type "number")}} selected {{/if}} value="number">Number</option>
-                            <option {{#if (eq this.type "boolean")}} selected {{/if}} value="boolean">Boolean</option>
-                            <option {{#if (eq this.type "dropdown")}} selected {{/if}} value="dropdown">Dropdown</option>
-                            <option {{#if (eq this.type "date")}} selected {{/if}} value="date">Date (Calendar)</option>
-                            <option {{#if (eq this.type "image")}} selected {{/if}} value="image">Image upload</option>
-                            <option {{#if (eq this.type "file")}} selected {{/if}} value="file">File upload</option>
-                          </select>
-                      </div>
-                      {{#if (eq this.type "boolean")}}
-                      <label class="form-label dynamic-options">Select boolean values</label>
-                      <div class="mb-3 dynamic-options">
+                <label class="form-label">Enter project fields</label>
+                <p class="card-subtitle mb-3">Drag and drop the fields to change their order</p>
+                <div class="accordion" id="accordion-{{data.project.slug}}">
+                    {{#each data.project.fields}}
+                    <div class="accordion-item accordion-edit-project form-field">
+                        <h2 class="accordion-header d-flex justify-content-between" id="">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#collapse-{{../data.project.slug}}-{{@key}}" aria-expanded="true">
+                                <span class='d-none d-md-inline-block me-2'>Field is </span>
+                                <span class="badge bg-azure-lt me-2">{{this.actualName}}</span>
+                                <span class='d-none d-md-inline-block me-2'>with type of </span>
+                                <span class="badge bg-blue-lt">{{this.type}}</span>
+                            </button>
+                        </h2>
+                        <div id="collapse-{{../data.project.slug}}-{{@key}}" class="accordion-collapse collapse"
+                            data-bs-parent="#accordion-{{../data.project.slug}}">
+                            <div class="accordion-body pt-0">
+                                <div class="mb-3">
+                                    <label class="form-label">Name</label>
+                                    <input id="" type="text" class="form-control" name="example-text-input"
+                                        placeholder="Field name" value="{{this.actualName}}" />
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Type</label>
+                                    <select class="form-select">
+                                        <option {{#if (eq this.type "string" )}} selected {{/if}} value="string">String
+                                        </option>
+                                        <option {{#if (eq this.type "textarea" )}} selected {{/if}} value="textarea">
+                                            Long text</option>
+                                        <option {{#if (eq this.type "number" )}} selected {{/if}} value="number">Number
+                                        </option>
+                                        <option {{#if (eq this.type "boolean" )}} selected {{/if}} value="boolean">
+                                            Boolean</option>
+                                        <option {{#if (eq this.type "dropdown" )}} selected {{/if}} value="dropdown">
+                                            Dropdown</option>
+                                        <option {{#if (eq this.type "date" )}} selected {{/if}} value="date">Date
+                                            (Calendar)</option>
+                                        <option {{#if (eq this.type "image" )}} selected {{/if}} value="image">Image
+                                            upload</option>
+                                        <option {{#if (eq this.type "file" )}} selected {{/if}} value="file">File upload
+                                        </option>
+                                    </select>
+                                </div>
+                                {{#if (eq this.type "boolean")}}
+                                <label class="form-label dynamic-options">Select boolean values</label>
+                                <div class="mb-3 dynamic-options">
 
-                          <div class="row g-2" style="margin-bottom:0.5rem">
-                              <div class="col-auto">
-                                  <a href="#" class="btn btn-icon disabled" aria-label="Button">
-                                      <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-check"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l5 5l10 -10" /></svg>
-                                  </a>
-                              </div>
-                              <div class="col">
-                                  <input type="text" data-label="true" class="form-control" placeholder="Active" value="{{this.options.0.value}}">
-                              </div>
-                          </div>
+                                    <div class="row g-2" style="margin-bottom:0.5rem">
+                                        <div class="col-auto">
+                                            <a href="#" class="btn btn-icon disabled" aria-label="Button">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                                    viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                                    class="icon icon-tabler icons-tabler-outline icon-tabler-check">
+                                                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                                    <path d="M5 12l5 5l10 -10" />
+                                                </svg>
+                                            </a>
+                                        </div>
+                                        <div class="col">
+                                            <input type="text" data-label="true" class="form-control"
+                                                placeholder="Active" value="{{this.options.0.value}}">
+                                        </div>
+                                    </div>
 
-                          <div class="row g-2" style="margin-bottom:0.5rem">
-                              <div class="col-auto">
-                                  <a href="#" class="btn btn-icon disabled" aria-label="Button">
-                                      <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-x"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M18 6l-12 12" /><path d="M6 6l12 12" /></svg>
-                                  </a>
-                              </div>
-                              <div class="col">
-                                  <input type="text" data-label="false" class="form-control" placeholder="Inactive" value="{{this.options.1.value}}">
-                              </div>
-                          </div>
+                                    <div class="row g-2" style="margin-bottom:0.5rem">
+                                        <div class="col-auto">
+                                            <a href="#" class="btn btn-icon disabled" aria-label="Button">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                                    viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                                    class="icon icon-tabler icons-tabler-outline icon-tabler-x">
+                                                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                                    <path d="M18 6l-12 12" />
+                                                    <path d="M6 6l12 12" />
+                                                </svg>
+                                            </a>
+                                        </div>
+                                        <div class="col">
+                                            <input type="text" data-label="false" class="form-control"
+                                                placeholder="Inactive" value="{{this.options.1.value}}">
+                                        </div>
+                                    </div>
 
-                      </div>
-                      {{/if}}
-                      {{#if (eq this.type "dropdown")}}
-                      <label class="form-label dynamic-options">Add / edit dropdown options</label>
-                      {{#each this.options}}
-                      <div class="mb-3 dynamic-options">
-                          <div class="row g-2">
-                              <div class="col-auto">
-                                  <a href="#" class="btn btn-icon" aria-label="Button" onclick="addOption(this)">
-                                      <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-plus"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 5l0 14" /><path d="M5 12l14 0" /></svg>
-                                  </a>
-                                  <a href="#" class="btn btn-icon" aria-label="Button" onclick="deleteOption(this)">
-                                      <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-trash"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 7l16 0" /><path d="M10 11l0 6" /><path d="M14 11l0 6" /><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></svg>
-                                  </a>
-                              </div>
-                              <div class="col">
-                                  <input type="text" class="form-control" placeholder="Enter your option" value="{{this.value}}">
-                              </div>
-                          </div>
-                      </div>
-                      {{/each}}
-                      {{/if}}
-                      <div class="mb-3 text-center">
-                        <button class="btn btn-outline-danger border delete-project-field">
-                          <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-trash"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 7l16 0" /><path d="M10 11l0 6" /><path d="M14 11l0 6" /><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></svg>
-                          Delete this field
-                        </button>
-                      </div>
+                                </div>
+                                {{/if}}
+                                {{#if (eq this.type "dropdown")}}
+                                <label class="form-label dynamic-options">Add / edit dropdown options</label>
+                                {{#each this.options}}
+                                <div class="mb-3 dynamic-options">
+                                    <div class="row g-2">
+                                        <div class="col-auto">
+                                            <a href="#" class="btn btn-icon" aria-label="Button"
+                                                onclick="addOption(this)">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                                    viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                                    class="icon icon-tabler icons-tabler-outline icon-tabler-plus">
+                                                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                                    <path d="M12 5l0 14" />
+                                                    <path d="M5 12l14 0" />
+                                                </svg>
+                                            </a>
+                                            <a href="#" class="btn btn-icon" aria-label="Button"
+                                                onclick="deleteOption(this)">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                                    viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                                    class="icon icon-tabler icons-tabler-outline icon-tabler-trash">
+                                                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                                    <path d="M4 7l16 0" />
+                                                    <path d="M10 11l0 6" />
+                                                    <path d="M14 11l0 6" />
+                                                    <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" />
+                                                    <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" />
+                                                </svg>
+                                            </a>
+                                        </div>
+                                        <div class="col">
+                                            <input type="text" class="form-control" placeholder="Enter your option"
+                                                value="{{this.value}}">
+                                        </div>
+                                    </div>
+                                </div>
+                                {{/each}}
+                                {{/if}}
+                                <div class="mb-3 text-center">
+                                    <button class="btn btn-outline-danger border delete-project-field">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                            stroke-linecap="round" stroke-linejoin="round"
+                                            class="icon icon-tabler icons-tabler-outline icon-tabler-trash">
+                                            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                            <path d="M4 7l16 0" />
+                                            <path d="M10 11l0 6" />
+                                            <path d="M14 11l0 6" />
+                                            <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" />
+                                            <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" />
+                                        </svg>
+                                        Delete this field
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                  </div>
+
+                    {{/each}}
+
                 </div>
-
-                {{/each}}
-
-            </div>
-            <div class="text-center mt-3">
-              <button class="btn btn-outline-secondary border add-project-field">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                        <path d="M12 5l0 14"></path>
-                        <path d="M5 12l14 0"></path>
-                    </svg>
-                    Add new field
-              </button>
-            </div>
+                <div class="text-center mt-3">
+                    <button class="btn btn-outline-secondary border add-project-field">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24"
+                            stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round"
+                            stroke-linejoin="round">
+                            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                            <path d="M12 5l0 14"></path>
+                            <path d="M5 12l14 0"></path>
+                        </svg>
+                        Add new field
+                    </button>
+                </div>
             </div>
             <div class="modal-body">
-              <div class="mb-3 form-field primary-field">
-                  <div class="form-label">Select non-repeatable field</div>
-                  <p class="card-subtitle mb-3">This is a unique field in your project that never repeats. It can be an email, id card number, mobile number, or slug etc. </p>
-                  <div class="card d-block p-2 mb-3 form-control primary-field-selectors">
+                <div class="mb-3 form-field primary-field">
+                    <div class="form-label">Select non-repeatable field</div>
+                    <p class="card-subtitle mb-3">This is a unique field in your project that never repeats. It can be
+                        an email, id card number, mobile number, or slug etc. </p>
+                    <div class="card d-block p-2 mb-3 form-control primary-field-selectors">
                         {{#each data.project.fields}}
-                            {{#if (regexMatch this.type '^(string|textarea|number)$')}}
-                                <span class="badge cursor-pointer p-2 mb-1 {{#if this.primary}} bg-blue-lt {{/if}}" onclick="setPrimaryField(this)">{{this.actualName}}</span>
-                            {{/if}}
+                        {{#if (regexMatch this.type '^(string|textarea|number)$')}}
+                        <span class="badge cursor-pointer p-2 mb-1 {{#if this.primary}} bg-blue-lt {{/if}}"
+                            onclick="setPrimaryField(this)">{{this.actualName}}</span>
+                        {{/if}}
                         {{/each}}
-                  </div>
-                  <input type="text" class="d-none" disabled
-                    {{#each data.project.fields}}
-                        {{#if this.primary}}
-                            value="{{this.actualName}}"
-                        {{/if}}
-                    {{/each}}
-                  >
-              </div>
-
-              <div class="mb-3 form-field visible-field">
-                <div class="form-label">Fields visible to onboarding customers</div>
-                <p class="card-subtitle mb-3">These fields are used to draw the beneficiary card while a customer is being onboarded/ adding new payment. On payment completion, all fields will be visible to the customer.</p>
-                <div class="card d-block p-2 mb-3 form-control visible-field-selectors">
-                    {{#each data.project.fields}}
-                        <span class="badge cursor-pointer p-2 mb-1 {{#if this.visible}} bg-blue-lt {{/if}}" onclick="setVisibleField(this)">{{this.actualName}}</span>
-                    {{/each}}
+                    </div>
+                    <input type="text" class="d-none" disabled {{#each data.project.fields}} {{#if this.primary}}
+                        value="{{this.actualName}}" {{/if}} {{/each}}>
                 </div>
-                <input type="text" class="d-none" disabled value="{{#each data.project.fields}}{{#if (eq this.visible true)}}{{this.actualName}}{{/if}}{{/each}}">
-              </div>
 
-              <div class="mb-3 form-field subscription-field">
-                <div class="form-label">Subscription fields</div>
-                <p class="card-subtitle mb-3">Fields that show different subscription options for each project entry. Can only be numbers.</p>
-                <div class="card d-block p-2 mb-3 form-control subscription-field-selectors">
-                    {{#each data.project.fields}}
+                <div class="mb-3 form-field visible-field">
+                    <div class="form-label">Fields visible to onboarding customers</div>
+                    <p class="card-subtitle mb-3">These fields are used to draw the beneficiary card while a customer is
+                        being onboarded/ adding new payment. On payment completion, all fields will be visible to the
+                        customer.</p>
+                    <div class="card d-block p-2 mb-3 form-control visible-field-selectors">
+                        {{#each data.project.fields}}
+                        <span class="badge cursor-pointer p-2 mb-1 {{#if this.visible}} bg-blue-lt {{/if}}"
+                            onclick="setVisibleField(this)">{{this.actualName}}</span>
+                        {{/each}}
+                    </div>
+                    <input type="text" class="d-none" disabled
+                        value="{{#each data.project.fields}}{{#if (eq this.visible true)}}{{this.actualName}}{{/if}}{{/each}}">
+                </div>
+
+                <div class="mb-3 form-field subscription-field">
+                    <div class="form-label">Subscription fields</div>
+                    <p class="card-subtitle mb-3">Fields that show different subscription options for each project
+                        entry. Can only be numbers.</p>
+                    <div class="card d-block p-2 mb-3 form-control subscription-field-selectors">
+                        {{#each data.project.fields}}
                         {{#if (regexMatch this.type '^(number)$')}}
-                        <span class="badge cursor-pointer p-2 mb-1 {{#if this.subscription}} bg-blue-lt {{/if}}" onclick="setSubscriptionField(this)">{{this.actualName}}</span>
+                        <span class="badge cursor-pointer p-2 mb-1 {{#if this.subscription}} bg-blue-lt {{/if}}"
+                            onclick="setSubscriptionField(this)">{{this.actualName}}</span>
                         {{/if}}
-                    {{/each}}
+                        {{/each}}
+                    </div>
+                    <input type="text" class="d-none" disabled
+                        value="{{#each data.project.fields}}{{#if (eq this.subscription true)}}{{this.actualName}}{{/if}}{{/each}}">
                 </div>
-                <input type="text" class="d-none" disabled value="{{#each data.project.fields}}{{#if (eq this.subscription true)}}{{this.actualName}}{{/if}}{{/each}}">
-              </div>
 
             </div>
             <div class="modal-footer">
@@ -228,7 +293,14 @@
                 </a>
                 <a href="#" class="btn btn-primary ms-auto" onclick="updateProject(this)">
                     <!-- Download SVG icon from http://tabler-icons.io/i/plus -->
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-upload"> <path stroke="none" d="M0 0h24v24H0z" fill="none" /> <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2" /> <path d="M7 9l5 -5l5 5" /> <path d="M12 4l0 12" /> </svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="icon icon-tabler icons-tabler-outline icon-tabler-upload">
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                        <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2" />
+                        <path d="M7 9l5 -5l5 5" />
+                        <path d="M12 4l0 12" />
+                    </svg>
                     Update project
                 </a>
             </div>
@@ -237,4 +309,5 @@
     </div>
 </div>
 
-<button href="#" class="btn btn-primary d-none" id="button-{{data.project._id}}" data-bs-toggle="modal" data-bs-target="#modal-{{data.project.slug}}"></button>
+<button href="#" class="btn btn-primary d-none" id="button-{{data.project._id}}" data-bs-toggle="modal"
+    data-bs-target="#modal-{{data.project.slug}}"></button>
