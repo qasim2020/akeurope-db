@@ -1,4 +1,5 @@
-<div class="modal modal-blur fade" id="modal-{{data.customer._id}}" tabindex="-1" style="display: none; padding-left: 0px;" aria-modal="true" role="dialog" customerId="{{data.customer._id}}">
+<div class="modal modal-blur fade" id="modal-{{data.customer._id}}" tabindex="-1"
+  style="display: none; padding-left: 0px;" aria-modal="true" role="dialog" customerId="{{data.customer._id}}">
   <div class="modal-dialog modal-lg" role="document" id="">
     <div class="modal-content">
       <div class="modal-header">
@@ -9,51 +10,95 @@
 
         <div class="mb-3">
           <label class="form-label">Owner Name</label>
-          <input type="text" class="name form-control" name="name" placeholder="Name of owner" value="{{data.customer.name}}"/>
+          <input type="text" class="name form-control" name="name" placeholder="Name of owner"
+            value="{{data.customer.name}}" />
         </div>
 
         <div class="mb-3">
           <label class="form-label">Owner Email</label>
-          <input type="email" class="email form-control" name="email" placeholder="customer@gmail.com"/ value="{{data.customer.email}}" disabled>
-          <button class="btn btn-primary mt-2" customer-id="{{data.customer._id}}" onclick="sendEmailInvite(this)">Send email invite again</button>
+          <input type="email" class="email form-control" name="email" placeholder="customer@gmail.com" /
+            value="{{data.customer.email}}" disabled>
+          <button class="btn btn-primary mt-2" customer-id="{{data.customer._id}}" onclick="sendEmailInvite(this)">Send
+            email invite again</button>
         </div>
 
         <div class="mb-3">
           <label class="form-label">Organization Name</label>
-          <input type="text" class="org-name form-control" name="organization" placeholder="Name of organization" value="{{data.customer.organization}}"/>
+          <input type="text" class="org-name form-control" name="organization" placeholder="Name of organization"
+            value="{{data.customer.organization}}" />
         </div>
 
         <div class="mb-3">
           <label class="form-label">Location</label>
-          <input type="text" class="location form-control" name="location" placeholder="Pakistan etc" value="{{data.customer.location}}"/>
+          <input type="text" class="location form-control" name="location" placeholder="Pakistan etc"
+            value="{{data.customer.location}}" />
         </div>
 
         <div class="mb-3">
-          <label class="form-label">Status</label>
-          <div class="form-selectgroup-boxes row mb-3 customer-status" >
-            <div class="col-lg-6">
+          <label class="form-label">Role</label>
+          <div class="form-selectgroup-boxes row mb-3 role">
+            <div class="">
               <label class="form-selectgroup-item">
-              <input type="radio" name="status" value="active" class="form-selectgroup-input" {{#if (eq 'active' data.customer.status)}} checked="" {{/if}} />
-              <span class="form-selectgroup-label d-flex align-items-center p-3">
-                <span class="me-3">
-                  <span class="form-selectgroup-check"></span>
-                </span>
-                <span class="form-selectgroup-label-content">
-                  <span class="form-selectgroup-title strong mb-1">Active</span>
-                  <span class="d-block text-secondary">Customer is active to access his portal and perform transactions</span>
-                </span>
-              </span>
-              </label>
-            </div>
-            <div class="col-lg-6">
-              <label class="form-selectgroup-item">
-                <input type="radio" name="status" value="blocked" class="form-selectgroup-input" {{#if (eq 'blocked' data.customer.status)}} checked="" {{/if}} />
+                <input type="radio" name="role" value="partner" class="form-selectgroup-input" {{#if (eq
+                  data.customer.role 'partner' )}} checked="" {{/if}} />
                 <span class="form-selectgroup-label d-flex align-items-center p-3">
                   <span class="me-3">
                     <span class="form-selectgroup-check"></span>
                   </span>
                   <span class="form-selectgroup-label-content">
-                    <span class="form-selectgroup-title strong mb-1" >Blocked</span>
+                    <span class="form-selectgroup-title strong mb-1">Partner Portal</span>
+                    <span class="d-block text-secondary">Can create invoices and access paid beneficiaries.</span>
+                  </span>
+                </span>
+              </label>
+            </div>
+            <div class="">
+              <label class="form-selectgroup-item">
+                <input type="radio" name="role" value="owner" class="form-selectgroup-input" {{#if (eq
+                  data.customer.role 'owner' )}} checked="" {{/if}} />
+                <span class="form-selectgroup-label d-flex align-items-center p-3">
+                  <span class="me-3">
+                    <span class="form-selectgroup-check"></span>
+                  </span>
+                  <span class="form-selectgroup-label-content">
+                    <span class="form-selectgroup-title strong mb-1">Owner Portal</span>
+                    <span class="d-block text-secondary">In addition to partner portal, can also create donor portal and receive donor payments.</span>
+                  </span>
+                </span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Status</label>
+          <div class="form-selectgroup-boxes row mb-3 customer-status">
+            <div class="col-lg-6">
+              <label class="form-selectgroup-item">
+                <input type="radio" name="status" value="active" class="form-selectgroup-input" {{#if (eq 'active'
+                  data.customer.status)}} checked="" {{/if}} />
+                <span class="form-selectgroup-label d-flex align-items-center p-3">
+                  <span class="me-3">
+                    <span class="form-selectgroup-check"></span>
+                  </span>
+                  <span class="form-selectgroup-label-content">
+                    <span class="form-selectgroup-title strong mb-1">Active</span>
+                    <span class="d-block text-secondary">Customer is active to access his portal and perform
+                      transactions</span>
+                  </span>
+                </span>
+              </label>
+            </div>
+            <div class="col-lg-6">
+              <label class="form-selectgroup-item">
+                <input type="radio" name="status" value="blocked" class="form-selectgroup-input" {{#if (eq 'blocked'
+                  data.customer.status)}} checked="" {{/if}} />
+                <span class="form-selectgroup-label d-flex align-items-center p-3">
+                  <span class="me-3">
+                    <span class="form-selectgroup-check"></span>
+                  </span>
+                  <span class="form-selectgroup-label-content">
+                    <span class="form-selectgroup-title strong mb-1">Blocked</span>
                     <span class="d-block text-secondary">Customer can not do transactions or access his portal.</span>
                   </span>
                 </span>
@@ -66,12 +111,20 @@
       <div class="modal-footer">
         <a href="#" class="btn btn-link link-secondary" data-bs-dismiss="modal"> Cancel </a>
         <a href="#" class="btn btn-primary ms-auto" customer-id="{{data.customer._id}}" onclick="updateCustomer(this)">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-upload"> <path stroke="none" d="M0 0h24v24H0z" fill="none" /> <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2" /> <path d="M7 9l5 -5l5 5" /> <path d="M12 4l0 12" /> </svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            class="icon icon-tabler icons-tabler-outline icon-tabler-upload">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+            <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2" />
+            <path d="M7 9l5 -5l5 5" />
+            <path d="M12 4l0 12" />
+          </svg>
           Update Customer
-          </a>
+        </a>
       </div>
     </div>
   </div>
 </div>
 
-<button href="#" class="btn btn-primary d-none" id="button-{{data.customer._id}}" data-bs-toggle="modal" data-bs-target="#modal-{{data.customer._id}}"></button>
+<button href="#" class="btn btn-primary d-none" id="button-{{data.customer._id}}" data-bs-toggle="modal"
+  data-bs-target="#modal-{{data.customer._id}}"></button>

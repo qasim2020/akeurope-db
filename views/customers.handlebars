@@ -112,27 +112,12 @@
         return total;
       }, {});
 
-
-    const projects = $(elem)
-      .closest(".modal")
-      .find(".projects input:checked")
-      .map((key, val) => $(val).val())
-      .get();
-
-    if (projects.length == 0) {
-      $(elem).closest(".modal").find(".projects").find(".form-selectgroup-label").addClass("border-red");
-      $(elem).closest(".modal").find(".projects").append(`<div class="d-block invalid-feedback">Invalid entry</div> `);
-      isValid.push(false);
-    } else {
-      $(elem).closest(".modal").find(".projects").find(".form-selectgroup-label").removeClass("border-red");
-    }
-
     if (!(isValid.every(val => val === true))) {
       return false;
     }
 
-    data.projects = projects;
     data.status = $(elem).closest(".modal").find(".customer-status input:checked").val();
+    data.role = $(elem).closest('.modal').find('[name=role]:checked').val();
     data.customerId = $(elem).closest(".modal").attr("customerId");
 
     let currentBtnHTML = $(elem).html();
@@ -147,7 +132,7 @@
         $(elem).html(currentBtnHTML);
         $(".modal-footer").append(`
           <div class="alert alert-success mt-4 w-100" role="alert">
-            <h4 class="alert-title">Succesful!</h4>
+            <h4 class="alert-title">Successful!</h4>
             <div class="text-secondary">Customer has been invited on ${data.email}!</div>
           </div>`);
       },
@@ -321,9 +306,10 @@
       }, {});
 
     data.status = $(elem).closest(".modal").find(".customer-status input:checked").val();
+    data.role = $(elem).closest('.modal').find('[name=role]:checked').val();
 
-    if (!data.status) {
-      alert("Please select a status for the customer");
+    if (!data.status || !data.role) {
+      alert("Please select all fields");
       isValid.push(false);
     }
 
@@ -377,4 +363,5 @@
     });
 
   }
+
 </script>

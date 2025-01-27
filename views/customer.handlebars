@@ -144,9 +144,10 @@
       }, {});
 
     data.status = $(elem).closest(".modal").find(".customer-status input:checked").val();
+    data.role = $(elem).closest('.modal').find('[name=role]:checked').val();
 
-    if (!data.status) {
-      alert("Please select a status for the customer");
+    if (!data.status || !data.role) {
+      alert("Please select all fields");
       isValid.push(false);
     }
 
@@ -167,7 +168,7 @@
         $(elem).html(currentBtnHTML);
         $(".modal-footer").append(`
         <div class="alert alert-success mt-4 w-100" role="alert">
-          <h4 class="alert-title">Succesful!</h4>
+          <h4 class="alert-title">Successful!</h4>
           <div class="text-secondary">Customer updated successfully!</div>
         </div>`);
         showDataAsSuch('/getCustomerData/{{data.customer._id}}', '#customer-container');
@@ -215,6 +216,5 @@
       }
     })
   }
-
 
 </script>

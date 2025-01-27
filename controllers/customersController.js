@@ -59,14 +59,6 @@ exports.getData = async (req, res) => {
     try {
         const customers = await Customer.find().lean();
 
-        for (const customer of customers) {
-            customer.projects = await Promise.all(
-                customer.projects.map(async (val) => {
-                    return await Project.findOne({ slug: val }).lean();
-                }),
-            );
-        }
-
         res.render('partials/showCustomers', {
             layout: false,
             data: {
@@ -87,12 +79,6 @@ exports.getCustomerData = async (req, res) => {
         const customer = await Customer.findOne({
             _id: req.params.customerId,
         }).lean();
-
-        customer.projectsOpened = await Promise.all(
-            customer.projects.map(async (val) => {
-                return await Project.findOne({ slug: val }).lean();
-            }),
-        );
 
         res.render('partials/showCustomer', {
             layout: false,
@@ -133,7 +119,7 @@ exports.editModal = async (req, res) => {
 
 exports.createCustomer = async (req, res) => {
     try {
-        const { name, email, organization, location, status, projects, customerId } = req.body;
+        const { name, email, organization, location, status, role, customerId } = req.body;
 
         let check = [];
 
@@ -147,24 +133,6 @@ exports.createCustomer = async (req, res) => {
                 msg: 'Name contains only letters and spaces and is at least three characters long',
             });
         }
-
-        await Promise.all(
-            projects.map(async (slug) => {
-                let project = await Project.findOne({ slug });
-                if (!project) {
-                    check.push({
-                        elem: '.projects',
-                        msg: `Project ${slug} was not foud!`,
-                    });
-                }
-                if (project.status == 'inactive') {
-                    check.push({
-                        elem: '.projects',
-                        msg: `Project ${slug} is not Active!`,
-                    });
-                }
-            }),
-        );
 
         const checkCustomerExists = await Customer.findOne({ email }).lean();
 
@@ -190,13 +158,12 @@ exports.createCustomer = async (req, res) => {
             organization,
             location,
             status,
-            projects,
+            role,
             emailStatus: 'Email invite sent!',
             inviteToken,
             inviteExpires,
         });
 
-        // Configure the SMTP transporter
         let transporter = nodemailer.createTransport({
             host: process.env.EMAIL_HOST,
             port: process.env.EMAIL_PORT,
@@ -207,7 +174,6 @@ exports.createCustomer = async (req, res) => {
             },
         });
 
-        // Load and compile the Handlebars template
         const templatePath = path.join(__dirname, '../views/emails/customerInvite.handlebars');
         const templateSource = await fs.readFile(templatePath, 'utf8');
         const compiledTemplate = handlebars.compile(templateSource);
@@ -312,7 +278,7 @@ exports.sendInvite = async (req, res) => {
 
 exports.updateCustomer = async (req, res) => {
     try {
-        const { name, organization, location, status } = req.body;
+        const { name, organization, location, role, status } = req.body;
 
         let check = [];
 
@@ -339,6 +305,7 @@ exports.updateCustomer = async (req, res) => {
             organization,
             location,
             status,
+            role,
         };
 
         const changes = getChanges(customer, updatedFields);
@@ -355,9 +322,7 @@ exports.updateCustomer = async (req, res) => {
 
             await Customer.findByIdAndUpdate(req.params.customerId, updatedFields);
 
-            if (status === 'blocked') {
-                await killUserSessions(customer._id);
-            }
+            await killUserSessions(customer._id);
         }
 
         res.status(200).send('Customer updated successfully!');

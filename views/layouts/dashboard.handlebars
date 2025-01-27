@@ -606,6 +606,7 @@
   <script>
 
     {{#if (findInArray data.role 'viewNotifications')}}
+
     $(document).find('.dropdown .card').on('click', function (event) {
       event.stopPropagation();
     });
@@ -670,7 +671,6 @@
         }
       })
     }
-
 
     fetch('/socket-url')
       .then(response => response.json())
