@@ -57,7 +57,7 @@
                                 {{#with field.actualName as |actualName|}}
                                 {{#if (eq type 'date')}}
                                 <input type="text" class="form-control dateInput" aria-label="search by column date"
-                                    placeholder="> 2025 etc" value="{{stringifyDate value}}" query="{{json value}}"/>
+                                    placeholder="> 2025 etc" value="{{stringifyDate value}}" query="{{json value}}" />
                                 {{/if}}
                                 {{#if (eq type 'number')}}
                                 <input type="number" class="form-control" aria-label="search by column name"
@@ -66,6 +66,10 @@
                                 {{#if (eq type 'string')}}
                                 <input type="text" class="form-control" aria-label="search by column name"
                                     placeholder="Text values" value="{{value}}" />
+                                {{/if}}
+                                {{#if (eq type 'image')}}
+                                <input type="text" class="form-control" aria-label="search by column name"
+                                    placeholder="Enter image url" value="{{value}}"/>
                                 {{/if}}
                                 {{#if field.options}}
                                 {{#with (getOptionsFromValues field.options) as |options|}}
@@ -113,7 +117,7 @@
                                 </div>
                                 {{#if (eq data.project.fields.0.type 'date')}}
                                 <input type="text" class="form-control dateInput" aria-label="search by column date"
-                                    placeholder="> 2023 etc" value="{{stringifyDate this.value}}"/>
+                                    placeholder="> 2023 etc" value="{{stringifyDate this.value}}" />
                                 {{/if}}
                                 {{#if (eq data.project.fields.0.type 'boolean')}}
                                 <select class="form-select">
@@ -136,6 +140,10 @@
                                 {{#if (eq data.project.fields.0.type 'string')}}
                                 <input type="text" class="form-control" aria-label="search by column name"
                                     placeholder="Text values" />
+                                {{/if}}
+                                {{#if (eq data.project.fields.0.type 'image')}}
+                                <input type="text" class="form-control" aria-label="search by column name"
+                                    placeholder="Enter image url" />
                                 {{/if}}
                                 {{/if}}
                             </div>

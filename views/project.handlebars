@@ -668,7 +668,7 @@
       data: JSON.stringify(data),
       success: function (response) {
         $(elem).html(currentBtnHTML);
-        window.location.href = `/project/{{data.project.slug}}`;
+        refreshContainers();
       },
       error: function (xhr, status, error) {
         $(elem).html(currentBtnHTML);
@@ -718,6 +718,9 @@
                 <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-check"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l5 5l10 -10" /></svg>
               `);
           $(elem).closest(".image-upload").find("img").attr("src", response.cloudinaryUrl);
+          $(elem).closest('.image-upload').find('[data-fslightbox]').attr({ href: response.cloudinaryUrl });
+          editEntry(elem);
+          refreshFsLightbox();
         },
         error: function (error) {
           $(elem).closest(".image-upload").find(".btn").html(`
@@ -799,6 +802,7 @@
         $("footer").before(response);
         $(`#button-${entryId}`).trigger("click");
         refreshImages();
+        refreshFsLightbox();
       },
       error: function (xhr, status, error) {
         alert(xhr.responseText)
@@ -1032,6 +1036,7 @@
         $("#data-container").html(response);
         window.history.pushState(null, '', `/project/{{data.project.slug}}${href}`);
         refreshImages();
+        refreshFsLightbox();
       },
       error: function (error) {
         alert(error.responseText);
@@ -1055,4 +1060,9 @@
     }
   });
 
+  // refresh containers
+
+  const refreshContainers = function() {
+    $('.page-item.active > a').click();
+  }
 </script>

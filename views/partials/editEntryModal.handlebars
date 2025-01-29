@@ -1,4 +1,5 @@
-<div class="modal modal-blur fade" id="modal-{{data.entry._id}}" tabindex="-1" style="display: none; padding-left: 0px;" aria-modal="true" role="dialog" projSlug="{{data.project.slug}}" entryId="{{data.entry._id}}">
+<div class="modal modal-blur fade" id="modal-{{data.entry._id}}" tabindex="-1" style="display: none; padding-left: 0px;"
+  aria-modal="true" role="dialog" projSlug="{{data.project.slug}}" entryId="{{data.entry._id}}">
   <div class="modal-dialog modal-lg" role="document" id="">
     <div class="modal-content">
       <div class="modal-header">
@@ -11,78 +12,109 @@
             <table class="table table-vcenter">
               <tbody>
                 {{#each data.fields}}
-                  <tr>
-                    <td>
-                      <label class="form-label mb-0" for="{{name}}">{{actualName}}</label>
-                    </td>
-                    <td>
-                      {{#if (eq type "image")}}
-                        <div class="image-upload row text-center bg-secondary-lt justify-content-center d-flex align-items-center border rounded p-3" style="margin: 0 0.5px">
-                          <div class="col-md-6 mb-2 mb-md-0">
-                            <img src="{{resizeCloudinaryUrl (lookup ../data.entry this.name) 't_w-250'}}" alt="{{this.name}}" class="img-thumbnail" width="200px">
-                            <input type="file" class="form-control d-none" name="{{name}}" accept="image/*">
-                            <input type="hidden" class="entry-input cloudinaryUrl" name="{{name}}" value="{{lookup ../data.entry name}}" />
-                          </div>
-                          <div class="col-md-6">
-                            <a class="btn btn-secondary-outline btn-icon" onclick="uploadImage(this)">
-                              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-upload">
-                                  <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                                  <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2"></path>
-                                  <path d="M7 9l5 -5l5 5"></path>
-                                  <path d="M12 4l0 12"></path>
-                              </svg>
-                            </a>
-                          </div>
-                        </div>
-                      {{else if (eq type "file")}}
-                        <div class="input-group upload-pdf">
-                          <input type="file" class="form-control no-valid" name="{{name}}" accept="application/pdf" />
-                          <input type="hidden" class="entry-input control cloudinaryUrl" name="{{name}}" value="{{lookup ../data.entry name}}" />
-                          <span class="btn btn-secondary-outline btn-icon" onclick="uploadPdf(this)">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-upload">
-                                <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                                <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2"></path>
-                                <path d="M7 9l5 -5l5 5"></path>
-                                <path d="M12 4l0 12"></path>
-                            </svg>
-                          </span>
-                        </div>
-                      {{else if (eq type "textarea")}}
-                        <textarea rows="5" class="entry-input form-control" name="{{name}}" placeholder="Here can be your description">{{lookup ../data.entry name}}</textarea>
-                      {{else if (eq type "dropdown")}}
-                        <select class="entry-input form-select" name="{{name}}">
-                          {{#each options}}
-                            <option value="{{this.value}}" {{#if (lookup ../data.entry this.value)}} selected {{/if}}>{{this.value}}</option>
-                          {{/each}}
-                        </select>
-                      {{else if (eq type "date")}}
-                        <input type="date" class="entry-input form-control" name="{{name}}" value="{{browserDate (lookup ../data.entry name)}}">
-                      {{else if (eq type "boolean")}}
-                        <select class="entry-input form-select" name="{{name}}">
-                          <option value="{{options.0.value}}" {{#if (eq options.0.value (lookup ../data.entry name))}} selected {{/if}}>{{options.0.value}}</option>
-                          <option value="{{options.1.value}}" {{#if (eq options.1.value (lookup ../data.entry name))}} selected {{/if}}>{{options.1.value}}</option>
-                        </select>
-                      {{else if (eq type "string")}}
-                        {{#if primary}}
-                          <input type="text" class="entry-input form-control" name="" placeholder="String value" value="{{lookup ../data.entry name}}" disabled="true">
+                <tr>
+                  <td>
+                    <label class="form-label mb-0" for="{{name}}">{{actualName}}</label>
+                  </td>
+                  <td>
+                    {{#if (eq type "image")}}
+                    <div
+                      class="image-upload row text-center bg-secondary-lt justify-content-center d-flex align-items-center border rounded p-3"
+                      style="margin: 0 0.5px">
+                      <div class="col-md-6 mb-2 mb-md-0">
+                        {{#if (lookup ../data.entry this.name)}}
+                        <a data-fslightbox="{{../data.entry._id}}" href="{{lookup ../data.entry this.name}}">
+                          <img class="img-thumbnail"
+                            src="{{resizeCloudinaryUrl (lookup ../data.entry this.name) 't_w-250'}}" alt=""
+                            style="max-width: 200px;">
+                        </a>
                         {{else}}
-                          <input type="text" class="entry-input form-control" name="{{name}}" placeholder="String value" value="{{lookup ../data.entry name}}">
+                        <a data-fslightbox="{{../data.entry._id}}" href="/static/images/no-image-placement.png">
+                          <img class="img-thumbnail"
+                            src="/static/images/no-image-placement.png" alt=""
+                            style="max-width: 200px;">
+                        </a>
                         {{/if}}
-                      {{else if (eq type "number")}}
-                        {{#if primary}}
-                        <input type="number" class="entry-input form-control" name="" placeholder="Only numbers are allowed" value="{{lookup ../data.entry name}}" disabled="true">
-                        {{else}}
-                        <input type="number" class="entry-input form-control" name="{{name}}" placeholder="Only numbers are allowed" value="{{lookup ../data.entry name}}">
-                        {{/if}}
-                      {{else}}
-                        {{#if primary}}
-                          <input type="text" class="entry-input form-control" name="" placeholder="String value" value="{{lookup ../data.entry name}}" disabled="true">
-                        {{else}}
-                          <input type="text" class="entry-input form-control" name="{{name}}" placeholder="String value" value="{{lookup ../data.entry name}}">
-                        {{/if}}
-                      {{/if}}
-                    </td>
-                  </tr>
+                        <input type="file" class="form-control d-none" name="{{name}}" accept="image/*">
+                        <input type="hidden" class="entry-input cloudinaryUrl" name="{{name}}"
+                          value="{{lookup ../data.entry name}}" />
+                      </div>
+                      <div class="col-md-6">
+                        <a class="btn btn-secondary-outline btn-icon" onclick="uploadImage(this)">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="icon icon-tabler icons-tabler-outline icon-tabler-upload">
+                            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                            <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2"></path>
+                            <path d="M7 9l5 -5l5 5"></path>
+                            <path d="M12 4l0 12"></path>
+                          </svg>
+                        </a>
+                      </div>
+                    </div>
+                    {{else if (eq type "file")}}
+                    <div class="input-group upload-pdf">
+                      <input type="file" class="form-control no-valid" name="{{name}}" accept="application/pdf" />
+                      <input type="hidden" class="entry-input control cloudinaryUrl" name="{{name}}"
+                        value="{{lookup ../data.entry name}}" />
+                      <span class="btn btn-secondary-outline btn-icon" onclick="uploadPdf(this)">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                          class="icon icon-tabler icons-tabler-outline icon-tabler-upload">
+                          <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                          <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2"></path>
+                          <path d="M7 9l5 -5l5 5"></path>
+                          <path d="M12 4l0 12"></path>
+                        </svg>
+                      </span>
+                    </div>
+                    {{else if (eq type "textarea")}}
+                    <textarea rows="5" class="entry-input form-control" name="{{name}}"
+                      placeholder="Here can be your description">{{lookup ../data.entry name}}</textarea>
+                    {{else if (eq type "dropdown")}}
+                    <select class="entry-input form-select" name="{{name}}">
+                      {{#each options}}
+                      <option value="{{this.value}}" {{#if (lookup ../data.entry this.value)}} selected {{/if}}>
+                        {{this.value}}</option>
+                      {{/each}}
+                    </select>
+                    {{else if (eq type "date")}}
+                    <input type="date" class="entry-input form-control" name="{{name}}"
+                      value="{{browserDate (lookup ../data.entry name)}}">
+                    {{else if (eq type "boolean")}}
+                    <select class="entry-input form-select" name="{{name}}">
+                      <option value="{{options.0.value}}" {{#if (eq options.0.value (lookup ../data.entry name))}}
+                        selected {{/if}}>{{options.0.value}}</option>
+                      <option value="{{options.1.value}}" {{#if (eq options.1.value (lookup ../data.entry name))}}
+                        selected {{/if}}>{{options.1.value}}</option>
+                    </select>
+                    {{else if (eq type "string")}}
+                    {{#if primary}}
+                    <input type="text" class="entry-input form-control" name="" placeholder="String value"
+                      value="{{lookup ../data.entry name}}" disabled="true">
+                    {{else}}
+                    <input type="text" class="entry-input form-control" name="{{name}}" placeholder="String value"
+                      value="{{lookup ../data.entry name}}">
+                    {{/if}}
+                    {{else if (eq type "number")}}
+                    {{#if primary}}
+                    <input type="number" class="entry-input form-control" name="" placeholder="Only numbers are allowed"
+                      value="{{lookup ../data.entry name}}" disabled="true">
+                    {{else}}
+                    <input type="number" class="entry-input form-control" name="{{name}}"
+                      placeholder="Only numbers are allowed" value="{{lookup ../data.entry name}}">
+                    {{/if}}
+                    {{else}}
+                    {{#if primary}}
+                    <input type="text" class="entry-input form-control" name="" placeholder="String value"
+                      value="{{lookup ../data.entry name}}" disabled="true">
+                    {{else}}
+                    <input type="text" class="entry-input form-control" name="{{name}}" placeholder="String value"
+                      value="{{lookup ../data.entry name}}">
+                    {{/if}}
+                    {{/if}}
+                  </td>
+                </tr>
                 {{/each}}
               </tbody>
             </table>
@@ -93,11 +125,13 @@
         <a href="#" class="btn btn-link link-secondary" data-bs-dismiss="modal"> Cancel </a>
         <a href="#" class="btn btn-primary ms-auto" onclick="editEntry(this)">
           <!-- Download SVG icon from http://tabler-icons.io/i/plus -->
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-upload">
-              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-              <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2" />
-              <path d="M7 9l5 -5l5 5" />
-              <path d="M12 4l0 12" />
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            class="icon icon-tabler icons-tabler-outline icon-tabler-upload">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+            <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2" />
+            <path d="M7 9l5 -5l5 5" />
+            <path d="M12 4l0 12" />
           </svg>
           Update entry
         </a>
@@ -106,4 +140,5 @@
   </div>
 </div>
 
-<button href="#" class="btn btn-primary d-none" id="button-{{data.entry._id}}" data-bs-toggle="modal" data-bs-target="#modal-{{data.entry._id}}"></button>
+<button href="#" class="btn btn-primary d-none" id="button-{{data.entry._id}}" data-bs-toggle="modal"
+  data-bs-target="#modal-{{data.entry._id}}"></button>

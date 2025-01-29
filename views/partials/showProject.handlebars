@@ -39,10 +39,15 @@
 
           {{else if (eq this.type "image")}}
           {{#if (lookup entry this.name)}}
-          <img src="{{resizeCloudinaryUrl (lookup entry this.name) 't_w-250'}}" alt="{{this.name}}"
-            class="img-thumbnail" style="max-width: 150px;">
+          <a data-fslightbox="gallery-grid" href="{{lookup entry this.name}}">
+            <img class="img-thumbnai p-0 overflow-hidden rounded-3 border"
+              src="{{resizeCloudinaryUrl (lookup entry this.name) 't_w-250'}}" alt="{{this.name}}" style="max-width: 150px;">
+          </a>
           {{else}}
-          <img src="/static/images/no-image-placement.png" alt="" style="max-width: 150px;">
+          <a data-fslightbox="gallery-grid" href="/static/images/no-image-placement.png">
+            <img class="img-thumbnai p-0 overflow-hidden rounded-3 border"
+              src="/static/images/no-image-placement.png" alt="" style="max-width: 150px;">
+          </a>
           {{/if}}
 
           {{else if (eq this.type "file")}}
@@ -149,12 +154,17 @@
       {{else if (eq this.type "image")}}
       {{#if (lookup entry this.name)}}
       <td>
-        <img src="{{resizeCloudinaryUrl (lookup entry this.name) 't_w-250'}}" alt="{{this.name}}" class="img-thumbnail"
-          style="max-width: 50px;">
+        <a data-fslightbox="gallery" href="{{lookup entry this.name}}">
+          <img class="img-thumbnai p-0 overflow-hidden rounded-3 border"
+            src="{{resizeCloudinaryUrl (lookup entry this.name) 't_w-250'}}" alt="" style="max-width: 50px;">
+        </a>
       </td>
       {{else}}
       <td>
-        <img src="/static/images/no-image-placement.png" alt="" style="max-width: 40px;">
+        <a data-fslightbox="gallery" href="/static/images/no-image-placement.png">
+          <img class="img-thumbnail p-0 overflow-hidden rounded-3 border" src="/static/images/no-image-placement.png"
+            alt="" style="max-width: 50px;">
+        </a>
       </td>
       {{/if}}
 
