@@ -173,6 +173,7 @@
       method: 'GET',
       success: function (response) {
         $(containerId).replaceWith(response);
+        refreshFsLightbox();
       },
       error: function (error) {
         alert(error.responseText);
