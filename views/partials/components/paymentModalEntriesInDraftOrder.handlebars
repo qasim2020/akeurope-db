@@ -229,6 +229,13 @@
                         <td>
                             {{#if (eq field.type 'date')}}
                             {{formatDate (lookup entry.detail field.name)}}
+                            {{else if (eq field.type 'image')}}
+                            {{#if (lookup entry.detail field.name)}}
+                            <img src="{{resizeCloudinaryUrl (lookup entry.detail field.name) 't_w-250'}}" alt="{{field.name}}"
+                                class="img-thumbnail" style="max-width: 40px;">
+                            {{else}}
+                            <img src="/static/images/no-image-placement.png" alt="" style="max-width: 40px;">
+                            {{/if}}
                             {{else}}
                             {{lookup entry.detail field.name}}
                             {{/if}}

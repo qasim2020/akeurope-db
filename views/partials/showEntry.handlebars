@@ -58,7 +58,7 @@
             <img src="{{resizeCloudinaryUrl (lookup entry this.name) 't_w-250'}}" alt="{{this.name}}"
               class="img-thumbnail" style="max-width: 150px;">
             {{else}}
-            <span>No image available</span>
+            <img src="/static/images/no-image-placement.png" alt="" style="width: 150px;">
             {{/if}}
 
             {{else if (eq this.type "file")}}
