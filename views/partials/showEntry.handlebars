@@ -2,7 +2,7 @@
 <div class="col-12 col-md-4 mb-auto" id="entry-container">
   <div class="d-block card mb-3 data-row">
     <div class="card-header d-flex justify-content-between">
-      <h3 class="card-title"><span class="badge bg-blue-lt">{{lookup entry (findPrimaryKey ../data.fields)}}</span></h3>
+      <h3 class="card-title">Profile</h3>
       <div class="d-flex">
         <a href="#" class="btn btn-primary me-2 btn-icon" data-bs-toggle="modal" data-bs-target="#modal-{{entry._id}}">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
@@ -59,7 +59,9 @@
               <img class="img-thumbnail" src="{{resizeCloudinaryUrl (lookup entry this.name) 't_w-250'}}" alt="" style="max-width: 150px;">
             </a>
             {{else}}
-            <img src="/static/images/no-image-placement.png" alt="" style="width: 150px;">
+            <a data-fslightbox="gallery" href="/static/images/no-image-placement.png">
+              <img class="img-thumbnail" src="/static/images/no-image-placement.png" alt="" style="max-width: 150px;">
+            </a>
             {{/if}}
 
             {{else if (eq this.type "file")}}

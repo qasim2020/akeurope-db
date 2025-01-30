@@ -54,5 +54,6 @@ router.get(
     entryController.getPaginatedEntriesForOrderPage,
 );
 
+router.get('/searchEntry/:slug', authenticate, authorize('viewEntry'), entryController.searchEntry);
 
 module.exports = router;
