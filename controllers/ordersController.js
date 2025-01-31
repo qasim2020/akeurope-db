@@ -1,3 +1,4 @@
+const User = require('../models/User');
 const Customer = require('../models/Customer');
 const Project = require('../models/Project');
 const Order = require('../models/Order');
@@ -50,6 +51,20 @@ exports.viewOrders = async (req, res) => {
 exports.viewOrder = async (req, res) => {
     try {
         const order = await getSingleOrder(req, res);
+
+        const files = await File.find({ 'links.entityId': req.params.orderId }).sort({ createdAt: -1 }).lean();
+
+        for (const file of files) {
+            if (file.uploadedBy?.actorType === 'user') {
+                const user = await User.findById(file.uploadedBy?.actorId).lean();
+                file.actorName = user.name;
+                file.actorRole = user.role;
+            }
+            if (file.uploadedBy?.actorType === 'customer') {
+                file.actorName = (await Customer.findById(file.uploadedBy?.actorId).lean()).name;
+            }
+        }
+
         res.render('order', {
             layout: 'dashboard',
             data: {
@@ -64,7 +79,7 @@ exports.viewOrder = async (req, res) => {
                 customers: await Customer.find().lean(),
                 activeMenu: 'orders',
                 order,
-                files: await File.find({ 'links.entityId': req.params.orderId }).sort({ createdAt: -1 }).lean(),
+                files,
             },
         });
     } catch (error) {

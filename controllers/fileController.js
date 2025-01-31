@@ -5,6 +5,11 @@ const path = require('path');
 const { createDynamicModel } = require('../models/createDynamicModel');
 const User = require('../models/User');
 const Customer = require('../models/Customer');
+const Project = require('../models/Project');
+
+const { saveLog } = require('../modules/logAction');
+const { logTemplates } = require('../modules/logTemplates');
+const { getChanges } = require('../modules/getChanges');
 
 exports.upload = async (req, res) => {
     try {
@@ -32,16 +37,17 @@ exports.uploadFileToEntry = async (req, res) => {
             return res.status(400).json({ message: 'No file uploaded' });
         }
 
-        const { entityId, entityType, entityUrl, category } = req.body;
+        const { entityId, entityType, entityUrl, entitySlug, category } = req.body;
+
+        if (!entitySlug) throw new Error('entitySlug is required');
 
         let access;
-        
+
         if (req.userPermissions.includes('changeFilesAccess')) {
             access = ['editors'];
         } else {
-            access = ['editors', 'customers'];
+            access = ['editors'];
         }
-        
 
         const links = [
             {
@@ -64,9 +70,28 @@ exports.uploadFileToEntry = async (req, res) => {
             size: fileMulter.size / 1000,
             path: `/uploads/${fileMulter.filename}`,
             mimeType: fileMulter.mimetype,
+            uploadedBy: {
+                actorType: 'user',
+                actorId: req.session.user._id,
+                actorUrl: `/user/${req.session.user._id}`,
+            },
         });
 
         await file.save();
+
+        const project = await Project.findOne({ slug: entitySlug }).lean();
+        const DynamicModel = await createDynamicModel(entitySlug);
+        const entry = await DynamicModel.findById(entityId).lean();
+
+        await saveLog(
+            logTemplates({
+                type: 'entryNewFile',
+                entity: entry,
+                actor: req.session.user,
+                project,
+                file,
+            }),
+        );
 
         res.status(200).send(file);
     } catch (error) {
@@ -85,14 +110,16 @@ exports.uploadFileToOrder = async (req, res) => {
 
         const { entityId, entityType, entityUrl } = req.body;
 
+        if (!entityId) throw new Error('entityId, entityType, entitySlug are required');
+
         let access;
-        
+
         if (req.userPermissions.includes('changeFilesAccess')) {
-            access = ['customer'];
+            access = ['customers'];
         } else {
-            throw new Error('You are not authorized to add files to an invoice')
+            throw new Error('You are not authorized to add files to an invoice');
         }
-        
+
         const links = [
             {
                 entityId,
@@ -114,9 +141,25 @@ exports.uploadFileToOrder = async (req, res) => {
             size: fileMulter.size / 1000,
             path: `/uploads/${fileMulter.filename}`,
             mimeType: fileMulter.mimetype,
+            uploadedBy: {
+                actorType: 'user',
+                actorId: req.session.user._id,
+                actorUrl: `/user/${req.session.user._id}`,
+            },
         });
 
         await file.save();
+
+        const order = await Order.findById(entityId).lean();
+
+        await saveLog(
+            logTemplates({
+                type: 'orderNewFile',
+                entity: order,
+                actor: req.session.user,
+                file,
+            }),
+        );
 
         res.status(200).send(file);
     } catch (error) {
@@ -161,6 +204,18 @@ exports.renderEntityFiles = async (req, res) => {
         } else {
             files = await File.find({ 'links.entityId': req.params.entityId, access: 'editors' }).sort({ createdAt: -1 }).lean();
         }
+
+        for (const file of files) {
+            if (file.uploadedBy?.actorType === 'user') {
+                const user = await User.findById(file.uploadedBy?.actorId).lean();
+                file.actorName = user.name;
+                file.actorRole = user.role;
+            }
+            if (file.uploadedBy?.actorType === 'customer') {
+                file.actorName = (await Customer.findById(file.uploadedBy?.actorId).lean()).name;
+            }
+        }
+
         res.status(200).render('partials/showEntityFiles', {
             layout: false,
             data: {
@@ -175,7 +230,6 @@ exports.renderEntityFiles = async (req, res) => {
 
 exports.file = async (req, res) => {
     try {
-
         let file;
         if (req.userPermissions.includes('changeFilesAccess')) {
             file = await File.findById(req.params.fileId).lean();
@@ -205,9 +259,14 @@ exports.file = async (req, res) => {
 exports.update = async (req, res) => {
     try {
         const { fileId } = req.params;
-        const { name, category, access, notes } = req.body;
+        const { name, category, access, notes, entityId, entityType, entitySlug } = req.body;
+
+        if (!entityType || !entitySlug || !entityId) throw new Error('entity type is required');
+
         const file = await File.findById(fileId);
         if (!file) return res.status(404).send('File not found');
+
+        const changes = getChanges(file.toObject(), { name, notes });
 
         if (req.userPermissions.includes('changeFilesAccess')) {
             file.name = name;
@@ -218,12 +277,39 @@ exports.update = async (req, res) => {
             file.name = name;
             file.category = category;
             file.notes = notes;
-            file.access = ['editors', 'customers'];
+        }
+
+        if (changes.length > 0) {
+            if (entityType === 'order') {
+                const order = await Order.findById(entityId).lean();
+                await saveLog(
+                    logTemplates({
+                        type: 'orderChangeFile',
+                        entity: order,
+                        actor: req.session.user,
+                        changes,
+                        file,
+                    }),
+                );
+            } else if (entityType === 'entry') {
+                const project = await Project.findOne({ slug: entitySlug }).lean();
+                const DynamicModel = await createDynamicModel(entitySlug);
+                const entry = await DynamicModel.findById(entityId).lean();
+                await saveLog(
+                    logTemplates({
+                        type: 'entryChangeFile',
+                        entity: entry,
+                        actor: req.session.user,
+                        changes,
+                        project,
+                        file,
+                    }),
+                );
+            }
         }
 
         await file.save();
-
-        res.status(200).send('File renamed successfully!');
+        return res.status(200).send('File updated successfully!');
     } catch (error) {
         console.log(error);
         res.status(500).send('Error renaming file');
@@ -233,20 +319,48 @@ exports.update = async (req, res) => {
 exports.delete = async (req, res) => {
     try {
         const { fileId } = req.params;
-        
+        const { entityType, entityId, entitySlug } = req.body;
+
+        if (!entityType || !entityId || !entitySlug) throw new Error('entityType, entityId, entitySlug are required');
+
         let file;
 
         if (req.user?.role === 'admin') {
             file = await File.findOneAndDelete({ _id: fileId });
         } else {
             file = await await File.findOneAndDelete({ _id: fileId, access: 'editors' });
-        } 
+        }
 
         if (!file) return res.status(404).send('File not found');
 
         const dir = path.join(__dirname, '../../');
         const filePath = path.join(dir, file.path);
         await fs.unlink(filePath);
+
+        if (entityType === 'order') {
+            const order = await Order.findById(entityId).lean();
+            await saveLog(
+                logTemplates({
+                    type: 'orderDeletedFile',
+                    entity: order,
+                    actor: req.session.user,
+                    file,
+                }),
+            );
+        } else if (entityType === 'entry') {
+            const project = await Project.findOne({ slug: entitySlug }).lean();
+            const DynamicModel = await createDynamicModel(entitySlug);
+            const entry = await DynamicModel.findById(entityId).lean();
+            await saveLog(
+                logTemplates({
+                    type: 'entryDeletedFile',
+                    entity: entry,
+                    actor: req.session.user,
+                    project,
+                    file,
+                }),
+            );
+        }
 
         res.status(200).send('File deleted successfully!');
     } catch (error) {
@@ -262,8 +376,8 @@ exports.getFileModal = async (req, res) => {
         if (req.userPermissions.includes('changeFilesAccess')) {
             file = await File.findById(req.params.fileId).lean();
         } else {
-            file = await File.findOne({_id: req.params.fileId, access: 'editors'}).lean();
-        }  
+            file = await File.findOne({ _id: req.params.fileId, access: 'editors' }).lean();
+        }
 
         if (!file) {
             return res.status(404).send({ error: 'File not found' });
@@ -276,7 +390,7 @@ exports.getFileModal = async (req, res) => {
                 const slug = parts[parts.length - 1];
                 const model = await createDynamicModel(slug);
                 link.entity = await model.findById(link.entityId).lean();
-                link.entityName = link.entity && link.entity.name;;
+                link.entityName = link.entity && link.entity.name;
             }
             if (link.entityType === 'user') {
                 link.entity = await User.findById(link.entityId).lean();
@@ -296,7 +410,7 @@ exports.getFileModal = async (req, res) => {
             layout: false,
             data: {
                 file,
-                role: req.userPermissions
+                role: req.userPermissions,
             },
         });
     } catch (error) {

@@ -11,6 +11,7 @@ const uploadNewFile = function (elem) {
     const entityType = $('#files-container').attr('entity-type');
     const entityUrl = $('#files-container').attr('entity-url');
     const fileUrl = $('#files-container').attr('file-url');
+    const entitySlug = $('#files-container').attr('entity-slug');
 
     const elemHtml = $(elem).html();
 
@@ -30,6 +31,7 @@ const uploadNewFile = function (elem) {
             formData.append('entityId', entityId);
             formData.append('entityType', entityType);
             formData.append('entityUrl', entityUrl);
+            formData.append('entitySlug', entitySlug);
 
             $.ajax({
                 url: fileUrl,
@@ -41,6 +43,7 @@ const uploadNewFile = function (elem) {
                     $(elem).html(elemHtml);
                     getFileModal(null, response._id);
                     renderFiles();
+                    refreshContainers();
                 },
                 error: function (xhr, status, error) {
                     alert(error);
@@ -92,6 +95,9 @@ const updateFile = function (elem) {
             return $(this).val();
         })
         .get();
+    const entityType = $('#files-container').attr('entity-type');
+    const entityId = $('#files-container').attr('entity-id');
+    const entitySlug = $('#files-container').attr('entity-slug');
 
     if (!name || !category) {
         alert('File name and category are required');
@@ -107,13 +113,14 @@ const updateFile = function (elem) {
     $.ajax({
         url: `/fileUpdate/${fileId}`,
         method: 'POST',
-        data: JSON.stringify({ name, category, notes, access }),
+        data: JSON.stringify({ name, category, notes, access, entityType, entityId, entitySlug }),
         contentType: 'application/json',
         success: (response) => {
             console.log(response);
             $(elem).html(elemHtml);
             modal.modal('hide');
             renderFiles();
+            refreshContainers();
         },
         error: (error) => {
             console.log(error);
@@ -126,6 +133,12 @@ const updateFile = function (elem) {
 const deleteFile = function (elem) {
     const modal = $(elem).closest('.modal');
     const fileId = $(modal).attr('file-id');
+
+
+    const entityType = $('#files-container').attr('entity-type');
+    const entityId = $('#files-container').attr('entity-id');
+    const entitySlug = $('#files-container').attr('entity-slug');
+
     const elemHtml = $(elem).html();
     $(elem).html(`
         <span class="spinner-border spinner-border-sm me-2" role="status"></span>
@@ -135,8 +148,10 @@ const deleteFile = function (elem) {
         url: `/fileDelete/${fileId}`,
         method: 'POST',
         contentType: 'application/json',
+        data: JSON.stringify({entityId, entityType, entitySlug}),
         success: function (response) {
             renderFiles();
+            refreshContainers();
             $(elem).html('File Deleted');
             modal.modal('hide');
         },

@@ -52,7 +52,8 @@
     </div>
     <div class="d-block col-12 col-md-6">
       {{#if (findInArray data.role 'viewFiles')}}
-      <div class="card mb-3" id="files-container" entity-type="order" entity-id="{{data.order._id}}"
+      <div class="card mb-3" id="files-container" 
+        entity-type="order" entity-id="{{data.order._id}}" entity-slug="none"
         entity-url="/order/{{data.order._id}}" file-url="/uploadFileToOrder">
         {{> showEntityFiles}}
       </div>
@@ -71,9 +72,9 @@
 
   const refreshContainers = function (modal) {
     console.log('refreshing containers');
-    const hrefOrder = `/getOrderData/${$(modal).attr('order-id')}`;
+    const hrefOrder = `/getOrderData/{{data.order._id}}`;
     loadOrderInContainer(modal, hrefOrder);
-    const hrefLogs = `/getOrderLogs/${$(modal).attr('order-id')}?page=1`;
+    const hrefLogs = `/getOrderLogs/{{data.order._id}}?page=1`;
     getOrderLogs(modal, hrefLogs);
     const hrefProjects = `/getOrderProjects/{{data.order._id}}`;
     loadOrderProjects(hrefProjects);

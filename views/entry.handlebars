@@ -65,9 +65,10 @@
       {{> showEntryPayments}}
       {{/if}}
       {{#if (findInArray data.role 'viewFiles')}}
-      <div class="card mb-3" id="files-container" entity-type="entry" entity-id="{{data.entry._id}}"
-        entity-url="/entry/{{data.entry._id}}/project/{{data.project.slug}}" file-url="/uploadFileToEntry"
-        file-access="[editors]">
+      <div class="card mb-3" id="files-container" 
+        entity-type="entry" entity-id="{{data.entry._id}}" entity-slug="{{data.project.slug}}" 
+        entity-url="/entry/{{data.entry._id}}/project/{{data.project.slug}}" 
+        file-url="/uploadFileToEntry">
         {{> showEntityFiles data=data beneficiary=true}}
       </div>
       {{/if}}
@@ -373,4 +374,8 @@
     }
   });
 
+  const refreshContainers = function() {
+    showDataAsSuch('/getSingleEntryData/{{data.entry._id}}/project/{{data.project.slug}}', '#entry-container');
+    showDataAsSuch('/getSingleEntryLogs/{{data.entry._id}}/project/{{data.project.slug}}', '#logs-container');
+  }
 </script>

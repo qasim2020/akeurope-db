@@ -5,6 +5,7 @@ const logTemplates = ({
     entity,
     actor,
     project,
+    file,
     order,
     entry,
     color,
@@ -342,7 +343,40 @@ const logTemplates = ({
               }
             : null,
         // NEW CHANGES FROM 19 JAN 2025
-        
+        entryNewFile: file && project ? {
+            ...commons('entry', entity._id),
+            action: `Document <span class="fw-bold">${file.name}</span> added to <a href="/entry/${entity._id}/project/${project.slug}">${entity.name}</a> `,
+            color: 'blue',
+        } : null, 
+        entryChangeFile: file && project && changes ? {
+            ...commons('entry', entity._id),
+            action: `Document <span class="fw-bold">${file.name}</span> properties updated in <a href="/entry/${entity._id}/project/${project.slug}">${entity.name}</a> `,
+            color: 'blue',
+            changes,
+        } : null, 
+        entryDeletedFile: file && project ? {
+            ...commons('entry', entity._id),
+            action: `Document <span class="fw-bold">${file.name}</span> deleted in <a href="/entry/${entity._id}/project/${project.slug}">${entity.name}</a> `,
+            color: 'red',
+        } : null,
+        orderNewFile: file ? {
+            ...commons('order', entity._id),
+            action: `Document <span class="fw-bold">${file.name}</span> added to <a href="/order/${entity._id}">Invoice-${entity.orderNo}</a> `,
+            color: 'blue',
+            isNotification: true,
+            isReadByCustomer: false
+        } : null, 
+        orderChangeFile: file && changes ? {
+            ...commons('order', entity._id),
+            action: `Document <span class="fw-bold">${file.name}</span> properties updated in <a href="/order/${entity._id}">Invoice-${entity.orderNo}</a> `,
+            color: 'blue',
+            changes,
+        } : null, 
+        orderDeletedFile: file ? {
+            ...commons('order', entity._id),
+            action: `Document <span class="fw-bold">${file.name}</span> deleted in <a href="/order/${entity._id}">Invoice-${entity.orderNo}</a> `,
+            color: 'red',
+        } : null,
 
     };
 

@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const Project = require('../models/Project');
+const User = require('../models/User');
 const Customer = require('../models/Customer');
 const cloudinary = require('cloudinary').v2;
 const moment = require('moment');
@@ -253,29 +254,36 @@ exports.deleteEntry = async (req, res) => {
 };
 
 const fetchEntryNeighbors = async (model, entry) => {
+    const prev =
+        (await model
+            .findOne({ _id: { $lt: entry._id } })
+            .sort({ _id: -1 })
+            .lean()) || (await model.findOne().sort({ _id: -1 }).lean());
 
-    const prev = await model.findOne({ _id: { $lt: entry._id } })
-        .sort({ _id: -1 }) 
-        .lean() || await model.findOne().sort({ _id: -1 }).lean();
+    const next =
+        (await model
+            .findOne({ _id: { $gt: entry._id } })
+            .sort({ _id: 1 })
+            .lean()) || (await model.findOne().sort({ _id: 1 }).lean());
 
-    const next = await model.findOne({ _id: { $gt: entry._id } })
-        .sort({ _id: 1 }) 
-        .lean() || await model.findOne().sort({ _id: 1 }).lean();
-
-    const prev5 = await model.find({ _id: { $lt: entry._id } })
-        .sort({ _id: -1 }) 
+    const prev5 = await model
+        .find({ _id: { $lt: entry._id } })
+        .sort({ _id: -1 })
         .limit(5)
         .lean();
 
-    const next5 = await model.find({ _id: { $gt: entry._id } })
-        .sort({ _id: 1 }) 
+    const next5 = await model
+        .find({ _id: { $gt: entry._id } })
+        .sort({ _id: 1 })
         .limit(5)
         .lean();
 
     const array = [entry, ...next5, ...prev5];
 
     return {
-        prev, next, array
+        prev,
+        next,
+        array,
     };
 };
 
@@ -295,13 +303,24 @@ exports.entry = async (req, res) => {
         entry.currency = project.currency;
 
         const neighbors = await fetchEntryNeighbors(DynamicModel, entry);
-        
+
         let files;
 
         if (req.userPermissions.includes('changeFilesAccess')) {
-            files = await File.find({ 'links.entityId': req.params.entryId }).sort({ uploadDate: -1 }).lean();
+            files = await File.find({ 'links.entityId': req.params.entryId }).sort({ createdAt: -1 }).lean();
         } else {
-            files = await File.find({ 'links.entityId': req.params.entryId, access: 'editors' }).sort({ uploadDate: -1 }).lean();
+            files = await File.find({ 'links.entityId': req.params.entryId, access: 'editors' }).sort({ createdAt: -1 }).lean();
+        }
+
+        for (const file of files) {
+            if (file.uploadedBy?.actorType === 'user') {
+                const user = await User.findById(file.uploadedBy?.actorId).lean();
+                file.actorName = user.name;
+                file.actorRole = user.role;
+            }
+            if (file.uploadedBy?.actorType === 'customer') {
+                file.actorName = (await Customer.findById(file.uploadedBy?.actorId).lean()).name;
+            }
         }
 
         res.render('entry', {
