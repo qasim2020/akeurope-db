@@ -89,6 +89,9 @@
 <script>
 
   const deleteEntry = function (elem) {
+    if (!confirm("Are you sure you want to delete this entry? This action cannot be undone.")) {
+        return; 
+    }
     const entryId = $(elem).attr("entry-id");
     $.ajax({
       url: '/project/entry/delete/{{data.project.slug}}',

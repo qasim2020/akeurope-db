@@ -200,6 +200,20 @@ exports.updateEntry = async (req, res) => {
     }
 };
 
+async function canDeleteEntry(entryId) {
+    const isReferencedInOrders = await Order.exists({ 'projects.entries.entryId': entryId });
+    if (isReferencedInOrders) {
+        return false;
+    }
+
+    const isReferencedInFiles = await File.exists({ 'links.entityId': entryId });
+    if (isReferencedInFiles) {
+        return false;
+    }
+
+    return true;
+}
+
 exports.deleteEntry = async (req, res) => {
     try {
         const project = await Project.findOne({ slug: req.params.slug });
@@ -207,6 +221,12 @@ exports.deleteEntry = async (req, res) => {
 
         const DynamicModel = await createDynamicModel(project.slug);
         const entry = await DynamicModel.findOne({ _id: req.body.entryId });
+
+        const canDelete = await canDeleteEntry(entry._id);
+
+        if (!canDelete) {
+            throw new Error('Entry cannot be deleted as it is referenced in an Order or File.');
+        }
 
         if (!entry)
             return res.status(404).json({
