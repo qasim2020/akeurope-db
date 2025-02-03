@@ -299,7 +299,12 @@ exports.entry = async (req, res) => {
             _id: req.params.entryId,
         }).lean();
 
+        if (!entry) {
+            entry = { deleted: true };
+        }
+
         entry = await fetchEntrySubscriptionsAndPayments(entry);
+
         entry.currency = project.currency;
 
         const neighbors = await fetchEntryNeighbors(DynamicModel, entry);

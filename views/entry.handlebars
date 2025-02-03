@@ -1,18 +1,17 @@
-<!-- Page header -->
 <div class="page-header d-print-none">
   <div class="container-xl">
     <div class="row">
       <div class="col me-auto mb-3">
         <div class="page-pretitle"> Overview </div>
         <h2 class="page-title">
-          {{#if data.entry}}
+          {{#if data.entry.deleted}}
+          Not Found
+          {{else}}
           {{#if data.entry.name}}
           {{data.entry.name}}
           {{else}}
           {{lookup data.entry (findPrimaryKey data.project.fields)}}
           {{/if}}
-          {{else}}
-          Entry deleted
           {{/if}}
           </ol>
         </h2>

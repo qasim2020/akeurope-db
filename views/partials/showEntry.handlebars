@@ -1,3 +1,15 @@
+{{#if data.entry.deleted}}
+<div class="col-12 col-md-4 mb-auto" id="entry-container">
+  <div class="card mb-3">
+    <div class="card-header">
+      <h3 class="card-title">Not Found</h3>
+    </div>
+    <div class="card-body d-flex justify-content-center align-items-center">
+      <p>Entry was not found. It might have been deleted. Check logs to see previous activity.</p>
+    </div>
+  </div>
+</div>
+{{else}}
 {{#with data.entry as |entry|}}
 <div class="col-12 col-md-4 mb-auto" id="entry-container">
   <div class="d-block card mb-3 data-row">
@@ -88,3 +100,4 @@
   </div>
 </div>
 {{/with}}
+{{/if}}
