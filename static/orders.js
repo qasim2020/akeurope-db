@@ -140,6 +140,7 @@ const doSearch = function (elem, href, refreshAll) {
     const customerId = $(modal).find('[name=customerId]').val();
     const slug = $(elem).closest('.card').attr('projectSlug');
     const orderId = $(modal).find(`.${slug}`).attr('orderId');
+    if (!orderId) return alert('no order id found - something is wrong in page code.');
     const toggleState = $(modal).find(`.${slug}`).attr('toggleState');
     const url = `/getPaginatedEntriesForDraftOrder/${slug}/${customerId}${href}&orderId=${orderId}&toggleState=${toggleState}`;
 

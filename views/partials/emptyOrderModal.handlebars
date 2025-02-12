@@ -13,7 +13,7 @@
       </div>
       <div class="modal-body">
         <div class="row">
-          <div class="col-xl-6 col-12 opposite-invoice">
+          <div class="col-12 opposite-invoice">
             <div class="mb-3">
               <label class="form-label">Select Customer</label>
               <select name="customerId"  class="form-select order-change">
@@ -81,7 +81,7 @@
               {{/if}}
             </div>
           </div>
-          <div class="col-xl-6 col-12 invoice">
+          <div class="col-xl-6 col-12 invoice d-none">
             <iframe class="invoice-frame" width="100%" height="755px" style="border: none;"
               src="/invoice/{{#if data.order}}{{data.order._id}}{{else}}blank{{/if}}"></iframe>
           </div>
