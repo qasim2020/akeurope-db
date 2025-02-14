@@ -24,7 +24,12 @@ mongoose.connection.on('open', () => {
         try {
             const expiryTime = new Date(Date.now() - 15 * 60 * 1000); // 30 seconds ago
 
-            const expiredOrders = await Order.find({ status: 'draft', createdAt: { $lt: expiryTime } });
+            const expiredOrders = await Order.find({
+                $or: [
+                    { status: "draft", createdAt: { $lt: expiryTime } },
+                    { status: "pending payment", customerId: "67af1a4174f0dfae5f0ead1b", createdAt: { $lt: expiryTime } }
+                ]
+            });
 
             if (expiredOrders.length > 0) {
                 console.log(`Found ${expiredOrders.length} expired orders.`);
