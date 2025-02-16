@@ -53,6 +53,13 @@ router.get(
     authProject,
     entryController.getPaginatedEntriesForOrderPage,
 );
+router.get(
+    '/getPaginatedEntriesForModal/:slug/:customerId',
+    authenticate,
+    authorize('viewEntry'),
+    authProject,
+    entryController.getPaginatedEntriesForModal,
+);
 
 router.get('/searchEntry/:slug', authenticate, authorize('viewEntry'), entryController.searchEntry);
 

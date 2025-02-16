@@ -141,7 +141,7 @@
               </svg>
             </button>
           </td>
-          <td>{{order.orderNo}}</td>
+          <td>{{order.orderNo}} {{#if order.monthlySubscription}} <i class="ti ti-refresh ms-1"></i> {{/if}}</td>
           <td>{{formatDate order.createdAt}}</td>
           <td>{{order.customer.name}}</td>
           <td>
@@ -153,7 +153,17 @@
               in {{this.details.name}} </span>
             {{/each}}
           </td>
-          <td> {{order.totalCost}} {{order.currency}}</td>
+          <td> 
+            {{#if (eq order.stripeInfo.paymentMethodType 'card')}} <i class="ti ti-credit-card"></i> {{/if}}
+            {{#if (eq order.stripeInfo.paymentMethodType 'apple_pay')}} <i class="ti ti-brand-apple"></i> {{/if}}
+            {{#if (eq order.stripeInfo.paymentMethodType 'google_pay')}} <i class="ti ti-brand-google"></i> {{/if}}
+            {{#unless order.stripeInfo}} <i class="ti ti-home"></i> {{/unless}}
+            {{#if order.monthlySubscription}}
+            {{order.totalCostSingleMonth}} {{order.currency}} 
+            {{else}}
+            {{order.totalCost}} {{order.currency}} 
+            {{/if}}
+          </td>
         </tr>
         {{/each}}
       </tbody>

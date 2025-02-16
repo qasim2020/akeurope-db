@@ -1,6 +1,7 @@
 const Project = require('../models/Project');
 const Customer = require('../models/Customer');
 const Order = require('../models/Order');
+const Donor = require('../models/Donor');
 
 const { createDynamicModel } = require('../models/createDynamicModel');
 const { generatePagination } = require('../modules/generatePagination');
@@ -360,6 +361,30 @@ const formatOrder = async (req, order) => {
     return order;
 };
 
+const cleanOrder = async (orderId) => {
+    await Order.findOneAndUpdate(
+        { _id: orderId },
+        {
+            $pull: {
+                'projects.$[].entries': { selectedSubscriptions: { $size: 0 } },
+            },
+        },
+        { new: true },
+    );
+
+    await Order.findOneAndUpdate(
+        { _id: orderId },
+        {
+            $pull: {
+                projects: { totalCost: 0 },
+            },
+        },
+        { new: true },
+    );
+
+    return true;
+};
+
 const getSingleOrder = async (req, res) => {
     const checkOrder = await Order.findOne({ _id: req.params.orderId }).lean();
     let order;
@@ -567,7 +592,35 @@ const getPendingOrderEntries = async (req, res) => {
     };
 };
 
+const getSubscriptionByOrderId = async (orderId) => {
+    try {
+        const donor = await Donor.findOne({
+            "subscriptions.orderId": orderId
+        }, { "subscriptions.$": 1 }).lean();
+
+        return donor ? donor.subscriptions[0] : null;
+    } catch (error) {
+        console.error("Error fetching subscription:", error);
+        return null;
+    }
+};
+
+const getPaymentByOrderId = async (orderId) => {
+    try {
+        const donor = await Donor.findOne({
+            "payments.orderId": orderId
+        }, { "payments.$": 1 }).lean();
+
+        return donor ? donor.payments[0] : null;
+    } catch (error) {
+        console.error("Error fetching payment:", error);
+        return null;
+    }
+};
+
 module.exports = {
+    getSubscriptionByOrderId,
+    getPaymentByOrderId,
     createDraftOrder,
     updateDraftOrder,
     getPaginatedOrders,
@@ -577,4 +630,5 @@ module.exports = {
     openOrderProjectWithEntries,
     getPendingOrderEntries,
     formatOrder,
+    cleanOrder,
 };

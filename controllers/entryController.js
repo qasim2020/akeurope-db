@@ -5,7 +5,12 @@ const Customer = require('../models/Customer');
 const cloudinary = require('cloudinary').v2;
 const moment = require('moment');
 const { createDynamicModel } = require('../models/createDynamicModel');
-const { projectEntries, fetchEntrySubscriptionsAndPayments, getPaidOrdersByEntryId } = require('../modules/projectEntries');
+const {
+    projectEntries,
+    fetchEntrySubscriptionsAndPayments,
+    getPaidOrdersByEntryId,
+    getAllOrdersByEntryId,
+} = require('../modules/projectEntries');
 const { saveLog, visibleLogs, entryLogs } = require('../modules/logAction');
 const { logTemplates } = require('../modules/logTemplates');
 const { getChanges } = require('../modules/getChanges');
@@ -323,8 +328,6 @@ exports.entry = async (req, res) => {
             entry = { deleted: true };
         }
 
-        entry = await fetchEntrySubscriptionsAndPayments(entry);
-
         entry.currency = project.currency;
 
         const neighbors = await fetchEntryNeighbors(DynamicModel, entry);
@@ -367,7 +370,7 @@ exports.entry = async (req, res) => {
                 entryLogs: await entryLogs(req, res),
                 sidebarCollapsed: req.session.sidebarCollapsed,
                 customers: await Customer.find().lean(),
-                payments: await getPaidOrdersByEntryId(req),
+                payments: await getAllOrdersByEntryId(req),
             },
         });
     } catch (error) {
@@ -457,8 +460,11 @@ exports.getPaginatedEntriesForDraftOrder = async (req, res) => {
                 detail: await Project.findOne({ slug: project.slug }).lean(),
             });
         }
-
-        res.render('partials/components/paymentModalEntriesInDraftOrder', {
+        const partial =
+            order.status === 'draft'
+                ? 'partials/components/paymentModalEntriesInDraftOrder'
+                : 'partials/components/paymentModalEntriesInLockedOrder';
+        res.render(partial, {
             layout: false,
             project,
             order,
@@ -509,6 +515,36 @@ exports.getPaginatedEntriesForPendingOrder = async (req, res) => {
             layout: false,
             order,
             project,
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            error: 'Error getting paginated entries',
+            details: error.message,
+        });
+    }
+};
+
+exports.getPaginatedEntriesForModal = async (req, res) => {
+    try {
+        const orderInDb = await Order.findOne({
+            _id: req.query.orderId,
+        }).lean();
+        const order = await formatOrder(req, orderInDb);
+        const project = order.projects.find((project) => project.slug == req.params.slug);
+        if (project) {
+            Object.assign(project, {
+                detail: await Project.findOne({ slug: project.slug }).lean(),
+            });
+        }
+        const partial =
+            order.status === 'draft'
+                ? 'partials/components/paymentModalEntriesInDraftOrder'
+                : 'partials/components/paymentModalEntriesInLockedOrder';
+        res.render(partial, {
+            layout: false,
+            project,
+            order,
         });
     } catch (error) {
         console.log(error);

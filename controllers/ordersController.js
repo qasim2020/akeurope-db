@@ -13,6 +13,9 @@ const {
     addPaymentsToOrder,
     openOrderProjectWithEntries,
     formatOrder,
+    getPaymentByOrderId,
+    getSubscriptionByOrderId,
+    cleanOrder,
 } = require('../modules/orders');
 const { generateInvoice, deleteInvoice, sendInvoiceToCustomer } = require('../modules/invoice');
 const Log = require('../models/Log');
@@ -21,6 +24,11 @@ const { createDynamicModel } = require('../models/createDynamicModel');
 exports.viewOrders = async (req, res) => {
     try {
         const { orders, pagination } = await getPaginatedOrders(req, res);
+
+        for (const order of orders) {
+            order.stripeInfo = await getPaymentByOrderId(order._id) || await getSubscriptionByOrderId(order._id);
+        };
+        
         const customers = await Customer.find().lean();
         res.render('orders', {
             layout: 'dashboard',
@@ -170,6 +178,7 @@ exports.getOrderTotalCost = async (req, res) => {
 
 exports.changeOrderStatus = async (req, res) => {
     try {
+        await cleanOrder(req.params.orderId || req.query.orderId);
         const order = await updateOrderStatus(req, res);
         res.status(200).render('partials/components/invoice-status-buttons', {
             layout: false,

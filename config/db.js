@@ -26,8 +26,8 @@ mongoose.connection.on('open', () => {
 
             const expiredOrders = await Order.find({
                 $or: [
-                    { status: "draft", createdAt: { $lt: expiryTime } },
-                    { status: "pending payment", customerId: "67af1a4174f0dfae5f0ead1b", createdAt: { $lt: expiryTime } }
+                    { status: "draft", updatedAt: { $lt: expiryTime } },
+                    { status: "pending payment", customerId: "67af1a4174f0dfae5f0ead1b", updatedAt: { $lt: expiryTime } }
                 ]
             });
 

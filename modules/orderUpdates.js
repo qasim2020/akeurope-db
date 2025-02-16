@@ -12,6 +12,7 @@ const { createDynamicModel } = require('../models/createDynamicModel');
 const { camelCaseWithCommaToNormalString } = require('../modules/helpers');
 
 const runQueriesOnOrder = async (req, res) => {
+    
     await validateQuery(req, res);
 
     let order;
@@ -19,6 +20,9 @@ const runQueriesOnOrder = async (req, res) => {
     const projectSlug = req.params.slug;
     const checkProject = await Project.findOne({ slug: projectSlug }).lean();
     const existingOrder = await Order.findById(req.query.orderId).lean();
+
+    if (existingOrder.status !== 'draft') return existingOrder;
+
     const existingCustomer = await Customer.findById(
         existingOrder.customerId,
     ).lean();

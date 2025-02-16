@@ -653,12 +653,33 @@ const changeOrderStatus = function (elem) {
         success: (response) => {
             $(modal).find('.invoice-status').html(response);
             refreshContainers(modal);
+            refreshModal(modal);
         },
         error: (error) => {
             alert(error.responseText);
         },
     });
 };
+
+const refreshModal = function(modal) {
+    const orderId = $(modal).attr('order-id');
+    $('.project-in-order').each((index, project) => {
+        const { select, search, customerId, currency } = getModalData(modal);
+        const projectSlug = $(project).attr('projectSlug');
+        const toggleState = $(project).attr('toggleState');
+        $.ajax({
+            url: `/getPaginatedEntriesForModal/${projectSlug}/${customerId}?orderId=${orderId}&select=${select}&search=${search}&currency=${currency}&toggleState=${toggleState}`,
+            method: 'GET',
+            success: function (response) {
+                $(modal).find(`[projectSlug=${projectSlug}]`).replaceWith(response);
+                refreshFsLightbox(); 
+            },
+            error: function (error) {
+                alert(error.responseText);
+            },
+        });
+    });
+}
 
 const emailInvoice = function (elem) {
     const modal = $(elem).closest('.modal');
