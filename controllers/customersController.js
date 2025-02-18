@@ -154,7 +154,7 @@ exports.createCustomer = async (req, res) => {
         const customer = new Customer({
             _id: customerId,
             name,
-            email,
+            email: email.toLowerCase(),
             organization,
             location,
             status,

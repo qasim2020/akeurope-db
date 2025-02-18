@@ -127,7 +127,7 @@ exports.createUser = async (req, res) => {
 
         const newUser = new User({
             name,
-            email,
+            email: email.toLowerCase(),
             role,
             projects,
             status: 'Invite Sent',
