@@ -7,7 +7,9 @@ require('dotenv').config();
 
 exports.login = async (req, res) => {
   
-  const { email, password, rememberMe } = req.body;
+  let { email, password, rememberMe } = req.body;
+  
+  email = email.toLowerCase();
 
   const user = await User.findOne({ email });
 
