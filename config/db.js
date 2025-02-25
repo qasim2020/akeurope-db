@@ -22,7 +22,7 @@ mongoose.connection.on('open', () => {
 
     setInterval(async () => {
         try {
-            const expiryTime = new Date(Date.now() - 15 * 60 * 1000); // 30 seconds ago
+            const expiryTime = new Date(Date.now() - 45 * 60 * 1000); // 30 seconds ago
 
             const expiredOrders = await Order.find({
                 $or: [
