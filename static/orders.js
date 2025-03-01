@@ -620,6 +620,8 @@ const getPaymentModal = function (elem) {
 };
 
 const deleteOrder = function (elem) {
+    if (!confirm("Are you sure you want to delete this order?")) return;
+
     const orderId = $(elem).attr('order-id');
     $.ajax({
         url: `/deleteOrder/${orderId}`,

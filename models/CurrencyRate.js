@@ -5,7 +5,7 @@ const CurrencyRateSchema = new mongoose.Schema(
         baseCurrency: {
             type: String,
             required: true,
-            enum: ['USD', 'NOK', 'GBP', 'EUR', 'PKR', 'ILS', 'EGP'],
+            enum: ['USD', 'NOK', 'SEK', 'GBP', 'EUR', 'PKR', 'ILS', 'EGP'],
         },
         rates: {
             type: Map,

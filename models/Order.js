@@ -19,7 +19,7 @@ const OrderSchema = new mongoose.Schema(
         },
         currency: {
             type: String,
-            enum: ['USD', 'NOK', 'GBP', 'EUR', 'PKR', 'ILS', 'EGP'],
+            enum: ['USD', 'NOK', 'SEK', 'GBP', 'EUR', 'PKR', 'ILS', 'EGP'],
             default: 'USD',
             required: true,
         },
