@@ -2,6 +2,7 @@ const PDFDocument = require('pdfkit');
 const fs = require('fs-extra');
 const path = require('path');
 const Order = require('../models/Order');
+const Subscription = require('../models/Subscription');
 const Customer = require('../models/Customer');
 const nodemailer = require('nodemailer');
 const handlebars = require('handlebars');
@@ -217,11 +218,10 @@ function deletePath(filePath) {
 }
 
 const deleteInvoice = async (orderId) => {
-    const order = await Order.findOne({ _id: orderId });
+    const order = (await Order.findOne({ _id: orderId })) || (await Subscription.findOne({ _id: orderId }));
     if (!order) {
         throw new Error('Order does not exist');
     }
-    const customer = await Customer.findOne({ _id: order.customerId });
     const invoiceDir = path.join(__dirname, '../../invoices');
     const invoicePath = path.join(invoiceDir, `order_no_${order.orderNo}.pdf`);
     return deletePath(invoicePath);

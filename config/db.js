@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 require('dotenv').config();
 const Order = require('../models/Order');
+const Subscription = require('../models/Subscription');
 const { deleteInvoice } = require('../modules/invoice');
 
 const connectDB = async () => {
@@ -17,37 +18,44 @@ const connectDB = async () => {
     }
 };
 
+async function deleteExpiredOrders(Collection) {
+
+    const expiryTime = new Date(Date.now() - 45 * 60 * 1000); 
+
+    const expiredOrders = await Collection.find({
+        $or: [
+            { status: "draft", updatedAt: { $lt: expiryTime } },
+            { status: "pending payment", customerId: process.env.TEMP_CUSTOMER_ID, updatedAt: { $lt: expiryTime } }
+        ]
+    });
+
+    if (expiredOrders.length > 0) {
+        console.log(`Found ${expiredOrders.length} expired orders.`);
+
+        const orderIds = expiredOrders.map((order) => order._id);
+
+        for (const orderId of orderIds) {
+            await deleteInvoice(orderId);
+        }
+
+        const result = await Collection.deleteMany({ _id: { $in: orderIds } });
+
+        console.log(`Deleted ${result.deletedCount} expired orders.`);
+    }
+
+}
+
 mongoose.connection.on('open', () => {
     console.log('Order cleanup job started...');
 
     setInterval(async () => {
         try {
-            const expiryTime = new Date(Date.now() - 45 * 60 * 1000); // 30 seconds ago
-
-            const expiredOrders = await Order.find({
-                $or: [
-                    { status: "draft", updatedAt: { $lt: expiryTime } },
-                    { status: "pending payment", customerId: process.env.TEMP_CUSTOMER_ID, updatedAt: { $lt: expiryTime } }
-                ]
-            });
-
-            if (expiredOrders.length > 0) {
-                console.log(`Found ${expiredOrders.length} expired orders.`);
-
-                const orderIds = expiredOrders.map((order) => order._id);
-
-                for (const orderId of orderIds) {
-                    await deleteInvoice(orderId);
-                }
-
-                const result = await Order.deleteMany({ _id: { $in: orderIds } });
-
-                console.log(`Deleted ${result.deletedCount} expired orders.`);
-            }
+            await deleteExpiredOrders(Order);
+            await deleteExpiredOrders(Subscription);
         } catch (error) {
             console.error('Error deleting expired orders:', error);
         }
-    }, 60 * 1000); // Runs every 60 sec
+    }, 60 * 1000); 
 });
 
 module.exports = connectDB;
