@@ -20,7 +20,7 @@ const connectDB = async () => {
 
 async function deleteExpiredOrders(Collection) {
 
-    const expiryTime = new Date(Date.now() - 45 * 60 * 1000); 
+    const expiryTime = new Date(Date.now() - 1 * 60 * 60 * 1000); 
 
     const expiredOrders = await Collection.find({
         $or: [
