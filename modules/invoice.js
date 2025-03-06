@@ -227,6 +227,40 @@ const deleteInvoice = async (orderId) => {
     return deletePath(invoicePath);
 };
 
+const sendThanksToCustomer = async (project, customer) => {
+
+    let transporter = nodemailer.createTransport({
+        host: process.env.EMAIL_HOST,
+        port: process.env.EMAIL_PORT,
+        secure: true,
+        auth: {
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS,
+        },
+    });
+
+    const templatePath = path.join(__dirname, '../views/emails/emailThanks.handlebars');
+    const templateSource = await fs.readFile(templatePath, 'utf8');
+    const compiledTemplate = handlebars.compile(templateSource);
+
+    const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: customer.email,
+        subject: `Thank you for supporting Alkhidmat Europe`,
+        html: compiledTemplate({
+            name: customer.name,
+        })
+    };
+
+    try {
+        await transporter.sendMail(mailOptions);
+        console.log('Thanks sent!');
+        return true;
+    } catch (err) {
+        throw new Error(`Failed to send email: ${err.message}`);
+    } 
+};
+
 const sendInvoiceToCustomer = async (order, customer) => {
     const invoicesDirectory = '../invoices';
     const invoiceFilename = `order_no_${order.orderNo}.pdf`;
@@ -270,4 +304,4 @@ const sendInvoiceToCustomer = async (order, customer) => {
     }
 };
 
-module.exports = { generateInvoice, deleteInvoice, deletePath, sendInvoiceToCustomer };
+module.exports = { generateInvoice, deleteInvoice, deletePath, sendInvoiceToCustomer, sendThanksToCustomer };
