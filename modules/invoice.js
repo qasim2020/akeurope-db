@@ -2,6 +2,7 @@ const PDFDocument = require('pdfkit');
 const fs = require('fs-extra');
 const path = require('path');
 const Order = require('../models/Order');
+const Project = require('../models/Project');
 const Subscription = require('../models/Subscription');
 const Customer = require('../models/Customer');
 const nodemailer = require('nodemailer');
@@ -227,8 +228,7 @@ const deleteInvoice = async (orderId) => {
     return deletePath(invoicePath);
 };
 
-const sendThanksToCustomer = async (project, customer) => {
-
+const sendThanksToCustomer = async (order, customer) => {
     let transporter = nodemailer.createTransport({
         host: process.env.EMAIL_HOST,
         port: process.env.EMAIL_PORT,
@@ -243,13 +243,21 @@ const sendThanksToCustomer = async (project, customer) => {
     const templateSource = await fs.readFile(templatePath, 'utf8');
     const compiledTemplate = handlebars.compile(templateSource);
 
+    const project = order.projects.find((project) => project.slug === 'gaza-orphans');
+    project.detail = await Project.findOne({ slug: project.slug }).lean();
+
+    let inviteLink = '';
+    if (customer.inviteToken) {
+        inviteLink = `${process.env.CUSTOMER_PORTAL_URL}/register/${customer.inviteToken}`;
+    } else {
+        inviteLink = `${process.env.CUSTOMER_PORTAL_URL}/login`;
+    }
+
     const mailOptions = {
         from: process.env.EMAIL_USER,
         to: customer.email,
-        subject: `Thank you for supporting Alkhidmat Europe`,
-        html: compiledTemplate({
-            name: customer.name,
-        })
+        subject: `Thank you for your order`,
+        html: compiledTemplate({ order, customer, project, inviteLink }),
     };
 
     try {
@@ -258,7 +266,7 @@ const sendThanksToCustomer = async (project, customer) => {
         return true;
     } catch (err) {
         throw new Error(`Failed to send email: ${err.message}`);
-    } 
+    }
 };
 
 const sendInvoiceToCustomer = async (order, customer) => {

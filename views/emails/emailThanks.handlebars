@@ -6,31 +6,46 @@
 <body style="font-family: Arial, sans-serif; background-color: #f4f4f7; color: #333333; margin: 0; padding: 0;">
     <div style="width: 90%; max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 20px;">
         <div style="text-align: center">
-            <img src="https://res.cloudinary.com/miscellaneous/image/upload/v1741265888/akeurope/logo-actual.png"
-                style="height: 35px; width: 35px; margin-bottom: 20px; margin-top: 20px" alt="akeurope.org Logo" />
+            <img src="https://res.cloudinary.com/miscellaneous/image/upload/v1729975173/akeurope/logo-full.png"
+                style="height: 35px; margin-bottom: 20px; margin-top: 20px" alt="akeurope.org Logo" />
         </div>
-        <h2 style="color: #333333;">Thank you for supporting Alkhidmat Europe</h2>
-        <p style="color: #333333;">Hi, {{name}}</p>
+        <p style="color: #333333;">Hi, {{customer.name}},</p>
+
         <p style="color: #333333; line-height: 1.5rem;">
-            We are truly honored to have you join us in our mission to support children and families affected by
-            conflict, disaster, and displacement. Your involvement is vital in helping us deliver much-needed relief and
+            We’re truly grateful to have you with us in our mission to support children and families affected by
+            conflict, disaster, and displacement. Your generosity plays a crucial role in delivering essential aid and
             resources.
         </p>
+
+        <p style="color: #333333;  line-height: 1.5rem; font-weight: bold; color: #007A78;">
+            You are sponsoring {{project.entries.length}} x {{project.detail.name}} for the next {{project.months}}
+            months.
+        </p>
+
+        <p style="color: #333333; line-height: 1.5rem; ">
+            Your generous support will provide crucial assistance to these children and families over the next
+            {{project.months}} months. These sponsorships have been linked to your account. Click below to view the
+            beneficiary profiles in your dashboard and track their progress.
+        </p>
+
+        <a href="{{inviteLink}}"
+            style="display: inline-block; padding: 10px 20px; margin-top: 0px; margin-bottom: 15px; background-color: #007A78; color: #ffffff; text-decoration: none; border-radius: 4px;">View
+            Beneficiary Profiles</a>
+
         <p style="color: #333333; line-height: 1.5rem;">
-            Thank you for your recent order. You can easily manage your payments, subscriptions, and see the details of
-            the children you are supporting by visiting our <a href="https://partner.akeurope.org"
-                style="text-decoration: none; color: #007A78">Partner Portal</a>. We’ve recently launched this portal,
-            and we’d love to hear your feedback and suggestions.
+            If you have any questions, feel free to reply to this email or contact Abdul Wahab directly at <strong>+47
+                45782299</strong>.
         </p>
 
         <p style="color: #333333; line-height: 1.5rem;">
-            If you have any queries you can reach Abdul Wahab at +47 45782299.
+            Your generosity is truly appreciated. Thank you for your continued support.
         </p>
 
         <p style="color: #333333; line-height: 1.5rem;">
-            Thank You,<br>The Alkhidmat Europe Team<br>
+            The Alkhidmat Europe Team<br>
             <a href="https://akeurope.org" style="text-decoration: none; color: #007A78">akeurope.org</a>
         </p>
+
 
     </div>
 </body>
