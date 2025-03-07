@@ -35,29 +35,29 @@ const app = express();
 app.engine('handlebars', exphbs.engine({helpers: hbsHelpers}));
 app.set('view engine', 'handlebars');
 
-app.get('/preview-email/:orderId', async (req, res) => {
-  const templateName = 'emailThanks';
+// app.get('/preview-email/:orderId', async (req, res) => {
+//   const templateName = 'emailThanks';
 
-  const Order = require('./models/Order');
-  const Customer = require('./models/Customer');
-  const Project = require('./models/Project');
+//   const Order = require('./models/Order');
+//   const Customer = require('./models/Customer');
+//   const Project = require('./models/Project');
   
-  const order = await Order.findById(req.params.orderId).lean();
-  const customer = await Customer.findById(order.customerId).lean();
+//   const order = await Order.findById(req.params.orderId).lean();
+//   const customer = await Customer.findById(order.customerId).lean();
 
-  const project = order.projects.find(project => project.slug === 'gaza-orphans');
-  project.detail = await Project.findOne({ slug: project.slug }).lean();
+//   const project = order.projects.find(project => project.slug === 'gaza-orphans');
+//   project.detail = await Project.findOne({ slug: project.slug }).lean();
 
-  let inviteLink = '';
-  if (customer.inviteToken) {
-      inviteLink = `${process.env.CUSTOMER_PORTAL_URL}/register/${customer.inviteToken}`;
-  } else {
-      inviteLink = `${process.env.CUSTOMER_PORTAL_URL}/login`;
-  }
+//   let inviteLink = '';
+//   if (customer.inviteToken) {
+//       inviteLink = `${process.env.CUSTOMER_PORTAL_URL}/register/${customer.inviteToken}`;
+//   } else {
+//       inviteLink = `${process.env.CUSTOMER_PORTAL_URL}/login`;
+//   }
 
-  const data = { order, customer, project, inviteLink }; 
-  res.render(`emails/${templateName}`, data);
-});
+//   const data = { order, customer, project, inviteLink }; 
+//   res.render(`emails/${templateName}`, data);
+// });
 
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(express.json({ limit: '50mb' }));
