@@ -1,10 +1,18 @@
 const Project = require('../models/Project');
+const { createDynamicModel } = require('../models/createDynamicModel');
+const { countPaidEntriesInProject } = require('../modules/projectEntries');
 const { visibleLogs } = require('../modules/logAction');
 
 exports.projects = async (req, res) => {
     let projects = await Project.find({
         slug: { $in: req.user.projects },
     }).lean();
+
+    for (const project of projects) {
+        const model = await createDynamicModel(project.slug);
+        project.total = await model.countDocuments();
+        project.paid = await countPaidEntriesInProject(project.slug);
+    }
 
     res.render('projects', {
         layout: 'dashboard',

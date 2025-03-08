@@ -41,13 +41,9 @@ const fetchEntryDetailsFromPaymentsAndSubscriptions = async function (entries) {
         entryId: { $in: entryIds },
     }).lean();
 
-    const lastPaymentsMap = Object.fromEntries(
-        lastPayments.map(({ _id, lastPaid }) => [_id.toString(), lastPaid]),
-    );
+    const lastPaymentsMap = Object.fromEntries(lastPayments.map(({ _id, lastPaid }) => [_id.toString(), lastPaid]));
 
-    const subscriptionsMap = Object.fromEntries(
-        subscriptions.map((sub) => [sub.entryId.toString(), sub]),
-    );
+    const subscriptionsMap = Object.fromEntries(subscriptions.map((sub) => [sub.entryId.toString(), sub]));
 
     entries.forEach((entry) => {
         entry.lastPaid = lastPaymentsMap[entry._id.toString()] || null;
@@ -74,16 +70,12 @@ const projectEntries = async function (req, res) {
     const { searchQuery, fieldFilters } = generateSearchQuery(req, project);
 
     const serializedFilters = Object.fromEntries(
-        Object.entries(fieldFilters).map(([key, value]) => [key, JSON.stringify(value)])
+        Object.entries(fieldFilters).map(([key, value]) => [key, JSON.stringify(value)]),
     );
-    
+
     const filtersQuery = new URLSearchParams(serializedFilters).toString();
 
-    let entries = await DynamicModel.find(searchQuery)
-        .sort(sortOptions)
-        .skip(skip)
-        .limit(limit)
-        .lean();
+    let entries = await DynamicModel.find(searchQuery).sort(sortOptions).skip(skip).limit(limit).lean();
 
     entries = await fetchEntryDetailsFromPaymentsAndSubscriptions(entries);
 
@@ -103,8 +95,7 @@ const projectEntries = async function (req, res) {
             pagesArray: generatePagination(totalPages, page),
             sort: {
                 sortBy,
-                order:
-                    req.query.orderBy == undefined ? 'asc' : req.query.orderBy,
+                order: req.query.orderBy == undefined ? 'asc' : req.query.orderBy,
             },
             search: req.query.search,
             filtersQuery,
@@ -128,20 +119,13 @@ const getPaidOrdersByEntryId = async (req, res) => {
 
     for (const order of orders) {
         order.customer = await Customer.findById(order.customerId).lean();
-        const project = order.projects.find((project) =>
-            project.entries.find(
-                (entry) => entry.entryId == req.params.entryId,
-            ),
-        );
+        const project = order.projects.find((project) => project.entries.find((entry) => entry.entryId == req.params.entryId));
         order.project = project;
-        order.entry = project.entries.find(
-            (entry) => entry.entryId == req.params.entryId,
-        );
+        order.entry = project.entries.find((entry) => entry.entryId == req.params.entryId);
     }
 
     return orders;
 };
-
 
 const getAllOrdersByEntryId = async (req, res) => {
     const orders = await Order.find({
@@ -155,18 +139,50 @@ const getAllOrdersByEntryId = async (req, res) => {
 
     for (const order of orders) {
         order.customer = await Customer.findById(order.customerId).lean();
-        const project = order.projects.find((project) =>
-            project.entries.find(
-                (entry) => entry.entryId == req.params.entryId,
-            ),
-        );
+        const project = order.projects.find((project) => project.entries.find((entry) => entry.entryId == req.params.entryId));
         order.project = project;
-        order.entry = project.entries.find(
-            (entry) => entry.entryId == req.params.entryId,
-        );
+        order.entry = project.entries.find((entry) => entry.entryId == req.params.entryId);
     }
 
     return orders;
+};
+
+const countPaidEntriesInProject = async (slug) => {
+    const result = await Order.aggregate([
+        {
+            $match: { status: "paid", "projects.slug": slug }
+        },
+        {
+            $addFields: {
+                maxMonths: { $max: "$projects.months" },
+                orderExpiry: {
+                    $add: [
+                        "$createdAt",
+                        { $multiply: [{ $max: "$projects.months" }, 30 * 24 * 60 * 60 * 1000] }
+                    ]
+                }
+            }
+        },
+        {
+            $match: {
+                orderExpiry: { $gt: new Date() }
+            }
+        },
+        {
+            $unwind: "$projects"
+        },
+        {
+            $match: { "projects.slug": slug }
+        },
+        {
+            $unwind: "$projects.entries"
+        },
+        {
+            $count: "totalPaidEntries"
+        }
+    ]);
+
+    return result.length > 0 ? result[0].totalPaidEntries : 0;
 };
 
 module.exports = {
@@ -174,4 +190,5 @@ module.exports = {
     fetchEntrySubscriptionsAndPayments,
     getPaidOrdersByEntryId,
     getAllOrdersByEntryId,
+    countPaidEntriesInProject,
 };

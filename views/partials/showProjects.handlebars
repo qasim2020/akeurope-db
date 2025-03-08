@@ -57,6 +57,7 @@
         <tr>
           <th></th>
           <th>Name</th>
+          <th>Paid</th>
           <th>Slug</th>
           <th>Location</th>
           <th>Status</th>
@@ -94,9 +95,20 @@
             {{/if}}
           </td>
           <td>{{this.name}}</td>
+          <td>
+            <div class="d-flex align-items-center me-2">
+              <span class="me-2 text-nowrap">{{this.paid}} / {{this.total}}</span>
+              <div class="progress flex-fill" style="height: 8px; min-width:100px">
+                <div class="progress-bar" role="progressbar"
+                  style="width: {{multiply (divide this.paid this.total) 100}}%;" aria-valuenow="{{this.paid}}"
+                  aria-valuemin="0" aria-valuemax="{{this.total}}">
+                </div>
+              </div>
+            </div>
+          </td>
           <td class="text-secondary">{{this.slug}}</td>
           <td class="text-secondary">{{this.location}}</td>
-          <td class="text-secondary">{{this.status}}</td>
+          <td class="text-secondary">{{capitalizeFirstLetter this.status}}</td>
         </tr>
         {{/each}}
       </tbody>

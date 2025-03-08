@@ -284,6 +284,14 @@ const shortenFileName = function(string) {
     return `${start}...${end}`;       
 }
 
+const multiply = function(a, b) {
+    return a * b;
+}
+
+const divide = function(a, b) {
+    return a / b;
+};
+
 module.exports = {
     eq,
     gt,
@@ -291,6 +299,8 @@ module.exports = {
     compareIds,
     inc,
     dec,
+    multiply,
+    divide,
     formatDate,
     formatTime,
     browserDate,
