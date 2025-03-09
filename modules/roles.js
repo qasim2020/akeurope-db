@@ -58,6 +58,7 @@ const roles = {
         'deleteFiles',
         'updateFiles',
         'uploadPdf',
+        'viewOrderOutline',
         'uploadImage',
     ],
     viewer: ['viewEntry'],

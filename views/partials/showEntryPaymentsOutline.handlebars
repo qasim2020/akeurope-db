@@ -1,0 +1,55 @@
+<div class="card mb-3">
+  <div class="card-header d-flex justify-content-between">
+    <h3 class="card-title">Payments</h3>
+  </div>
+  {{#if data.payments}}
+  <div style="overflow-x: auto;">
+    <table class="table table-striped mb-0" style="white-space: nowrap; width: 100%;">
+      <thead>
+        <tr>
+          <th>Invoice #</th>
+          <th>Date</th>
+          <th>Amount</th>
+          <th>Expiry/ Renewel</th>
+          <th>Status</th>
+          <th>Customer</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each data.payments}}
+        <tr>
+          <td>{{orderNo}}</a></td>
+          <td>{{formatDate createdAt}}</td>
+          <td>
+            {{#each entry.costs}}
+            {{#if totalOrderedCost}}
+            {{totalOrderedCost}} {{../currency}} in {{camelCaseToNormalString fieldName}} <br>
+            {{/if}}
+            {{/each}}
+          </td>
+          {{#if (eq monthlySubscription 'false')}}
+          <td>Expires after {{project.months}} month(s) on {{expiresOn createdAt project.months}}</td>
+          {{else}}
+          <td>Renews on {{expiresOn createdAt 1}}</td>
+          {{/if}}
+          <td>
+            {{#if (eq status 'paid')}}
+            {{{getOrderIcon status}}}
+            {{capitalizeFirstLetter status}}
+            {{else}}
+            {{capitalizeFirstLetter status}}
+            {{/if}}
+          </td>
+          <td>{{customer.name}}</td>
+        </tr>
+        {{/each}}
+      </tbody>
+    </table>
+  </div>
+  {{else}}
+  <div class="card-body">
+    <div class="text-center py-4">No payments found</div>
+  </div>
+  {{/if}}
+
+</div>

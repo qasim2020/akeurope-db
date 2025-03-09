@@ -345,12 +345,12 @@ const logTemplates = ({
         // NEW CHANGES FROM 19 JAN 2025
         entryNewFile: file && project ? {
             ...commons('entry', entity._id),
-            action: `Document <span class="fw-bold">${file.name}</span> added to <a href="/entry/${entity._id}/project/${project.slug}">${entity.name}</a> `,
+            action: `Document <a file-id="${file._id}" onclick="getFileModal(this)" class="fw-bold">${file.name}</a> added to <a href="/entry/${entity._id}/project/${project.slug}">${entity.name}</a> `,
             color: 'blue',
         } : null, 
         entryChangeFile: file && project && changes ? {
             ...commons('entry', entity._id),
-            action: `Document <span class="fw-bold">${file.name}</span> properties updated in <a href="/entry/${entity._id}/project/${project.slug}">${entity.name}</a> `,
+            action: `Document <a file-id="${file._id}" onclick="getFileModal(this)" class="fw-bold">${file.name}</a> properties updated in <a href="/entry/${entity._id}/project/${project.slug}">${entity.name}</a> `,
             color: 'blue',
             changes,
         } : null, 

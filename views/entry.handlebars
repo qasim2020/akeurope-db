@@ -63,6 +63,9 @@
       {{#if (findInArray data.role 'viewOrders')}}
       {{> showEntryPayments}}
       {{/if}}
+      {{#if (findInArray data.role 'viewOrderOutline')}}
+      {{> showEntryPaymentsOutline}}
+      {{/if}}
       {{#if (findInArray data.role 'viewFiles')}}
       <div class="card mb-3" id="files-container" 
         entity-type="entry" entity-id="{{data.entry._id}}" entity-slug="{{data.project.slug}}" 
