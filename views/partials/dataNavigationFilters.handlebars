@@ -151,6 +151,8 @@
                         <div class="col-12 col-md-4 mb-2 sortBy">
                             <label class="form-label">Sort by</label>
                             <select class="form-select">
+                                <option value="paid" {{#if (eq ../data.pagination.sort.sortBy
+                                    'paid')}}selected{{/if}}>Paid in active orders</option>
                                 {{#each data.project.fields}}
                                 <option value="{{this.name}}" {{#if (eq ../data.pagination.sort.sortBy
                                     this.name)}}selected{{/if}}>{{this.actualName}}</option>

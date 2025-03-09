@@ -75,12 +75,63 @@ const projectEntries = async function (req, res) {
 
     const filtersQuery = new URLSearchParams(serializedFilters).toString();
 
-    let entries = await DynamicModel.find(searchQuery).sort(sortOptions).skip(skip).limit(limit).lean();
+    let entries = [];
+    let totalEntries, totalPages;
 
-    entries = await fetchEntryDetailsFromPaymentsAndSubscriptions(entries);
-
-    const totalEntries = await DynamicModel.countDocuments(searchQuery);
-    const totalPages = Math.ceil(totalEntries / limit);
+    entries = await DynamicModel.aggregate([
+        { $match: searchQuery },
+        {
+            $lookup: {
+                from: "orders",
+                localField: "_id",
+                foreignField: "projects.entries.entryId",
+                as: "orderInfo"
+            }
+        },
+        { $unwind: { path: "$orderInfo", preserveNullAndEmptyArrays: true } },
+        { $unwind: { path: "$orderInfo.projects", preserveNullAndEmptyArrays: true } },
+        {
+            $addFields: {
+                isPaid: {
+                    $cond: {
+                        if: {
+                            $and: [
+                                { $eq: ["$orderInfo.status", "paid"] },
+                                {
+                                    $gt: [
+                                        {
+                                            $add: [
+                                                "$orderInfo.createdAt",
+                                                {
+                                                    $multiply: [
+                                                        "$orderInfo.projects.months",
+                                                        30 * 24 * 60 * 60 * 1000
+                                                    ]
+                                                }
+                                            ]
+                                        },
+                                        new Date()
+                                    ]
+                                }
+                            ]
+                        },
+                        then: 1,
+                        else: 0
+                    }
+                }
+            }
+        },
+        ...(req.query.sortBy === "paid"
+            ? [{ $sort: { isPaid: -1, ...sortOptions } }]
+            : [{ $sort: { ...sortOptions }}]),
+        { $skip: skip },
+        { $limit: limit }
+    ]);
+    
+    totalEntries = await DynamicModel.countDocuments(searchQuery);
+    
+    totalEntries = await DynamicModel.countDocuments(searchQuery);
+    totalPages = Math.ceil(totalEntries / limit);
 
     return {
         entries,

@@ -1,8 +1,39 @@
+const hbs = require('handlebars');
 const moment = require('moment');
 const getLetterIcon = require('../modules/iconLetter');
 const getOrderIcon = require('../modules/iconOrder');
 const cheerio = require('cheerio');
 const roles = require('../modules/roles');
+
+const categoryOptions = function (selectedCategory, options) {
+    const categories = [
+        { value: "thankyou", label: "Thank You Note" },
+        { value: "general", label: "General" },
+        { value: "health", label: "Health Report" },
+        { value: "invoice", label: "Invoice" },
+        { value: "paymentProof", label: "Payment Proof" },
+        { value: "schoolReport", label: "School Report" },
+        { value: "rent", label: "Rent Report" },
+        { value: "monthlyReport", label: "Monthly Report" },
+    ];
+
+    let html = "";
+    categories.forEach((category) => {
+        html += `
+        <label class="form-selectgroup-item flex-fill">
+            <input type="radio" name="fileCategory" value="${category.value}" class="form-selectgroup-input"
+                ${selectedCategory === category.value ? "checked" : ""}>
+            <div class="form-selectgroup-label d-flex align-items-center p-3">
+                <div class="me-3">
+                    <span class="form-selectgroup-check"></span>
+                </div>
+                <div>${category.label}</div>
+            </div>
+        </label>`;
+    });
+
+    return new hbs.SafeString(html);
+};
 
 const eq = function (a, b) {
     return a === b;
@@ -293,6 +324,7 @@ const divide = function(a, b) {
 };
 
 module.exports = {
+    categoryOptions,
     eq,
     gt,
     and,

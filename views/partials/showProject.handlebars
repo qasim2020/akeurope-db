@@ -41,12 +41,13 @@
           {{#if (lookup entry this.name)}}
           <a data-fslightbox="gallery-grid" href="{{lookup entry this.name}}">
             <img class="img-thumbnai p-0 overflow-hidden rounded-3 border"
-              src="{{resizeCloudinaryUrl (lookup entry this.name) 't_w-250'}}" alt="{{this.name}}" style="max-width: 150px;">
+              src="{{resizeCloudinaryUrl (lookup entry this.name) 't_w-250'}}" alt="{{this.name}}"
+              style="max-width: 150px;">
           </a>
           {{else}}
           <a data-fslightbox="gallery-grid" href="/static/images/no-image-placement.png">
-            <img class="img-thumbnai p-0 overflow-hidden rounded-3 border"
-              src="/static/images/no-image-placement.png" alt="" style="max-width: 150px;">
+            <img class="img-thumbnai p-0 overflow-hidden rounded-3 border" src="/static/images/no-image-placement.png"
+              alt="" style="max-width: 150px;">
           </a>
           {{/if}}
 
@@ -101,7 +102,7 @@
   </thead>
   <tbody>
     {{#each data.entries as |entry|}}
-    <tr class="data-row">
+    <tr class="data-row {{#if (eq entry.isPaid 1)}}bg-red-lt{{/if}}">
       <td>
         <a href="/entry/{{entry._id}}/project/{{../data.project.slug}}" class="btn btn-primary btn-icon cursor-pointer">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
