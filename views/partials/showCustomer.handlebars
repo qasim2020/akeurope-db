@@ -16,23 +16,32 @@
         </div>
 
         <div class="datagrid-item">
+          <div class="datagrid-title">Phone</div>
+          <div class="datagrid-content">
+            <span>{{customer.tel}}</span>
+          </div>
+        </div>
+
+        <div class="datagrid-item">
           <div class="datagrid-title">Email</div>
           <div class="datagrid-content">
             <span>{{customer.email}}</span>
           </div>
         </div>
 
+        {{#if customer.organization}}
         <div class="datagrid-item">
           <div class="datagrid-title">Organization</div>
           <div class="datagrid-content">
             <span>{{customer.organization}}</span>
           </div>
         </div>
+        {{/if}}
 
         <div class="datagrid-item">
-          <div class="datagrid-title">Location</div>
+          <div class="datagrid-title">Address</div>
           <div class="datagrid-content">
-            <span>{{customer.location}}</span>
+            <span>{{or customer.address customer.location}}</span>
           </div>
         </div>
 
@@ -56,9 +65,6 @@
             <span>{{customer.emailStatus}}</span>
           </div>
         </div>
-
-
-
 
       </div>
     </div>

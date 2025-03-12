@@ -14,6 +14,7 @@ const { saveLog, customerLogs, visibleLogs } = require('../modules/logAction');
 const { logTemplates } = require('../modules/logTemplates');
 const { getChanges } = require('../modules/getChanges');
 const Order = require('../models/Order');
+const Donor = require('../models/Donor');
 
 const sessionCollection = mongoose.connection.collection('sessions_customer_portal');
 
@@ -345,6 +346,9 @@ exports.getLogs = async (req, res) => {
 exports.customer = async (req, res) => {
     try {
         const customer = await Customer.findById(req.params.customerId).lean();
+
+        const donor = await Donor.findOne({ email: customer.email }).lean();
+        customer.tel = customer.tel || donor?.tel;
 
         const orders = await Order.find({ customerId: req.params.customerId }).lean();
 

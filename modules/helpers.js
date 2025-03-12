@@ -5,6 +5,10 @@ const getOrderIcon = require('../modules/iconOrder');
 const cheerio = require('cheerio');
 const roles = require('../modules/roles');
 
+const or = function (a,b) {
+    return a || b;
+};
+
 const categoryOptions = function (selectedCategory, options) {
     const categories = [
         { value: "thankyou", label: "Thank You Note" },
@@ -325,6 +329,7 @@ const divide = function(a, b) {
 
 module.exports = {
     categoryOptions,
+    or,
     eq,
     gt,
     and,
