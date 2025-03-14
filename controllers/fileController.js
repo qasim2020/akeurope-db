@@ -1,5 +1,6 @@
 const File = require('../models/File');
 const Order = require('../models/Order');
+const Subscription = require('../models/Subscription');
 const fs = require('fs').promises;
 const path = require('path');
 const { createDynamicModel } = require('../models/createDynamicModel');
@@ -150,7 +151,7 @@ exports.uploadFileToOrder = async (req, res) => {
 
         await file.save();
 
-        const order = await Order.findById(entityId).lean();
+        const order = (await Order.findById(entityId).lean()) || (await Subscription.findById(entityId).lean());
 
         await saveLog(
             logTemplates({
@@ -281,7 +282,7 @@ exports.update = async (req, res) => {
 
         if (changes.length > 0) {
             if (entityType === 'order') {
-                const order = await Order.findById(entityId).lean();
+                const order = (await Order.findById(entityId).lean()) || (await Subscription.findById(entityId).lean());
                 await saveLog(
                     logTemplates({
                         type: 'orderChangeFile',
@@ -338,7 +339,7 @@ exports.delete = async (req, res) => {
         await fs.unlink(filePath);
 
         if (entityType === 'order') {
-            const order = await Order.findById(entityId).lean();
+            const order = (await Order.findById(entityId).lean()) || (await Subscription.findById(entityId).lean());
             await saveLog(
                 logTemplates({
                     type: 'orderDeletedFile',

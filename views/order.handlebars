@@ -1,15 +1,17 @@
+<script src="https://pfau-software.de/json-viewer/dist/iife/index.js"></script>
+
 <div class="page-header d-print-none">
   <div class="mt-3 mx-3">
     <div class="row g-2 align-items-center">
       <div class="col">
         <div class="page-pretitle"> Overview </div>
-        <h2 class="page-title"> Invoice {{data.order.orderNo}}
+        <h2 class="page-title"> Order # {{data.order.orderNo}}
           <span class="ms-2 d-flex">
             {{{getOrderIcon data.order.status}}}
           </span>
         </h2>
       </div>
-      {{#if data.order.customer}}
+      {{#if data.order.projects}}
       <div class="col-auto ms-auto d-print-none">
         <div class="btn-list">
           <a href="#" class="btn btn-primary d-none d-md-inline-block" id="#editOrder" data-bs-toggle="modal"
@@ -23,7 +25,7 @@
               <path d="M16 19h6"></path>
               <path d="M19 16v6"></path>
             </svg>
-            Edit Invoice
+            Edit Order
           </a>
           <a href="#" class="btn btn-primary d-md-none btn-icon" data-bs-toggle="modal"
             data-bs-target="#modal-{{data.order._id}}" aria-label="modal-order-{{data.order._id}}">
@@ -41,6 +43,7 @@
       </div>
       {{/if}}
     </div>
+
   </div>
 </div>
 <div class="m-3 pt-4" id="data-container">
@@ -52,8 +55,7 @@
     </div>
     <div class="d-block col-12 col-md-6">
       {{#if (findInArray data.role 'viewFiles')}}
-      <div class="card mb-3" id="files-container" 
-        entity-type="order" entity-id="{{data.order._id}}" entity-slug="none"
+      <div class="card mb-3" id="files-container" entity-type="order" entity-id="{{data.order._id}}" entity-slug="none"
         entity-url="/order/{{data.order._id}}" file-url="/uploadFileToOrder">
         {{> showEntityFiles}}
       </div>
@@ -68,16 +70,19 @@
 {{/if}}
 
 <script src="/static/orders.js"></script>
+
 <script>
 
   const refreshContainers = function (modal) {
     console.log('refreshing containers');
-    const hrefOrder = `/getOrderData/{{data.order._id}}`;
-    loadOrderInContainer(modal, hrefOrder);
     const hrefLogs = `/getOrderLogs/{{data.order._id}}?page=1`;
     getOrderLogs(modal, hrefLogs);
+    {{#if data.order.projects}}
+    const hrefOrder = `/getOrderData/{{data.order._id}}`;
+    loadOrderInContainer(modal, hrefOrder);
     const hrefProjects = `/getOrderProjects/{{data.order._id}}`;
     loadOrderProjects(hrefProjects);
+    {{/if}}
   }
 
   const loadOrderInContainer = function (elem, href) {

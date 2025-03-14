@@ -5,13 +5,10 @@ const http = require('http');
 const session = require('express-session');
 const flash = require('connect-flash');
 const mongoose = require('./config/db');
-
 const exphbs = require('express-handlebars');
 const path = require('path');
 const hbsHelpers = require('./modules/helpers');
-
 const MongoStore = require('connect-mongo');
-
 const { initSocket } = require('./sockets');
 
 const { router } = require('./routes/authRoutes');
@@ -29,35 +26,13 @@ const orderRoutes = require('./routes/ordersRoutes');
 const invoiceRoutes = require('./routes/invoiceRoutes');
 const fileRoutes = require('./routes/filesRoutes');
 
+const { sendErrorToTelegram } = require('../akeurope-cp/modules/telegramBot');
+
 mongoose();
 
 const app = express();
 app.engine('handlebars', exphbs.engine({helpers: hbsHelpers}));
 app.set('view engine', 'handlebars');
-
-// app.get('/preview-email/:orderId', async (req, res) => {
-//   const templateName = 'emailThanks';
-
-//   const Order = require('./models/Order');
-//   const Customer = require('./models/Customer');
-//   const Project = require('./models/Project');
-  
-//   const order = await Order.findById(req.params.orderId).lean();
-//   const customer = await Customer.findById(order.customerId).lean();
-
-//   const project = order.projects.find(project => project.slug === 'gaza-orphans');
-//   project.detail = await Project.findOne({ slug: project.slug }).lean();
-
-//   let inviteLink = '';
-//   if (customer.inviteToken) {
-//       inviteLink = `${process.env.CUSTOMER_PORTAL_URL}/register/${customer.inviteToken}`;
-//   } else {
-//       inviteLink = `${process.env.CUSTOMER_PORTAL_URL}/login`;
-//   }
-
-//   const data = { order, customer, project, inviteLink }; 
-//   res.render(`emails/${templateName}`, data);
-// });
 
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(express.json({ limit: '50mb' }));
@@ -76,6 +51,42 @@ app.use(
     }
   })
 );
+
+
+app.use((req, res, next) => {
+  res.set('Cache-Control', 'no-store');
+  console.log(req.originalUrl);
+  let oldSend = res.send;
+  let oldJson = res.json;
+
+  let responseBody;
+
+  res.send = function (data) {
+      responseBody = data;
+      return oldSend.apply(res, arguments);
+  };
+
+  res.json = function (data) {
+      responseBody = data;
+      return oldJson.apply(res, arguments);
+  };
+
+  const forbiddenErrors = ['/overlay/fonts/Karla-regular.woff', '/robots.txt'];
+
+  res.on('finish', () => {
+      if (res.statusCode > 399 && !forbiddenErrors.includes(req.originalUrl)) {
+          const errorData = {
+              message: responseBody,
+              status: res.statusCode,
+              url: req.originalUrl,
+          };
+
+          sendErrorToTelegram(errorData);
+      }
+  });
+
+  next();
+});
 
 app.use(flash());
 

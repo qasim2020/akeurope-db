@@ -14,11 +14,12 @@ const categoryOptions = function (selectedCategory, options) {
         { value: "thankyou", label: "Thank You Note" },
         { value: "general", label: "General" },
         { value: "health", label: "Health Report" },
-        { value: "invoice", label: "Invoice" },
         { value: "paymentProof", label: "Payment Proof" },
         { value: "schoolReport", label: "School Report" },
         { value: "rent", label: "Rent Report" },
         { value: "monthlyReport", label: "Monthly Report" },
+        { value: "invoice", label: "Invoice" },
+        { value: 'receipt', label: "Receipt"},
     ];
 
     let html = "";
@@ -327,7 +328,15 @@ const divide = function(a, b) {
     return a / b;
 };
 
+const slugToString = function (slug) {
+    return slug
+        .split('-')
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+};
+
 module.exports = {
+    slugToString,
     categoryOptions,
     or,
     eq,

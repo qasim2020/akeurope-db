@@ -1,71 +1,10 @@
 {{#if data.order.customer}}
 
-{{#with data.order as |order|}}
-
-<div class="card mb-3 data-row" id="order-container">
-  <div class="card-header">
-    <h3 class="card-title">Summary</h3>
-  </div>
-  <div class="card-body">
-    <div class="datagrid">
-      <div class="datagrid-item">
-        <div class="datagrid-title">Invoice No</div>
-        <div class="datagrid-content">
-          <span>{{order.orderNo}}</span>
-        </div>
-      </div>
-
-
-      <div class="datagrid-item">
-        <div class="datagrid-title">Customer</div>
-        <div class="datagrid-content">
-          <span>{{order.customer.name}}</span>
-        </div>
-      </div>
-
-      <div class="datagrid-item">
-        <div class="datagrid-title">Organization</div>
-        <div class="datagrid-content">
-          <span>{{order.customer.organization}}</span>
-        </div>
-      </div>
-
-      <div class="datagrid-item">
-        <div class="datagrid-title">Customer Email</div>
-        <div class="datagrid-content">
-          <span>{{order.customer.email}}</span>
-        </div>
-      </div>
-
-      <div class="datagrid-item">
-        <div class="datagrid-title">Total Amount</div>
-        <div class="datagrid-content">
-          <span>{{order.totalCost}} {{order.currency}}</span>
-        </div>
-      </div>
-
-      <div class="datagrid-item">
-        <div class="datagrid-title">Projects Amount</div>
-        <div class="datagrid-content">
-          {{#each order.projects}}
-          <span class="badge bg-green-lt px-2 mb-1">{{this.totalCostAllMonths}} {{order.currency}} in
-            {{this.detail.name}}</span>
-          {{/each}}
-        </div>
-      </div>
-
-      <div class="datagrid-item">
-        <div class="datagrid-title">Invoice Status</div>
-        <div class="datagrid-content">
-          <span>{{{getOrderIcon order.status}}} {{capitalizeFirstLetter order.status}}</span>
-        </div>
-      </div>
-
-    </div>
-  </div>
+<div class="card mb-3 p-0">
+  <andypf-json-viewer indent="2" expanded="1" theme="default-light" show-data-types="true" show-toolbar="false"
+    expand-icon-type="square" show-copy="true" show-size="true">
+    {{data.orderJson}}</andypf-json-viewer>
 </div>
-
-{{/with}}
 
 {{else}}
 

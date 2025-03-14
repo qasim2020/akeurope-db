@@ -95,7 +95,7 @@
           <th>Date</th>
           <th>Customer</th>
           <th>Status</th>
-          <th>Projects Amount</th>
+          <th>Project(s)</th>
           <th>Total Amount</th>
         </tr>
       </thead>
@@ -148,21 +148,22 @@
             {{{getOrderIcon order.status}}} {{capitalizeFirstLetter order.status}}
           </td>
           <td>
-            {{#each order.projects}}
-            <span class="badge bg-green-lt">{{this.totalCostAllMonths}} {{../order.currency}}
-              in {{this.details.name}} </span>
-            {{/each}}
+            {{#if order.projects}}
+              {{#each order.projects}}
+              <span class="badge bg-green-lt">{{this.totalCostAllMonths}} {{order.currency}}
+                in {{this.details.name}} </span>
+              {{/each}}
+            {{else}}
+            <span class="badge bg-red-lt">{{this.total}} {{order.currency}}
+              in {{slugToString this.projectSlug}} </span>
+            {{/if}}
           </td>
-          <td> 
+          <td>
             {{#if (eq order.stripeInfo.paymentMethodType 'card')}} <i class="ti ti-credit-card"></i> {{/if}}
             {{#if (eq order.stripeInfo.paymentMethodType 'apple_pay')}} <i class="ti ti-brand-apple"></i> {{/if}}
             {{#if (eq order.stripeInfo.paymentMethodType 'google_pay')}} <i class="ti ti-brand-google"></i> {{/if}}
             {{#unless order.stripeInfo}} <i class="ti ti-home"></i> {{/unless}}
-            {{#if order.monthlySubscription}}
-            {{order.totalCostSingleMonth}} {{order.currency}} 
-            {{else}}
-            {{order.totalCost}} {{order.currency}} 
-            {{/if}}
+            {{or order.totalCost order.total}} {{order.currency}}
           </td>
         </tr>
         {{/each}}

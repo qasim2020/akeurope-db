@@ -2,6 +2,7 @@ const Project = require('../models/Project');
 const Customer = require('../models/Customer');
 const Order = require('../models/Order');
 const Donor = require('../models/Donor');
+const Subscription = require('../models/Subscription');
 
 const { createDynamicModel } = require('../models/createDynamicModel');
 const { generatePagination } = require('../modules/generatePagination');
@@ -254,10 +255,13 @@ const createDraftOrder = async (req, res) => {
 
 const getPaginatedOrders = async (req, res) => {
     const orders = await Order.find().sort({ _id: -1 }).lean();
+    const subs = await Subscription.find().sort({ _id: -1 }).lean();
+
+    const mergedData = [...orders, ...subs].sort((a, b) => b.orderNo - a.orderNo);
 
     const pagination = createPagination({
         req,
-        totalEntries: orders.length,
+        totalEntries: mergedData.length,
         pageType: 'orders',
     });
 
@@ -265,17 +269,19 @@ const getPaginatedOrders = async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const skip = (page - 1) * limit;
 
-    const ordersPaginated = orders.slice(skip, skip + limit);
+    const ordersPaginated = mergedData.slice(skip, skip + limit);
 
     for (const order of ordersPaginated) {
         order.customer = await Customer.findById(order.customerId).lean();
-        order.projects = await Promise.all(
-            order.projects.map((val) =>
-                Project.findOne({ slug: val.slug })
-                    .lean()
-                    .then((projectDetails) => Object.assign(val, { details: projectDetails })),
-            ),
-        );
+        if (order.projects) {
+            order.projects = await Promise.all(
+                order.projects.map((val) =>
+                    Project.findOne({ slug: val.slug })
+                        .lean()
+                        .then((projectDetails) => Object.assign(val, { details: projectDetails })),
+                ),
+            );
+        }
     }
 
     return {
@@ -500,7 +506,13 @@ const addPaymentsToOrder = async (order) => {
             return entry;
         });
         for (const entry of cleanedEntries) {
-            const { _id: entryId, totalCost: totalCostAllSubscriptions, totalOrderedCost: totalCost, selectedSubscriptions, costs } = entry;
+            const {
+                _id: entryId,
+                totalCost: totalCostAllSubscriptions,
+                totalOrderedCost: totalCost,
+                selectedSubscriptions,
+                costs,
+            } = entry;
             await Order.updateOne(
                 { _id: order._id },
                 {
@@ -594,31 +606,52 @@ const getPendingOrderEntries = async (req, res) => {
 
 const getSubscriptionByOrderId = async (orderId) => {
     try {
-        const donor = await Donor.findOne({
-            "subscriptions.orderId": orderId
-        }, { "subscriptions.$": 1 }).lean();
+        const temp = await Donor.findOne({'subscriptions.orderId': orderId}).lean();
+        console.log(temp);
+
+        const donor = await Donor.findOne(
+            {
+                'subscriptions.orderId': orderId,
+            },
+            { 'subscriptions.$': 1 },
+        ).lean();
 
         return donor ? donor.subscriptions[0] : null;
     } catch (error) {
-        console.error("Error fetching subscription:", error);
+        console.error('Error fetching subscription:', error);
+        return null;
+    }
+};
+
+const getSubscriptionsByOrderId = async (orderId) => {
+    try {
+        const donor = await Donor.findOne({'subscriptions.orderId': orderId}).lean();
+        const subscriptions = donor.subscriptions.filter(sub => sub.orderId.toString() === orderId.toString());
+        return subscriptions;
+    } catch (error) {
+        console.error('Error fetching subscriptions:', error);
         return null;
     }
 };
 
 const getPaymentByOrderId = async (orderId) => {
     try {
-        const donor = await Donor.findOne({
-            "payments.orderId": orderId
-        }, { "payments.$": 1 }).lean();
+        const donor = await Donor.findOne(
+            {
+                'payments.orderId': orderId,
+            },
+            { 'payments.$': 1 },
+        ).lean();
 
         return donor ? donor.payments[0] : null;
     } catch (error) {
-        console.error("Error fetching payment:", error);
+        console.error('Error fetching payment:', error);
         return null;
     }
 };
 
 module.exports = {
+    getSubscriptionsByOrderId,
     getSubscriptionByOrderId,
     getPaymentByOrderId,
     createDraftOrder,

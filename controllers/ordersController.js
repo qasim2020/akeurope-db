@@ -3,6 +3,7 @@ const Customer = require('../models/Customer');
 const Project = require('../models/Project');
 const Order = require('../models/Order');
 const File = require('../models/File');
+const Subscription = require('../models/Subscription');
 const { saveLog, visibleLogs, orderLogs } = require('../modules/logAction');
 const { logTemplates } = require('../modules/logTemplates');
 const { getChanges } = require('../modules/getChanges');
@@ -15,6 +16,7 @@ const {
     formatOrder,
     getPaymentByOrderId,
     getSubscriptionByOrderId,
+    getSubscriptionsByOrderId,
     cleanOrder,
 } = require('../modules/orders');
 const { generateInvoice, deleteInvoice, sendInvoiceToCustomer, sendThanksToCustomer } = require('../modules/invoice');
@@ -58,7 +60,19 @@ exports.viewOrders = async (req, res) => {
 
 exports.viewOrder = async (req, res) => {
     try {
-        const order = await getSingleOrder(req, res);
+        let order = await getSingleOrder(req, res);
+
+        if (!order.customerId) {
+            order = await Subscription.findById(req.params.orderId).lean();
+            if (!order) throw new Error('Order not found');
+            order.customer = await Customer.findById(order.customerId).lean();
+        }
+
+        const payment = await getPaymentByOrderId(order._id);
+        const subscriptions = await getSubscriptionsByOrderId(order._id);
+
+        if (payment) order.payment = payment;
+        if (subscriptions) order.subscriptions = subscriptions;
 
         const files = await File.find({ 'links.entityId': req.params.orderId }).sort({ createdAt: -1 }).lean();
 
@@ -87,6 +101,7 @@ exports.viewOrder = async (req, res) => {
                 customers: await Customer.find().lean(),
                 activeMenu: 'orders',
                 order,
+                orderJson: JSON.stringify(order),
                 files,
             },
         });

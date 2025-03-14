@@ -1,5 +1,6 @@
 const path = require('path');
 const fs = require('fs');
+const File = require('../models/File');
 const { saveLog, customerLogs, visibleLogs } = require('../modules/logAction');
 const { logTemplates } = require('../modules/logTemplates');
 const { getSingleOrder } = require('../modules/orders');
@@ -35,6 +36,14 @@ exports.invoice = async (req, res) => {
             return;
         }
 
+        if (!order.projects) {
+            res.status(200).render('error', {
+                message: 'Invoice is created for orders with projects',
+                success: true,
+            });
+            return;
+        }
+
         if (order.projects.length == 0 || order.totalCost == 0) {
             res.status(200).render('error', {
                 message: 'Invoice is created after you select beneficiaries',
@@ -55,6 +64,8 @@ exports.invoice = async (req, res) => {
         );
 
         const invoiceExists = await checkFileExists(invoicePath);
+
+        console.log(invoiceExists);
 
         if (invoiceExists) {
             await deletePath(invoicePath);
