@@ -626,6 +626,7 @@ const getSubscriptionByOrderId = async (orderId) => {
 const getSubscriptionsByOrderId = async (orderId) => {
     try {
         const donor = await Donor.findOne({'subscriptions.orderId': orderId}).lean();
+        if (!donor) return false;
         const subscriptions = donor.subscriptions.filter(sub => sub.orderId.toString() === orderId.toString());
         return subscriptions;
     } catch (error) {
