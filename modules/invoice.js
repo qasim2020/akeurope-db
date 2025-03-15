@@ -97,24 +97,17 @@ const generateInvoice = async (order) => {
             doc.text(`${order.customer.name}`, 350, 170);
             doc.text(`${order.customer.email}`, 350, 185);
 
-            let x = 200;
+            doc.fontSize(12)
+                .font('Helvetica-Bold')
+                .text('Organization: ', 350, 200, { continued: true })
+                .font('Helvetica')
+                .text(`${order.customer.organization || 'Not Listed'}`);
 
-            if (order.customer.organization) {
-                doc.fontSize(12)
-                    .font('Helvetica-Bold')
-                    .text('Organization: ', 350, 215, { continued: true })
-                    .font('Helvetica')
-                    .text(`${order.customer.organization || 'Not Listed'}`);
-                x += 15;
-            } else {
-                x = 200;
-            }
-
-            doc.fontSize(12).font('Helvetica-Bold').text('Address: ', 350, x);
+            doc.fontSize(12).font('Helvetica-Bold').text('Address: ', 350, 215);
 
             doc.fontSize(12)
                 .font('Helvetica')
-                .text(`${order.customer.address || ''}`, 350, x + 15);
+                .text(`${order.customer.address || ''}`, 350, 230);
 
             const startY = 320;
             const endY = drawTable(doc, order.projects, startY, order);

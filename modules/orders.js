@@ -367,6 +367,12 @@ const formatOrder = async (req, order) => {
     return order;
 };
 
+async function countSubscriptions(orderId) {
+    const donor = await Donor.findOne({ 'subscriptions.orderId': orderId }).lean();
+    const subscriptions = donor.subscriptions.filter((sub) => sub.orderId.toString() === orderId.toString());
+    return subscriptions.length;
+}
+
 const cleanOrder = async (orderId) => {
     await Order.findOneAndUpdate(
         { _id: orderId },
@@ -387,6 +393,16 @@ const cleanOrder = async (orderId) => {
         },
         { new: true },
     );
+
+    const months = await countSubscriptions(orderId);
+    const order = await Order.findOneAndUpdate(
+        { _id: orderId, 'projects.slug': { $exists: true } },
+        { $set: { 'projects.$.months': months } },
+        { new: true, lean: true },
+    );
+    if (!order) throw new Error('Failed to update the order with months');
+    const calculatedOrder = await calculateOrder(order);
+    await addPaymentsToOrder(calculatedOrder);
 
     return true;
 };

@@ -163,7 +163,7 @@ const logTemplates = ({
         // NEW CHANGES FROM 31 DEC 2024
         orderCreated: {
             ...commons('order', entity._id),
-            action: `New <a href="/order/${entity._id}">Invoice-${entity.orderNo}</a> created`,
+            action: `New <a href="/order/${entity._id}">Order-${entity.orderNo}</a> created`,
             color: 'green',
             isNotification: true,
             isRead: true,
@@ -173,7 +173,7 @@ const logTemplates = ({
             order && customer
                 ? {
                       ...commons('order', entity._id),
-                      action: `<a href="/customer/${customer._id}">${customer.name}</a> removed from <a href="/order/${order._id}">Invoice-${order.orderNo}</a>`,
+                      action: `<a href="/customer/${customer._id}">${customer.name}</a> removed from <a href="/order/${order._id}">Order-${order.orderNo}</a>`,
                       color: 'blue',
                   }
                 : null,
@@ -181,7 +181,7 @@ const logTemplates = ({
             order && customer
                 ? {
                       ...commons('order', entity._id),
-                      action: `<a href="/customer/${customer._id}">${customer.name}</a> added to <a href="/order/${order._id}">Invoice-${order.orderNo}</a>`,
+                      action: `<a href="/customer/${customer._id}">${customer.name}</a> added to <a href="/order/${order._id}">Order-${order.orderNo}</a>`,
                       color: 'blue',
                   }
                 : null,
@@ -195,7 +195,7 @@ const logTemplates = ({
                           project.slug
                       }">${
                           project.detail ? project.detail.name : project.name
-                      }</a> selected in <a href="/order/${order._id}">Invoice-${
+                      }</a> selected in <a href="/order/${order._id}">Order-${
                           order.orderNo
                       }</a>`,
                       changes,
@@ -214,7 +214,7 @@ const logTemplates = ({
                           project.detail ? project.detail.name : project.name
                       }</a> removed from <a href="/order/${
                           order._id
-                      }">Invoice-${order.orderNo}</a>`,
+                      }">Order-${order.orderNo}</a>`,
                       changes,
                       color: 'red',
                   }
@@ -231,7 +231,7 @@ const logTemplates = ({
                           project.detail ? project.detail.name : project.name
                       }</a> status changed in <a href="/order/${
                           order._id
-                      }">Invoice-${order.orderNo}</a>`,
+                      }">Order-${order.orderNo}</a>`,
                       changes,
                       color: color ? color : 'blue',
                   }
@@ -246,7 +246,7 @@ const logTemplates = ({
                           entity.name || entity.nameOfOrphan
                       }</a> in project <a href="/project/${project.slug}">${
                           project.detail ? project.detail.name : project.name
-                      }</a> of <a href="/order/${order._id}">Invoice-${
+                      }</a> of <a href="/order/${order._id}">Order-${
                           order.orderNo
                       }</a>`,
                       changes,
@@ -257,7 +257,7 @@ const logTemplates = ({
             entry && project && changes
                 ? {
                       ...commons('order', entity._id),
-                      action: `Subscription changed of <a href="/entry/${entry._id}/project/${project.slug}">${entry.name || entry.nameOfOrphan}</a> in <a href="/project/${project.slug}">${project.detail.name}</a> of <a href="/order/${entity._id}">Invoice-${entity.orderNo}</a>`,
+                      action: `Subscription changed of <a href="/entry/${entry._id}/project/${project.slug}">${entry.name || entry.nameOfOrphan}</a> in <a href="/project/${project.slug}">${project.detail.name}</a> of <a href="/order/${entity._id}">Order-${entity.orderNo}</a>`,
                       changes,
                       color: 'blue',
                   }
@@ -266,20 +266,20 @@ const logTemplates = ({
             project && order && changes
                 ? {
                       ...commons('order', entity._id),
-                      action: `Subscription column changed in project <a href="/project/${project.slug}">${project.name}</a> of <a href="/order/${order._id}">Invoice-${order.orderNo}</a>`,
+                      action: `Subscription column changed in project <a href="/project/${project.slug}">${project.name}</a> of <a href="/order/${order._id}">Order-${order.orderNo}</a>`,
                       changes,
                       color: 'blue',
                   }
                 : null,
         orderCustomerChanged: {
             ...commons('order', entity._id),
-            action: `Customer changed in <a href="/order/${entity._id}">Invoice-${entity.orderNo}</a>`,
+            action: `Customer changed in <a href="/order/${entity._id}">Order-${entity.orderNo}</a>`,
             color: 'blue',
             changes,
         },
         orderCurrencyChanged: {
             ...commons('order', entity._id),
-            action: `Currency changed in <a href="/order/${entity._id}">Invoice-${entity.orderNo}</a>`,
+            action: `Currency changed in <a href="/order/${entity._id}">Order-${entity.orderNo}</a>`,
             color: 'blue',
             changes,
         },
@@ -287,7 +287,7 @@ const logTemplates = ({
             project && order
                 ? {
                       ...commons('order', entity._id),
-                      action: `Project <a href="/project/${project.slug}">${project.name}</a> removed from <a href="/order/${order._id}">Invoice-${order.orderNo}</a>`,
+                      action: `Project <a href="/project/${project.slug}">${project.name}</a> removed from <a href="/order/${order._id}">Order-${order.orderNo}</a>`,
                       color: 'blue',
                   }
                 : null,
@@ -302,19 +302,19 @@ const logTemplates = ({
                       project.slug
                   }">${project.name}</a> of <a href="/order/${
                       entity._id
-                  }">Invoice-${entity.orderNo}</a>`,
+                  }">Order-${entity.orderNo}</a>`,
                   color: 'blue',
               }
             : null,
         orderTotalCostChanged: {
             ...commons('order', entity._id),
-            action: `Total cost changed in <a href="/order/${entity._id}">Invoice-${entity.orderNo}</a>`,
+            action: `Total cost changed in <a href="/order/${entity._id}">Order-${entity.orderNo}</a>`,
             changes,
             color: 'blue',
         },
         orderStatusChanged: {
             ...commons('order', entity._id),
-            action: `Status changed in <a href="/order/${entity._id}">Invoice-${entity.orderNo}</a>`,
+            action: `Status changed in <a href="/order/${entity._id}">Order-${entity.orderNo}</a>`,
             changes,
             isNotification: true,
             isRead: true,
@@ -323,7 +323,7 @@ const logTemplates = ({
         },
         orderStatusChangedToPaid: {
             ...commons('order', entity._id),
-            action: `<a href="/order/${entity._id}">Invoice-${entity.orderNo}</a> status changed to Paid`,
+            action: `<a href="/order/${entity._id}">Order-${entity.orderNo}</a> status changed to Paid`,
             isNotification: true,
             isRead: true,
             isReadByCustomer: false,
@@ -331,13 +331,13 @@ const logTemplates = ({
         },
         orderDeleted: {
             ...commons('order', entity._id),
-            action: `<a href="/order/${entity._id}">Invoice-${entity.orderNo}</a> deleted`,
+            action: `<a href="/order/${entity._id}">Order-${entity.orderNo}</a> deleted`,
             color: 'red',
         },
         customerOrderDeleted: order
             ? {
                   ...commons('customer', entity._id),
-                  action: `<a href="/order/${order._id}">Invoice-${order.orderNo}</a> deleted`,
+                  action: `<a href="/order/${order._id}">Order-${order.orderNo}</a> deleted`,
                   color: 'red',
                   isRead: true,
                   isReadByCustomer: false,
@@ -363,20 +363,20 @@ const logTemplates = ({
         } : null,
         orderNewFile: file ? {
             ...commons('order', entity._id),
-            action: `Document <span class="fw-bold">${file.name}</span> added to <a href="/order/${entity._id}">Invoice-${entity.orderNo}</a> `,
+            action: `Document <span class="fw-bold">${file.name}</span> added to <a href="/order/${entity._id}">Order-${entity.orderNo}</a> `,
             color: 'blue',
             isNotification: true,
             isReadByCustomer: false
         } : null, 
         orderChangeFile: file && changes ? {
             ...commons('order', entity._id),
-            action: `Document <span class="fw-bold">${file.name}</span> properties updated in <a href="/order/${entity._id}">Invoice-${entity.orderNo}</a> `,
+            action: `Document <span class="fw-bold">${file.name}</span> updated in <a href="/order/${entity._id}">Order-${entity.orderNo}</a> `,
             color: 'blue',
             changes,
         } : null, 
         orderDeletedFile: file ? {
             ...commons('order', entity._id),
-            action: `Document <span class="fw-bold">${file.name}</span> deleted in <a href="/order/${entity._id}">Invoice-${entity.orderNo}</a> `,
+            action: `Document <span class="fw-bold">${file.name}</span> deleted in <a href="/order/${entity._id}">Order-${entity.orderNo}</a> `,
             color: 'red',
         } : null,
 
