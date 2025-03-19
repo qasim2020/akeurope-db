@@ -367,15 +367,15 @@ const cleanOrder = async (orderId) => {
         { new: true },
     );
 
-    const months = await countSubscriptions(orderId);
-    const order = await Order.findOneAndUpdate(
-        { _id: orderId, 'projects.slug': { $exists: true } },
-        { $set: { 'projects.$.months': months } },
-        { new: true, lean: true },
-    );
-    if (!order) throw new Error('Failed to update the order with months');
-    const calculatedOrder = await calculateOrder(order);
-    await addPaymentsToOrder(calculatedOrder);
+    // const months = await countSubscriptions(orderId);
+    // const order = await Order.findOneAndUpdate(
+    //     { _id: orderId, 'projects.slug': { $exists: true } },
+    //     { $set: { 'projects.$.months': months } },
+    //     { new: true, lean: true },
+    // );
+    // if (!order) throw new Error('Failed to update the order with months');
+    // const calculatedOrder = await calculateOrder(order);
+    // await addPaymentsToOrder(calculatedOrder);
 
     return true;
 };
