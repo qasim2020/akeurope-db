@@ -364,4 +364,20 @@
 
   }
 
+  const doSearch = function (elem, href) {
+    if (!href) {
+      href = $(elem).attr("my-href");
+    }
+    $.ajax({
+      url: `/getCustomersData${href}`,
+      method: 'GET',
+      success: function (response) {
+        $("#data-container").html(response);
+        window.history.pushState(null, '', `/customers${href}`);
+      },
+      error: function (error) {
+        alert(error.responseText);
+      }
+    });
+  }
 </script>

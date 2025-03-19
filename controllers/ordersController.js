@@ -28,9 +28,9 @@ exports.viewOrders = async (req, res) => {
         const { orders, pagination } = await getPaginatedOrders(req, res);
 
         for (const order of orders) {
-            order.stripeInfo = await getPaymentByOrderId(order._id) || await getSubscriptionByOrderId(order._id);
-        };
-        
+            order.stripeInfo = (await getPaymentByOrderId(order._id)) || (await getSubscriptionByOrderId(order._id));
+        }
+
         const customers = await Customer.find().lean();
         res.render('orders', {
             layout: 'dashboard',
@@ -212,7 +212,7 @@ exports.changeOrderStatus = async (req, res) => {
 exports.deleteOrder = async (req, res) => {
     try {
         const orderId = req.params.orderId;
-        const order = await Order.findById(orderId).lean();
+        const order = (await Order.findById(orderId).lean()) || (await Subscription.findById(orderId).lean());
         await deleteInvoice(orderId);
         await saveLog(
             logTemplates({
@@ -229,23 +229,28 @@ exports.deleteOrder = async (req, res) => {
                 actor: req.session.user,
             }),
         );
-        for (const project of order.projects) {
-            project.detail = await Project.findOne({ slug: project.slug }).lean();
-            const model = await createDynamicModel(project.slug);
-            for (const entryInOrder of project.entries) {
-                const entry = await model.findById(entryInOrder.entryId).lean();
-                await saveLog(
-                    logTemplates({
-                        type: 'entryRemovedFromOrder',
-                        entity: entry,
-                        order,
-                        project,
-                        actor: req.session.user,
-                    }),
-                );
+        if (order.projects?.length > 0) {
+            for (const project of order.projects) {
+                project.detail = await Project.findOne({ slug: project.slug }).lean();
+                const model = await createDynamicModel(project.slug);
+                for (const entryInOrder of project.entries) {
+                    const entry = await model.findById(entryInOrder.entryId).lean();
+                    await saveLog(
+                        logTemplates({
+                            type: 'entryRemovedFromOrder',
+                            entity: entry,
+                            order,
+                            project,
+                            actor: req.session.user,
+                        }),
+                    );
+                }
             }
         }
+
         await Order.deleteOne({ _id: orderId });
+        await Subscription.deleteOne({ _id: orderId });
+
         res.status(200).send('Order & Invoice deleted!');
     } catch (error) {
         console.log(error);

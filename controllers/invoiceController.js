@@ -65,8 +65,6 @@ exports.invoice = async (req, res) => {
 
         const invoiceExists = await checkFileExists(invoicePath);
 
-        console.log(invoiceExists);
-
         if (invoiceExists) {
             await deletePath(invoicePath);
             await generateInvoice(order);

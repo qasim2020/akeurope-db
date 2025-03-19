@@ -236,10 +236,22 @@ const countPaidEntriesInProject = async (slug) => {
     return result.length > 0 ? result[0].totalPaidEntries : 0;
 };
 
+const visibleProjectDateFields = async (project) => {
+    if (!project) throw new Error('no project provided');
+    let visibleFields = [];
+    for (const field of project.fields) {
+        if (field.type === 'date' && field.visible === true) {
+            visibleFields.push(field);
+        }
+    }
+    return visibleFields;
+}
+
 module.exports = {
     projectEntries,
     fetchEntrySubscriptionsAndPayments,
     getPaidOrdersByEntryId,
     getAllOrdersByEntryId,
     countPaidEntriesInProject,
+    visibleProjectDateFields,
 };

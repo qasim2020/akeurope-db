@@ -335,8 +335,28 @@ const slugToString = function (slug) {
         .join(' ');
 };
 
+function circleCloudinaryUrl(url) {
+    if (!url) return '/static/images/no-photo-placement.png';
+
+    const transformation = 'ar_1:1,c_fill,e_improve,g_auto,h_250,r_max,w_250,z_1.0';
+    return url.replace('/upload/', `/upload/${transformation}/`);
+};
+
+
+const capitalizeAll = function (str) {
+    if (!str) return '';
+    return str.toUpperCase();
+};
+
+
+const getMonth = function(date) {
+    return moment(date).format('MMM-YY'); 
+}
+
 module.exports = {
+    getMonth,
     slugToString,
+    capitalizeAll,
     categoryOptions,
     or,
     eq,
@@ -378,4 +398,5 @@ module.exports = {
     removeLinksFromHtml,
     concat,
     shortenFileName,
+    circleCloudinaryUrl,
 };

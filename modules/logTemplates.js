@@ -13,7 +13,6 @@ const logTemplates = ({
     changes,
 }) => {
 
-    console.log({type, actor, entity});
     if (!type || !entity || !actor) {
         throw new Error(
             'Missing required parameters: type, entity, and actor are mandatory.',

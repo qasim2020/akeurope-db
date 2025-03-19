@@ -45,8 +45,11 @@ async function deleteExpiredOrders(Collection) {
 
 }
 
-mongoose.connection.on('open', () => {
+mongoose.connection.on('open', async () => {
     console.log('Order cleanup job started...');
+
+    await deleteExpiredOrders(Order);
+    await deleteExpiredOrders(Subscription);
 
     setInterval(async () => {
         try {

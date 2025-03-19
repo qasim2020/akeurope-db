@@ -588,8 +588,6 @@ exports.searchEntry = async (req, res) => {
                 .lean();
         }
 
-        console.log(matches, neighbors);
-
         res.json({ data: [...matches, ...neighbors] });
     } catch (error) {
         console.log(error);

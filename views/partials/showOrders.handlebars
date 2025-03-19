@@ -143,7 +143,7 @@
           </td>
           <td>{{order.orderNo}} {{#if order.monthlySubscription}} <i class="ti ti-refresh ms-1"></i> {{/if}}</td>
           <td>{{formatDate order.createdAt}}</td>
-          <td>{{order.customer.name}}</td>
+          <td><a href="/customer/{{order.customer._id}}">{{order.customer.name}}</a></td>
           <td>
             {{{getOrderIcon order.status}}} {{capitalizeFirstLetter order.status}}
           </td>

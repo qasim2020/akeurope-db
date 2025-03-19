@@ -13,30 +13,47 @@ const checkValidForm = require('../modules/checkValidForm');
 const { saveLog, customerLogs, visibleLogs } = require('../modules/logAction');
 const { logTemplates } = require('../modules/logTemplates');
 const { getChanges } = require('../modules/getChanges');
+const { visibleProjectDateFields } = require('../modules/projectEntries');
+const { getSubscriptionsByOrderId, getPaymentByOrderId } = require('../modules/orders');
+const { getEntriesByCustomerId } = require('../modules/ordersFetchEntries');
+const { createPagination } = require('../modules/generatePagination');
+
 const Order = require('../models/Order');
 const Donor = require('../models/Donor');
+const Subscription = require('../models/Subscription');
 
 const sessionCollection = mongoose.connection.collection('sessions_customer_portal');
 
 async function killUserSessions(userId) {
     try {
-  
-      const sessions = await sessionCollection.find().toArray();
-      for (const session of sessions) {
-        const sessionData = JSON.parse(session.session);
-        if (sessionData.user && sessionData.user._id === userId.toString()) {
-          await sessionCollection.deleteOne({ _id: session._id });
-          console.log(`Deleted session: ${session._id} for customer: ${userId}`);
+        const sessions = await sessionCollection.find().toArray();
+        for (const session of sessions) {
+            const sessionData = JSON.parse(session.session);
+            if (sessionData.user && sessionData.user._id === userId.toString()) {
+                await sessionCollection.deleteOne({ _id: session._id });
+                console.log(`Deleted session: ${session._id} for customer: ${userId}`);
+            }
         }
-      }
-      console.log('Session cleanup completed.');
+        console.log('Session cleanup completed.');
     } catch (error) {
-      console.error('Error deleting sessions:', error);
+        console.error('Error deleting sessions:', error);
     }
-  }
+}
 
 exports.customers = async (req, res) => {
-    const customers = await Customer.find().lean();
+    const customers = await Customer.find().sort({_id: -1}).lean();
+
+    const pagination = createPagination({
+        req,
+        totalEntries: customers.length,
+        pageType: 'customers',
+    });
+
+    const limit = parseInt(req.query.limit) || 10;
+    const page = parseInt(req.query.page) || 1;
+    const skip = (page - 1) * limit;
+
+    const customersPaginated = customers.slice(skip, skip + limit);
 
     res.render('customers', {
         layout: 'dashboard',
@@ -49,22 +66,36 @@ exports.customers = async (req, res) => {
             projects: req.allProjects,
             role: req.userPermissions,
             customerId: new mongoose.Types.ObjectId(),
-            customers,
+            customers: customersPaginated,
+            pagination,
             logs: await visibleLogs(req, res),
             sidebarCollapsed: req.session.sidebarCollapsed,
         },
     });
 };
 
-exports.getData = async (req, res) => {
+exports.getCustomersData = async (req, res) => {
     try {
-        const customers = await Customer.find().lean();
+        const customers = await Customer.find().sort({_id: -1}).lean();
+
+        const pagination = createPagination({
+            req,
+            totalEntries: customers.length,
+            pageType: 'customers',
+        });
+
+        const limit = parseInt(req.query.limit) || 10;
+        const page = parseInt(req.query.page) || 1;
+        const skip = (page - 1) * limit;
+
+        const customersPaginated = customers.slice(skip, skip + limit);
 
         res.render('partials/showCustomers', {
             layout: false,
             data: {
-                customers,
+                customers: customersPaginated,
                 layout: req.session.layout,
+                pagination,
             },
         });
     } catch (error) {
@@ -350,17 +381,40 @@ exports.customer = async (req, res) => {
         const donor = await Donor.findOne({ email: customer.email }).lean();
         customer.tel = customer.tel || donor?.tel;
 
-        const orders = await Order.find({ customerId: req.params.customerId }).lean();
+        const projects = await Project.find({ status: 'active' }).lean();
+
+        let visibleDateFields = [];
+
+        if (!projects) {
+            projects = [];
+        } else {
+            visibleDateFields = await visibleProjectDateFields(projects[0]);
+        }
+
+        const orders = await Order.find({ customerId: customer._id }).sort({ orderNo: -1 }).lean();
+
+        for (const order of orders) {
+            order.stripeInfo = (await getPaymentByOrderId(order._id)) || (await getSubscriptionsByOrderId(order._id));
+        }
+
+        const activeSubscriptions = await getEntriesByCustomerId(customer._id);
+
+        const subscriptions = await Subscription.find({ customerId: customer._id }).sort({ orderNo: -1 }).lean();
+
+        for (const subscription of subscriptions) {
+            subscription.stripeInfo =
+                (await getPaymentByOrderId(subscription._id)) || (await getSubscriptionsByOrderId(subscription._id));
+        }
 
         res.render('customer', {
             layout: 'dashboard',
             data: {
                 layout: req.session.layout,
-                userId: req.session.user._id,
                 userName: req.session.user.name,
                 userRole: req.session.user.role.charAt(0).toUpperCase() + req.session.user.role.slice(1),
                 activeMenu: 'customers',
-                projects: req.allProjects,
+                projects,
+                visibleDateFields,
                 role: req.userPermissions,
                 logs: await visibleLogs(req, res),
                 customerLogs: await customerLogs(req, res),
@@ -368,6 +422,8 @@ exports.customer = async (req, res) => {
                 sidebarCollapsed: req.session.sidebarCollapsed,
                 customers: await Customer.find().lean(),
                 orders,
+                activeSubscriptions,
+                subscriptions,
             },
         });
     } catch (error) {

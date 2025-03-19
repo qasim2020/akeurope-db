@@ -1,6 +1,7 @@
 const { createDynamicModel } = require('../models/createDynamicModel');
 const Project = require('../models/Project');
 const Order = require('../models/Order');
+const Subscription = require('../models/Subscription');
 const Customer = require('../models/Customer');
 const Log = require('../models/Log');
 const User = require('../models/User');
@@ -154,10 +155,15 @@ const customerLogs = async (req, res) => {
             customerId: req.params.customerId,
         }).lean();
 
+        const subscriptions = await Subscription.find({
+            customerId: req.params.customerId,
+        }).lean();
+
         const query = {
             $or: [
-                { entityId: req.params.customerId },
-                { entityId: { $in: orders.map((order) => order._id) } },
+                { entityId: req.params.customerId }, 
+                { entityId: { $in: orders.map(order => order._id) } },
+                { entityId: { $in: subscriptions.map(order => order._id) } },
             ],
         };
 

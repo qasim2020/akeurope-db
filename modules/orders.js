@@ -5,7 +5,7 @@ const Donor = require('../models/Donor');
 const Subscription = require('../models/Subscription');
 
 const { createDynamicModel } = require('../models/createDynamicModel');
-const { generatePagination } = require('../modules/generatePagination');
+const { generatePagination, createPagination } = require('../modules/generatePagination');
 const { getCurrencyRates } = require('./getCurrencyRates');
 const { runQueriesOnOrder } = require('../modules/orderUpdates');
 const { getOldestPaidEntries, makeProjectForOrder, getPreviousOrdersForEntry } = require('../modules/ordersFetchEntries');
@@ -13,33 +13,6 @@ const { saveLog } = require('./logAction');
 const { logTemplates } = require('./logTemplates');
 const { capitalizeFirstLetter } = require('./helpers');
 const { fetchEntrySubscriptionsAndPayments } = require('./projectEntries');
-
-const createPagination = ({ req, totalEntries, fieldFilters, filtersQuery, pageType }) => {
-    const limit = parseInt(req.query.limit) || 10;
-    const totalPages = Math.ceil(totalEntries / limit);
-    const page = parseInt(req.query.page) || 1;
-    const skip = (page - 1) * limit;
-    const sortBy = req.query.sortBy || '_id';
-    return {
-        totalEntries,
-        totalPages,
-        currentPage: page,
-        limit,
-        startIndex: totalEntries == 0 ? 0 : skip + 1,
-        endIndex: Math.min(skip + limit, totalEntries),
-        pagesArray: generatePagination(totalPages, page),
-        sort: {
-            sortBy,
-            order: req.query.orderBy == undefined ? 'asc' : req.query.orderBy,
-        },
-        search: req.query.search,
-        filtersQuery,
-        fieldFilters: fieldFilters == {} ? undefined : fieldFilters,
-        showSearchBar: req.query.showSearchBar,
-        showFilters: req.query.showFilters,
-        pageType,
-    };
-};
 
 const calculationOnProject = async (projectOrdered, requestedCurrencyRate) => {
     const projectOriginal = await Project.findOne({
@@ -623,7 +596,6 @@ const getPendingOrderEntries = async (req, res) => {
 const getSubscriptionByOrderId = async (orderId) => {
     try {
         const temp = await Donor.findOne({'subscriptions.orderId': orderId}).lean();
-        console.log(temp);
 
         const donor = await Donor.findOne(
             {

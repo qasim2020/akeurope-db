@@ -5,7 +5,7 @@ const { allProjects } = require("../modules/mw-data");
 const customersController = require('../controllers/customersController');
 
 router.get("/customers", authenticate, authorize("viewCustomers"), allProjects, customersController.customers);
-router.get('/getCustomersData', authenticate, authorize("viewCustomers"), customersController.getData);
+router.get('/getCustomersData', authenticate, authorize("viewCustomers"), customersController.getCustomersData);
 router.get('/getEditCustomerModal/:customerId', authenticate, authorize("editCustomers"), allProjects, customersController.editModal);
 router.post('/customer/sendInvite', authenticate, authorize("editCustomers"), customersController.sendInvite);
 router.post("/customer/update/:customerId", authenticate, authorize("createCustomers"), customersController.updateCustomer);
