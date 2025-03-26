@@ -376,15 +376,8 @@ exports.getLogs = async (req, res) => {
 
 exports.activeSubscriptions = async (req,res) => {
     try {
-        if (req.params.customerId != req.session.user._id.toString()) {
-            res.status(401).render('error', {
-                heading: 'Unauthorized',
-                error: 'You are not authorized to view this page',
-            });
-            return;
-        }
         const activeSubscriptions = await getEntriesByCustomerId(req, req.params.customerId);
-        const customer = await Customer.findById(req.session.user._id).lean();
+        const customer = await Customer.findById(req.params.customerId).lean();
         res.render('partials/showCustomerSubscriptions',{
             layout: false,
             data: {
