@@ -14,6 +14,49 @@ const getModalData = function (modal) {
     };
 };
 
+const addNewEntries = function(elem) {
+    const modal = $(elem).closest('.modal');
+    const { customerId, slug } = getModalData(modal);
+    const toggleState = $(modal).find(`.${slug}`).attr('toggleState');
+    const orderId = $(modal).find('.project-in-order').attr('orderId');
+    if (!orderId) {
+        alert('No order exists yet to add to that');
+        return;
+    }
+    let url = `/getPaginatedEntriesForDraftOrder/${slug}/${customerId}?orderId=${orderId}&toggleState=${toggleState}&addNewEntries=10`; 
+    startSpinner(modal);
+    $.ajax({
+        url,
+        method: 'GET',
+        success: (response) => {
+            endSpinner(modal);
+            $(modal).find('.error').remove();
+            const elemExists = $(modal).find(`.${slug}`).length > 0;
+            if (elemExists) {
+                $(modal).find(`.${slug}`).replaceWith(response);
+            } else {
+                $(modal)
+                    .find('.search-results-payment-modal-entries')
+                    .append(response);
+            }
+            initializePopovers();
+            $(modal).attr({ 'order-id': orderId });
+            updateTotalCost(modal);
+            if (!orderId) return;
+            $(modal)
+                .find('.invoice-frame')
+                .attr({ src: `/invoice/${orderId}` })
+                .removeClass('d-none');
+            refreshContainers(modal);
+        },
+        error: (error) => {
+            endSpinner(modal);
+            alert(error.responseText);
+        },
+    });
+
+}
+
 const searchBeneficiaries = function (elem) {
     let error;
 

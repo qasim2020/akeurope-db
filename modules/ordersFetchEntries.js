@@ -6,6 +6,7 @@ const mongoose = require('mongoose');
 const Project = require('../models/Project');
 const { errorMonitor } = require('connect-mongo');
 const moment = require('moment');
+const { generatePagination } = require('../modules/generatePagination');
 
 const validateQuery = async (req, res) => {
     const orderId = req.query.orderId;
@@ -487,44 +488,9 @@ const getOldestPaidEntries = async (req, project, pickDraft = true) => {
     };
 };
 
-const makeProjectForOrder = (project, allEntries, months = 12) => {
-    return {
-        slug: project.slug,
-        months,
-        entries: allEntries.map((entry) => {
-            return {
-                entryId: entry._id,
-                selectedSubscriptions: project.fields
-                    .filter((field) => {
-                        const isSubscriptionValid =
-                            field.subscription && entry[field.name];
 
-                        if (!entry.oldOrders || !isSubscriptionValid) {
-                            return isSubscriptionValid;
-                        }
+const getEntriesByCustomerId = async (req, customerId) => {
 
-                        const isAlreadyOrdered = entry.oldOrders.some(
-                            (order) => {
-                                return (
-                                    order.selectedSubscriptions &&
-                                    order.selectedSubscriptions.includes(
-                                        field.name,
-                                    ) &&
-                                    new Date(order.expiry) > new Date()
-                                );
-                            },
-                        );
-
-                        return isSubscriptionValid && isAlreadyOrdered == false;
-                    })
-                    .map((field) => field.name),
-            };
-        }),
-    };
-};
-
-
-const getEntriesByCustomerId = async (customerId) => {
     const now = new Date();
 
     const orders = await Order.find({
@@ -532,7 +498,6 @@ const getEntriesByCustomerId = async (customerId) => {
         $or: [
             {
                 status: 'paid',
-                monthlySubscription: { $ne: true },
                 $expr: {
                     $gt: [
                         {
@@ -545,12 +510,7 @@ const getEntriesByCustomerId = async (customerId) => {
                         now,
                     ],
                 },
-            },
-            {
-                status: 'paid',
-                monthlySubscription: true,
-                createdAt: { $gt: moment().subtract(1, 'month').subtract(2, 'days').toDate() },
-            },
+            }
         ],
     }).lean();
 
@@ -566,13 +526,26 @@ const getEntriesByCustomerId = async (customerId) => {
                     ? new Date(new Date(order.createdAt).getTime() + project.months * 30 * 24 * 60 * 60 * 1000)
                     : null,
                 renewalDate: order.monthlySubscription
-                    ? new Date(new Date(order.createdAt).getTime() + 30 * 24 * 60 * 60 * 1000)
+                    ? new Date(new Date(order.createdAt).getTime() + project.months * 30 * 24 * 60 * 60 * 1000)
                     : null,
             }: null)).filter(entry => entry != null),
         ),
     );
 
-    const mergedEntriesByProject = await validEntriesByProject.reduce(async (accPromise, entry) => {
+    const paginate = (array, page, pageSize) => {
+        const start = (page - 1) * pageSize;
+        return array.slice(start, start + pageSize);
+    };
+
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const total = validEntriesByProject.length;
+
+    const totalPages = Math.ceil(total / limit);
+
+    const paginatedEntriesByProject = paginate(validEntriesByProject, page, limit);
+    
+    const mergedEntriesByProject = await paginatedEntriesByProject.reduce(async (accPromise, entry) => {
         const acc = await accPromise;
 
         const projectIndex = acc.findIndex((p) => p.projectSlug === entry.projectSlug);
@@ -621,10 +594,89 @@ const getEntriesByCustomerId = async (customerId) => {
         return cleanProject;
     });
 
-    return output;
+    return {
+        subscriptions: output,
+        pagesArray: generatePagination(totalPages, page),
+        currentPage: page,
+        totalPages,
+        totalEntries: total,
+        hasNextPage: page < totalPages,
+        hasPrevPage: page > 1,
+        nextPage: page + 1,
+        prevPage: page - 1,
+    };
 };
 
-const orderIsValid = async (req, res) => {};
+const makeProjectForOrder = (project, allEntries, months = 12) => {
+    return {
+        slug: project.slug,
+        months,
+        entries: allEntries.map((entry) => {
+            return {
+                entryId: entry._id,
+                selectedSubscriptions: project.fields
+                    .filter((field) => {
+                        const isSubscriptionValid =
+                            field.subscription && entry[field.name];
+
+                        if (!entry.oldOrders || !isSubscriptionValid) {
+                            return isSubscriptionValid;
+                        }
+
+                        const isAlreadyOrdered = entry.oldOrders.some(
+                            (order) => {
+                                return (
+                                    order.selectedSubscriptions &&
+                                    order.selectedSubscriptions.includes(
+                                        field.name,
+                                    ) &&
+                                    new Date(order.expiry) > new Date()
+                                );
+                            },
+                        );
+
+                        return isSubscriptionValid && isAlreadyOrdered == false;
+                    })
+                    .map((field) => field.name),
+            };
+        }),
+    };
+};
+
+const makeSubscriptionArrayForOrder = (project, entry) => {
+    const subArray = project.fields
+        .filter((field) => {
+            const isSubscriptionValid = field.subscription && entry[field.name];
+
+            if (!entry.oldOrders || !isSubscriptionValid) {
+                return isSubscriptionValid;
+            }
+
+            const isAlreadyOrdered = entry.oldOrders.some((order) => {
+                return (
+                    order.selectedSubscriptions &&
+                    order.selectedSubscriptions.includes(field.name) &&
+                    new Date(order.expiry) > new Date()
+                );
+            });
+
+            return isSubscriptionValid && isAlreadyOrdered == false;
+        })
+        .map((field) => field.name);
+    return subArray;
+};
+
+const makeEntriesForWidgetOrder = (allEntries, selectEntries = 1, project) => {
+    const entriesArray = allEntries.map((entry) => {
+        const entryInOrder = {
+            entryId: entry._id,
+            selectedSubscriptions: selectEntries > 0 ? makeSubscriptionArrayForOrder(project, entry) : [],
+        };
+        selectEntries--;
+        return entryInOrder;
+    });
+    return entriesArray;
+};
 
 module.exports = {
     getOldestPaidEntries,
@@ -632,4 +684,6 @@ module.exports = {
     getPreviousOrdersForEntry,
     validateQuery,
     getEntriesByCustomerId,
+    makeSubscriptionArrayForOrder,
+    makeEntriesForWidgetOrder,
 };

@@ -32,7 +32,7 @@
               <select name="currency" class="form-select order-change">
                 <option value="USD" {{#if (eq data.order.currency 'USD' )}}selected{{/if}}>USD ($)</option>
                 <option value="NOK" {{#if (eq data.order.currency 'NOK' )}}selected{{/if}}>NOK (kr)</option>
-                <option value="SEK" {{#if (eq data.order.currency 'SEK' )}}selected{{/if}}>SEK (kr)</option
+                <option value="SEK" {{#if (eq data.order.currency 'SEK' )}}selected{{/if}}>SEK (kr)</option>
                 <option value="GBP" {{#if (eq data.order.currency 'GBP' )}}selected{{/if}}>GBP (£)</option>
                 <option value="EUR" {{#if (eq data.order.currency 'EUR' )}}selected{{/if}}>EUR (€)</option>
                 <option value="PKR" {{#if (eq data.order.currency 'PKR' )}}selected{{/if}}>PKR (₨)</option>
@@ -49,7 +49,7 @@
                   placeholder="Number of beneficiaries" />
                 <span class="input-group-text">beneficiaries randomly</span>
               </div>
-              <div class="input-group">
+              <div class="input-group mb-2">
                 <span class="input-group-text">or</span>
                 <input type="text" class="form-control" placeholder="search specific beneficiaries..."
                   onkeydown="if (event.key === 'Enter') searchBeneficiaries(this)" name="specificBeneficiaries" />
@@ -72,6 +72,13 @@
                   </svg>
                 </button>
               </div>
+
+              <div class="input-group">
+                <span class="input-group-text">Add</span>
+                <input type="number" class="form-control" min="1" max="1000" placeholder="10 etc" name="addNewEntries" />
+                <button class="input-group-btn btn" onclick="addNewEntries(this)">New Available Entries</button>
+              </div>
+
             </div>
             <div class="search-results-payment-modal-entries">
               {{#if data.order}}

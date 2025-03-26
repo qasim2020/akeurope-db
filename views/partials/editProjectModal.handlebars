@@ -260,6 +260,7 @@
                     <p class="card-subtitle mb-3">These fields are used to draw the beneficiary card while a customer is
                         being onboarded/ adding new payment. On payment completion, all fields will be visible to the
                         customer.</p>
+                    <button class="btn btn-sm mb-2" onclick="toggleSelection(this)">Toggle Selection</button>
                     <div class="card d-block p-2 mb-3 form-control visible-field-selectors">
                         {{#each data.project.fields}}
                         <span class="badge cursor-pointer p-2 mb-1 {{#if this.visible}} bg-blue-lt {{/if}}"
@@ -284,6 +285,22 @@
                     </div>
                     <input type="text" class="d-none" disabled
                         value="{{#each data.project.fields}}{{#if (eq this.subscription true)}}{{this.actualName}}{{/if}}{{/each}}">
+                </div>
+
+
+                <div class="mb-3 form-field status-field">
+                    <div class="form-label">Status Field</div>
+                    <p class="card-subtitle mb-3">One field that shows the status of the child for example when was the last contact or any updates.</p>
+                    <div class="card d-block p-2 mb-3 form-control status-field-selector">
+                        {{#each data.project.fields}}
+                        {{#if (regexMatch this.type '^(string|textarea)$')}}
+                        <span class="badge cursor-pointer p-2 mb-1 {{#if this.status}} bg-blue-lt {{/if}}"
+                            onclick="setStatusField(this)">{{this.actualName}}</span>
+                        {{/if}}
+                        {{/each}}
+                    </div>
+                    <input type="text" class="d-none" disabled
+                        value="{{#each data.project.fields}}{{#if (eq this.status true)}}{{this.actualName}}{{/if}}{{/each}}">
                 </div>
 
             </div>

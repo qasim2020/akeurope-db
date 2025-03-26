@@ -157,6 +157,10 @@ exports.updateEntry = async (req, res) => {
                 entryData[fieldName] = fieldValue;
             }
 
+            if (field.status === true && fieldValue.length > 0) {
+                existingEntry[fieldName] = "";
+            }
+
             if (field.primary === true) {
                 entryData[fieldName] = existingEntry[fieldName];
                 fieldValue = existingEntry[fieldName];

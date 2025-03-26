@@ -47,11 +47,7 @@ const saveLog = async ({
 };
 
 const updateLog = async ({ logId, updates }) => {
-    const updatedLog = await Log.findByIdAndUpdate(
-        logId,
-        { $set: updates },
-        { new: true },
-    );
+    const updatedLog = await Log.findByIdAndUpdate(logId, { $set: updates }, { new: true });
 
     if (!updatedLog) {
         throw new Error('Log not found or update failed.');
@@ -62,11 +58,13 @@ const updateLog = async ({ logId, updates }) => {
 
 const entryLogs = async (req, res) => {
     try {
-        
         let query;
 
         if (req.userPermissions.includes('viewOrders')) {
-            query = { entityId: req.params.entryId };
+            query = {
+                entityId: req.params.entryId,
+                entityType: { $ne: 'order' },
+            };
         } else {
             query = {
                 entityId: req.params.entryId,
@@ -161,9 +159,9 @@ const customerLogs = async (req, res) => {
 
         const query = {
             $or: [
-                { entityId: req.params.customerId }, 
-                { entityId: { $in: orders.map(order => order._id) } },
-                { entityId: { $in: subscriptions.map(order => order._id) } },
+                { entityId: req.params.customerId },
+                { entityId: { $in: orders.map((order) => order._id) } },
+                { entityId: { $in: subscriptions.map((order) => order._id) } },
             ],
         };
 
@@ -228,7 +226,6 @@ const orderLogs = async (req, res) => {
 };
 
 const findConnectedIds = async (logs, req) => {
-
     for (const log of logs) {
         if (log.entityType == 'user') {
             log.entity = await User.findById(log.entityId).lean();
@@ -251,9 +248,7 @@ const findConnectedIds = async (logs, req) => {
 
 const visibleLogs = async (req, res) => {
     try {
-        const logs = await Log.find({ isNotification: true, isRead: false })
-            .sort({ timestamp: -1 })
-            .lean();
+        const logs = await Log.find({ isNotification: true, isRead: false }).sort({ timestamp: -1 }).lean();
         return await findConnectedIds(logs);
     } catch (error) {
         console.log(error);

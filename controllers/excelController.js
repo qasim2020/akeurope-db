@@ -77,6 +77,7 @@ exports.template = async(req,res) => {
 
 exports.upload = async(req,res) => {
     try {
+        let merged = [];
         const project = await Project.findOne({ slug: req.params.slug });
         if (!project) return res.status(404).send(`Project ${req.params.slug} not found`);
 
@@ -198,10 +199,14 @@ exports.upload = async(req,res) => {
                             project,
                             changes: getChanges(existingEntry, entryData)
                         })); 
-        
+                        
+                        const diff = getChanges(existingEntry, entryData);
+                        merged.push(diff);
+
                         Object.assign(existingEntry, entryData);
                         await existingEntry.save();
                         results.merged++;
+                        
                     } else {
                         results.skipped++;
                     }
@@ -223,7 +228,6 @@ exports.upload = async(req,res) => {
                 console.log(err);
                 results.errors.push(`Error in row ${rowNumber}: ${err.message}`);
             });
-        
             
             rowPromises.push(rowPromise);
         });
@@ -238,6 +242,7 @@ exports.upload = async(req,res) => {
 
         res.json({
             message: 'Upload and processing completed',
+            merged,
             results
         });
     } catch (error) {

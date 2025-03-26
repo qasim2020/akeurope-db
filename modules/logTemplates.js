@@ -85,7 +85,7 @@ const logTemplates = ({
         entryCreated: project
             ? {
                   ...commons('entry', entity._id),
-                  action: `Entry <a href="/entry/${entity._id}/project/${project.slug}">${entity.name || entity.nameOfOrphan}</a> created in project <a href="/project/${project.slug}">${project.name}</a>`,
+                  action: `<a href="/entry/${entity._id}/project/${project.slug}">${entity.name || entity.nameOfOrphan || 'Entry'}</a> created.`,
                   color: 'blue',
               }
             : null,
@@ -93,7 +93,7 @@ const logTemplates = ({
             project && changes
                 ? {
                       ...commons('entry', entity._id),
-                      action: `Entry <a href="/entry/${entity._id}/project/${project.slug}">${entity.name || entity.nameOfOrphan}</a> updated in project <a href="/project/${project.slug}">${project.name}</a>`,
+                      action: `<a href="/entry/${entity._id}/project/${project.slug}">${entity.name || entity.nameOfOrphan || 'Entry'}</a> updated.`,
                       changes,
                       color: 'blue',
                   }
@@ -110,7 +110,7 @@ const logTemplates = ({
             project && changes
                 ? {
                       ...commons('entry', entity._id),
-                      action: `Entry <a href="/entry/${entity._id}/project/${project.slug}">${entity.name || entity.nameOfOrphan}</a> updated in bulk upload in project <a href="/project/${project.slug}">${project.name}</a>`,
+                      action: `<a href="/entry/${entity._id}/project/${project.slug}">${entity.name || entity.nameOfOrphan || 'Entry'}</a> updated in bulk upload.`,
                       changes,
                       color: 'blue',
                   }
@@ -118,7 +118,7 @@ const logTemplates = ({
         entryCreatedBulkUpload: project
             ? {
                   ...commons('entry', entity._id),
-                  action: `Entry <a href="/entry/${entity._id}/project/${project.slug}">${entity.name || entity.nameOfOrphan}</a> created in bulk upload in project <a href="/project/${project.slug}">${project.name}</a>`,
+                  action: `<a href="/entry/${entity._id}/project/${project.slug}">${entity.name || entity.nameOfOrphan || 'Entry'}</a> created in bulk upload.`,
                   isNotification: false,
                   color: 'blue'
               }

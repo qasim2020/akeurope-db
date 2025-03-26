@@ -130,23 +130,6 @@ const updateDraftOrder = async (req, res) => {
     const calculatedOrder = await calculateOrder(order);
     await addPaymentsToOrder(calculatedOrder);
 
-    if (checkOrder.totalCost != calculatedOrder.totalCost) {
-        await saveLog(
-            logTemplates({
-                type: 'orderTotalCostChanged',
-                entity: order,
-                changes: [
-                    {
-                        key: 'totalCost',
-                        oldValue: `${checkOrder.totalCost} ${checkOrder.currency}`,
-                        newValue: `${calculatedOrder.totalCost} ${calculatedOrder.currency}`,
-                    },
-                ],
-                actor: req.session.user,
-            }),
-        );
-    }
-
     return true;
 };
 
@@ -205,15 +188,7 @@ const createDraftOrder = async (req, res) => {
         }
 
         const customer = await Customer.findById(order.customerId).lean();
-        await saveLog(
-            logTemplates({
-                type: 'customerAddedToOrder',
-                entity: customer,
-                order,
-                customer,
-                actor: req.session.user,
-            }),
-        );
+
 
         const leanOrder = order.toObject();
         const calculatedOrder = await calculateOrder(leanOrder);
@@ -342,6 +317,7 @@ const formatOrder = async (req, order) => {
 
 async function countSubscriptions(orderId) {
     const donor = await Donor.findOne({ 'subscriptions.orderId': orderId }).lean();
+    if (!donor) return 1;
     const subscriptions = donor.subscriptions.filter((sub) => sub.orderId.toString() === orderId.toString());
     return subscriptions.length;
 }
@@ -366,17 +342,6 @@ const cleanOrder = async (orderId) => {
         },
         { new: true },
     );
-
-    // const months = await countSubscriptions(orderId);
-    // const order = await Order.findOneAndUpdate(
-    //     { _id: orderId, 'projects.slug': { $exists: true } },
-    //     { $set: { 'projects.$.months': months } },
-    //     { new: true, lean: true },
-    // );
-    // if (!order) throw new Error('Failed to update the order with months');
-    // const calculatedOrder = await calculateOrder(order);
-    // await addPaymentsToOrder(calculatedOrder);
-
     return true;
 };
 

@@ -374,6 +374,31 @@ exports.getLogs = async (req, res) => {
     });
 };
 
+exports.activeSubscriptions = async (req,res) => {
+    try {
+        if (req.params.customerId != req.session.user._id.toString()) {
+            res.status(401).render('error', {
+                heading: 'Unauthorized',
+                error: 'You are not authorized to view this page',
+            });
+            return;
+        }
+        const activeSubscriptions = await getEntriesByCustomerId(req, req.params.customerId);
+        const customer = await Customer.findById(req.session.user._id).lean();
+        res.render('partials/showCustomerSubscriptions',{
+            layout: false,
+            data: {
+                activeSubscriptions,
+                customer,
+            }
+        })
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: 'Could not fetch subscriptions', error });
+    }
+}
+
 exports.customer = async (req, res) => {
     try {
         const customer = await Customer.findById(req.params.customerId).lean();
@@ -397,7 +422,7 @@ exports.customer = async (req, res) => {
             order.stripeInfo = (await getPaymentByOrderId(order._id)) || (await getSubscriptionsByOrderId(order._id));
         }
 
-        const activeSubscriptions = await getEntriesByCustomerId(customer._id);
+        const activeSubscriptions = await getEntriesByCustomerId(req, customer._id);
 
         const subscriptions = await Subscription.find({ customerId: customer._id }).sort({ orderNo: -1 }).lean();
 

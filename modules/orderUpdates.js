@@ -1,11 +1,7 @@
 const Project = require('../models/Project');
 const Customer = require('../models/Customer');
 const Order = require('../models/Order');
-const { logTemplates } = require('../modules/logTemplates');
-const { saveLog } = require('../modules/logAction');
-const { getOldestPaidEntries, makeProjectForOrder, validateQuery } = require('../modules/ordersFetchEntries');
-const { createDynamicModel } = require('../models/createDynamicModel');
-const { camelCaseWithCommaToNormalString } = require('../modules/helpers');
+const { getOldestPaidEntries, makeProjectForOrder, validateQuery, makeEntriesForWidgetOrder: makeEntriesForOrder } = require('../modules/ordersFetchEntries');
 
 const runQueriesOnOrder = async (req, res) => {
     await validateQuery(req, res);
@@ -20,49 +16,38 @@ const runQueriesOnOrder = async (req, res) => {
 
     const existingCustomer = await Customer.findById(existingOrder.customerId).lean();
 
+    if (req.query.addNewEntries) {
+        const addEntries = parseInt(req.query.addNewEntries);
+        order = await Order.findById(orderId).lean();
+        const currentEntries = order.projects.flatMap((project) => project.entries);
+        req.query.select = currentEntries.length + addEntries;
+
+        const { project, allEntries } = await getOldestPaidEntries(req, checkProject);
+
+        const newEntries = allEntries
+            .filter((newEntry) => {
+                return !currentEntries.some((existingEntry) => existingEntry.entryId.toString() === newEntry._id.toString());
+            })
+            .slice(0, addEntries);
+
+        const entriesForOrder = makeEntriesForOrder(newEntries, addEntries, project);
+        order = await Order.findOneAndUpdate(
+            { _id: order._id, 'projects.slug': checkProject.slug },
+            {
+                $push: {
+                    'projects.$.entries': { $each: entriesForOrder },
+                },
+            },
+            {
+                lean: true,
+                new: true,
+            },
+        );
+    }
+
     if (req.query.customerId) {
         const customerId = req.query.customerId;
-
         order = await Order.findOneAndUpdate({ _id: orderId }, { $set: { customerId: customerId } }, { new: true, lean: true });
-
-        const newCustomer = await Customer.findById(order.customerId).lean();
-
-        if (existingCustomer.email != newCustomer.email) {
-            await saveLog(
-                logTemplates({
-                    type: 'orderCustomerChanged',
-                    entity: order,
-                    changes: [
-                        {
-                            key: 'customer',
-                            oldValue: `<a href="/customer/${existingCustomer._id}">${existingCustomer.name}</a>`,
-                            newValue: `<a href="/customer/${newCustomer._id}">${newCustomer.name}</a>`,
-                        },
-                    ],
-                    actor: req.session.user,
-                }),
-            );
-
-            await saveLog(
-                logTemplates({
-                    type: 'customerRemovedFromOrder',
-                    entity: existingCustomer,
-                    order,
-                    customer: existingCustomer,
-                    actor: req.session.user,
-                }),
-            );
-
-            await saveLog(
-                logTemplates({
-                    type: 'customerAddedToOrder',
-                    entity: newCustomer,
-                    order,
-                    customer: newCustomer,
-                    actor: req.session.user,
-                }),
-            );
-        }
     }
 
     if (req.query.currency) {

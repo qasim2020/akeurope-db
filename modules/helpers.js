@@ -329,6 +329,7 @@ const divide = function(a, b) {
 };
 
 const slugToString = function (slug) {
+    if (!slug) return 'Slug not found';
     return slug
         .split('-')
         .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
