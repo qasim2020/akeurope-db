@@ -166,7 +166,7 @@ const renderFiles = function () {
     const entityId = $(document).find('#files-container').attr('entity-id');
     if (!entityId) {
         $('#files-container');
-        alert('no entity id found');
+        console.log('no entity id found');
         return;
     }
     $.ajax({

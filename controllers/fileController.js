@@ -45,9 +45,9 @@ exports.uploadFileToEntry = async (req, res) => {
         let access;
 
         if (req.userPermissions.includes('changeFilesAccess')) {
-            access = ['editors'];
+            access = ['editors', 'customers'];
         } else {
-            access = ['editors'];
+            access = ['editors', 'customers'];
         }
 
         const links = [
@@ -83,16 +83,6 @@ exports.uploadFileToEntry = async (req, res) => {
         const project = await Project.findOne({ slug: entitySlug }).lean();
         const DynamicModel = await createDynamicModel(entitySlug);
         const entry = await DynamicModel.findById(entityId).lean();
-
-        await saveLog(
-            logTemplates({
-                type: 'entryNewFile',
-                entity: entry,
-                actor: req.session.user,
-                project,
-                file,
-            }),
-        );
 
         res.status(200).send(file);
     } catch (error) {
@@ -260,14 +250,10 @@ exports.file = async (req, res) => {
 exports.update = async (req, res) => {
     try {
         const { fileId } = req.params;
-        const { name, category, access, notes, entityId, entityType, entitySlug } = req.body;
-
-        if (!entityType || !entitySlug || !entityId) throw new Error('entity type is required');
+        const { name, category, access, notes} = req.body;
 
         const file = await File.findById(fileId);
         if (!file) return res.status(404).send('File not found');
-
-        const changes = getChanges(file.toObject(), { name, notes });
 
         if (req.userPermissions.includes('changeFilesAccess')) {
             file.name = name;
@@ -278,35 +264,6 @@ exports.update = async (req, res) => {
             file.name = name;
             file.category = category;
             file.notes = notes;
-        }
-
-        if (changes.length > 0) {
-            if (entityType === 'order') {
-                const order = (await Order.findById(entityId).lean()) || (await Subscription.findById(entityId).lean());
-                await saveLog(
-                    logTemplates({
-                        type: 'orderChangeFile',
-                        entity: order,
-                        actor: req.session.user,
-                        changes,
-                        file,
-                    }),
-                );
-            } else if (entityType === 'entry') {
-                const project = await Project.findOne({ slug: entitySlug }).lean();
-                const DynamicModel = await createDynamicModel(entitySlug);
-                const entry = await DynamicModel.findById(entityId).lean();
-                await saveLog(
-                    logTemplates({
-                        type: 'entryChangeFile',
-                        entity: entry,
-                        actor: req.session.user,
-                        changes,
-                        project,
-                        file,
-                    }),
-                );
-            }
         }
 
         await file.save();
