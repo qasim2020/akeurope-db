@@ -409,7 +409,7 @@ exports.customer = async (req, res) => {
             visibleDateFields = await visibleProjectDateFields(projects[0]);
         }
 
-        const orders = await Order.find({ customerId: customer._id }).sort({ orderNo: -1 }).lean();
+        const orders = await Order.find({ customerId: customer._id }).sort({ _id: -1 }).lean();
 
         for (const order of orders) {
             order.stripeInfo = (await getPaymentByOrderId(order._id)) || (await getSubscriptionsByOrderId(order._id));
@@ -417,7 +417,7 @@ exports.customer = async (req, res) => {
 
         const activeSubscriptions = await getEntriesByCustomerId(req, customer._id);
 
-        const subscriptions = await Subscription.find({ customerId: customer._id }).sort({ orderNo: -1 }).lean();
+        const subscriptions = await Subscription.find({ customerId: customer._id }).sort({ _id: -1 }).lean();
 
         for (const subscription of subscriptions) {
             subscription.stripeInfo =
