@@ -1,22 +1,8 @@
-const { getOrderIcon } = require('../modules/helpers');
+const { getOrderIcon, slugToString } = require('../modules/helpers');
 
-const logTemplates = ({
-    type,
-    entity,
-    actor,
-    project,
-    file,
-    order,
-    entry,
-    color,
-    customer,
-    changes,
-}) => {
-
+const logTemplates = ({ type, entity, actor, project, file, order, entry, color, customer, changes }) => {
     if (!type || !entity || !actor) {
-        throw new Error(
-            'Missing required parameters: type, entity, and actor are mandatory.',
-        );
+        throw new Error('Missing required parameters: type, entity, and actor are mandatory.');
     }
 
     const commons = (entityType, entityId) => ({
@@ -85,7 +71,9 @@ const logTemplates = ({
         entryCreated: project
             ? {
                   ...commons('entry', entity._id),
-                  action: `<a href="/entry/${entity._id}/project/${project.slug}">${entity.name || entity.nameOfOrphan || 'Entry'}</a> created.`,
+                  action: `<a href="/entry/${entity._id}/project/${project.slug}">${
+                      entity.name || entity.nameOfOrphan || 'Entry'
+                  }</a> created.`,
                   color: 'blue',
               }
             : null,
@@ -93,15 +81,33 @@ const logTemplates = ({
             project && changes
                 ? {
                       ...commons('entry', entity._id),
-                      action: `<a href="/entry/${entity._id}/project/${project.slug}">${entity.name || entity.nameOfOrphan || 'Entry'}</a> updated.`,
+                      action: `<a href="/entry/${entity._id}/project/${project.slug}">${
+                          entity.name || entity.nameOfOrphan || 'Entry'
+                      }</a> updated.`,
                       changes,
                       color: 'blue',
+                  }
+                : null,
+        donorEntryUpdated:
+            entry && project && changes
+                ? {
+                      ...commons('customer', entity._id),
+                      action: `<a href="/entry/${entry._id}/project/${project.slug}">${
+                          entry.name || entry.nameOfOrphan || 'Entry'
+                      }</a> updated.`,
+                      changes,
+                      color: 'blue',
+                      isNotification: true,
+                      isRead: true,
+                      isReadByCustomer: false,
                   }
                 : null,
         entryDeleted: project
             ? {
                   ...commons('entry', entity._id),
-                  action: `Entry <a href="/entry/${entity._id}/project/${project.slug}">${entity.name || entity.nameOfOrphan}</a> deleted in project <a href="/project/${project.slug}">${project.name}</a>`,
+                  action: `Entry <a href="/entry/${entity._id}/project/${project.slug}">${
+                      entity.name || entity.nameOfOrphan
+                  }</a> deleted in project <a href="/project/${project.slug}">${project.name}</a>`,
                   color: 'red',
                   isNotification: true,
               }
@@ -110,7 +116,9 @@ const logTemplates = ({
             project && changes
                 ? {
                       ...commons('entry', entity._id),
-                      action: `<a href="/entry/${entity._id}/project/${project.slug}">${entity.name || entity.nameOfOrphan || 'Entry'}</a> updated in bulk upload.`,
+                      action: `<a href="/entry/${entity._id}/project/${project.slug}">${
+                          entity.name || entity.nameOfOrphan || 'Entry'
+                      }</a> updated in bulk upload.`,
                       changes,
                       color: 'blue',
                   }
@@ -118,9 +126,11 @@ const logTemplates = ({
         entryCreatedBulkUpload: project
             ? {
                   ...commons('entry', entity._id),
-                  action: `<a href="/entry/${entity._id}/project/${project.slug}">${entity.name || entity.nameOfOrphan || 'Entry'}</a> created in bulk upload.`,
+                  action: `<a href="/entry/${entity._id}/project/${project.slug}">${
+                      entity.name || entity.nameOfOrphan || 'Entry'
+                  }</a> created in bulk upload.`,
                   isNotification: false,
-                  color: 'blue'
+                  color: 'blue',
               }
             : null,
         bulkUploadCompleted: {
@@ -188,15 +198,11 @@ const logTemplates = ({
             order && project
                 ? {
                       ...commons('order', entity._id),
-                      action: `<a href="/entry/${entity._id}/project/${
-                          project.slug
-                      }">${entity.name || entity.nameOfOrphan}</a> in project <a href="/project/${
-                          project.slug
-                      }">${
+                      action: `<a href="/entry/${entity._id}/project/${project.slug}">${
+                          entity.name || entity.nameOfOrphan
+                      }</a> in project <a href="/project/${project.slug}">${
                           project.detail ? project.detail.name : project.name
-                      }</a> selected in <a href="/order/${order._id}">Order-${
-                          order.orderNo
-                      }</a>`,
+                      }</a> selected in <a href="/order/${order._id}">Order-${order.orderNo}</a>`,
                       changes,
                       color: 'green',
                   }
@@ -205,15 +211,11 @@ const logTemplates = ({
             order && project
                 ? {
                       ...commons('order', entity._id),
-                      action: `<a href="/entry/${entity._id}/project/${
-                          project.slug
-                      }">${entity.name || entity.nameOfOrphan}</a> in project <a href="/project/${
-                          project.slug
-                      }">${
+                      action: `<a href="/entry/${entity._id}/project/${project.slug}">${
+                          entity.name || entity.nameOfOrphan
+                      }</a> in project <a href="/project/${project.slug}">${
                           project.detail ? project.detail.name : project.name
-                      }</a> removed from <a href="/order/${
-                          order._id
-                      }">Order-${order.orderNo}</a>`,
+                      }</a> removed from <a href="/order/${order._id}">Order-${order.orderNo}</a>`,
                       changes,
                       color: 'red',
                   }
@@ -222,15 +224,11 @@ const logTemplates = ({
             order && project
                 ? {
                       ...commons('order', entity._id),
-                      action: `<a href="/entry/${entity._id}/project/${
-                          project.slug
-                      }">${entity.name}</a> in project <a href="/project/${
-                          project.slug
-                      }">${
+                      action: `<a href="/entry/${entity._id}/project/${project.slug}">${
+                          entity.name
+                      }</a> in project <a href="/project/${project.slug}">${
                           project.detail ? project.detail.name : project.name
-                      }</a> status changed in <a href="/order/${
-                          order._id
-                      }">Order-${order.orderNo}</a>`,
+                      }</a> status changed in <a href="/order/${order._id}">Order-${order.orderNo}</a>`,
                       changes,
                       color: color ? color : 'blue',
                   }
@@ -239,15 +237,11 @@ const logTemplates = ({
             order && project && changes
                 ? {
                       ...commons('order', entity._id),
-                      action: `Subscription changed for <a href="/entry/${
-                          entity._id
-                      }/project/${project.slug}">${
+                      action: `Subscription changed for <a href="/entry/${entity._id}/project/${project.slug}">${
                           entity.name || entity.nameOfOrphan
                       }</a> in project <a href="/project/${project.slug}">${
                           project.detail ? project.detail.name : project.name
-                      }</a> of <a href="/order/${order._id}">Order-${
-                          order.orderNo
-                      }</a>`,
+                      }</a> of <a href="/order/${order._id}">Order-${order.orderNo}</a>`,
                       changes,
                       color: 'blue',
                   }
@@ -256,7 +250,11 @@ const logTemplates = ({
             entry && project && changes
                 ? {
                       ...commons('order', entity._id),
-                      action: `Subscription changed of <a href="/entry/${entry._id}/project/${project.slug}">${entry.name || entry.nameOfOrphan}</a> in <a href="/project/${project.slug}">${project.detail.name}</a> of <a href="/order/${entity._id}">Order-${entity.orderNo}</a>`,
+                      action: `Subscription changed of <a href="/entry/${entry._id}/project/${project.slug}">${
+                          entry.name || entry.nameOfOrphan
+                      }</a> in <a href="/project/${project.slug}">${slugToString(project.slug)}</a> of <a href="/order/${
+                          entity._id
+                      }">Order-${entity.orderNo}</a>`,
                       changes,
                       color: 'blue',
                   }
@@ -294,12 +292,8 @@ const logTemplates = ({
             ? {
                   ...commons('order', entity._id),
                   action: `${
-                      project.selection
-                          ? project.selection.entries.length
-                          : null
-                  } x entries selected in project <a href="/project/${
-                      project.slug
-                  }">${project.name}</a> of <a href="/order/${
+                      project.selection ? project.selection.entries.length : null
+                  } x entries selected in project <a href="/project/${project.slug}">${project.name}</a> of <a href="/order/${
                       entity._id
                   }">Order-${entity.orderNo}</a>`,
                   color: 'blue',
@@ -344,41 +338,56 @@ const logTemplates = ({
               }
             : null,
         // NEW CHANGES FROM 19 JAN 2025
-        entryNewFile: file && project ? {
-            ...commons('entry', entity._id),
-            action: `Document <a file-id="${file._id}" onclick="getFileModal(this)" class="fw-bold">${file.name}</a> added to <a href="/entry/${entity._id}/project/${project.slug}">${entity.name}</a> `,
-            color: 'blue',
-        } : null, 
-        entryChangeFile: file && project && changes ? {
-            ...commons('entry', entity._id),
-            action: `Document <a file-id="${file._id}" onclick="getFileModal(this)" class="fw-bold">${file.name}</a> properties updated in <a href="/entry/${entity._id}/project/${project.slug}">${entity.name}</a> `,
-            color: 'blue',
-            changes,
-        } : null, 
-        entryDeletedFile: file && project ? {
-            ...commons('entry', entity._id),
-            action: `Document <span class="fw-bold">${file.name}</span> deleted in <a href="/entry/${entity._id}/project/${project.slug}">${entity.name}</a> `,
-            color: 'red',
-        } : null,
-        orderNewFile: file ? {
-            ...commons('order', entity._id),
-            action: `Document <span class="fw-bold">${file.name}</span> added to <a href="/order/${entity._id}">Order-${entity.orderNo}</a> `,
-            color: 'blue',
-            isNotification: true,
-            isReadByCustomer: false
-        } : null, 
-        orderChangeFile: file && changes ? {
-            ...commons('order', entity._id),
-            action: `Document <span class="fw-bold">${file.name}</span> updated in <a href="/order/${entity._id}">Order-${entity.orderNo}</a> `,
-            color: 'blue',
-            changes,
-        } : null, 
-        orderDeletedFile: file ? {
-            ...commons('order', entity._id),
-            action: `Document <span class="fw-bold">${file.name}</span> deleted in <a href="/order/${entity._id}">Order-${entity.orderNo}</a> `,
-            color: 'red',
-        } : null,
-
+        entryNewFile:
+            file && project
+                ? {
+                      ...commons('entry', entity._id),
+                      action: `Document <a file-id="${file._id}" onclick="getFileModal(this)" class="fw-bold">${file.name}</a> added to <a href="/entry/${entity._id}/project/${project.slug}">${entity.name}</a> `,
+                      color: 'blue',
+                  }
+                : null,
+        entryChangeFile:
+            file && project && changes
+                ? {
+                      ...commons('entry', entity._id),
+                      action: `Document <a file-id="${file._id}" onclick="getFileModal(this)" class="fw-bold">${file.name}</a> properties updated in <a href="/entry/${entity._id}/project/${project.slug}">${entity.name}</a> `,
+                      color: 'blue',
+                      changes,
+                  }
+                : null,
+        entryDeletedFile:
+            file && project
+                ? {
+                      ...commons('entry', entity._id),
+                      action: `Document <span class="fw-bold">${file.name}</span> deleted in <a href="/entry/${entity._id}/project/${project.slug}">${entity.name}</a> `,
+                      color: 'red',
+                  }
+                : null,
+        orderNewFile: file
+            ? {
+                  ...commons('order', entity._id),
+                  action: `Document <span class="fw-bold">${file.name}</span> added to <a href="/order/${entity._id}">Order-${entity.orderNo}</a> `,
+                  color: 'blue',
+                  isNotification: true,
+                  isReadByCustomer: false,
+              }
+            : null,
+        orderChangeFile:
+            file && changes
+                ? {
+                      ...commons('order', entity._id),
+                      action: `Document <span class="fw-bold">${file.name}</span> updated in <a href="/order/${entity._id}">Order-${entity.orderNo}</a> `,
+                      color: 'blue',
+                      changes,
+                  }
+                : null,
+        orderDeletedFile: file
+            ? {
+                  ...commons('order', entity._id),
+                  action: `Document <span class="fw-bold">${file.name}</span> deleted in <a href="/order/${entity._id}">Order-${entity.orderNo}</a> `,
+                  color: 'red',
+              }
+            : null,
     };
 
     if (templates[type] == null) {

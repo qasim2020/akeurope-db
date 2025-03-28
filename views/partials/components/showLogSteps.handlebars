@@ -1,5 +1,4 @@
 <li class="step-item">
-    {{log hideUpdates}}
     <div class="d-flex align-items-center justify-content-between mb-1 overflow-hidden">
         <div class="d-flex align-items-center">
             <span class="badge">{{formatTime log.timestamp}}</span>
@@ -13,15 +12,15 @@
                 {{log.actor.name}}
             </span>
             {{else if (eq log.actorType 'user')}}
-                {{#if (eq log.actor.role 'admin')}}
-                <span class="badge bg-green-lt">
-                    <a href="/{{log.actorType}}/{{log.actor._id}}" style="color: inherit;">{{log.actor.name}}</a>
-                </span>
-                {{else}}
-                <span class="badge bg-blue-lt">
-                    <a href="/{{log.actorType}}/{{log.actor._id}}" style="color: inherit;">{{log.actor.name}}</a>
-                </span>
-                {{/if}}
+            {{#if (eq log.actor.role 'admin')}}
+            <span class="badge bg-green-lt">
+                <a href="/{{log.actorType}}/{{log.actor._id}}" style="color: inherit;">{{log.actor.name}}</a>
+            </span>
+            {{else}}
+            <span class="badge bg-blue-lt">
+                <a href="/{{log.actorType}}/{{log.actor._id}}" style="color: inherit;">{{log.actor.name}}</a>
+            </span>
+            {{/if}}
             {{else if (eq log.actorType 'customer')}}
             <span class="badge bg-red-lt">
                 <a href="/{{log.actorType}}/{{log.actor._id}}" style="color: inherit;">{{log.actor.name}}</a>
@@ -64,7 +63,13 @@
         {{#if log.changes}}
         {{#each log.changes}}
         {{#unless (eq @index 0)}}<br>{{/unless}}
+        
+        {{#if (eq this.key 'status')}}
+        <span class="badge bg-red-lt mt-1">{{camelCaseToNormalString this.key}}</span>
+        {{else}}
         <span class="badge bg-green-lt mt-1">{{camelCaseToNormalString this.key}}</span>
+        {{/if}}
+
         {{#if this.oldValue}}
         <span class="text-decoration-line-through">{{{this.oldValue}}}</span>
         {{/if}}

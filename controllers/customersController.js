@@ -395,7 +395,6 @@ exports.activeSubscriptions = async (req,res) => {
 exports.customer = async (req, res) => {
     try {
         const customer = await Customer.findById(req.params.customerId).lean();
-
         const donor = await Donor.findOne({ email: customer.email }).lean();
         customer.tel = customer.tel || donor?.tel;
 

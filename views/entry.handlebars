@@ -111,6 +111,7 @@
 
   const editEntry = function (elem) {
 
+    $(elem).closest('.modal').find('textarea').removeClass('is-invalid');
     $(elem).closest(".modal").find("input").removeClass("is-invalid");
     $(elem).closest(".modal").find(".invalid-feedback").remove();
     $(elem).closest(".modal").find("span").removeClass("border-red");
@@ -148,6 +149,11 @@
       }, {});
 
     if (!(isValid.every(val => val === true))) {
+      $(".modal-footer").append(`
+        <div class="w-100 d-block alert alert-danger mt-4" role="alert">
+          <h4 class="alert-title">Form Incomplete.</h4>
+          <div class="text-secondary">Incomplete fields. Make sure all fields are filled or refresh the screen</div>
+        </div>`);
       return false;
     }
 
@@ -166,6 +172,7 @@
         $(elem).html(currentBtnHTML);
         showDataAsSuch('/getSingleEntryData/{{data.entry._id}}/project/{{data.project.slug}}', '#entry-container');
         showDataAsSuch('/getSingleEntryLogs/{{data.entry._id}}/project/{{data.project.slug}}', '#logs-container');
+        $(elem).closest(".modal").modal("hide");
       },
       error: function (xhr, status, error) {
         $(elem).html(currentBtnHTML);

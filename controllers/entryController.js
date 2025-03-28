@@ -15,6 +15,7 @@ const { saveLog, visibleLogs, entryLogs } = require('../modules/logAction');
 const { logTemplates } = require('../modules/logTemplates');
 const { getChanges } = require('../modules/getChanges');
 const { createDraftOrder, updateDraftOrder, getPendingOrderEntries, formatOrder } = require('../modules/orders');
+const { sendNotificationToDonor } = require('../modules/notifyCustomer');
 const { getEntityFiles } = require('../modules/filesUtils.js');
 const Order = require('../models/Order');
 const File = require('../models/File');
@@ -149,6 +150,12 @@ exports.updateEntry = async (req, res) => {
         }
 
         const entryData = {};
+        let notifyCustomer = {
+            sendEmail: false,
+            sendText: false,
+            message: '',
+        };
+
         project.fields.forEach((field) => {
             const fieldName = field.name;
             let fieldValue = req.body[fieldName];
@@ -158,7 +165,32 @@ exports.updateEntry = async (req, res) => {
             }
 
             if (field.status === true && fieldValue.length > 0) {
-                existingEntry[fieldName] = "";
+                if (!existingEntry.name) {
+                    throw new Error('Name field does not exist');
+                }
+                if (existingEntry[fieldName] != fieldValue) {
+                    existingEntry[fieldName] = '';
+                    notifyCustomer = {
+                        sendEmail: true,
+                        sendText: true,
+                        email: {
+                            subject: 'Orphan Update from Alkhidmat Europe',
+                            message: `
+Status of an beneficiary that is sponsored by you has been updated: <br>
+<b>Orphan Name</b>: ${existingEntry.name} <br>
+<b>Status Update</b>: ${fieldValue} <br>`,
+                        },
+                        text: `Alkhidmat Europe Update \n\n
+Assalam o Alaikum. \n
+Status of a beneficiary that is sponsored by you has been updated: \n
+Orphan Name: ${existingEntry.name.trim()} \n
+Status Update: ${fieldValue} \n
+Login here to view beneficiary details. 
+${process.env.CUSTOMER_PORTAL_URL} \n
+Jazak Allah \n
+Alkhidmat Europe`,
+                    };
+                }
             }
 
             if (field.primary === true) {
@@ -200,7 +232,11 @@ exports.updateEntry = async (req, res) => {
             await DynamicModel.findByIdAndUpdate(existingEntry._id, entryData);
         }
 
+        if (notifyCustomer.sendEmail || notifyCustomer.sendText) 
+            sendNotificationToDonor(notifyCustomer, existingEntry, req.session.user, project, changedEntries );
+
         res.status(200).send('Entry updated successfully');
+        
     } catch (error) {
         res.status(500).json({
             error: 'Error updating entry',

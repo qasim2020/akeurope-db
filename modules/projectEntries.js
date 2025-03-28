@@ -82,54 +82,49 @@ const projectEntries = async function (req, res) {
         { $match: searchQuery },
         {
             $lookup: {
-                from: "orders",
-                localField: "_id",
-                foreignField: "projects.entries.entryId",
-                as: "orderInfo"
-            }
+                from: 'orders',
+                localField: '_id',
+                foreignField: 'projects.entries.entryId',
+                as: 'orderInfo',
+            },
         },
-        { $unwind: { path: "$orderInfo", preserveNullAndEmptyArrays: true } },
-        { $unwind: { path: "$orderInfo.projects", preserveNullAndEmptyArrays: true } },
+        { $unwind: { path: '$orderInfo', preserveNullAndEmptyArrays: true } },
+        { $unwind: { path: '$orderInfo.projects', preserveNullAndEmptyArrays: true } },
         {
             $addFields: {
                 isPaid: {
                     $cond: {
                         if: {
                             $and: [
-                                { $eq: ["$orderInfo.status", "paid"] },
+                                { $eq: ['$orderInfo.status', 'paid'] },
                                 {
                                     $gt: [
                                         {
                                             $add: [
-                                                "$orderInfo.createdAt",
+                                                '$orderInfo.createdAt',
                                                 {
-                                                    $multiply: [
-                                                        "$orderInfo.projects.months",
-                                                        30 * 24 * 60 * 60 * 1000
-                                                    ]
-                                                }
-                                            ]
+                                                    $multiply: ['$orderInfo.projects.months', 30 * 24 * 60 * 60 * 1000],
+                                                },
+                                            ],
                                         },
-                                        new Date()
-                                    ]
-                                }
-                            ]
+                                        new Date(),
+                                    ],
+                                },
+                            ],
                         },
                         then: 1,
-                        else: 0
-                    }
-                }
-            }
+                        else: 0,
+                    },
+                },
+            },
         },
-        ...(req.query.sortBy === "paid"
-            ? [{ $sort: { isPaid: -1, ...sortOptions } }]
-            : [{ $sort: { ...sortOptions }}]),
+        ...(req.query.sortBy === 'paid' ? [{ $sort: { isPaid: -1, ...sortOptions } }] : [{ $sort: { ...sortOptions } }]),
         { $skip: skip },
-        { $limit: limit }
+        { $limit: limit },
     ]);
-    
+
     totalEntries = await DynamicModel.countDocuments(searchQuery);
-    
+
     totalEntries = await DynamicModel.countDocuments(searchQuery);
     totalPages = Math.ceil(totalEntries / limit);
 
@@ -157,12 +152,28 @@ const projectEntries = async function (req, res) {
     };
 };
 
-const getPaidOrdersByEntryId = async (req, res) => {
+const getPaidOrdersByEntryId = async (req, res, entryId) => {
+
+    entryId = entryId || req.params.entryId;
+
+    const now = new Date();
+
     const orders = await Order.find({
         status: 'paid',
+        $expr: {
+            $gte: [
+                {
+                    $add: [
+                        '$createdAt',
+                        { $multiply: [{ $arrayElemAt: ['$projects.months', 0] }, 30 * 24 * 60 * 60 * 1000] },
+                    ],
+                },
+                now,
+            ],
+        },
         'projects.entries': {
             $elemMatch: {
-                entryId: req.params.entryId,
+                entryId: entryId,
                 totalCost: { $ne: 0 },
             },
         },
@@ -170,9 +181,12 @@ const getPaidOrdersByEntryId = async (req, res) => {
 
     for (const order of orders) {
         order.customer = await Customer.findById(order.customerId).lean();
-        const project = order.projects.find((project) => project.entries.find((entry) => entry.entryId == req.params.entryId));
+        const project = order.projects.find((project) => {
+            return project.entries.find((entry) => entry.entryId == entryId.toString())
+        });
+        console.log(project);
         order.project = project;
-        order.entry = project.entries.find((entry) => entry.entryId == req.params.entryId);
+        order.entry = project.entries.find((entry) => entry.entryId == entryId.toString());
     }
 
     return orders;
@@ -201,36 +215,33 @@ const getAllOrdersByEntryId = async (req, res) => {
 const countPaidEntriesInProject = async (slug) => {
     const result = await Order.aggregate([
         {
-            $match: { status: "paid", "projects.slug": slug }
+            $match: { status: 'paid', 'projects.slug': slug },
         },
         {
             $addFields: {
-                maxMonths: { $max: "$projects.months" },
+                maxMonths: { $max: '$projects.months' },
                 orderExpiry: {
-                    $add: [
-                        "$createdAt",
-                        { $multiply: [{ $max: "$projects.months" }, 30 * 24 * 60 * 60 * 1000] }
-                    ]
-                }
-            }
+                    $add: ['$createdAt', { $multiply: [{ $max: '$projects.months' }, 30 * 24 * 60 * 60 * 1000] }],
+                },
+            },
         },
         {
             $match: {
-                orderExpiry: { $gt: new Date() }
-            }
+                orderExpiry: { $gt: new Date() },
+            },
         },
         {
-            $unwind: "$projects"
+            $unwind: '$projects',
         },
         {
-            $match: { "projects.slug": slug }
+            $match: { 'projects.slug': slug },
         },
         {
-            $unwind: "$projects.entries"
+            $unwind: '$projects.entries',
         },
         {
-            $count: "totalPaidEntries"
-        }
+            $count: 'totalPaidEntries',
+        },
     ]);
 
     return result.length > 0 ? result[0].totalPaidEntries : 0;
@@ -245,7 +256,7 @@ const visibleProjectDateFields = async (project) => {
         }
     }
     return visibleFields;
-}
+};
 
 module.exports = {
     projectEntries,
