@@ -57,18 +57,6 @@ const sendNotificationToDonor = async (notifyCustomer, entry, actor, project, ch
         if (!notifyCustomer.sendText && !notifyCustomer.sendEmail)
             throw new Error('Customer has all fields as false, please check if it is ok');
 
-        if (notifyCustomer.sendText) {
-            if (!customer.tel)
-                throw new Error(
-                    `Customer ${customer.name || customer.firstName} \n\n ${
-                        customer.email
-                    } \n\n does not have a phone number to send him this message: ${notifyCustomer.text}`,
-                );
-            const phone = await validatePhoneNumber(customer.tel);
-            await sendTextMessage(phone, notifyCustomer.text);
-            await sendTelegramMessage(`Text message sent to ${customer.name} | ${customer.email} \n\n ${notifyCustomer.text}`);
-        }
-
         if (notifyCustomer.sendEmail) {
             let message = notifyCustomer.email?.message;
             const subject = notifyCustomer.email?.subject;
@@ -86,6 +74,18 @@ const sendNotificationToDonor = async (notifyCustomer, entry, actor, project, ch
             }
             await sendEmail(email, name, subject, message, link, linkLabel);
             await sendTelegramMessage(`Email sent to ${customer.name} | ${customer.email} \n\n ${message}`);
+        }
+
+        if (notifyCustomer.sendText) {
+            if (!customer.tel)
+                throw new Error(
+                    `Customer ${customer.name || customer.firstName} \n\n ${
+                        customer.email
+                    } \n\n does not have a phone number to send him this message: ${notifyCustomer.text}`,
+                );
+            const phone = await validatePhoneNumber(customer.tel);
+            await sendTextMessage(phone, notifyCustomer.text);
+            await sendTelegramMessage(`Text message sent to ${customer.name} | ${phone} \n\n ${notifyCustomer.text}`);
         }
 
         return true;

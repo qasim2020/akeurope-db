@@ -176,19 +176,18 @@ exports.updateEntry = async (req, res) => {
                         email: {
                             subject: 'Orphan Update from Alkhidmat Europe',
                             message: `
-Status of an beneficiary that is sponsored by you has been updated: <br>
-<b>Orphan Name</b>: ${existingEntry.name} <br>
+Status of a beneficiary that is sponsored by you has been updated: <br>
+<b>Beneficiary</b>: ${existingEntry.name.trim()} <br>
 <b>Status Update</b>: ${fieldValue} <br>`,
                         },
                         text: `Alkhidmat Europe Update \n\n
 Assalam o Alaikum. \n
 Status of a beneficiary that is sponsored by you has been updated: \n
-Orphan Name: ${existingEntry.name.trim()} \n
+Beneficiary: ${existingEntry.name.trim()} \n
 Status Update: ${fieldValue} \n
 Login here to view beneficiary details. 
 ${process.env.CUSTOMER_PORTAL_URL} \n
-Jazak Allah \n
-Alkhidmat Europe`,
+Jazak Allah`,
                     };
                 }
             }
