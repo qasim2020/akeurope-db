@@ -11,14 +11,13 @@ const {
     getPaginatedOrders,
     getSingleOrder,
     updateOrderStatus,
-    addPaymentsToOrder,
-    openOrderProjectWithEntries,
     formatOrder,
     getPaymentByOrderId,
     getSubscriptionByOrderId,
     getSubscriptionsByOrderId,
     cleanOrder,
 } = require('../modules/orders');
+const { getVippsPaymentByOrderId, getVippsSubscriptionByOrderId } = require('../modules/vippsMain');
 const { generateInvoice, deleteInvoice, sendInvoiceToCustomer, sendThanksToCustomer } = require('../modules/invoice');
 const Log = require('../models/Log');
 const { createDynamicModel } = require('../models/createDynamicModel');
@@ -29,7 +28,8 @@ exports.viewOrders = async (req, res) => {
 
         for (const order of orders) {
             order.stripeInfo = (await getPaymentByOrderId(order._id)) || (await getSubscriptionByOrderId(order._id));
-        }
+            order.vippsInfo = (await getVippsPaymentByOrderId(order.vippsReference)) || (await getVippsSubscriptionByOrderId(order.vippsAgreementId));
+        };
 
         const customers = await Customer.find().lean();
         res.render('orders', {
@@ -70,6 +70,9 @@ exports.viewOrder = async (req, res) => {
 
         const payment = await getPaymentByOrderId(order._id);
         const subscriptions = await getSubscriptionsByOrderId(order._id);
+
+        order.vippsInfo = (await getVippsPaymentByOrderId(order.vippsReference)) || 
+            (await getVippsSubscriptionByOrderId(order.vippsAgreementId));
 
         if (payment) order.payment = payment;
         if (subscriptions) order.subscriptions = subscriptions;
@@ -135,6 +138,12 @@ exports.getOrderData = async (req, res) => {
 exports.getOrdersData = async (req, res) => {
     try {
         const { orders, pagination } = await getPaginatedOrders(req, res);
+
+        for (const order of orders) {
+            order.stripeInfo = (await getPaymentByOrderId(order._id)) || (await getSubscriptionByOrderId(order._id));
+            order.vippsInfo = (await getVippsPaymentByOrderId(order.vippsReference)) || (await getVippsSubscriptionByOrderId(order._id));
+        };
+
         res.render('partials/showOrders', {
             layout: false,
             data: {
