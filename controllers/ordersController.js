@@ -18,7 +18,7 @@ const {
     cleanOrder,
 } = require('../modules/orders');
 const { getVippsPaymentByOrderId, getVippsSubscriptionByOrderId } = require('../modules/vippsMain');
-const { generateInvoice, deleteInvoice, sendInvoiceToCustomer, sendThanksToCustomer } = require('../modules/invoice');
+const { deleteInvoice, sendInvoiceToCustomer, sendThanksToCustomer } = require('../modules/invoice');
 const Log = require('../models/Log');
 const { createDynamicModel } = require('../models/createDynamicModel');
 

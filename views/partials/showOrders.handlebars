@@ -78,7 +78,7 @@
             {{#if order.stripeInfo}} {{{getOrderIcon 'stripe'}}} {{/if}}
             {{#if order.vippsInfo}} {{{getOrderIcon 'vipps'}}} {{/if}}
             {{else}}
-            {{{getOrderIcon 'wire_tfr'}}}
+            {{{getOrderIcon 'phone_call'}}}
             {{/if}}
             {{or order.totalCost order.total}} {{order.currency}}
           </td>

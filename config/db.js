@@ -25,9 +25,12 @@ async function deleteExpiredOrders(Collection) {
     const expiredOrders = await Collection.find({
         $or: [
             { status: "draft", updatedAt: { $lt: expiryTime } },
+            { status: "aborted", updatedAt: { $lt: expiryTime } },
             { status: "pending payment", customerId: process.env.TEMP_CUSTOMER_ID, updatedAt: { $lt: expiryTime } }
         ]
     });
+
+    console.log(expiredOrders.length)
 
     if (expiredOrders.length > 0) {
         console.log(`Found ${expiredOrders.length} expired orders.`);
