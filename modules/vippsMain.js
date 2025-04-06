@@ -20,7 +20,6 @@ const getVippsSubscriptionByOrderId = async (agreementId) => {
             { 'vippsCharges.agreementId': agreementId },
             { vippsCharges: 1 }
         ).lean();
-        console.log('donor', donor);
         if (donor?.vippsCharges?.length) {
             const matchedCharge = donor.vippsCharges.find(charge => charge.agreementId === agreementId);
             return matchedCharge || null;
@@ -34,10 +33,15 @@ const getVippsSubscriptionByOrderId = async (agreementId) => {
 
 const getVippsSubscriptionsByOrderId = async (agreementId) => {
     try {
-        const donor = await Donor.findOne({'vippsCharges.agreementId': agreementId}).lean();
-        if (!donor) return null;
-        const subscriptions = donor.vippsCharges.filter(sub => sub.agreementId.toString() === agreementId);
-        return subscriptions || agreementId || null;
+        const donor = await Donor.findOne(
+            { 'vippsCharges.agreementId': agreementId },
+            { vippsCharges: 1 }
+        ).lean();
+        if (donor?.vippsCharges?.length) {
+            const matchedCharges = donor.vippsCharges.filter(charge => charge.agreementId === agreementId);
+            return matchedCharges || [];
+        }
+        return [];
     } catch (error) {
         console.error('Error fetching subscriptions:', error);
         return null;

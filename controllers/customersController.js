@@ -17,6 +17,7 @@ const { visibleProjectDateFields } = require('../modules/projectEntries');
 const { getSubscriptionsByOrderId, getPaymentByOrderId } = require('../modules/orders');
 const { getEntriesByCustomerId } = require('../modules/ordersFetchEntries');
 const { createPagination } = require('../modules/generatePagination');
+const { getVippsPaymentByOrderId, getVippsSubscriptionsByOrderId } = require('../modules/vippsMain');
 
 const Order = require('../models/Order');
 const Donor = require('../models/Donor');
@@ -310,7 +311,7 @@ exports.sendInvite = async (req, res) => {
 
 exports.updateCustomer = async (req, res) => {
     try {
-        const { name, organization, location, role, status } = req.body;
+        const { name, organization, location, role, status, tel } = req.body;
 
         let check = [];
 
@@ -337,6 +338,7 @@ exports.updateCustomer = async (req, res) => {
             organization,
             location,
             status,
+            tel,
             role,
         };
 
@@ -392,14 +394,16 @@ exports.activeSubscriptions = async (req,res) => {
     }
 }
 
+
 exports.customer = async (req, res) => {
     try {
         const customer = await Customer.findById(req.params.customerId).lean();
+
         const donor = await Donor.findOne({ email: customer.email }).lean();
         customer.tel = customer.tel || donor?.tel;
 
         const projects = await Project.find({ status: 'active' }).lean();
-
+        
         let visibleDateFields = [];
 
         if (!projects) {
@@ -408,20 +412,23 @@ exports.customer = async (req, res) => {
             visibleDateFields = await visibleProjectDateFields(projects[0]);
         }
 
-        const orders = await Order.find({ customerId: customer._id }).sort({ _id: -1 }).lean();
+        const orders = await Order.find({customerId: customer._id}).sort({_id: -1}).lean();
 
         for (const order of orders) {
-            order.stripeInfo = (await getPaymentByOrderId(order._id)) || (await getSubscriptionsByOrderId(order._id));
-        }
+            order.stripeInfo = await getPaymentByOrderId(order._id) || await getSubscriptionsByOrderId(order._id);
+            order.vippsInfo = (await getVippsPaymentByOrderId(order.vippsReference)) || 
+                (await getVippsSubscriptionsByOrderId(order.vippsAgreementId));
+        };
 
         const activeSubscriptions = await getEntriesByCustomerId(req, customer._id);
 
-        const subscriptions = await Subscription.find({ customerId: customer._id }).sort({ _id: -1 }).lean();
+        const subscriptions = await Subscription.find({customerId: customer._id}).sort({_id: -1}).lean();
 
         for (const subscription of subscriptions) {
-            subscription.stripeInfo =
-                (await getPaymentByOrderId(subscription._id)) || (await getSubscriptionsByOrderId(subscription._id));
-        }
+            subscription.stripeInfo = await getPaymentByOrderId(subscription._id) || await getSubscriptionsByOrderId(subscription._id);
+            subscription.vippsInfo = (await getVippsPaymentByOrderId(subscription.vippsReference)) || 
+                (await getVippsSubscriptionsByOrderId(subscription.vippsAgreementId));
+        };
 
         res.render('customer', {
             layout: 'dashboard',
