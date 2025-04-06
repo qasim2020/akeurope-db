@@ -46,11 +46,67 @@ async function deleteExpiredOrders(Collection) {
 
 }
 
+async function handleExpiredOrders(Collection) {
+    const now = new Date();
+
+    const expiredOrders = await Collection.aggregate([
+        {
+            $match: {
+                status: 'paid',
+            },
+        },
+        {
+            $addFields: {
+                maxMonths: { $max: '$projects.months' },
+            },
+        },
+        {
+            $addFields: {
+                expirationDate: {
+                    $dateAdd: {
+                        startDate: {
+                            $dateAdd: {
+                                startDate: '$createdAt',
+                                unit: 'month',
+                                amount: '$maxMonths',
+                            },
+                        },
+                        unit: 'day',
+                        amount: 2,
+                    },
+                },
+            },
+        },
+        {
+            $match: {
+                expirationDate: { $lte: now },
+            },
+        },
+        {
+            $project: { _id: 1 },
+        },
+    ]);
+
+    const expiredIds = expiredOrders.map(order => order._id);
+
+    if (expiredIds.length) {
+        await Collection.updateMany(
+            { _id: { $in: expiredIds } },
+            { $set: { status: 'expired' } }
+        );
+        console.log(`Marked ${expiredIds.length} orders as expired`);
+    } else {
+        console.log('No expired orders found');
+    }
+}
+
+
 mongoose.connection.on('open', async () => {
     console.log('Order cleanup job started...');
 
     await deleteExpiredOrders(Order);
     await deleteExpiredOrders(Subscription);
+    await handleExpiredOrders(Order);
 
     setInterval(async () => {
         try {
