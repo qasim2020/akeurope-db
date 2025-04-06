@@ -464,8 +464,6 @@ const getEntriesByCustomerId = async (req, customerId) => {
         },
     ]);
 
-    console.log('orders', orders);
-
     const validEntriesByProject = orders.flatMap((order) =>
         order.projects.flatMap((project) =>
             project.entries
