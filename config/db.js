@@ -30,8 +30,6 @@ async function deleteExpiredOrders(Collection) {
         ]
     });
 
-    console.log(expiredOrders.length)
-
     if (expiredOrders.length > 0) {
         console.log(`Found ${expiredOrders.length} expired orders.`);
 
