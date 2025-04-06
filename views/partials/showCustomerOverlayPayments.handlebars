@@ -1,64 +1,71 @@
-<div class="col-12 col-md-6">
-  <div class="card mb-3" id="stripe-payments-container">
-    <div class="card-header flex-column align-items-start">
-      <h3 class="card-title">General Payments</h3>
-      <div class="text-secondary">Payments made through website that are not linked to any beneficiary.</div>
-    </div>
-    {{#if data.subscriptions}}
-    <div class="p-md-3">
-      <table class="table table-striped mb-0">
-        <thead>
-          <tr>
-            <th>Order #</th>
-            <th>Date</th>
-            <th>Amount</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          {{#each data.subscriptions}}
-          <tr>
-            <td>
+<div class="card mb-0" id="stripe-payments-container">
+  <div class="card-header flex-column align-items-start">
+    <h3 class="card-title">General Payments</h3>
+    <div class="text-secondary">Payments made through website that are not linked to any beneficiary.</div>
+  </div>
+  {{#if data.subscriptions}}
+  <div class="p-md-3 table-responsive">
+    <table class="table table-striped mb-0 text-nowrap">
+      <thead>
+        <tr>
+          <th>Order #</th>
+          <th>Date</th>
+          <th>Amount</th>
+          <th>Project</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each data.subscriptions}}
+        <tr>
+          <td>
+            {{#if (hasAny this.stripeInfo this.vippsInfo)}}
               {{#if this.stripeInfo.paymentIntentId}}
               <a href="/order/{{this._id}}">{{this.orderNo}}</a>
-              {{else}}
-              <a href="/order/{{this._id}}">{{this.orderNo}}</a>
-              <i class="ti ti-refresh ms-1"></i>
               {{/if}}
-            </td>
-            <td>{{formatDate this.createdAt}}</td>
-            <td>
-              {{#unless this.stripeInfo}} <i class="ti ti-home"></i> {{/unless}}
-              <span>
-                {{#if this.monthlySubscription}}
-                  {{#each this.stripeInfo}}
-                  {{#if (eq this.paymentMethodType 'card')}} <i class="ti ti-credit-card"></i> {{/if}}
-                  {{#if (eq this.paymentMethodType 'apple_pay')}} <i class="ti ti-brand-apple"></i> {{/if}}
-                  {{#if (eq this.paymentMethodType 'google_pay')}} <i class="ti ti-brand-google"></i> {{/if}}
-                  <span class="me-2">{{divide this.price 100}} {{capitalizeAll this.currency}} in {{getMonth this.currentPeriodStart}}</span> <br>
-                  {{/each}}
-                  <i class="ti ti-equal"></i> {{this.totalAllTime}} {{this.currency}}
-                {{else}}
-                  {{#if (eq this.stripeInfo.paymentMethodType 'card')}} <i class="ti ti-credit-card"></i> {{/if}}
-                  {{#if (eq this.stripeInfo.paymentMethodType 'apple_pay')}} <i class="ti ti-brand-apple"></i> {{/if}}
-                  {{#if (eq this.stripeInfo.paymentMethodType 'google_pay')}} <i class="ti ti-brand-google"></i> {{/if}}
-                  {{this.total}} {{this.currency}}
-                {{/if}}
-              </span>
-            </td>
-            <td>
-              <span>{{{getOrderIcon this.status}}} </span>
-              <span class="ms-1">{{capitalizeFirstLetter this.status}}</span>
-            </td>
-          </tr>
-          {{/each}}
-        </tbody>
-      </table>
-    </div>
-    {{else}}
-    <div class="card-body">
-      <div class="text-center py-4">No payments found</div>
-    </div>
-    {{/if}}
+              {{#if this.vippsInfo}}
+              {{this.orderNo}} 
+              {{/if}}
+            {{else}}
+             <a href="/order/{{this._id}}">{{this.orderNo}}</a> 
+            {{/if}}
+            {{#if this.monthlySubscription}}
+            <i class="ti ti-refresh ms-1"></i>
+            {{/if}}
+          </td>
+          <td>{{formatDate this.createdAt}}</td>
+          <td>
+            {{#if this.monthlySubscription}}
+              {{#each this.stripeInfo}}
+                {{{getOrderIcon 'stripe'}}}
+                <span class="me-2">{{divide this.price 100}} {{capitalizeAll this.currency}} in {{getMonth this.currentPeriodStart}}</span> <br>
+              {{/each}}
+              {{#each this.vippsInfo}}
+                {{{getOrderIcon 'vipps_smiley'}}}
+                <span class="me-2">{{divide this.amount 100}} {{this.currency}} in {{getMonth this.due}}</span> <br>
+              {{/each}}
+                <i class="ti ti-equal" style=" margin-right: 12px; margin-left: 6px; "></i> {{this.totalAllTime}} {{this.currency}}
+            {{else}}
+              {{#if this.stripeInfo}} {{{getOrderIcon 'stripe'}}} {{/if}}
+              {{#if this.vippsInfo}} {{{getOrderIcon 'vipps_smiley'}}} {{/if}}
+              {{this.total}} {{this.currency}}
+            {{/if}}
+          </td>
+          <td>
+            <span class="badge bg-red-lt">{{slugToString this.projectSlug}}</span>
+          </td>
+          <td>
+            <span>{{{getOrderIcon this.status}}} </span>
+            <span class="ms-1">{{capitalizeFirstLetter this.status}}</span>
+          </td>
+        </tr>
+        {{/each}}
+      </tbody>
+    </table>
   </div>
+  {{else}}
+  <div class="card-body">
+    <div class="text-center py-4">No payments found</div>
+  </div>
+  {{/if}}
 </div>

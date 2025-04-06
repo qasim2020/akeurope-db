@@ -354,12 +354,23 @@ const getMonth = function(date) {
     return moment(date).format('MMM-YY'); 
 }
 
+const hasAny = function (a, b) {
+    const isTruthy = val => {
+        if (Array.isArray(val)) return val.length > 0;
+        if (val && typeof val === 'object') return Object.keys(val).length > 0;
+        return !!val;
+    };
+
+    return isTruthy(a) || isTruthy(b);
+};
+
 module.exports = {
     getMonth,
     slugToString,
     capitalizeAll,
     categoryOptions,
     or,
+    hasAny,
     eq,
     gt,
     and,
