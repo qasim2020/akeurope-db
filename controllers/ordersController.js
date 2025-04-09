@@ -137,12 +137,15 @@ exports.getOrderData = async (req, res) => {
 
 exports.getOrdersData = async (req, res) => {
     try {
+
         const { orders, pagination } = await getPaginatedOrders(req, res);
 
         for (const order of orders) {
             order.stripeInfo = (await getPaymentByOrderId(order._id)) || (await getSubscriptionByOrderId(order._id));
-            order.vippsInfo = (await getVippsPaymentByOrderId(order.vippsReference)) || (await getVippsSubscriptionByOrderId(order._id));
+            order.vippsInfo = (await getVippsPaymentByOrderId(order.vippsReference)) || (await getVippsSubscriptionByOrderId(order.vippsAgreementId));
         };
+
+        const customers = await Customer.find().lean();
 
         res.render('partials/showOrders', {
             layout: false,
