@@ -320,6 +320,14 @@ const shortenFileName = function(string) {
     return `${start}...${end}`;       
 }
 
+const shortenCustomerName = function(string) {
+    if (string.length <= 30) {
+        return string;
+    }
+    const start = string.slice(0, 27); 
+    return `${start}...`;    
+}
+
 const multiply = function(a, b) {
     return a * b;
 }
@@ -411,4 +419,5 @@ module.exports = {
     concat,
     shortenFileName,
     circleCloudinaryUrl,
+    shortenCustomerName,
 };
