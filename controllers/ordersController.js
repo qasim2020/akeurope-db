@@ -18,7 +18,7 @@ const {
     cleanOrder,
 } = require('../modules/orders');
 const { getVippsPaymentByOrderId, getVippsSubscriptionByOrderId } = require('../modules/vippsMain');
-const { deleteInvoice, sendInvoiceToCustomer, sendThanksToCustomer } = require('../modules/invoice');
+const { deleteInvoice, sendInvoiceToCustomer, sendThanksToCustomer, sendClarifyEmailToCustomer } = require('../modules/invoice');
 const Log = require('../models/Log');
 const { createDynamicModel } = require('../models/createDynamicModel');
 
@@ -291,6 +291,20 @@ exports.emailThanks = async (req, res) => {
         const order = await Order.findById(req.params.orderId).lean();
         const customer = await Customer.findById(order.customerId).lean();
         await sendThanksToCustomer(order, customer);
+        res.status(200).send('Email sent successfully!');
+    } catch (error) {
+        console.log(error);
+        res.status(404).send({
+            error: error,
+        });
+    }
+};
+
+exports.emailClarify = async (req, res) => {
+    try {
+        const order = await Order.findById(req.params.orderId).lean();
+        const customer = await Customer.findById(order.customerId).lean();
+        await sendClarifyEmailToCustomer(order, customer);
         res.status(200).send('Email sent successfully!');
     } catch (error) {
         console.log(error);

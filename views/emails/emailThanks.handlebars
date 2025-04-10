@@ -11,6 +11,7 @@
         </div>
         <p style="color: #333333;">Assalam o Alaikum, dear {{customer.name}},</p>
 
+        {{#if (eq project.detail.slug 'gaza-orphans')}}
         <p style="color: #333333; line-height: 1.5rem;">
             We’re truly grateful to have you with us in our mission to support children and families affected by
             conflict, disaster, and displacement. Your generosity plays a crucial role in delivering essential aid and
@@ -27,6 +28,27 @@
             {{project.months}} months. These sponsorships have been linked to your account. Click below to view the
             beneficiary profiles in your dashboard and track their progress.
         </p>
+        {{/if}}
+
+        {{#if (eq project.detail.slug 'alfalah-student-scholarship-2025')}}
+        <p style="color: #333333; line-height: 1.5rem;">
+            We’re truly grateful to have you with us in our mission to support underprivileged students across Pakistan
+            through quality education and long-term opportunities. Your generosity plays a vital role in opening doors
+            to a brighter future.
+        </p>
+
+        <p style="color: #333333; line-height: 1.5rem; font-weight: bold; color: #007A78;">
+            You are sponsoring {{project.entries.length}} x {{project.detail.name}} for the next
+            {{project.months}} months.
+        </p>
+
+        <p style="color: #333333; line-height: 1.5rem;">
+            Your generous support will empower these students to continue their education and work towards a better
+            future over the next {{project.months}} months. These scholarships have been linked to your account. Click
+            below to view student profiles in your dashboard and track their academic progress.
+        </p>
+
+        {{/if}}
 
         <a href="{{inviteLink}}"
             style="display: inline-block; padding: 10px 20px; margin-top: 0px; margin-bottom: 15px; background-color: #007A78; color: #ffffff; text-decoration: none; border-radius: 4px;">View

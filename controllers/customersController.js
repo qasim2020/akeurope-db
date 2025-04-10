@@ -152,7 +152,7 @@ exports.editModal = async (req, res) => {
 
 exports.createCustomer = async (req, res) => {
     try {
-        const { name, email, organization, location, status, role, customerId } = req.body;
+        const { name, email, tel, organization, address, status, role, customerId } = req.body;
 
         let check = [];
 
@@ -189,7 +189,8 @@ exports.createCustomer = async (req, res) => {
             name,
             email: email.toLowerCase(),
             organization,
-            location,
+            address,
+            tel,
             status,
             role,
             emailStatus: 'Email invite sent!',
@@ -311,7 +312,7 @@ exports.sendInvite = async (req, res) => {
 
 exports.updateCustomer = async (req, res) => {
     try {
-        const { name, organization, location, role, status, tel } = req.body;
+        const { name, organization, address, role, status, tel } = req.body;
 
         let check = [];
 
@@ -336,7 +337,7 @@ exports.updateCustomer = async (req, res) => {
         const updatedFields = {
             name,
             organization,
-            location,
+            address,
             status,
             tel,
             role,

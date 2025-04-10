@@ -12,6 +12,7 @@ router.post('/changeOrderStatus/:orderId', authenticate, authorize('editOrders')
 router.get('/deleteOrder/:orderId', authenticate, authorize('deleteOrders'), ordersController.deleteOrder);
 router.post('/emailInvoice/:orderId', authenticate, authorize('viewOrders'), ordersController.emailInvoice);
 router.post('/emailThanks/:orderId', authenticate, authorize('viewOrders'), ordersController.emailThanks);
+router.post('/emailClarify/:orderId', authenticate, authorize('viewOrders'), ordersController.emailClarify);
 router.get('/order/:orderId', authenticate, authorize('viewOrders'), allProjects, ordersController.viewOrder);
 router.get('/getOrderLogs/:orderId', authenticate, authorize('viewOrders'), ordersController.getOrderLogs);
 router.get('/getOrderData/:orderId', authenticate, authorize('viewOrders'), ordersController.getOrderData);

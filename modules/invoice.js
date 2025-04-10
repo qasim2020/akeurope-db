@@ -9,6 +9,7 @@ const nodemailer = require('nodemailer');
 const handlebars = require('handlebars');
 const { Error } = require('mongoose');
 const { formatDate, formatTime, expiresOn } = require('../modules/helpers');
+const helpers = require('../modules/helpers');
 
 const generateInvoice = async (order) => {
     const invoiceDir = path.join(__dirname, '../../invoices');
@@ -241,9 +242,14 @@ const sendThanksToCustomer = async (order, customer) => {
 
     const templatePath = path.join(__dirname, '../views/emails/emailThanks.handlebars');
     const templateSource = await fs.readFile(templatePath, 'utf8');
+    Object.entries(helpers).forEach(([name, fn]) => {
+        handlebars.registerHelper(name, fn);
+    });  
     const compiledTemplate = handlebars.compile(templateSource);
 
-    const project = order.projects.find((project) => project.slug === 'gaza-orphans');
+    if (order.projects.length > 1) 
+        throw new Error('Does not support multiple projects');
+    const project = order.projects[0];
     project.detail = await Project.findOne({ slug: project.slug }).lean();
 
     let inviteLink = '';
@@ -257,6 +263,55 @@ const sendThanksToCustomer = async (order, customer) => {
         from: process.env.EMAIL_USER,
         to: customer.email,
         subject: `Thank you for your order`,
+        html: compiledTemplate({ order, customer, project, inviteLink }),
+    };
+
+    try {
+        await transporter.sendMail(mailOptions);
+        console.log('Thanks sent!');
+        return true;
+    } catch (err) {
+        throw new Error(`Failed to send email: ${err.message}`);
+    }
+};
+
+const sendClarifyEmailToCustomer = async (order, customer) => {
+    let transporter = nodemailer.createTransport({
+        host: process.env.EMAIL_HOST,
+        port: process.env.EMAIL_PORT,
+        secure: true,
+        auth: {
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS,
+        },
+    });
+
+    const templatePath = path.join(__dirname, '../views/emails/emailClarify.handlebars');
+    const templateSource = await fs.readFile(templatePath, 'utf8');
+    Object.entries(helpers).forEach(([name, fn]) => {
+        handlebars.registerHelper(name, fn);
+    });  
+    const compiledTemplate = handlebars.compile(templateSource);
+
+    if (order.projects.length > 1) 
+        throw new Error('Does not support multiple projects');
+    const project = order.projects[0];
+    project.detail = await Project.findOne({ slug: project.slug }).lean();
+
+    if (project.slug !== 'alfalah-student-scholarship-2025')
+        throw new Error('Does not supported other than alfalah-student-scholarship-2025');
+
+    let inviteLink = '';
+    if (customer.inviteToken) {
+        inviteLink = `${process.env.CUSTOMER_PORTAL_URL}/register/${customer.inviteToken}`;
+    } else {
+        inviteLink = `${process.env.CUSTOMER_PORTAL_URL}/login`;
+    }
+
+    const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: customer.email,
+        subject: `Clarification Regarding Your Recent Sponsorship Email`,
         html: compiledTemplate({ order, customer, project, inviteLink }),
     };
 
@@ -312,4 +367,4 @@ const sendInvoiceToCustomer = async (order, customer) => {
     }
 };
 
-module.exports = { generateInvoice, deleteInvoice, deletePath, sendInvoiceToCustomer, sendThanksToCustomer };
+module.exports = { generateInvoice, deleteInvoice, deletePath, sendInvoiceToCustomer, sendThanksToCustomer, sendClarifyEmailToCustomer };
