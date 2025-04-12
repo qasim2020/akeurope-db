@@ -259,8 +259,8 @@ const findConnectedIds = async (logs, req) => {
             const testOne = log.actor && log.actor._id.toString();
             const testTwo = req && req.session.user._id.toString();
             log.actorIsSelf = testOne === testTwo;
-            log.self = req && req.session.user;
         }
+        log.viewer = req && req.session.user;
     }
 
     return logs;
@@ -293,7 +293,7 @@ const activtyByEntityType = async (req, res) => {
         const totalPages = Math.ceil(total / limit);
 
         return {
-            logs: await findConnectedIds(logs),
+            logs: await findConnectedIds(logs, req),
             entityTypes: await Log.distinct('entityType').lean(),
             entityType,
             pagesArray: generatePagination(totalPages, page),

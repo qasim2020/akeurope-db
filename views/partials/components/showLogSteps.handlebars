@@ -3,24 +3,37 @@
         <div class="d-flex align-items-center">
             <span class="badge">{{formatTime log.timestamp}}</span>
             <span class="badge bg-transparent fs-5">by</span>
+            {{log log.viewer}}
             {{#if (and log.actorIsSelf (neq log.actor.role 'admin'))}}
             <span class="badge bg-blue-lt">
                 <a href="/dashboard" style="color: inherit;">{{log.actor.name}}</a>
             </span>
-            {{else if (and (eq log.actor.role 'admin') (neq log.self.role 'admin'))}}
-            <span class="badge bg-green-lt">
-                {{log.actor.name}}
-            </span>
-            {{else if (eq log.actorType 'user')}}
-            {{#if (eq log.actor.role 'admin')}}
-            <span class="badge bg-green-lt">
-                <a href="/{{log.actorType}}/{{log.actor._id}}" style="color: inherit;">{{log.actor.name}}</a>
-            </span>
-            {{else}}
-            <span class="badge bg-blue-lt">
-                <a href="/{{log.actorType}}/{{log.actor._id}}" style="color: inherit;">{{log.actor.name}}</a>
-            </span>
-            {{/if}}
+            {{else if (eq log.viewer.role 'admin')}}
+                {{#if (eq log.actor.role 'admin')}}
+                <span class="badge bg-green-lt">
+                    <a href="/{{log.actorType}}/{{log.actor._id}}" style="color: inherit;">{{log.actor.name}}</a>
+                </span>
+                {{else}}
+                <span class="badge bg-blue-lt">
+                    <a href="/{{log.actorType}}/{{log.actor._id}}" style="color: inherit;">{{log.actor.name}}</a>
+                </span>
+                {{/if}}
+            {{else if (eq log.viewer.role 'editor')}}
+                {{#if log.actorIsSelf}}
+                <span class="badge bg-blue-lt">
+                    <a href="/{{log.actorType}}/{{log.actor._id}}" style="color: inherit;">{{log.actor.name}}</a>
+                </span>
+                {{else}}
+                    {{#if (eq log.actor.role 'admin')}}
+                    <span class="badge bg-green-lt">
+                        {{log.actor.name}}
+                    </span>
+                    {{else}}
+                    <span class="badge bg-blue-lt">
+                        {{log.actor.name}}
+                    </span>
+                    {{/if}}
+                {{/if}}
             {{else if (eq log.actorType 'customer')}}
             <span class="badge bg-red-lt">
                 <a href="/{{log.actorType}}/{{log.actor._id}}" style="color: inherit;">{{log.actor.name}}</a>
