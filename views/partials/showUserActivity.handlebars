@@ -4,7 +4,8 @@
     <div class="card-header">
       <h3 class="card-title col-auto">Recent Activity</h3>
       <select class="ms-2 form-select" my-href="/getUserActivityData/{{data.user._id}}?page=1">
-        <option value="all" {{#if (eq data.userLogs.showBy 'all' )}}selected{{/if}}>Show all</option>
+        <option value="project" {{#if (eq data.userLogs.showBy 'project' )}}selected{{/if}}>on assigned project(s)</option>
+        <option value="all" {{#if (eq data.userLogs.showBy 'all' )}}selected{{/if}}>show all</option>
         <option value="actor" {{#if (eq data.userLogs.showBy 'actor' )}}selected{{/if}}>by administrator</option>
         <option value="entity" {{#if (eq data.userLogs.showBy 'entity' )}}selected{{/if}}>on administrator</option>
       </select>

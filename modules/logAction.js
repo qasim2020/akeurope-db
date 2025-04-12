@@ -101,17 +101,31 @@ const entryLogs = async (req, res) => {
 };
 
 const userLogs = async (req, userId) => {
+    const user = await User.findById(userId).lean();
+    const userProjects = user.projects;
+    const regexArray = userProjects.map((slug) => new RegExp(slug, 'i'));
+    const usersWithMatchingProjects = await User.find({
+        projects: { $in: user.projects },
+    }).lean();
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
+    const filter = req.query.showBy || 'project';
     let query;
-    if (req.query.showBy == 'actor') {
+    if (filter === 'actor') {
         query = {
             actorId: userId,
         };
-    } else if (req.query.showBy == 'entity') {
+    } else if (filter === 'entity') {
         query = {
             entityId: userId,
+            actorId: { $ne: userId },
         };
+    } else if (filter === 'project') {
+        query = {
+            actorId: { $in: usersWithMatchingProjects.map((user) => user._id) },
+            entityType: 'entry',
+            action: { $in: regexArray },
+        }
     } else {
         query = {
             $or: [
@@ -119,8 +133,14 @@ const userLogs = async (req, userId) => {
                     entityId: userId,
                 },
                 {
-                    actorId: userId,
+                    entityId: userId,
+                    actorId: { $ne: userId },
                 },
+                {
+                    actorId: { $in: usersWithMatchingProjects.map((user) => user._id) },
+                    entityType: 'entry',
+                    action: { $in: regexArray },
+                }
             ],
         };
     }
@@ -135,7 +155,7 @@ const userLogs = async (req, userId) => {
     const totalPages = Math.ceil(total / limit);
 
     return {
-        showBy: req.query.showBy || 'all',
+        showBy: filter,
         logs: await findConnectedIds(logs, req),
         pagesArray: generatePagination(totalPages, page),
         currentPage: page,
