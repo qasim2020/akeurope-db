@@ -14,7 +14,10 @@ const logSchema = new mongoose.Schema({
     isRead: { type: Boolean, default: false },
     isReadByCustomer: { type: Boolean, default: true },
     expiresAt: Date,
+}, {
+    timestamps: true
 });
+
 
 logSchema.post('save', function (doc) {
     if (doc.isNotification) {

@@ -97,7 +97,7 @@ const projectEntries = async function (req, res) {
             _id: { $in: allPaidEntryIds },
             ...searchQuery,
         });
-        
+
         if (skip < paidCount) {
             const paidLimit = Math.min(limit, paidCount - skip);
         
