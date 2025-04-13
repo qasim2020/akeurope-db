@@ -42,6 +42,7 @@ const roles = {
         'viewInvoices',
         'viewLogs',
         'viewNotifications',
+        'viewSelf',
     ],
     editor: [
         'viewSelf',

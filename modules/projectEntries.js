@@ -3,6 +3,8 @@ const Payment = require('../models/Payment');
 const Subscription = require('../models/Subscription');
 const Order = require('../models/Order');
 const Customer = require('../models/Customer');
+const Country = require('../models/Country');
+const Log = require('../models/Log');
 
 const { createDynamicModel } = require('../models/createDynamicModel');
 const { generatePagination } = require('../modules/generatePagination');
@@ -70,7 +72,7 @@ const projectEntries = async function (req, res) {
     const { searchQuery, fieldFilters } = generateSearchQuery(req, project);
 
     const serializedFilters = Object.fromEntries(
-        Object.entries(fieldFilters).map(([key, value]) => [key, JSON.stringify(value)]),
+        Object.entries(fieldFilters).map(([key, value]) => [key, typeof value === 'string' ? value : JSON.stringify(value)]),
     );
 
     const filtersQuery = new URLSearchParams(serializedFilters).toString();
@@ -78,52 +80,91 @@ const projectEntries = async function (req, res) {
     let entries = [];
     let totalEntries, totalPages;
 
-    entries = await DynamicModel.aggregate([
-        { $match: searchQuery },
-        {
-            $lookup: {
-                from: 'orders',
-                localField: '_id',
-                foreignField: 'projects.entries.entryId',
-                as: 'orderInfo',
-            },
-        },
-        { $unwind: { path: '$orderInfo', preserveNullAndEmptyArrays: true } },
-        { $unwind: { path: '$orderInfo.projects', preserveNullAndEmptyArrays: true } },
-        {
-            $addFields: {
-                isPaid: {
-                    $cond: {
-                        if: {
-                            $and: [
-                                { $eq: ['$orderInfo.status', 'paid'] },
-                                {
-                                    $gt: [
-                                        {
-                                            $add: [
-                                                '$orderInfo.createdAt',
-                                                {
-                                                    $multiply: ['$orderInfo.projects.months', 30 * 24 * 60 * 60 * 1000],
-                                                },
-                                            ],
-                                        },
-                                        new Date(),
-                                    ],
-                                },
-                            ],
-                        },
-                        then: 1,
-                        else: 0,
-                    },
-                },
-            },
-        },
-        ...(req.query.sortBy === 'paid' ? [{ $sort: { isPaid: -1, ...sortOptions } }] : [{ $sort: { ...sortOptions } }]),
-        { $skip: skip },
-        { $limit: limit },
-    ]);
+    if (req.query.sortBy === 'paid') {
+        delete sortOptions.paid;
+        const orders = await Order.find({
+            status: 'paid',
+            'projects.slug': project.slug,
+        }).lean();
 
-    totalEntries = await DynamicModel.countDocuments(searchQuery);
+        const allPaidEntryIds = orders.flatMap(order =>
+            order.projects
+                .filter(project => project.slug === req.params.slug)
+                .flatMap(project => project.entries.map(entry => entry.entryId))
+        );
+        
+        const paidCount = allPaidEntryIds.length;
+        
+        if (skip < paidCount) {
+            const paidLimit = Math.min(limit, paidCount - skip);
+        
+            const paidEntries = await DynamicModel.find({
+                _id: { $in: allPaidEntryIds },
+                ...searchQuery,
+            })
+                .sort(sortOptions)
+                .skip(skip)
+                .limit(paidLimit)
+                .lean();
+        
+            entries.push(...paidEntries);
+        
+            const remainingLimit = limit - paidEntries.length;
+        
+            if (remainingLimit > 0) {
+                const unPaidEntries = await DynamicModel.find({
+                    _id: { $nin: allPaidEntryIds },
+                    ...searchQuery,
+                })
+                    .sort(sortOptions)
+                    .limit(remainingLimit)
+                    .lean();
+        
+                entries.push(...unPaidEntries);
+            }
+        } else {
+            const unpaidSkip = skip - paidCount;
+        
+            const unPaidEntries = await DynamicModel.find({
+                _id: { $nin: allPaidEntryIds },
+                ...searchQuery,
+            })
+                .sort(sortOptions)
+                .skip(unpaidSkip)
+                .limit(limit)
+                .lean();
+        
+            entries = unPaidEntries;
+        }
+
+    } else {
+        entries = await DynamicModel.find(searchQuery).sort(sortOptions).skip(skip).limit(limit).lean();
+
+        for (const entry of entries) {
+            const order = await Order.findOne({
+                'projects.entries.entryId': entry._id,
+                status: 'paid',
+            }).lean();
+
+            if (!order) {
+                entry.isPaid = 0;
+                continue;
+            }
+
+            const customer = await Customer.findById(order.customerId).lean();
+            const country = await Country.findOne({ 'currency.code': order.currency }).lean();
+
+            entry.orderInfo = order;
+            entry.customer = customer;
+            entry.country = country;
+            entry.isPaid = order ? 1 : 0;
+        }
+    }
+
+    for (const entry of entries) {
+        const lastLog = await Log.findOne({ entityId: entry._id }).sort({ createdAt: -1 }).lean();
+        entry.lastLog = lastLog.timestamp;
+    }
 
     totalEntries = await DynamicModel.countDocuments(searchQuery);
     totalPages = Math.ceil(totalEntries / limit);
@@ -153,7 +194,6 @@ const projectEntries = async function (req, res) {
 };
 
 const getPaidOrdersByEntryId = async (req, res, entryId) => {
-
     entryId = entryId || req.params.entryId;
 
     const now = new Date();
@@ -163,10 +203,7 @@ const getPaidOrdersByEntryId = async (req, res, entryId) => {
         $expr: {
             $gte: [
                 {
-                    $add: [
-                        '$createdAt',
-                        { $multiply: [{ $arrayElemAt: ['$projects.months', 0] }, 30 * 24 * 60 * 60 * 1000] },
-                    ],
+                    $add: ['$createdAt', { $multiply: [{ $arrayElemAt: ['$projects.months', 0] }, 30 * 24 * 60 * 60 * 1000] }],
                 },
                 now,
             ],
@@ -182,9 +219,8 @@ const getPaidOrdersByEntryId = async (req, res, entryId) => {
     for (const order of orders) {
         order.customer = await Customer.findById(order.customerId).lean();
         const project = order.projects.find((project) => {
-            return project.entries.find((entry) => entry.entryId == entryId.toString())
+            return project.entries.find((entry) => entry.entryId == entryId.toString());
         });
-        console.log(project);
         order.project = project;
         order.entry = project.entries.find((entry) => entry.entryId == entryId.toString());
     }

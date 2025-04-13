@@ -22,17 +22,17 @@ const authorize = (permission) => {
                 return res.status(401).send('Unauthorized: No role assigned');
             }
 
-            if (permission === 'viewUsers' && roles[userRole].includes('viewSelf')) {
-                const testOne = req.user?._id.toString();
-                const testTwo = req.params && req.params.userId && req.params.userId.toString();
-                const test = testOne === testTwo;
-                if (!test) {
-                    return res.status(401).render('error', {
-                        heading: 'Unauthorized',
-                        error: `You do not have sufficient permissions to view another Admin`,
-                    });
-                }
-            } else {
+            // if (permission === 'viewUsers' && roles[userRole].includes('viewSelf')) {
+            //     const testOne = req.user?._id.toString();
+            //     const testTwo = req.params && req.params.userId && req.params.userId.toString();
+            //     const test = testOne === testTwo;
+            //     if (!test) {
+            //         return res.status(401).render('error', {
+            //             heading: 'Unauthorized',
+            //             error: `You do not have sufficient permissions to view another Admin`,
+            //         });
+            //     }
+            // } else {
                 const hasPermissionResult = await hasPermission(userRole, userId, permission);
                 if (!hasPermissionResult) {
                     return res.status(401).render('error', {
@@ -40,7 +40,7 @@ const authorize = (permission) => {
                         error: `Unauthorized: ${userRole} can't ${permission}`,
                     });
                 }
-            }
+            // }
 
             req.userPermissions = [...(roles[userRole] || []), ...(userProjects || [])];
 

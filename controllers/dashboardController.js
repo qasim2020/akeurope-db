@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const { visibleLogs, activtyByEntityType, userLogs } = require('../modules/logAction');
+const { dataForUserPage } = require('../modules/users');
 
 exports.showDashboard = async (req, res) => {
     try {
@@ -21,22 +22,10 @@ exports.showDashboard = async (req, res) => {
             });
         }
         if (req.user?.role === 'editor') {
+            const userId = req.user._id;
             res.render('user', {
                 layout: 'dashboard',
-                data: {
-                    layout: req.session.layout,
-                    userEmail: req.session.user.email,
-                    userId: req.session.user._id,
-                    userName: req.session.user.name,
-                    userRole: req.session.user.role.charAt(0).toUpperCase() + req.session.user.role.slice(1),
-                    activeMenu: 'dashboard',
-                    projects: req.allProjects,
-                    role: req.userPermissions,
-                    logs: await visibleLogs(req, res),
-                    userLogs: await userLogs(req, req.session.user._id),
-                    user: await User.findById(req.session.user._id).lean(),
-                    sidebarCollapsed: req.session.sidebarCollapsed,
-                },
+                data: await dataForUserPage(req, res, 'dashboard', userId),
             });
         }
     } catch (error) {

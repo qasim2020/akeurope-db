@@ -1,0 +1,93 @@
+<div class="tab-pane active show project-tab" id="{{this.project.slug}}" role="tabpanel">
+    <h3 class="card-title">Total Beneficiaries ({{this.pagination.totalEntries}})</h3>
+
+    <p class="text-secondary">
+        {{this.note}}
+    </p>
+
+    <div class="row g-3 pt-2">
+        {{#each this.entries as |ben|}}
+        <div class="col-md-4">
+            <div class="card h-100 p-2 border-0 shadow-sm rounded-3">
+                <div class="d-flex h-100">
+                    <div class="col-4">
+                        <a href="/entry/{{ben._id}}/project/{{../project.slug}}">
+                            <img class="w-100 img-fluid rounded-3 border border-1" alt="{{ben.name}}"
+                                src="{{roundedCloudinaryUrl (or ben.photo (or ben.photoOfChild ben.photoOfOrphan))}}">
+                        </a>
+                    </div>
+                    <div class="col-8 ps-2 d-flex flex-column h-100">
+                        <a href="/entry/{{ben._id}}/project/{{../project.slug}}">
+                            <h4 style="margin-bottom: 4px;">{{ben.name}}</h4>
+                        </a>
+                        <p class="text-secondary" style="margin-bottom: 4px;">
+                            {{#if ben.customer}}
+                            Subscribed by <span class="badge bg-red-lt"
+                                style="display: inline-block; white-space: normal;">{{getFirstName
+                                ben.customer.name}}</span>
+                            from <span>
+                                <img src="{{ben.country.flag}}" style="margin-top: -4px;"
+                                    alt="{{ben.country.code}} Flag" width="20" height="14" class="rounded">
+                                <span>{{ben.country.name}}</span>
+                            </span>
+                            {{else}}
+                            No active donors.
+                            {{/if}}
+                        </p>
+                        <p style="margin-bottom: 4px;" class="flex-grow-1"><strong>Status: </strong>{{shortenString ben.status 30}}</p>
+                        <p style="margin-bottom: 4px;" class="text-secondary fs-5"><strong>Last updated: </strong>{{timeDaysAgo ben.lastLog}}</p>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        {{/each}}
+    </div>
+
+    {{#with this.pagination as |list|}}
+
+    {{#if (gt list.totalPages 1)}}
+    <div class="mt-3 py-2 ps-3 pe-2 rounded-3 border-0 bg-light d-flex align-items-center">
+        <p class="m-0 text-secondary">Page <span>{{list.currentPage}}</span> of
+            <span>{{list.totalPages}}</span>
+        </p>
+        <ul class="pagination m-0 ms-auto">
+            <li class="page-item {{#if (eq list.hasPrevPage false)}}disabled{{/if}}">
+                <a class="page-link cursor-pointer" tabindex="-1" aria-disabled="true"
+                    my-href="/get-user-entries-by-project/{{../project.slug}}/{{../userId}}?page={{dec list.currentPage}}"
+                    onclick="getUserEntries(this)">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="icon">
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                        <path d="M15 6l-6 6l6 6"></path>
+                    </svg>
+                </a>
+            </li>
+            {{#each list.pagesArray}}
+            <li class="page-item {{#if (eq list.currentPage this)}}active{{/if}}">
+                <a class="page-link cursor-pointer" my-href="/get-user-entries-by-project/{{../../project.slug}}/{{../../userId}}?page={{this}}"
+                    onclick="getUserEntries(this)">{{this}}</a>
+            </li>
+            {{/each}}
+            <li class="page-item {{#if (eq list.hasNextPage false)}}disabled{{/if}}">
+                <a class="page-link cursor-pointer" tabindex="-1" aria-disabled="true"
+                    my-href="/get-user-entries-by-project/{{../project.slug}}/{{../userId}}?page={{inc list.currentPage}}"
+                    onclick="getUserEntries(this)">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="icon">
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                        <path d="M9 6l6 6l-6 6"></path>
+                    </svg>
+                </a>
+            </li>
+        </ul>
+    </div>
+    {{/if}}
+
+    {{/with}}
+</div>

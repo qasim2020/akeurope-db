@@ -9,6 +9,7 @@ const UserSchema = new mongoose.Schema({
   status: { type: String, default: 'pending' },
   invitationStatus: { type: Boolean, default: false },
   projects: [String],
+  entries: [{ type: Object }],
   resetPasswordToken: String,
   resetPasswordExpires: Date,
   inviteToken: String,

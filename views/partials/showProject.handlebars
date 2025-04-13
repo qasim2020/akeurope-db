@@ -182,7 +182,7 @@
       <td class="text-danger fw-bold">{{lookup entry this.name}}<sup class="ms-1">{{../../data.project.currency}} /
           Month</sup></td>
       {{else}}
-      <td class="{{#if (neq @key 0)}}text-secondary{{/if}}"> {{lookup entry this.name}} </td>
+      <td class="{{#if (neq @key 0)}}text-secondary{{/if}}"> {{shortenString (lookup entry this.name) 40}} </td>
       {{/if}}
 
       {{/each}}

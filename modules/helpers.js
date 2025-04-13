@@ -168,6 +168,23 @@ const findPrimaryKey = function (fields) {
     return primaryField ? primaryField.name : null;
 };
 
+const timeDaysAgo = function (timestamp) {
+    const now = moment();
+    const date = moment(timestamp);
+
+    const seconds = now.diff(date, 'seconds');
+    const minutes = now.diff(date, 'minutes');
+    const hours = now.diff(date, 'hours');
+    const days = now.diff(date, 'days');
+
+    if (seconds < 60) return 'few seconds ago';
+    if (minutes < 60) return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+    if (hours < 24) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+    if (days === 1) return 'yesterday';
+    if (days < 7) return `${days} day${days > 1 ? 's' : ''} ago`;
+    return `${days} days ago`;
+};
+
 const timeAgo = function (timestamp) {
     const now = moment();
     const date = moment(timestamp);
@@ -328,6 +345,21 @@ const shortenCustomerName = function(string) {
     return `${start}...`;    
 }
 
+const shortenString = function(string, length) {
+    if (typeof string !== 'string') return '';
+    if (string.length <= length) {
+        return string;
+    }
+    const start = string.slice(0, length - 3); 
+    return `${start}...`;    
+}
+
+const getFirstName = function (name) {
+    if (!name) return '';
+    const words = name.trim().split(' ');
+    return words[0];
+};
+
 const multiply = function(a, b) {
     return a * b;
 }
@@ -351,6 +383,12 @@ function circleCloudinaryUrl(url) {
     return url.replace('/upload/', `/upload/${transformation}/`);
 };
 
+function roundedCloudinaryUrl(url) {
+    if (!url) return '/static/images/no-photo-placement.png';
+
+    const transformation = 'ar_1:1,c_fill,e_improve,g_auto,h_250,w_250,r_10,z_1.0';
+    return url.replace('/upload/', `/upload/${transformation}/`);
+}
 
 const capitalizeAll = function (str) {
     if (!str) return '';
@@ -405,6 +443,7 @@ module.exports = {
     isEmptyObject,
     findPrimaryKey,
     timeAgo,
+    timeDaysAgo,
     camelCaseToNormalString,
     kebabCaseToNormalString,
     camelCaseWithCommaToNormalString,
@@ -417,7 +456,10 @@ module.exports = {
     getOrderIcon,
     removeLinksFromHtml,
     concat,
+    shortenString,
     shortenFileName,
     circleCloudinaryUrl,
+    roundedCloudinaryUrl,
     shortenCustomerName,
+    getFirstName,
 };

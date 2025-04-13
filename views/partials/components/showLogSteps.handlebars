@@ -3,7 +3,6 @@
         <div class="d-flex align-items-center">
             <span class="badge">{{formatTime log.timestamp}}</span>
             <span class="badge bg-transparent fs-5">by</span>
-            {{log log.viewer}}
             {{#if (and log.actorIsSelf (neq log.actor.role 'admin'))}}
             <span class="badge bg-blue-lt">
                 <a href="/dashboard" style="color: inherit;">{{log.actor.name}}</a>

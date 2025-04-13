@@ -41,6 +41,7 @@
 <!-- Page body -->
 <div class="container-xl pt-4" id="data-container">
   <div class="row row-deck row-cards">
+    {{> showUserEntries}}
     {{> showUser}}
     {{> showUserActivity}}
   </div>
@@ -128,7 +129,7 @@
           <div class="text-secondary">User updated successfully.</div>
         </div>`);
         if (response === 'refresh window') {
-          window.location.reload(); 
+          window.location.reload();
           return;
         }
         showDataAsSuch();
@@ -251,6 +252,21 @@
         $(elem).siblings("input").after(`<div class="invalid-feedback">${xhr.responseText}</div> `);
       }
     });
+  }
+
+  const getUserEntries = function (elem, href) {
+    href = href || $(elem).attr("my-href");
+    const projectTab = $(elem).closest(".project-tab");
+    $.ajax({
+      url: href,
+      method: 'GET',
+      success: function (response) {
+        projectTab.replaceWith(response);
+      },
+      error: function (error) {
+        $('#user-entries-container').html(error.responseText);
+      }
+    })
   }
 
 

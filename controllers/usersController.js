@@ -10,25 +10,26 @@ const checkValidForm = require('../modules/checkValidForm');
 const { saveLog, visibleLogs, userLogs } = require('../modules/logAction');
 const { logTemplates } = require('../modules/logTemplates');
 const { getChanges } = require('../modules/getChanges');
+const { dataForUserPage } = require('../modules/users');
+const { projectEntries } = require('../modules/projectEntries');
 
 const mongoose = require('mongoose');
 const sessionCollection = mongoose.connection.collection('sessions');
 
 async function killUserSessions(userId) {
-  try {
-
-    const sessions = await sessionCollection.find().toArray();
-    for (const session of sessions) {
-      const sessionData = JSON.parse(session.session);
-      if (sessionData.user && sessionData.user._id === userId.toString()) {
-        await sessionCollection.deleteOne({ _id: session._id });
-        console.log(`Deleted session: ${session._id} for user: ${userId}`);
-      }
+    try {
+        const sessions = await sessionCollection.find().toArray();
+        for (const session of sessions) {
+            const sessionData = JSON.parse(session.session);
+            if (sessionData.user && sessionData.user._id === userId.toString()) {
+                await sessionCollection.deleteOne({ _id: session._id });
+                console.log(`Deleted session: ${session._id} for user: ${userId}`);
+            }
+        }
+        console.log('Session cleanup completed.');
+    } catch (error) {
+        console.error('Error deleting sessions:', error);
     }
-    console.log('Session cleanup completed.');
-  } catch (error) {
-    console.error('Error deleting sessions:', error);
-  }
 }
 
 exports.users = async (req, res) => {
@@ -40,9 +41,7 @@ exports.users = async (req, res) => {
             data: {
                 userId: req.session.user._id,
                 userName: req.session.user.name,
-                userRole:
-                    req.session.user.role.charAt(0).toUpperCase() +
-                    req.session.user.role.slice(1),
+                userRole: req.session.user.role.charAt(0).toUpperCase() + req.session.user.role.slice(1),
                 userEmail: req.session.user.email,
                 projects: await Project.find().lean(),
                 layout: req.session.layout,
@@ -145,10 +144,7 @@ exports.createUser = async (req, res) => {
             },
         });
 
-        const templatePath = path.join(
-            __dirname,
-            '../views/emails/userInvite.handlebars',
-        );
+        const templatePath = path.join(__dirname, '../views/emails/userInvite.handlebars');
         const templateSource = await fs.readFile(templatePath, 'utf8');
         const compiledTemplate = handlebars.compile(templateSource);
 
@@ -225,14 +221,10 @@ exports.updateUser = async (req, res) => {
                 }),
             );
 
-            const updatedUser = await User.findOneAndUpdate(
-                { _id: req.params.userId },
-                updatedFields,
-                { new: true },
-            );
+            const updatedUser = await User.findOneAndUpdate({ _id: req.params.userId }, updatedFields, { new: true });
 
             if (!updatedUser) {
-                return res.status(404).send("User not found");
+                return res.status(404).send('User not found');
             }
 
             if (req.session.user._id.toString() == updatedUser._id.toString()) {
@@ -364,10 +356,7 @@ exports.sendInvite = async (req, res) => {
             },
         });
 
-        const templatePath = path.join(
-            __dirname,
-            '../views/emails/userInvite.handlebars',
-        );
+        const templatePath = path.join(__dirname, '../views/emails/userInvite.handlebars');
         const templateSource = await fs.readFile(templatePath, 'utf8');
         const compiledTemplate = handlebars.compile(templateSource);
 
@@ -406,24 +395,10 @@ exports.sendInvite = async (req, res) => {
 
 exports.user = async (req, res) => {
     try {
+        const userId = req.params.userId;
         res.render('user', {
             layout: 'dashboard',
-            data: {
-                layout: req.session.layout,
-                userEmail: req.session.user.email,
-                userId: req.session.user._id,
-                userName: req.session.user.name,
-                userRole:
-                    req.session.user.role.charAt(0).toUpperCase() +
-                    req.session.user.role.slice(1),
-                activeMenu: 'users',
-                projects: req.allProjects,
-                role: req.userPermissions,
-                logs: await visibleLogs(req, res),
-                userLogs: await userLogs(req, req.params.userId),
-                user: await User.findById(req.params.userId).lean(),
-                sidebarCollapsed: req.session.sidebarCollapsed,
-            },
+            data: await dataForUserPage(req, res, 'users', userId),
         });
     } catch (error) {
         console.log(error);
@@ -440,9 +415,7 @@ exports.getUserData = async (req, res) => {
             layout: false,
             data: {
                 userEmail: req.session.user.email,
-                userRole:
-                    req.session.user.role.charAt(0).toUpperCase() +
-                    req.session.user.role.slice(1),
+                userRole: req.session.user.role.charAt(0).toUpperCase() + req.session.user.role.slice(1),
                 role: req.userPermissions,
                 user: await User.findById(req.params.userId).lean(),
             },
@@ -464,6 +437,40 @@ exports.getUserActivityData = async (req, res) => {
                 userLogs: await userLogs(req, req.params.userId),
                 user: await User.findById(req.params.userId).lean(),
             },
+        });
+    } catch (error) {
+        res.render('error', {
+            heading: 'Server Error',
+            error: error,
+        });
+    }
+};
+
+exports.getUserEntriesData = async (req, res) => {
+    try {
+        const user = await User.findById(req.params.userId).lean();
+        const userQuery = user.entries.find((e) => e.slug == req.params.slug).query;
+        
+        const fullUrl = new URL(`http://dummy.com?${userQuery}`);
+        
+        const userQueryClear = Object.fromEntries(fullUrl.searchParams.entries());
+        
+        delete userQueryClear.page;
+        
+        req.query = {
+            ...userQueryClear, 
+            page: req.query.page || 1, 
+        };
+        console.log(req.query);
+        req.params = { slug: req.params.slug };
+        const { entries, project, pagination } = await projectEntries(req);
+        res.render('partials/showUserProjectEntries', {
+            layout: false,
+            entries,
+            project,
+            pagination,
+            userId: user._id,
+            note: user.entries.find((e) => e.slug == project.slug).note,
         });
     } catch (error) {
         res.render('error', {

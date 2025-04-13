@@ -1,0 +1,22 @@
+<div id="user-entries-container">
+    <div class="card">
+        <div class="card-header">
+            <ul class="nav nav-tabs card-header-tabs" data-bs-toggle="tabs" role="tablist">
+                {{#each data.userEntries}}
+                <li class="nav-item" role="presentation">
+                    <a href="#{{this.project.slug}}" class="nav-link {{#if (eq @index 0)}}active{{/if}}"
+                        data-bs-toggle="tab" aria-selected="true" role="tab">{{this.project.name}}</a>
+                </li>
+                {{/each}}
+            </ul>
+        </div>
+        <div class="card-body">
+            <div class="tab-content">
+                {{#each data.userEntries}}
+                    {{> showUserProjectEntries}}
+                {{/each}}
+            </div>
+        </div>
+    </div>
+
+</div>

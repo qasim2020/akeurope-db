@@ -17,5 +17,6 @@ router.post('/users/register/:token', usersController.setRegister);
 router.get('/user/:userId', authenticate, authorize("viewUsers"), allProjects, usersController.user);
 router.get('/getUserActivityData/:userId', authenticate, authorize("viewUsers"), usersController.getUserActivityData);
 router.get('/getUserData/:userId', authenticate, authorize("viewUsers"), usersController.getUserData);
+router.get('/get-user-entries-by-project/:slug/:userId', authenticate, authorize("viewSelf"), usersController.getUserEntriesData);
 
 module.exports = router;

@@ -49,23 +49,29 @@ const generateSearchQuery = function (req, project) {
     project.fields.forEach((field) => {
         if (req.query[field.name]) {
             let queryValue = req.query[field.name];
-            const query = parseDateQuery(queryValue);
-            if (query) {
-                fieldFilters[field.name] = query;
+
+            if (isDateString(queryValue)) {
+                const query = parseDateQuery(queryValue);
+                if (query) {
+                    fieldFilters[field.name] = query;
+                } else {
+                    fieldFilters[field.name] = queryValue;
+                }
             } else {
                 fieldFilters[field.name] = queryValue;
             }
         }
     });
 
+    function isDateString(value) {
+        const parsedDate = Date.parse(value);
+        return !isNaN(parsedDate);
+    }
+
     const stringFields = project.fields
-        .filter((field) =>
-            /string|boolean|image|file|dropdown/i.test(field.type),
-        )
+        .filter((field) => /string|boolean|image|file|dropdown/i.test(field.type))
         .map((field) => ({ [field.name]: new RegExp(search, 'i') }));
-    const numberFields = project.fields.filter(
-        (field) => field.type === 'number',
-    );
+    const numberFields = project.fields.filter((field) => field.type === 'number');
     const dateFields = project.fields.filter((field) => field.type === 'date');
 
     let searchQuery = {};
