@@ -461,7 +461,6 @@ exports.getUserEntriesData = async (req, res) => {
             ...userQueryClear, 
             page: req.query.page || 1, 
         };
-        console.log(req.query);
         req.params = { slug: req.params.slug };
         const { entries, project, pagination } = await projectEntries(req);
         res.render('partials/showUserProjectEntries', {

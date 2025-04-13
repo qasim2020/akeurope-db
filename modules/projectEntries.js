@@ -92,13 +92,16 @@ const projectEntries = async function (req, res) {
                 .filter(project => project.slug === req.params.slug)
                 .flatMap(project => project.entries.map(entry => entry.entryId))
         );
-        
-        const paidCount = allPaidEntryIds.length;
+
+        const paidCount = await DynamicModel.countDocuments({
+            _id: { $in: allPaidEntryIds },
+            ...searchQuery,
+        });
         
         if (skip < paidCount) {
             const paidLimit = Math.min(limit, paidCount - skip);
         
-            const paidEntries = await DynamicModel.find({
+            const pickPaidEntries = await DynamicModel.find({
                 _id: { $in: allPaidEntryIds },
                 ...searchQuery,
             })
@@ -107,9 +110,9 @@ const projectEntries = async function (req, res) {
                 .limit(paidLimit)
                 .lean();
         
-            entries.push(...paidEntries);
+            entries.push(...pickPaidEntries);
         
-            const remainingLimit = limit - paidEntries.length;
+            const remainingLimit = limit - paidCount.length;
         
             if (remainingLimit > 0) {
                 const unPaidEntries = await DynamicModel.find({
@@ -123,8 +126,9 @@ const projectEntries = async function (req, res) {
                 entries.push(...unPaidEntries);
             }
         } else {
-            const unpaidSkip = skip - paidCount;
         
+            const unpaidSkip = skip - paidCount;
+
             const unPaidEntries = await DynamicModel.find({
                 _id: { $nin: allPaidEntryIds },
                 ...searchQuery,
@@ -142,7 +146,7 @@ const projectEntries = async function (req, res) {
     }
 
     for (const entry of entries) {
-        const lastLog = await Log.findOne({ entityId: entry._id }).sort({ createdAt: -1 }).lean();
+        const lastLog = await Log.findOne({ entityId: entry._id }).sort({ timestamp: -1 }).lean();
         entry.lastLog = lastLog.timestamp;
 
         const order = await Order.findOne({
