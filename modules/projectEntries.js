@@ -139,31 +139,29 @@ const projectEntries = async function (req, res) {
 
     } else {
         entries = await DynamicModel.find(searchQuery).sort(sortOptions).skip(skip).limit(limit).lean();
-
-        for (const entry of entries) {
-            const order = await Order.findOne({
-                'projects.entries.entryId': entry._id,
-                status: 'paid',
-            }).lean();
-
-            if (!order) {
-                entry.isPaid = 0;
-                continue;
-            }
-
-            const customer = await Customer.findById(order.customerId).lean();
-            const country = await Country.findOne({ 'currency.code': order.currency }).lean();
-
-            entry.orderInfo = order;
-            entry.customer = customer;
-            entry.country = country;
-            entry.isPaid = order ? 1 : 0;
-        }
     }
 
     for (const entry of entries) {
         const lastLog = await Log.findOne({ entityId: entry._id }).sort({ createdAt: -1 }).lean();
         entry.lastLog = lastLog.timestamp;
+
+        const order = await Order.findOne({
+            'projects.entries.entryId': entry._id,
+            status: 'paid',
+        }).lean();
+
+        if (!order) {
+            entry.isPaid = 0;
+            continue;
+        }
+
+        const customer = await Customer.findById(order.customerId).lean();
+        const country = await Country.findOne({ 'currency.code': order.currency }).lean();
+
+        entry.orderInfo = order;
+        entry.customer = customer;
+        entry.country = country;
+        entry.isPaid = 1;
     }
 
     totalEntries = await DynamicModel.countDocuments(searchQuery);

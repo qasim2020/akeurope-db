@@ -346,7 +346,7 @@ const shortenCustomerName = function(string) {
 }
 
 const shortenString = function(string, length) {
-    if (typeof string !== 'string') return '';
+    if (typeof string !== 'string') return string;
     if (string.length <= length) {
         return string;
     }
@@ -377,14 +377,14 @@ const slugToString = function (slug) {
 };
 
 function circleCloudinaryUrl(url) {
-    if (!url) return '/static/images/no-photo-placement.png';
+    if (!url) return '/static/images/no-image-placement.png';
 
     const transformation = 'ar_1:1,c_fill,e_improve,g_auto,h_250,r_max,w_250,z_1.0';
     return url.replace('/upload/', `/upload/${transformation}/`);
 };
 
 function roundedCloudinaryUrl(url) {
-    if (!url) return '/static/images/no-photo-placement.png';
+    if (!url) return '/static/images/no-image-placement.png';
 
     const transformation = 'ar_1:1,c_fill,e_improve,g_auto,h_250,w_250,r_10,z_1.0';
     return url.replace('/upload/', `/upload/${transformation}/`);

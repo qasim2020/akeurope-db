@@ -6,6 +6,9 @@ const { URL } = require('url');
 const getUserEntries = async (userId) => {
     const user = await User.findById(userId).lean();
     let allEntries = [];
+    if (!user.entries) {
+        return null;
+    }
 
     for (const userProject of user.entries) {
         const slug = userProject.slug;
