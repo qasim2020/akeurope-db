@@ -427,6 +427,10 @@ const getOldestPaidEntries = async (req, project, pickDraft = true) => {
 const getEntriesByCustomerId = async (req, customerId) => {
     const now = new Date();
 
+    if (customerId && typeof customerId === 'string' && mongoose.isValidObjectId(customerId)) {
+        customerId = new mongoose.Types.ObjectId(customerId);
+    }
+
     const orders = await Order.aggregate([
         {
             $match: {

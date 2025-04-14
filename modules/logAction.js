@@ -198,7 +198,7 @@ const customerLogs = async (req, res) => {
         const totalPages = Math.ceil(total / limit);
 
         return {
-            logs: await findConnectedIds(logs),
+            logs: await findConnectedIds(logs, req),
             pagesArray: generatePagination(totalPages, page),
             currentPage: page,
             totalPages,

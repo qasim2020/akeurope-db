@@ -8,14 +8,20 @@
                 <a href="/dashboard" style="color: inherit;">{{log.actor.name}}</a>
             </span>
             {{else if (eq log.viewer.role 'admin')}}
-                {{#if (eq log.actor.role 'admin')}}
-                <span class="badge bg-green-lt">
-                    <a href="/{{log.actorType}}/{{log.actor._id}}" style="color: inherit;">{{log.actor.name}}</a>
-                </span>
+                {{#if (eq log.actorType 'customer')}}
+                    <span class="badge bg-red-lt">
+                        <a href="/{{log.actorType}}/{{log.actor._id}}" style="color: inherit;">{{log.actor.name}}</a>
+                    </span>
                 {{else}}
-                <span class="badge bg-blue-lt">
-                    <a href="/{{log.actorType}}/{{log.actor._id}}" style="color: inherit;">{{log.actor.name}}</a>
-                </span>
+                    {{#if (eq log.actor.role 'admin')}}
+                    <span class="badge bg-green-lt">
+                        <a href="/{{log.actorType}}/{{log.actor._id}}" style="color: inherit;">{{log.actor.name}}</a>
+                    </span>
+                    {{else}}
+                    <span class="badge bg-blue-lt">
+                        <a href="/{{log.actorType}}/{{log.actor._id}}" style="color: inherit;">{{log.actor.name}}</a>
+                    </span>
+                    {{/if}}
                 {{/if}}
             {{else if (eq log.viewer.role 'editor')}}
                 {{#if log.actorIsSelf}}

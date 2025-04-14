@@ -146,8 +146,8 @@ const projectEntries = async function (req, res) {
     }
 
     for (const entry of entries) {
-        const lastLog = await Log.findOne({ entityId: entry._id }).sort({ timestamp: -1 }).lean();
-        entry.lastLog = lastLog.timestamp;
+        const lastLog = await Log.findOne({ entityId: entry._id, entityType: 'entry' }).sort({ timestamp: -1 }).lean();
+        entry.lastLog = lastLog?.timestamp;
 
         const order = await Order.findOne({
             'projects.entries.entryId': entry._id,
@@ -160,7 +160,44 @@ const projectEntries = async function (req, res) {
         }
 
         const customer = await Customer.findById(order.customerId).lean();
-        const country = await Country.findOne({ 'currency.code': order.currency }).lean();
+
+        let country = null;
+
+        if (customer.address) {
+            const address = customer.address;
+            const words = address.split(/\s+/).filter((w) => w.length > 2); 
+
+            for (const word of words) {
+                country = await Country.findOne({
+                    name: { $regex: new RegExp(`^${word}$`, 'i') }
+                }).lean();
+                if (country) break;
+            }
+
+            if (!country) {
+                country = await Country.findOne({ 'currency.code': order.currency }).lean();   
+            }
+        } else {
+            if (customer.tel) {
+                const tel = customer.tel?.replace(/\s+/g, '');  // Clean the telephone number
+                const prefix = tel.substring(0, 4);
+                const regex = `^\\+${prefix}`;
+
+                country = await Country.findOne({
+                    callingCodes: {
+                        $elemMatch: { $regex: regex, $options: 'i' }
+                    }
+                }).lean();
+
+                if (!country) {
+                    console.log('No country found for this telephone number - falling back to order.currency');
+                    country = await Country.findOne({ 'currency.code': order.currency }).lean();   
+                };
+                
+            } else {
+                country = await Country.findOne({ 'currency.code': order.currency }).lean();   
+            }
+        }
 
         entry.orderInfo = order;
         entry.customer = customer;
