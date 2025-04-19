@@ -67,7 +67,7 @@ exports.uploadFileToEntry = async (req, res) => {
             links,
             category,
             access,
-            name: fileMulter.filename,
+            name: fileMulter.originalname,
             size: fileMulter.size / 1000,
             path: `/uploads/${fileMulter.filename}`,
             mimeType: fileMulter.mimetype,
@@ -83,6 +83,63 @@ exports.uploadFileToEntry = async (req, res) => {
         const project = await Project.findOne({ slug: entitySlug }).lean();
         const DynamicModel = await createDynamicModel(entitySlug);
         const entry = await DynamicModel.findById(entityId).lean();
+
+        res.status(200).send(file);
+    } catch (error) {
+        console.log(error);
+        res.status(500).send(error.toString());
+    }
+};
+
+exports.uploadVideoToEntry = async (req, res) => {
+    try {
+        const fileMulter = req.file;
+
+        if (!fileMulter) {
+            return res.status(400).json({ message: 'No file uploaded' });
+        }
+
+        const { entityId, entityType, entityUrl, entitySlug, category } = req.body;
+
+        if (!entitySlug) throw new Error('entitySlug is required');
+
+        let access;
+
+        if (req.userPermissions.includes('changeFilesAccess')) {
+            access = ['editors', 'customers'];
+        } else {
+            access = ['editors', 'customers'];
+        }
+
+        const links = [
+            {
+                entityId,
+                entityType,
+                entityUrl,
+            },
+            {
+                entityId: req.session.user._id,
+                entityType: 'user',
+                entityUrl: `/user/${req.session.user._id}`,
+            },
+        ];
+
+        const file = new File({
+            links,
+            category,
+            access,
+            name: fileMulter.originalname,
+            size: fileMulter.size / 1000,
+            path: `/videos/${fileMulter.filename}`,
+            mimeType: fileMulter.mimetype,
+            uploadedBy: {
+                actorType: 'user',
+                actorId: req.session.user._id,
+                actorUrl: `/user/${req.session.user._id}`,
+            },
+        });
+
+        await file.save();
 
         res.status(200).send(file);
     } catch (error) {
@@ -235,12 +292,7 @@ exports.file = async (req, res) => {
         const dir = path.join(__dirname, '../../');
         const filePath = path.join(dir, file.path);
 
-        res.sendFile(filePath, (err) => {
-            if (err) {
-                console.error('Error sending file:', err);
-                res.status(500).send({ error: 'Failed to send file' });
-            }
-        });
+        res.sendFile(filePath);
     } catch (error) {
         console.log(error);
         res.status(500).send(error.toString());

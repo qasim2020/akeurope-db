@@ -70,7 +70,9 @@
       <div class="card mb-3" id="files-container" 
         entity-type="entry" entity-id="{{data.entry._id}}" entity-slug="{{data.project.slug}}" 
         entity-url="/entry/{{data.entry._id}}/project/{{data.project.slug}}" 
-        file-url="/uploadFileToEntry">
+        file-types="application/pdf,video/*"
+        file-url="/uploadFileToEntry"
+        video-url="/uploadVideoToEntry">
         {{> showEntityFiles data=data beneficiary=true}}
       </div>
       {{/if}}
@@ -89,102 +91,9 @@
 
 <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
 
+{{> entryFrontEnd}}
+
 <script>
-
-  const deleteEntry = function (elem) {
-    if (!confirm("Are you sure you want to delete this entry? This action cannot be undone.")) {
-        return; 
-    }
-    const entryId = $(elem).attr("entry-id");
-    $.ajax({
-      url: '/project/entry/delete/{{data.project.slug}}',
-      method: 'POST',
-      data: { entryId },
-      success: function (response) {
-        $(elem).closest(".data-row").remove();
-      },
-      error: function (error) {
-        alert(error.responseText)
-      }
-    });
-  }
-
-  const editEntry = function (elem) {
-
-    $(elem).closest('.modal').find('textarea').removeClass('is-invalid');
-    $(elem).closest(".modal").find("input").removeClass("is-invalid");
-    $(elem).closest(".modal").find(".invalid-feedback").remove();
-    $(elem).closest(".modal").find("span").removeClass("border-red");
-    $(elem).closest(".modal").find("span").removeClass("rounded-end");
-    $(elem).closest(".modal").find(".alert").remove();
-
-    let isValid = [];
-
-    $(elem).closest(".modal").find(".entry-input").each((key, val) => {
-      if ($(val).val() == "") {
-        $(val).addClass("is-invalid")
-        if ($(val).siblings("span").length > 0) {
-          $(val).siblings(".invalid-feedback").remove();
-          $(val).siblings("span").after(`<div class="invalid-feedback mb-2">Invalid entry</div> `);
-          $(val).siblings("span").addClass("is-invalid border-red rounded-end");
-          $(val).siblings("input").addClass("is-invalid");
-        } else {
-          $(val).after(`<div class="invalid-feedback">Invalid entry</div> `);
-        }
-      } else {
-        $(val).addClass("is-valid");
-      }
-      isValid.push($(val).val() != "");
-    });
-
-    const data = $(elem)
-      .closest(".modal")
-      .find(".form-select, input, textarea")
-      .toArray()
-      .reduce((total, val) => {
-        Object.assign(total, {
-          [$(val).attr("name")]: $(val).val()
-        });
-        return total;
-      }, {});
-
-    if (!(isValid.every(val => val === true))) {
-      $(".modal-footer").append(`
-        <div class="w-100 d-block alert alert-danger mt-4" role="alert">
-          <h4 class="alert-title">Form Incomplete.</h4>
-          <div class="text-secondary">Incomplete fields. Make sure all fields are filled or refresh the screen</div>
-        </div>`);
-      return false;
-    }
-
-    let currentBtnHTML = $(elem).html();
-
-    $(elem).html(`<span class="spinner-border spinner-border-sm me-2" role="status"></span>`);
-
-    const entryId = $(elem).closest(".modal").attr("entryId");
-
-    $.ajax({
-      url: `/project/entry/update/{{data.project.slug}}/${entryId}`,
-      type: 'POST',
-      contentType: 'application/json',
-      data: JSON.stringify(data),
-      success: function (response) {
-        $(elem).html(currentBtnHTML);
-        showDataAsSuch('/getSingleEntryData/{{data.entry._id}}/project/{{data.project.slug}}', '#entry-container');
-        showDataAsSuch('/getSingleEntryLogs/{{data.entry._id}}/project/{{data.project.slug}}', '#logs-container');
-        $(elem).closest(".modal").modal("hide");
-      },
-      error: function (xhr, status, error) {
-        $(elem).html(currentBtnHTML);
-        $(".modal-footer").append(`
-        <div class="w-100 d-block alert alert-danger mt-4" role="alert">
-          <h4 class="alert-title">Could not save.</h4>
-          <div class="text-secondary">${xhr.responseText}</div>
-        </div>`);
-      }
-    });
-
-  }
 
   const showDataAsSuch = function (url, containerId) {
     $.ajax({
@@ -214,107 +123,30 @@
     })
   }
 
-  // Here start creating entries on click of save-entry button
+  // tom select - the right search bar on the top
 
-  const uploadImage = function (elem) {
-    $(elem).closest(".image-upload").find("input[type=file]").trigger("click");
-  }
-
-  $(document).on('change', ".image-upload input", function (event) {
-    let elem = $(this);
-    let inputName = $(this).attr("name");
-    if (event.target.files && event.target.files[0]) {
-      var reader = new FileReader();
-      reader.onload = function (e) {
-        $(elem).closest(".image-upload").find("img").attr("src", e.target.result);
-      };
-
-      // Read the image file as a data URL
-      reader.readAsDataURL(event.target.files[0]);
-
-      // Send the image to the backend
-      var formData = new FormData();
-      formData.append('image', event.target.files[0]);
-      formData.append('folderName', `akeurope/akeurope_project_entries/{{data.project.slug}}/${inputName}`);
-      formData.append('entryId', $(elem).closest(".modal").attr("entryId"));
-
-      $(elem).closest(".image-upload").find(".btn").html(`<span class="spinner-border spinner-border-sm" role="status"></span>`);
-
-      $.ajax({
-        url: '/upload-image',
-        type: 'POST',
-        data: formData,
-        contentType: false,
-        processData: false,
-        success: function (response) {
-          $(elem).closest(".image-upload").find(".cloudinaryUrl").val(response.cloudinaryUrl);
-          $(elem).closest(".image-upload").find(".btn").html(`
-                <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-check"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l5 5l10 -10" /></svg>
-              `);
-          $(elem).closest(".image-upload").find("img").attr("src", response.cloudinaryUrl);
-          $(elem).closest('.image-upload').find('[data-fslightbox]').attr({ href: response.cloudinaryUrl });
-          editEntry(elem);
-          refreshFsLightbox();
-        },
-        error: function (error) {
-          $(elem).closest(".image-upload").find(".btn").html(`
-                <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-x"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M18 6l-12 12" /><path d="M6 6l12 12" /></svg>
-              `);
-          alert("Error uploading image:", error);
-        }
-      });
-    }
-
+  $(document).on('click', '#next-btn, #prev-btn', function (e) {
+    e.preventDefault();
+    var href = $(this).attr('href');
+    window.location.href = href;
   });
 
-  const uploadPdf = function (elem) {
-    $(elem).closest(".upload-pdf").find("input").trigger("click");
-  }
-
-  $(document).on("change", ".upload-pdf input", function (event) {
-
-    const elem = $(this);
-    const fileInput = $(this)[0];
-    const file = fileInput.files[0];
-    const inputName = $(this).attr("name");
-
-    if (!file) {
-      alert("Please select a PDF file.");
-      return;
-    }
-
-    // Ensure the file type is PDF
-    if (file.type !== 'application/pdf') {
-      alert("Only PDF files are allowed.");
-      return;
-    }
-
-    // Prepare form data to send to backend
-    const formData = new FormData();
-    formData.append('pdf', file);
-    formData.append('folderName', `akeurope/akeurope_project_entries/{{data.project.slug}}/${inputName}`);
-    formData.append('entryId', $(elem).closest(".modal").attr("entryId"));
-
-
-    $(elem).closest(".upload-pdf").find(".btn").html(`<span class="spinner-border spinner-border-sm" role="status"></span>`);
-    // Send PDF file to the backend via AJAX
-    $.ajax({
-      url: '/upload-pdf',  // Backend route to handle PDF upload
-      type: 'POST',
-      data: formData,
-      contentType: false,
-      processData: false,
-      success: function (response) {
-        $(elem).closest(".upload-pdf").find(".cloudinaryUrl").val(response.cloudinaryUrl);
-        $(elem).closest(".upload-pdf").find(".btn").html(`
-              <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-check"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l5 5l10 -10" /></svg>
-            `);
-      },
-      error: function (error) {
-        alert("Error uploading PDF:", error);
+  $(document).keydown(function (e) {
+    if (($(':focus').length === 0 || $(':focus').is('input, textarea') === false) &&
+      !$('.modal.show').length &&
+      !$('.fslightbox-open').length) {
+      if (e.key === 'ArrowRight') {
+        $('#next-btn').trigger('click');
+      } else if (e.key === 'ArrowLeft') {
+        $('#prev-btn').trigger('click');
       }
-    });
-  })
+    }
+  });
+
+  const refreshContainers = function() {
+    showDataAsSuch('/getSingleEntryData/{{data.entry._id}}/project/{{data.project.slug}}', '#entry-container');
+    showDataAsSuch('/getSingleEntryLogs/{{data.entry._id}}/project/{{data.project.slug}}', '#logs-container');
+  }
 
   document.addEventListener("DOMContentLoaded", function () {
     var el = document.getElementById('select-people');
@@ -368,26 +200,4 @@
     }
   });
 
-  $(document).on('click', '#next-btn, #prev-btn', function (e) {
-    e.preventDefault();
-    var href = $(this).attr('href');
-    window.location.href = href;
-  });
-
-  $(document).keydown(function (e) {
-    if (($(':focus').length === 0 || $(':focus').is('input, textarea') === false) &&
-      !$('.modal.show').length &&
-      !$('.fslightbox-open').length) {
-      if (e.key === 'ArrowRight') {
-        $('#next-btn').trigger('click');
-      } else if (e.key === 'ArrowLeft') {
-        $('#prev-btn').trigger('click');
-      }
-    }
-  });
-
-  const refreshContainers = function() {
-    showDataAsSuch('/getSingleEntryData/{{data.entry._id}}/project/{{data.project.slug}}', '#entry-container');
-    showDataAsSuch('/getSingleEntryLogs/{{data.entry._id}}/project/{{data.project.slug}}', '#logs-container');
-  }
 </script>

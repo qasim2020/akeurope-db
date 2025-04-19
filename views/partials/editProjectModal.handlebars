@@ -1,5 +1,5 @@
 <div class="modal modal-blur fade" id="modal-{{data.project.slug}}" tabindex="-1"
-    style="display: none; padding-left: 0px;" aria-modal="true" role="dialog" projSlug="{{data.project.slug}}"
+    style="display: none; padding-left: 0px;" role="dialog" projSlug="{{data.project.slug}}"
     projId="{{data.project._id}}">
     <div class="modal-dialog modal-lg" role="document" id="">
         <div class="modal-content">
@@ -51,7 +51,8 @@
                                 </span>
                                 <span class="form-selectgroup-label-content">
                                     <span class="form-selectgroup-title strong mb-1">Active</span>
-                                    <span class="d-block text-secondary">Project is accessible to customers portal while creating invoices.</span>
+                                    <span class="d-block text-secondary">Project is accessible to customers portal while
+                                        creating invoices.</span>
                                 </span>
                             </span>
                         </label>
@@ -66,7 +67,8 @@
                                 </span>
                                 <span class="form-selectgroup-label-content">
                                     <span class="form-selectgroup-title strong mb-1">Inactive</span>
-                                    <span class="d-block text-secondary">Project is only visible to admins and selective-editors.</span>
+                                    <span class="d-block text-secondary">Project is only visible to admins and
+                                        selective-editors.</span>
                                 </span>
                             </span>
                         </label>
@@ -256,10 +258,11 @@
                 </div>
 
                 <div class="mb-3 form-field visible-field">
-                    <div class="form-label">Fields visible to onboarding customers</div>
-                    <p class="card-subtitle mb-3">These fields are used to draw the beneficiary card while a customer is
-                        being onboarded/ adding new payment. On payment completion, all fields will be visible to the
-                        customer.</p>
+                    <div class="form-label">Fields visible to customers</div>
+                    <p class="card-subtitle mb-3">These fields are visible to customers once they have made the payment.
+                        Otherwise only
+                        Beneficiary Serial Number, Age (if date of birth is added) are shown to the outside visitors.
+                    </p>
                     <button class="btn btn-sm mb-2" onclick="toggleSelection(this)">Toggle Selection</button>
                     <div class="card d-block p-2 mb-3 form-control visible-field-selectors">
                         {{#each data.project.fields}}
@@ -287,10 +290,10 @@
                         value="{{#each data.project.fields}}{{#if (eq this.subscription true)}}{{this.actualName}}{{/if}}{{/each}}">
                 </div>
 
-
                 <div class="mb-3 form-field status-field">
                     <div class="form-label">Status Field</div>
-                    <p class="card-subtitle mb-3">One field that shows the status of the child for example when was the last contact or any updates.</p>
+                    <p class="card-subtitle mb-3">One field that shows the status of the child for example when was the
+                        last contact or any updates. Can only be long text area.</p>
                     <div class="card d-block p-2 mb-3 form-control status-field-selector">
                         {{#each data.project.fields}}
                         {{#if (regexMatch this.type '^(string|textarea)$')}}
@@ -301,6 +304,23 @@
                     </div>
                     <input type="text" class="d-none" disabled
                         value="{{#each data.project.fields}}{{#if (eq this.status true)}}{{this.actualName}}{{/if}}{{/each}}">
+                </div>
+
+                <div class="mb-3 form-field phone-fields">
+                    <div class="form-label">Phone Number Fields</div>
+                    <p class="card-subtitle mb-3">Phone number where whatsapp is working, so a chat session can be
+                        created with
+                        the beneficiary. Can only be string field.</p>
+                    <div class="card d-block p-2 mb-3 form-control phone-field-selector">
+                        {{#each data.project.fields}}
+                        {{#if (regexMatch this.type '^(string)$')}}
+                        <span class="badge cursor-pointer p-2 mb-1 {{#if this.phone}} bg-blue-lt {{/if}}"
+                            onclick="setPhoneField(this)">{{this.actualName}}</span>
+                        {{/if}}
+                        {{/each}}
+                    </div>
+                    <input type="text" class="d-none" disabled
+                        value="{{#each data.project.fields}}{{#if (eq this.phone true)}}{{this.actualName}}{{/if}}{{/each}}">
                 </div>
 
             </div>

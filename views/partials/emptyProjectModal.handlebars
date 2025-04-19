@@ -1,153 +1,210 @@
-<!-- Modal -->
-<div class="modal modal-blur fade" id="modal-new-project" tabindex="-1" style="display: none; padding-left: 0px;" aria-modal="true" role="dialog" projSlug="new-project">
-    <div class="modal-dialog modal-lg" role="document" id="create-project">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">New project</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="mb-3">
-                    <label class="form-label">Name</label>
-                    <input type="text" class="project-name form-control" name="example-text-input" placeholder="Name of project" value="{{data.project.name}}" />
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Slug</label>
-                    <input type="text" class="project-slug form-control" name="example-text-input" placeholder="name-of-project" value="{{data.project.slug}}" />
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Project location</label>
-                    <input type="text" class="project-location form-control" name="example-text-input" placeholder="Pakistan etc" value="{{data.project.location}}" />
-                </div>
-                <div class="mb-3">
-                    <label for="invoiceAmount" class="form-label">Project Currency</label>
-                      <select class="form-select form-control project-sub-cost-currency" name="currency">
-                        <option value="USD" selected>USD ($)</option>
-                        <option value="NOK">NOK (kr)</option>
-                        <option value="GBP">GBP (£)</option>
-                        <option value="EUR">EUR (€)</option>
-                        <option value="PKR">PKR (₨)</option>
-                        <option value="ILS">ILS (₪)</option>
-                        <option value="EGP">EGP (£)</option>
-                      </select>
-                </div>
-                <label class="form-label">Project status</label>
-                <div class="form-selectgroup-boxes row mb-3 project-status">
-                    <div class="col-lg-6">
-                        <label class="form-selectgroup-item">
-                        <input type="radio" name="report-type" value="active" class="form-selectgroup-input" checked="" />
-                        <span class="form-selectgroup-label d-flex align-items-center p-3">
-                          <span class="me-3">
-                            <span class="form-selectgroup-check"></span>
-                          </span>
-                          <span class="form-selectgroup-label-content">
-                            <span class="form-selectgroup-title strong mb-1">Active</span>
-                            <span class="d-block text-secondary">Project is accessible to customers portal while creating invoices.</span>
-                          </span>
-                        </span>
-                        </label>
-                    </div>
-                    <div class="col-lg-6">
-                        <label class="form-selectgroup-item">
-                          <input type="radio" name="report-type" value="inactive" class="form-selectgroup-input" />
-                          <span class="form-selectgroup-label d-flex align-items-center p-3">
-                              <span class="me-3">
-                                  <span class="form-selectgroup-check"></span>
-                              </span>
-                              <span class="form-selectgroup-label-content">
-                                  <span class="form-selectgroup-title strong mb-1" >Inactive</span>
-                                  <span class="d-block text-secondary">Project is only visible to admins and selective-editors.</span>
-                              </span>
-                          </span>
-                        </label>
-                    </div>
-                </div>
-
-            </div>
-            <div class="modal-body">
-              <label class="form-label">Project fields</label>
-              <p class="card-subtitle mb-3">Drag and drop the fields to change their order</p>
-              <div class="accordion" id="accordion-new-project">
-                <div class="accordion-item accordion-edit-project form-field">
-                  <h2 class="accordion-header d-flex justify-content-between" id="">
-                    <button class="accordion-button " type="button" data-bs-toggle="collapse" data-bs-target="#collapse-new-project-1" aria-expanded="true">
-                      Field # 1
-                    </button>
-                  </h2>
-                  <div id="collapse-new-project-1" class="accordion-collapse collapse show" data-bs-parent="#accordion-new-project">
-                    <div class="accordion-body pt-0">
-                      <div class="mb-3">
-                          <label class="form-label">Name</label>
-                          <input id="" type="text" class="form-control" name="example-text-input" placeholder="Field name" value="" />
-                      </div>
-                      <div class="mb-3">
-                          <label class="form-label">Type</label>
-                          <select class="form-select">
-                            <option value="string">String</option>
-                            <option value="textarea">Long text</option>
-                            <option value="number">Number</option>
-                            <option value="boolean">Boolean</option>
-                            <option value="dropdown">Dropdown</option>
-                            <option value="date">Date (Calendar)</option>
-                            <option value="image">Image upload</option>
-                            <option value="file">File upload</option>
-                          </select>
-                      </div>
-                      <div class="mb-3 text-center">
-                        <button class="btn btn-outline-danger border delete-project-field">
-                          <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-trash"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 7l16 0" /><path d="M10 11l0 6" /><path d="M14 11l0 6" /><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></svg>
-                          Delete this field
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-            </div>
-            <div class="text-center mt-3">
-              <button class="btn btn-outline-secondary border add-project-field">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                        <path d="M12 5l0 14"></path>
-                        <path d="M5 12l14 0"></path>
-                    </svg>
-                    Add new field
-              </button>
-            </div>
-          </div>
-          <div class="modal-body">
-              <div class="mb-3 form-field primary-field">
-                  <div class="form-label">Non repeatable field</div>
-                  <p class="card-subtitle mb-3">This is a unique field in your project that never repeats. It can be an email, id card number, mobile number, or slug etc. </p>
-                  <div class="card d-block p-2 mb-3 form-control primary-field-selectors">
-                      <span class="badge cursor-pointer p-2 my-1 me-2" onclick="alert('This is a temp field. You need to enter a field name first.')">Field # 1</span>
-                  </div>
-                  <input type="text" class="d-none" disabled>
-              </div>
-
-              <div class="mb-3 form-field visible-field">
-                <div class="form-label">Fields visible to onboarding customers</div>
-                <p class="card-subtitle mb-3">These fields are used to draw the beneficiary card while a customer is being onboarded/ adding new payment. On payment completion, all fields will be visible to the customer.</p>
-                <div class="card d-block p-2 mb-3 form-control visible-field-selectors">
-                    <span class="badge cursor-pointer p-2 my-1 me-2" onclick="alert('This is a temp field. You need to enter a field name first.')">Field # 1</span>
-                </div>
-                <input type="text" class="d-none" disabled>
-              </div>
-          </div>
-
-          <div class="modal-footer">
-              <a href="#" class="btn btn-link link-secondary" data-bs-dismiss="modal">
-                Cancel
-              </a>
-              <a href="#" class="btn btn-primary ms-auto" onclick="createNewProject(this)">
-                  <!-- Download SVG icon from http://tabler-icons.io/i/plus -->
-                  <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                      <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                      <path d="M12 5l0 14"></path>
-                      <path d="M5 12l14 0"></path>
-                  </svg>
-                  Create new project
-              </a>
-          </div>
+<div class="modal modal-blur fade" id="modal-new-project" tabindex="-1" style="display: none; padding-left: 0px;"
+  role="dialog" projSlug="new-project">
+  <div class="modal-dialog modal-lg" role="document" id="create-project">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">New project</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label">Name</label>
+          <input type="text" class="project-name form-control" name="example-text-input" placeholder="Name of project"
+            value="{{data.project.name}}" />
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Slug</label>
+          <input type="text" class="project-slug form-control" name="example-text-input" placeholder="name-of-project"
+            value="{{data.project.slug}}" />
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Project location</label>
+          <input type="text" class="project-location form-control" name="example-text-input" placeholder="Pakistan etc"
+            value="{{data.project.location}}" />
+        </div>
+        <div class="mb-3">
+          <label for="invoiceAmount" class="form-label">Project Currency</label>
+          <select class="form-select form-control project-sub-cost-currency" name="currency">
+            <option value="USD" selected>USD ($)</option>
+            <option value="NOK">NOK (kr)</option>
+            <option value="GBP">GBP (£)</option>
+            <option value="EUR">EUR (€)</option>
+            <option value="PKR">PKR (₨)</option>
+            <option value="ILS">ILS (₪)</option>
+            <option value="EGP">EGP (£)</option>
+          </select>
+        </div>
+        <label class="form-label">Project status</label>
+        <div class="form-selectgroup-boxes row mb-3 project-status">
+          <div class="col-lg-6">
+            <label class="form-selectgroup-item">
+              <input type="radio" name="report-type" value="active" class="form-selectgroup-input" checked="" />
+              <span class="form-selectgroup-label d-flex align-items-center p-3">
+                <span class="me-3">
+                  <span class="form-selectgroup-check"></span>
+                </span>
+                <span class="form-selectgroup-label-content">
+                  <span class="form-selectgroup-title strong mb-1">Active</span>
+                  <span class="d-block text-secondary">Project is accessible to customers portal while creating
+                    invoices.</span>
+                </span>
+              </span>
+            </label>
+          </div>
+          <div class="col-lg-6">
+            <label class="form-selectgroup-item">
+              <input type="radio" name="report-type" value="inactive" class="form-selectgroup-input" />
+              <span class="form-selectgroup-label d-flex align-items-center p-3">
+                <span class="me-3">
+                  <span class="form-selectgroup-check"></span>
+                </span>
+                <span class="form-selectgroup-label-content">
+                  <span class="form-selectgroup-title strong mb-1">Inactive</span>
+                  <span class="d-block text-secondary">Project is only visible to admins and selective-editors.</span>
+                </span>
+              </span>
+            </label>
+          </div>
+        </div>
+
+      </div>
+      <div class="modal-body">
+        <label class="form-label">Project fields</label>
+        <p class="card-subtitle mb-3">Drag and drop the fields to change their order</p>
+        <div class="accordion" id="accordion-new-project">
+          <div class="accordion-item accordion-edit-project form-field">
+            <h2 class="accordion-header d-flex justify-content-between" id="">
+              <button class="accordion-button " type="button" data-bs-toggle="collapse"
+                data-bs-target="#collapse-new-project-1" aria-expanded="true">
+                Field # 1
+              </button>
+            </h2>
+            <div id="collapse-new-project-1" class="accordion-collapse collapse show"
+              data-bs-parent="#accordion-new-project">
+              <div class="accordion-body pt-0">
+                <div class="mb-3">
+                  <label class="form-label">Name</label>
+                  <input id="" type="text" class="form-control" name="example-text-input" placeholder="Field name"
+                    value="" />
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Type</label>
+                  <select class="form-select">
+                    <option value="string">String</option>
+                    <option value="textarea">Long text</option>
+                    <option value="number">Number</option>
+                    <option value="boolean">Boolean</option>
+                    <option value="dropdown">Dropdown</option>
+                    <option value="date">Date (Calendar)</option>
+                    <option value="image">Image upload</option>
+                    <option value="file">File upload</option>
+                  </select>
+                </div>
+                <div class="mb-3 text-center">
+                  <button class="btn btn-outline-danger border delete-project-field">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                      class="icon icon-tabler icons-tabler-outline icon-tabler-trash">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                      <path d="M4 7l16 0" />
+                      <path d="M10 11l0 6" />
+                      <path d="M14 11l0 6" />
+                      <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" />
+                      <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" />
+                    </svg>
+                    Delete this field
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="text-center mt-3">
+          <button class="btn btn-outline-secondary border add-project-field">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24"
+              stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+              <path d="M12 5l0 14"></path>
+              <path d="M5 12l14 0"></path>
+            </svg>
+            Add new field
+          </button>
+        </div>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3 form-field primary-field">
+          <div class="form-label">Non repeatable field</div>
+          <p class="card-subtitle mb-3">This is a unique field in your project that never repeats. It can be an email,
+            id card number, mobile number, or slug etc. </p>
+          <div class="card d-block p-2 mb-3 form-control primary-field-selectors">
+            <span class="badge cursor-pointer p-2 my-1 me-2"
+              onclick="alert('This is a temp field. You need to enter a field name first.')">Field # 1</span>
+          </div>
+          <input type="text" class="d-none" disabled>
+        </div>
+
+        <div class="mb-3 form-field visible-field">
+          <div class="form-label">Fields visible to customers</div>
+          <p class="card-subtitle mb-3">These fields are visible to customers once they have made the payment. Otherwise
+            only
+            Beneficiary Serial Number, Age (if date of birth is added) are shown to the outside visitors.</p>
+          <div class="card d-block p-2 mb-3 form-control visible-field-selectors">
+            <span class="badge cursor-pointer p-2 my-1 me-2"
+              onclick="alert('This is a temp field. You need to enter a field name first.')">Field # 1</span>
+          </div>
+          <input type="text" class="d-none" disabled>
+        </div>
+
+        <div class="mb-3 form-field subscription-field">
+          <div class="form-label">Subscription fields</div>
+          <p class="card-subtitle mb-3">Fields that show different subscription options for each project
+            entry. Can only be numbers.</p>
+          <div class="card d-block p-2 mb-3 form-control subscription-field-selectors">
+           <span class="badge cursor-pointer p-2 my-1 me-2"
+              onclick="alert('This is a temp field. Please add a Number field above to select it.')">Field # 1</span> 
+          </div>
+          <input type="text" class="d-none" disabled>
+        </div>
+
+        <div class="mb-3 form-field status-field">
+          <div class="form-label">Status Field</div>
+          <p class="card-subtitle mb-3">One field that shows the status of the child for example when was the last
+            contact or any updates. Can only be long text area.</p>
+          <div class="card d-block p-2 mb-3 form-control status-field-selectors">
+            <span class="badge cursor-pointer p-2 my-1 me-2"
+              onclick="alert('This is a temp field. Please add a TextArea field above to select it.')">Field # 1</span>
+          </div>
+          <input type="text" class="d-none" disabled>
+        </div>
+
+        <div class="mb-3 form-field phone-fields">
+          <div class="form-label">Phone Number Fields</div>
+          <p class="card-subtitle mb-3">Phone number where whatsapp is working, so a chat session can be created with
+            the beneficiary. Can only be string field.</p>
+          <div class="card d-block p-2 mb-3 form-control phone-field-selectors">
+            <span class="badge cursor-pointer p-2 my-1 me-2"
+              onclick="alert('This is a temp field. Please add a String field above to select it.')">Field # 1</span>
+          </div>
+          <input type="text" class="d-none" disabled>
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <a href="#" class="btn btn-link link-secondary" data-bs-dismiss="modal">
+          Cancel
+        </a>
+        <a href="#" class="btn btn-primary ms-auto" onclick="createNewProject(this)">
+          <!-- Download SVG icon from http://tabler-icons.io/i/plus -->
+          <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24"
+            stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+            <path d="M12 5l0 14"></path>
+            <path d="M5 12l14 0"></path>
+          </svg>
+          Create new project
+        </a>
+      </div>
+    </div>
   </div>
 </div>

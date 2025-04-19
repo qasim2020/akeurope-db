@@ -1,8 +1,9 @@
 const uploadNewFile = function (elem) {
+    const fileTypes = $('#files-container').attr('file-types');
     const fileInput = $('<input>', {
         type: 'file',
         class: 'd-none',
-        accept: 'application/pdf',
+        accept: fileTypes,
     });
 
     $('body').append(fileInput);
@@ -11,7 +12,10 @@ const uploadNewFile = function (elem) {
     const entityType = $('#files-container').attr('entity-type');
     const entityUrl = $('#files-container').attr('entity-url');
     const fileUrl = $('#files-container').attr('file-url');
+    const videoUrl = $('#files-container').attr('video-url');
     const entitySlug = $('#files-container').attr('entity-slug');
+
+    let uploadUrl;
 
     const elemHtml = $(elem).html();
 
@@ -21,6 +25,17 @@ const uploadNewFile = function (elem) {
         const file = this.files[0];
 
         if (file) {
+            const mimeType = file.type;
+
+            if (mimeType === 'application/pdf') {
+                uploadUrl = fileUrl;
+            } else if (mimeType.startsWith('video/')) {
+                uploadUrl = videoUrl;
+            } else {
+                alert('Unsupported file type');
+                return;
+            }
+
             $(elem).html(`
             <span class="spinner-border spinner-border-sm me-2" role="status"></span>
             Uploading
@@ -34,7 +49,7 @@ const uploadNewFile = function (elem) {
             formData.append('entitySlug', entitySlug);
 
             $.ajax({
-                url: fileUrl,
+                url: uploadUrl,
                 type: 'POST',
                 data: formData,
                 contentType: false,
@@ -134,7 +149,6 @@ const deleteFile = function (elem) {
     const modal = $(elem).closest('.modal');
     const fileId = $(modal).attr('file-id');
 
-
     const entityType = $('#files-container').attr('entity-type');
     const entityId = $('#files-container').attr('entity-id');
     const entitySlug = $('#files-container').attr('entity-slug');
@@ -148,7 +162,7 @@ const deleteFile = function (elem) {
         url: `/fileDelete/${fileId}`,
         method: 'POST',
         contentType: 'application/json',
-        data: JSON.stringify({entityId, entityType, entitySlug}),
+        data: JSON.stringify({ entityId, entityType, entitySlug }),
         success: function (response) {
             renderFiles();
             refreshContainers();
