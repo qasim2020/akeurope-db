@@ -46,7 +46,7 @@ async function deleteExpiredOrders(Collection) {
 
 }
 
-async function handleExpiredOrders(Collection) {
+async function convertUnpaidToExpired(Collection) {
     const now = new Date();
 
     const expiredOrders = await Collection.aggregate([
@@ -106,12 +106,13 @@ mongoose.connection.on('open', async () => {
 
     await deleteExpiredOrders(Order);
     await deleteExpiredOrders(Subscription);
-    await handleExpiredOrders(Order);
+    await convertUnpaidToExpired(Order);
 
     setInterval(async () => {
         try {
             await deleteExpiredOrders(Order);
             await deleteExpiredOrders(Subscription);
+            await convertUnpaidToExpired(Order);
         } catch (error) {
             console.error('Error deleting expired orders:', error);
         }
