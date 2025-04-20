@@ -85,7 +85,9 @@
                 options: options.length > 0 ? options : undefined,
                 primary: $(modal).find(".primary-field input").val() == $(val).find("input:first").val(),
                 visible: checkVisibleField($(val).find("input:first").val(), $(modal)),
-                subscription: checkSubscriptionField($(val).find("input:first").val(), $(modal))
+                subscription: checkSubscriptionField($(val).find("input:first").val(), $(modal)),
+                status: checkStatusField($(val).find("input:first").val(), $(modal)),
+                phone: checkPhoneField($(val).find("input:first").val(), $(modal)),
             }
         }).get();
 
@@ -451,6 +453,16 @@
 
     const checkVisibleField = function (field, modal) {
         const array = $(modal).find(".visible-field").find(".bg-blue-lt").map((key, val) => $(val).html()).get();
+        return array.includes(field);
+    };
+
+    const checkStatusField = function (field, modal) {
+        const array = $(modal).find(".status-field").find(".bg-blue-lt").map((key, val) => $(val).html()).get();
+        return array.includes(field);
+    };
+
+    const checkPhoneField = function (field, modal) {
+        const array = $(modal).find(".phone-field").find(".bg-blue-lt").map((key, val) => $(val).html()).get();
         return array.includes(field);
     };
 

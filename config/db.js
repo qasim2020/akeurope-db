@@ -3,6 +3,7 @@ require('dotenv').config();
 const Order = require('../models/Order');
 const Subscription = require('../models/Subscription');
 const { deleteInvoice } = require('../modules/invoice');
+const { sendTelegramMessage } = require('../../akeurope-cp/modules/telegramBot')
 
 const connectDB = async () => {
     try {
@@ -94,7 +95,7 @@ async function convertUnpaidToExpired(Collection) {
             { _id: { $in: expiredIds } },
             { $set: { status: 'expired' } }
         );
-        console.log(`Marked ${expiredIds.length} orders as expired`);
+        sendTelegramMessage(`Marked ${expiredIds.length} orders as expired`);
     } else {
         console.log('No expired orders found');
     }
