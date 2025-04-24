@@ -4,6 +4,7 @@ const getLetterIcon = require('../modules/iconLetter');
 const getOrderIcon = require('../modules/iconOrder');
 const cheerio = require('cheerio');
 const roles = require('../modules/roles');
+const maskList = require('../../akeurope-cp/static/maskList');
 
 const or = function (a,b) {
     return a || b;

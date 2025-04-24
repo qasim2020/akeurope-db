@@ -162,9 +162,9 @@ exports.updateEntry = async (req, res) => {
 
             if (fieldValue !== undefined) {
                 entryData[fieldName] = fieldValue;
-            }
+            } 
 
-            if (field.status === true && fieldValue.length > 0) {
+            if (field.status === true && fieldValue?.length > 0) {
                 if (!existingEntry.name) {
                     throw new Error('Name field does not exist');
                 }
@@ -197,7 +197,7 @@ Jazak Allah`,
                 fieldValue = existingEntry[fieldName];
             }
 
-            if (field.type === 'date') {
+            if (field.type === 'date' && fieldValue) {
                 const formattedExisting = moment(existingEntry[fieldName]).format('YYYY-MM-DD');
                 const formattedNew = moment(fieldValue).format('YYYY-MM-DD');
 
@@ -207,9 +207,11 @@ Jazak Allah`,
 
                 existingEntry[fieldName] = formattedExisting;
             } else {
-                if (existingEntry[fieldName] != fieldValue) {
+                if (!fieldValue) {
+                    entryData[fieldName] = existingEntry[fieldName];
+                } else if (existingEntry[fieldName] != fieldValue) {
                     entryData[fieldName] = fieldValue;
-                }
+                } 
             }
         });
 
@@ -237,6 +239,7 @@ Jazak Allah`,
         res.status(200).send('Entry updated successfully');
         
     } catch (error) {
+        console.log(error);
         res.status(500).json({
             error: 'Error updating entry',
             details: error.message,

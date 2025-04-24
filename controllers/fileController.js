@@ -3,6 +3,7 @@ const Order = require('../models/Order');
 const Subscription = require('../models/Subscription');
 const fs = require('fs').promises;
 const path = require('path');
+const mime = require('mime-types');
 const { createDynamicModel } = require('../models/createDynamicModel');
 const User = require('../models/User');
 const Customer = require('../models/Customer');
@@ -291,11 +292,29 @@ exports.file = async (req, res) => {
 
         const dir = path.join(__dirname, '../../');
         const filePath = path.join(dir, file.path);
+    
+        await fs.access(filePath);
+        const mimeType = mime.lookup(filePath);
+    
+        if (mimeType.startsWith('image/')) {
+            const imageBuffer = await fs.readFile(filePath);
+            const base64Image = imageBuffer.toString('base64');
+            const dataUri = `data:${mimeType};base64,${base64Image}`;
 
-        res.sendFile(filePath);
+            res.send(`
+                <html>
+                    <head><style>body{margin:0;display:flex;justify-content:center;align-items:center;height:100vh;background:#f9f9f9}</style></head>
+                    <body>
+                        <img src="${dataUri}" style="max-width:100%; max-height:100%;" />
+                    </body>
+                </html>
+            `);
+        } else {
+            res.status(200).sendFile(filePath);
+        }
     } catch (error) {
         console.log(error);
-        res.status(500).send(error.toString());
+        res.status(500).send(error.message);
     }
 };
 

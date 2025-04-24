@@ -1,10 +1,10 @@
 const mongoose = require('mongoose');
 const Project = require('./Project');
 
-const createDynamicModel = async function(projectName) {
+const createDynamicModel = async function(slug) {
     try {
-        const project = await Project.findOne({ slug: projectName });
-        if (!project) throw new Error(`Project with name "${projectName}" not found`);
+        const project = await Project.findOne({ slug: slug });
+        if (!project) throw new Error(`Project with slug: "${slug}" not found`);
 
         const dynamicFields = {};
 

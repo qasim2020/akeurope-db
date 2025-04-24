@@ -43,6 +43,7 @@ const roles = {
         'viewLogs',
         'viewNotifications',
         'viewSelf',
+        'chat',
     ],
     editor: [
         'viewSelf',
@@ -61,6 +62,8 @@ const roles = {
         'uploadPdf',
         'viewOrderOutline',
         'uploadImage',
+        'chat',
+        'changeFilesAccess'
     ],
     viewer: ['viewEntry'],
 };

@@ -27,7 +27,7 @@ const uploadNewFile = function (elem) {
         if (file) {
             const mimeType = file.type;
 
-            if (mimeType === 'application/pdf') {
+            if ( mimeType === 'application/pdf' || mimeType.startsWith('image/') ) {
                 uploadUrl = fileUrl;
             } else if (mimeType.startsWith('video/')) {
                 uploadUrl = videoUrl;

@@ -25,6 +25,7 @@ const logRoutes = require('./routes/logRoutes');
 const orderRoutes = require('./routes/ordersRoutes');
 const invoiceRoutes = require('./routes/invoiceRoutes');
 const fileRoutes = require('./routes/filesRoutes');
+const whatsappRoutes = require('./routes/whatsappRoutes');
 
 const { sendErrorToTelegram } = require('../akeurope-cp/modules/telegramBot');
 
@@ -106,6 +107,7 @@ app.use(logRoutes);
 app.use(orderRoutes);
 app.use(invoiceRoutes);
 app.use(fileRoutes);
+app.use(whatsappRoutes);
 
 
 app.get('/', (req, res) => {

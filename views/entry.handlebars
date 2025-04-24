@@ -70,7 +70,7 @@
       <div class="card mb-3" id="files-container" 
         entity-type="entry" entity-id="{{data.entry._id}}" entity-slug="{{data.project.slug}}" 
         entity-url="/entry/{{data.entry._id}}/project/{{data.project.slug}}" 
-        file-types="application/pdf,video/*"
+        file-types="application/pdf,image/*,video/*"
         file-url="/uploadFileToEntry"
         video-url="/uploadVideoToEntry">
         {{> showEntityFiles data=data beneficiary=true}}

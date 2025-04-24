@@ -1,0 +1,75 @@
+<div class="modal modal-blur fade" id="modal-{{data.phoneNo}}" tabindex="-1" style="display: none; padding-left: 0px;"
+    aria-modal="true" role="dialog">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-header px-4">
+                <h5 class="modal-title">Chat</h5>
+                <div class="ms-auto d-flex align-items-center">
+                    <button type="button" class="btn btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+            </div>
+            <div class="modal-body p-0">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="chat h-100">
+                            <div class="chat-bubbles">
+                                <div class="chat-item">
+                                    <div class="row align-items-end justify-content-end">
+                                        <div class="col col-lg-6">
+                                            <div class="chat-bubble chat-bubble-me">
+                                                <div class="chat-bubble-title">
+                                                    <div class="row">
+                                                        <div class="col chat-bubble-author">Paweł Kuna</div>
+                                                        <div class="col-auto chat-bubble-date">09:32</div>
+                                                    </div>
+                                                </div>
+                                                <div class="chat-bubble-body">
+                                                    <p>Hey guys, I just pushed a new commit on the <code>dev</code>
+                                                        branch.
+                                                        Can you have a look and tell me what you think?</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-auto"><span class="avatar avatar-1">QA</span></div>
+                                    </div>
+                                </div>
+                                <div class="chat-item">
+                                    <div class="row align-items-end">
+                                        <div class="col-auto"><span class="avatar avatar-1">AW</span></div>
+                                        <div class="col col-lg-6">
+                                            <div class="chat-bubble">
+                                                <div class="chat-bubble-title">
+                                                    <div class="row">
+                                                        <div class="col chat-bubble-author">Mallory Hulme</div>
+                                                        <div class="col-auto chat-bubble-date">09:34</div>
+                                                    </div>
+                                                </div>
+                                                <div class="chat-bubble-body">
+                                                    <p>Sure Paweł, let me pull the latest updates.</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <div class="button-group">
+                            <button class="btn-badge">Templates</button>
+                            <button class="btn-badge">Message</button> 
+                        </div>
+                        <div class="input-group input-group-flat">
+                            <input type="text" class="form-control" autocomplete="off" placeholder="Type message">
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            
+        </div>
+    </div>
+</div>
+
+<button href="#" class="btn btn-primary d-none" id="button-{{data.phoneNo}}" data-bs-toggle="modal"
+    data-bs-target="#modal-{{data.phoneNo}}"></button>

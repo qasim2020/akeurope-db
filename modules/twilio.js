@@ -43,4 +43,24 @@ async function sendTextMessage(phone, message) {
     }
 }
 
-module.exports = { validatePhoneNumber, formatPhoneNumber, sendTextMessage };
+const verifyTwilioWebhook = (req, res, next) => {
+    const twilioSignature = req.headers['x-twilio-signature'];
+    const url = `${process.env.TWILIO_BASE_URL}${req.originalUrl}`; 
+    const params = req.body;
+    
+    const isValid = twilio.validateRequest(
+        process.env.TWILIO_AUTH_TOKEN,
+        twilioSignature,
+        url,
+        params
+    );
+
+    if (!isValid) {
+        console.warn('⚠️ Twilio signature verification failed');
+        return res.status(403).send('Invalid Twilio signature');
+    }
+
+    next();
+};
+
+module.exports = { validatePhoneNumber, formatPhoneNumber, sendTextMessage, verifyTwilioWebhook };

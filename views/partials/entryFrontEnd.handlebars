@@ -195,4 +195,64 @@
         });
     })
 
+    const getChatModal = async function (elem) {
+        try {
+            let phoneNo = $(elem).html().trim();
+
+            let phoneNoChanged = false;
+
+            if (!phoneNo.startsWith('+')) {
+                const userInput = prompt(
+                    `📞 The phone number "${phoneNo}" doesn't seem to be in international format.\n\n Please enter the correct number starting with country code (e.g. +2052342324):`,
+                    phoneNo // prefilled input
+                );
+
+                if (!userInput) {
+                    return;
+                }
+
+                if (!userInput.startsWith('+')) {
+                    alert("❌ A valid international phone number is required.");
+                    return;
+                }
+
+                phoneNo = userInput.trim();
+                phoneNoChanged = true;
+            }
+
+            {{!-- const validatedPhoneNo = await $.ajax({
+                url: `/validate-phone-number/${phoneNo}`,
+                method: 'GET'
+            }); --}}
+
+            const validatedPhoneNo = phoneNo;
+
+            if (phoneNoChanged) {
+                const fieldName = $(elem).attr('field-name');
+                const data = {
+                    [fieldName]: validatedPhoneNo
+                }
+                await $.ajax({
+                    url: `/project/entry/update/{{data.project.slug}}/{{data.entry._id}}`,
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(data),
+                });
+
+                refreshContainers();
+            }
+
+            const safePhoneId = validatedPhoneNo.replace(/[^\w\-]/g, '');
+            const response = await $.ajax({
+                url: `/start-beneficiary-chat/{{data.project.slug}}/{{data.entry._id}}/${validatedPhoneNo}`,
+                method: 'GET'
+            });
+            $("footer").before(response);
+            $(`#button-${safePhoneId}`).trigger('click');
+        } catch (error) {
+            console.log(error);
+            alert(error.message || error.responseText || 'Server Error - could not start the chat');
+        }
+    }
+
 </script>
