@@ -5,7 +5,10 @@ const Subscription = require('../models/Subscription');
 const Customer = require('../models/Customer');
 const Log = require('../models/Log');
 const User = require('../models/User');
+const { DateTime } = require('luxon');
 const { generatePagination } = require('../modules/generatePagination');
+
+const norwayTime = DateTime.now().setZone("Europe/Oslo").toJSDate();
 
 const saveLog = async ({
     entityType,
@@ -14,7 +17,6 @@ const saveLog = async ({
     actorId,
     action,
     changes,
-    timestamp = new Date(),
     url,
     color,
     isNotification,
@@ -30,7 +32,7 @@ const saveLog = async ({
             actorId,
             action,
             changes,
-            timestamp,
+            timestamp: norwayTime,
             url,
             isNotification,
             isRead,
@@ -38,6 +40,8 @@ const saveLog = async ({
             expiresAt,
             color,
         });
+
+        console.log('Log created:', log);
 
         await log.save();
     } catch (error) {

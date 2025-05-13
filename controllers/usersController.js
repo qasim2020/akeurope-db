@@ -1,3 +1,4 @@
+const emailConfig = require('../config/emailConfig');
 const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs').promises;
@@ -134,15 +135,7 @@ exports.createUser = async (req, res) => {
             inviteExpires,
         });
 
-        let transporter = nodemailer.createTransport({
-            host: process.env.EMAIL_HOST,
-            port: process.env.EMAIL_PORT,
-            secure: true,
-            auth: {
-                user: process.env.EMAIL_USER,
-                pass: process.env.EMAIL_PASS,
-            },
-        });
+        let transporter = nodemailer.createTransport(emailConfig);
 
         const templatePath = path.join(__dirname, '../views/emails/userInvite.handlebars');
         const templateSource = await fs.readFile(templatePath, 'utf8');
@@ -346,15 +339,7 @@ exports.sendInvite = async (req, res) => {
         user.inviteToken = inviteToken;
         user.inviteExpires = inviteExpires;
 
-        let transporter = nodemailer.createTransport({
-            host: process.env.EMAIL_HOST,
-            port: process.env.EMAIL_PORT,
-            secure: true,
-            auth: {
-                user: process.env.EMAIL_USER,
-                pass: process.env.EMAIL_PASS,
-            },
-        });
+        let transporter = nodemailer.createTransport(emailConfig);
 
         const templatePath = path.join(__dirname, '../views/emails/userInvite.handlebars');
         const templateSource = await fs.readFile(templatePath, 'utf8');

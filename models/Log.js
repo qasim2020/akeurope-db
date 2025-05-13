@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const { getSocket } = require('../sockets/index');
+const moment = require('moment-timezone');
 
 const logSchema = new mongoose.Schema({
     entityType: String,
@@ -8,7 +9,10 @@ const logSchema = new mongoose.Schema({
     actorId: mongoose.Schema.Types.ObjectId,
     action: String,
     changes: [],
-    timestamp: { type: Date, default: Date.now },
+    timestamp: {
+        type: Date,
+        default: () => moment().tz('Europe/Oslo').toDate()
+    },
     color: String,
     isNotification: { type: Boolean, default: false },
     isRead: { type: Boolean, default: false },

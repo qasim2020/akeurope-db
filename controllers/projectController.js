@@ -8,7 +8,7 @@ const { getChanges } = require("../modules/getChanges");
 
 exports.createProject = async(req,res) => {
   try {
-    const { name, slug, status, currency, location, fields} = req.body;
+    const { name, slug, status, currency, location, language, fields} = req.body;
 
     const project = new Project({
       _id: new mongoose.Types.ObjectId(),
@@ -17,16 +17,17 @@ exports.createProject = async(req,res) => {
       status,
       currency,
       location,
+      language,
       fields
     });
 
+    await project.save();
+    
     await saveLog(logTemplates({ 
       type: 'projectCreated',
       entity: project,
       actor: req.session.user 
     }));
-
-    await project.save();
 
     res.status(200).send("Saved successfully");
 
@@ -45,7 +46,7 @@ exports.editModal = async(req,res) => {
 exports.updateProject = async(req,res) => {
   try {
     const { id } = req.params;
-    const { name, slug, currency, status, location, fields } = req.body;
+    const { name, slug, currency, status, location, fields, language } = req.body;
     
     const originalProject = await Project.findById(id);
     
@@ -58,6 +59,7 @@ exports.updateProject = async(req,res) => {
       slug: toKebabCase(slug),
       status,
       currency,
+      language,
       location,
       fields,
     };

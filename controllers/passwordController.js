@@ -1,3 +1,4 @@
+const emailConfig = require('../config/emailConfig');
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
 const handlebars = require('handlebars');
@@ -84,15 +85,7 @@ exports.forgotPassword = async (req, res) => {
   user.resetPasswordToken = token;
   user.resetPasswordExpires = Date.now() + 3600000; 
 
-  let transporter = nodemailer.createTransport({
-    host: process.env.EMAIL_HOST,
-    port: process.env.EMAIL_PORT,
-    secure: true, 
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS
-    },
-  });
+  let transporter = nodemailer.createTransport(emailConfig);
 
   const templatePath = path.join(__dirname, '../views/emails/passwordReset.handlebars');
   const templateSource = await fs.readFile(templatePath, 'utf8');

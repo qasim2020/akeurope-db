@@ -1,3 +1,4 @@
+const emailConfig = require('../config/emailConfig');
 const PDFDocument = require('pdfkit');
 const fs = require('fs-extra');
 const path = require('path');
@@ -230,15 +231,7 @@ const deleteInvoice = async (orderId) => {
 };
 
 const sendThanksToCustomer = async (order, customer) => {
-    let transporter = nodemailer.createTransport({
-        host: process.env.EMAIL_HOST,
-        port: process.env.EMAIL_PORT,
-        secure: true,
-        auth: {
-            user: process.env.EMAIL_USER,
-            pass: process.env.EMAIL_PASS,
-        },
-    });
+    let transporter = nodemailer.createTransport(emailConfig);
 
     const templatePath = path.join(__dirname, '../views/emails/emailThanks.handlebars');
     const templateSource = await fs.readFile(templatePath, 'utf8');
@@ -276,15 +269,7 @@ const sendThanksToCustomer = async (order, customer) => {
 };
 
 const sendClarifyEmailToCustomer = async (order, customer) => {
-    let transporter = nodemailer.createTransport({
-        host: process.env.EMAIL_HOST,
-        port: process.env.EMAIL_PORT,
-        secure: true,
-        auth: {
-            user: process.env.EMAIL_USER,
-            pass: process.env.EMAIL_PASS,
-        },
-    });
+    let transporter = nodemailer.createTransport(emailConfig);
 
     const templatePath = path.join(__dirname, '../views/emails/emailClarify.handlebars');
     const templateSource = await fs.readFile(templatePath, 'utf8');
@@ -329,15 +314,7 @@ const sendInvoiceToCustomer = async (order, customer) => {
     const invoiceFilename = `order_no_${order.orderNo}.pdf`;
     const invoicePath = path.join(invoicesDirectory, invoiceFilename);
 
-    let transporter = nodemailer.createTransport({
-        host: process.env.EMAIL_HOST,
-        port: process.env.EMAIL_PORT,
-        secure: true,
-        auth: {
-            user: process.env.EMAIL_USER,
-            pass: process.env.EMAIL_PASS,
-        },
-    });
+    let transporter = nodemailer.createTransport(emailConfig);
 
     const templatePath = path.join(__dirname, '../views/emails/invoice.handlebars');
     const templateSource = await fs.readFile(templatePath, 'utf8');
