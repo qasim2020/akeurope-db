@@ -27,6 +27,12 @@
                 </div>
 
                 <div class="mb-3">
+                    <label class="form-label">Country Language</label>
+                    <input type="text" class="project-language form-control" name="example-text-input"
+                        placeholder="English/ Arabic etc" value="{{data.project.language}}" />
+                </div>
+
+                <div class="mb-3">
                     <label for="invoiceAmount" class="form-label">Project Currency</label>
                     <select class="form-select form-control project-sub-cost-currency" name="currency">
                         <option value="USD" {{#if (eq data.project.currency 'USD' )}}selected{{/if}}>USD ($)</option>
@@ -263,7 +269,8 @@
                         Otherwise only
                         Beneficiary Serial Number, Age (if date of birth is added) are shown to the outside visitors.
                     </p>
-                    <button class="btn btn-sm mb-2" onclick="toggleSelection(this)">Toggle Selection</button>
+                    <button class="btn btn-sm p-2
+                     my-2" onclick="toggleSelection(this)">Toggle Selection</button>
                     <div class="card d-block p-2 mb-3 form-control visible-field-selectors">
                         {{#each data.project.fields}}
                         <span class="badge cursor-pointer p-2 mb-1 {{#if this.visible}} bg-blue-lt {{/if}}"
@@ -296,7 +303,7 @@
                         last contact or any updates. Can only be long text area.</p>
                     <div class="card d-block p-2 mb-3 form-control status-field-selector">
                         {{#each data.project.fields}}
-                        {{#if (regexMatch this.type '^(string|textarea)$')}}
+                        {{#if (regexMatch this.type '^(textarea)$')}}
                         <span class="badge cursor-pointer p-2 mb-1 {{#if this.status}} bg-blue-lt {{/if}}"
                             onclick="setStatusField(this)">{{this.actualName}}</span>
                         {{/if}}

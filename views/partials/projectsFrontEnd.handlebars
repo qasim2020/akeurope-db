@@ -65,6 +65,7 @@
         const name = $(modal).find(".project-name").val();
         const slug = $(modal).find(".project-slug").val();
         const location = $(modal).find(".project-location").val();
+        const language = $(modal).find(".project-language").val();
         const status = $(modal).find(".project-status").find("input:checked").val();
         const currency = $(modal).find(".project-sub-cost-currency").val();
 
@@ -92,7 +93,7 @@
         }).get();
 
         return {
-            name, status, location, slug, currency, fields,
+            name, status, location, language, slug, currency, fields,
         }
     }
 
@@ -596,6 +597,22 @@
             return console.log("can't be deleted as this is the last option");
         }
         $(elem).closest(".mb-3").remove();
+    }
+
+    const toggleSelection = function (elem) {
+        const parentDiv = $(elem).closest(".visible-field");
+        const selectors = parentDiv.find(".badge");
+        const newValues = selectors.map((index, element) => {
+            if ($(element).hasClass("bg-blue-lt")) {
+                $(element).removeClass("bg-blue-lt");
+                return null;
+            } else {
+                $(element).addClass("bg-blue-lt");
+                return $(element).text();
+            }            
+        }).get().filter(val => val != null).join(',');
+        console.log(newValues);
+        parentDiv.find("input").val(newValues); 
     }
 
     $(document).on('hide.bs.modal', '.modal', function () {
