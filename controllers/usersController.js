@@ -435,7 +435,8 @@ exports.getUserActivityData = async (req, res) => {
 exports.getUserEntriesData = async (req, res) => {
     try {
         const user = await User.findById(req.params.userId).lean();
-        const userQuery = user.entries.find((e) => e.slug == req.params.slug).query;
+        const userEntry = user.entries.find((e) => e.headingSlug == req.params.headingSlug);
+        const userQuery = userEntry.query;
         
         const fullUrl = new URL(`http://dummy.com?${userQuery}`);
         
@@ -455,7 +456,8 @@ exports.getUserEntriesData = async (req, res) => {
             project,
             pagination,
             userId: user._id,
-            note: user.entries.find((e) => e.slug == project.slug).note,
+            note: userEntry.note,
+            headingSlug: userEntry.headingSlug,
         });
     } catch (error) {
         res.render('error', {

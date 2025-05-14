@@ -21,6 +21,8 @@ const getUserEntries = async (userId) => {
         const { entries, project, pagination } = await projectEntries(req);
 
         allEntries.push({
+            heading: userProject.heading,
+            headingSlug: userProject.headingSlug,
             project,
             entries,
             pagination,

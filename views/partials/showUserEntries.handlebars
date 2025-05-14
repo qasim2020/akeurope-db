@@ -6,8 +6,8 @@
             <ul class="nav nav-tabs card-header-tabs" data-bs-toggle="tabs" role="tablist">
                 {{#each data.userEntries}}
                 <li class="nav-item" role="presentation">
-                    <a href="#{{this.project.slug}}" class="nav-link {{#if (eq @index 0)}}active{{/if}}"
-                        data-bs-toggle="tab" aria-selected="true" role="tab">{{this.project.name}}</a>
+                    <a href="#{{this.headingSlug}}" class="nav-link {{#if (eq @index 0)}}active{{/if}}"
+                        data-bs-toggle="tab" aria-selected="true" role="tab">{{this.heading}}</a>
                 </li>
                 {{/each}}
             </ul>
@@ -15,7 +15,9 @@
         <div class="card-body">
             <div class="tab-content">
                 {{#each data.userEntries}}
+                <div class="tab-pane project-tab {{#if (eq @index 0)}} active show {{/if}}" id="{{this.headingSlug}}" role="tabpanel">
                     {{> showUserProjectEntries}}
+                </div>
                 {{/each}}
             </div>
         </div>

@@ -261,7 +261,7 @@
       url: href,
       method: 'GET',
       success: function (response) {
-        projectTab.replaceWith(response);
+        projectTab.html(response);
       },
       error: function (error) {
         $('#user-entries-container').html(error.responseText);
