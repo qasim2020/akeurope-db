@@ -85,7 +85,7 @@ const projectEntries = async function (req, res) {
         const orders = await Order.find({
             status: 'paid',
             'projects.slug': project.slug,
-        }).lean();
+        }).sort({ createdAt: -1 }).lean();
 
         const allPaidEntryIds = orders.flatMap(order =>
             order.projects
@@ -100,20 +100,32 @@ const projectEntries = async function (req, res) {
 
         if (skip < paidCount) {
             const paidLimit = Math.min(limit, paidCount - skip);
-        
-            const pickPaidEntries = await DynamicModel.find({
+
+            const paidEntriesWithQuery = await DynamicModel.find({
                 _id: { $in: allPaidEntryIds },
                 ...searchQuery,
             })
                 .sort(sortOptions)
-                .skip(skip)
-                .limit(paidLimit)
                 .lean();
-        
-            entries.push(...pickPaidEntries);
-        
+
+            const entryMap = new Map(
+                paidEntriesWithQuery.map(entry => [entry._id.toString(), entry])
+            );
+
+            const orderedEntries = [];
+            for (const id of allPaidEntryIds) {
+                const entry = entryMap.get(id.toString());
+                if (entry) {
+                    orderedEntries.push(entry);
+                }
+            }
+
+            const paginatedEntries = orderedEntries.slice(skip, skip + paidLimit);
+
+            entries.push(...paginatedEntries);
+
             const remainingLimit = limit - paidCount.length;
-        
+
             if (remainingLimit > 0) {
                 const unPaidEntries = await DynamicModel.find({
                     _id: { $nin: allPaidEntryIds },
@@ -122,11 +134,11 @@ const projectEntries = async function (req, res) {
                     .sort(sortOptions)
                     .limit(remainingLimit)
                     .lean();
-        
+
                 entries.push(...unPaidEntries);
             }
         } else {
-        
+
             const unpaidSkip = skip - paidCount;
 
             const unPaidEntries = await DynamicModel.find({
@@ -137,7 +149,7 @@ const projectEntries = async function (req, res) {
                 .skip(unpaidSkip)
                 .limit(limit)
                 .lean();
-        
+
             entries = unPaidEntries;
         }
 
@@ -165,7 +177,7 @@ const projectEntries = async function (req, res) {
 
         if (customer.address) {
             const address = customer.address;
-            const words = address.split(/\s+/).filter((w) => w.length > 2); 
+            const words = address.split(/\s+/).filter((w) => w.length > 2);
 
             for (const word of words) {
                 country = await Country.findOne({
@@ -175,7 +187,7 @@ const projectEntries = async function (req, res) {
             }
 
             if (!country) {
-                country = await Country.findOne({ 'currency.code': order.currency }).lean();   
+                country = await Country.findOne({ 'currency.code': order.currency }).lean();
             }
         } else {
             if (customer.tel) {
@@ -191,11 +203,11 @@ const projectEntries = async function (req, res) {
 
                 if (!country) {
                     console.log('No country found for this telephone number - falling back to order.currency');
-                    country = await Country.findOne({ 'currency.code': order.currency }).lean();   
+                    country = await Country.findOne({ 'currency.code': order.currency }).lean();
                 };
-                
+
             } else {
-                country = await Country.findOne({ 'currency.code': order.currency }).lean();   
+                country = await Country.findOne({ 'currency.code': order.currency }).lean();
             }
         }
 

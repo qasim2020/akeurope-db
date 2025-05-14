@@ -247,6 +247,8 @@
                 url: `/start-beneficiary-chat/{{data.project.slug}}/{{data.entry._id}}/${validatedPhoneNo}`,
                 method: 'GET'
             });
+            $(`#modal-${safePhoneId}`).remove();
+            $(`#button-${safePhoneId}`).remove();
             $("footer").before(response);
             $(`#button-${safePhoneId}`).trigger('click');
         } catch (error) {

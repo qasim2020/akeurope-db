@@ -1,5 +1,5 @@
 {{#if data.entry.deleted}}
-<div class="col-12 col-md-4 mb-auto" id="entry-container" >
+<div class="col-12 col-md-4 mb-auto" id="entry-container">
   <div class="card mb-3">
     <div class="card-header">
       <h3 class="card-title">Not Found</h3>
@@ -68,7 +68,8 @@
             {{else if (eq this.type "image")}}
             {{#if (lookup entry this.name)}}
             <a data-fslightbox="gallery" href="{{lookup entry this.name}}">
-              <img class="img-thumbnail" src="{{resizeCloudinaryUrl (lookup entry this.name) 't_w-250'}}" alt="" style="max-width: 150px;">
+              <img class="img-thumbnail" src="{{resizeCloudinaryUrl (lookup entry this.name) 't_w-250'}}" alt=""
+                style="max-width: 150px;">
             </a>
             {{else}}
             <a data-fslightbox="gallery" href="/static/images/no-image-placement.png">
@@ -86,11 +87,13 @@
             {{else if this.subscription}}
             <span class="text-danger fw-bold">{{lookup entry this.name}} <sup>{{../../data.project.currency}} /
                 Month</sup></span>
-                
+
             {{else if this.phone}}
-            <span class="text-green fw-bold cursor-pointer" field-name="{{this.name}}" field-value="{{this.value}}" >
+            <span class="text-green fw-bold cursor-pointer" field-name="{{this.name}}" field-value="{{this.value}}"
+              onclick="getChatModal(this)">
               {{lookup entry this.name}}
             </span>
+
 
             {{else}}
             {{lookup entry this.name}}

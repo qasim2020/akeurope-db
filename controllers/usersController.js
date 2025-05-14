@@ -381,6 +381,7 @@ exports.sendInvite = async (req, res) => {
 exports.user = async (req, res) => {
     try {
         const userId = req.params.userId;
+        console.log('userId', userId);
         res.render('user', {
             layout: 'dashboard',
             data: await dataForUserPage(req, res, 'users', userId),

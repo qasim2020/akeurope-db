@@ -9,9 +9,9 @@
                 </div>
             </div>
             <div class="modal-body p-0">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="chat h-100">
+                <div class="card" style="height: 80vh; overflow: scroll">
+                    {{!-- <div class="card-body">
+                        <div class="chat">
                             <div class="chat-bubbles">
                                 <div class="chat-item">
                                     <div class="row align-items-end justify-content-end">
@@ -53,20 +53,76 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="card-footer">
-                        <div class="button-group">
-                            <button class="btn-badge">Templates</button>
-                            <button class="btn-badge">Message</button> 
-                        </div>
+                    </div> --}}
+                    <div class="card-footer d-none">
                         <div class="input-group input-group-flat">
                             <input type="text" class="form-control" autocomplete="off" placeholder="Type message">
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="card chat-bubble-me p-4 mb-2" id="orphan_request_report" dir="rtl">
+                            <p style="line-height: 1.8;">
+                                📢 السلام عليكم [[1]]! قام متبرع جديد من [[2]] بالاشتراك لدعم طفلكم. <br>
+
+                                رغم أن المدارس في غزة لا تزال مغلقة، إلا أن التحديثات التي ترسلونها تساعد المتبرع على
+                                الشعور
+                                بالقرب والاهتمام بحياة طفلكم في هذه الظروف الصعبة. عندما يكون ذلك ممكنًا، نرجو منكم
+                                إرسال أي
+                                مما يلي: <br>
+
+                                📸 صورة أو مقطع فيديو حديث لطفلكم في المنزل <br>
+
+                                🕊️ لحظة بسيطة أدخلت السرور على قلب الطفل — حتى وإن كانت صغيرة <br>
+
+                                🧸 شيء يحبه الطفل أو يستمتع به — لعبة مفضلة، رسمة، أو نشاط منزلي <br>
+
+                                🌙 صورة أو فيديو من رمضان أو العيد كان له معنى خاص، ولو ببساطة <br>
+
+                                📷 أي لحظات من الحياة اليومية تُظهر كيف حال الطفل — حتى لو كان فقط جالسًا أو يلعب أو مع
+                                العائلة <br>
+
+                                يمكنكم الرد مباشرة على هذه الرسالة بإرسال صور أو مقاطع فيديو فقط. سيتم مشاركة التحديث مع
+                                محرر المشروع، وإدارة خدمة أوروبا، وبعد المراجعة، مع المتبرع فقط. <br>
+
+                                جزاكم الله خيرًا على وقتكم واهتمامكم. ❤️
+                            </p>
+
+                            <div class="btn d-inline-block me-auto btn-primary mt-2">Send</div>
+                        </div>
+                        <div class="card chat-bubble-me p-4 mb-2" dir="rtl" id="start_chat_arabic">
+                            عزيزي [[1]]، مدير الخدمات أوروبا يرغب بالتحدث معك بخصوص رعايتك. يُرجى الرد إذا كنت متاحًا
+                            <div class="btn d-inline-block me-auto btn-primary mt-2">Send</div>
+                        </div>
+                        <div class="card chat-bubble-me p-4" id="student_status_english">
+                            <p style="line-height: 1.8;">
+                                📢 Salaam [[1]]! A new donor from [[2]] has just subscribed to support you.
+                                To help keep your sponsor updated and connected, please send us any of the following
+                                when
+                                you can: <br>
+
+                                - 📸 Photos or videos of you in uniform during an exam or studying <br>
+                                - 📚 Moments from extra-curricular activities (like a declamation contest, sports, or a
+                                school gala) <br>
+                                - 📖 A photo or video of you in the school library or reading at home <br>
+                                - ✍️ A thank you essay explaining how your sponsor’s help is supporting your goals <br>
+                                - 🎉 A family celebration, achievement, or milestone you recently experienced <br>
+                                - 💡 A personal “aha!” moment or something that made you feel inspired <br>
+
+                                You can reply directly to this message with your photos, videos, texts, or other
+                                updates.
+                                Rest assured, your data will be securely shared only with the Project Editor, Alkhidmat
+                                Europe Admin, and, after approval, with your sponsor. <br>
+
+                                We will make sure your donor receives your update after it’s reviewed. <br>
+                                JazakAllah khair! ❤️
+                            </p>
+                            <div class="btn d-inline-block me-auto btn-primary mt-2">Send</div>
                         </div>
                     </div>
                 </div>
 
             </div>
-            
+
         </div>
     </div>
 </div>
