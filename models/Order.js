@@ -2,6 +2,36 @@ const mongoose = require('mongoose');
 
 const Counter = require('../models/Counter');
 
+const EntrySchema = new mongoose.Schema(
+    {
+        entryId: mongoose.Schema.Types.ObjectId,
+        selectedSubscriptions: [String],
+        totalCost: Number,
+        totalCostAllSubscriptions: Number,
+        costs: [Object],
+    },
+    { _id: false }
+);
+
+const ProjectSchema = new mongoose.Schema(
+    {
+        slug: {
+            type: String,
+            required: true,
+        },
+        months: {
+            type: Number,
+            required: true,
+        },
+        totalCostSingleMonth: Number,
+        totalCostAllMonths: Number,
+        totalCost: Number,
+        totalSubscriptionCosts: [Object],
+        entries: [EntrySchema],
+    },
+    { _id: false }
+);
+
 const OrderSchema = new mongoose.Schema(
     {
         orderNo: {
@@ -23,39 +53,13 @@ const OrderSchema = new mongoose.Schema(
             default: 'USD',
             required: true,
         },
-        totalCost: {
-            type: Number,
-        },
-        projects: [
-            {
-                slug: {
-                    type: String,
-                    required: true,
-                },
-                months: {
-                    type: Number,
-                    required: true,
-                },
-                totalCostSingleMonth: Number,
-                totalCostAllMonths: Number,
-                totalCost: Number,
-                totalSubscriptionCosts: [Object],
-                entries: [
-                    {
-                        entryId: mongoose.Schema.Types.ObjectId,
-                        selectedSubscriptions: [String],
-                        totalCost: Number,
-                        totalCostAllSubscriptions: Number,
-                        costs: [Object],
-                    },
-                ],
-            },
-        ],
+        totalCost: Number,
+        projects: [ProjectSchema],
     },
     {
         timestamps: true,
         versionKey: false,
-    },
+    }
 );
 
 OrderSchema.pre('save', async function (next) {

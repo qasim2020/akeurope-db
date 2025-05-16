@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 require('dotenv').config();
+const { createDynamicModel } = require('../models/createDynamicModel');
 const Order = require('../models/Order');
 const Subscription = require('../models/Subscription');
 const { deleteInvoice } = require('../modules/invoice');
@@ -21,7 +22,7 @@ const connectDB = async () => {
 
 async function deleteExpiredOrders(Collection) {
 
-    const expiryTime = new Date(Date.now() - 1 * 60 * 60 * 1000); 
+    const expiryTime = new Date(Date.now() - 1 * 60 * 60 * 1000);
 
     const expiredOrders = await Collection.find({
         $or: [
@@ -101,6 +102,166 @@ async function convertUnpaidToExpired(Collection) {
     }
 }
 
+async function remove600Children() {
+    const orderId = '67ded251d39f5002372c600c';
+    const order = await Order.findById(orderId);
+    const children = order.projects.flatMap(project =>
+        project.entries.map(entry => entry.entryId)
+    );
+    const model = await createDynamicModel('gaza-orphans');
+    const childrenWithStatusUpdates = await model.find({ _id: { $in: children }, status: { $ne: 'Pending' } }).select('status');
+    console.log('Children with status updates:', childrenWithStatusUpdates.length);
+    const File = require('../models/File');
+    const childrenObjectIds = children.map(id => new mongoose.Types.ObjectId(id));
+    const files = await File.find({ "links.entityId": { $in: childrenObjectIds } });
+    const childrenWithFileUploads = new Set();
+
+    files.forEach(file => {
+        file.links.forEach(link => {
+            if (childrenObjectIds.find(id => id.equals(link.entityId))) {
+                childrenWithFileUploads.add(link.entityId.toString());
+            }
+        });
+    });
+    console.log('Children with file uploads:', childrenWithFileUploads.size);
+    // const fileUploadedStatuses = await model.find({ _id: { $in: Array.from(childrenWithFileUploads) } }).select('status');
+    const childrenWithStatusUpdatesIds = childrenWithStatusUpdates.map(child => child._id.toString());
+    const unionSet = new Set([...childrenWithStatusUpdatesIds, ...childrenWithFileUploads]);
+    const unionIds = Array.from(unionSet).map(id => new mongoose.Types.ObjectId(id));
+    console.log('Union of children with status updates and file uploads:', unionIds.length);
+    const unionIdStrings = unionIds.map(id => id.toString());
+    let modified = false;
+    for (const project of order.projects) {
+        const originalLength = project.entries.length;
+
+        project.entries = project.entries.filter(entry =>
+            unionIdStrings.includes(entry.entryId.toString())
+        );
+
+        if (project.entries.length !== originalLength) {
+            modified = true;
+        }
+    }
+
+    await order.save();
+
+    const alreadySelectedEntriesResult = await Order.aggregate([
+        {
+            $match: {
+                _id: { $ne: orderId },
+                'projects.slug': 'gaza-orphans',
+                status: 'paid',
+            },
+        },
+        {
+            $unwind: '$projects',
+        },
+        {
+            $unwind: '$projects.entries',
+        },
+        {
+            $group: {
+                _id: null,
+                entryIds: { $addToSet: '$projects.entries.entryId' },
+            },
+        },
+        {
+            $project: {
+                _id: 0,
+                entryIds: 1,
+            },
+        },
+    ]);
+
+    const alreadySelectedEntries = alreadySelectedEntriesResult[0]?.entryIds || [];
+
+    console.log('Already selected entries:', alreadySelectedEntries.length);
+
+    const dontSelectTheseIds = new Set([
+        ...alreadySelectedEntries.map(id => id.toString()),
+        ...children.map(id => id.toString()),
+    ]);
+
+    console.log('Dont select these ids:', dontSelectTheseIds.size);
+
+    const mongoIdsToSkip = Array.from(dontSelectTheseIds).map(id => new mongoose.Types.ObjectId(id));
+
+    const pendingChildrenFromNorth = await model.find({ _id: { $nin: mongoIdsToSkip }, status: 'Pending', cluster: 'North' }).limit(261).select('status');
+    console.log('Pending children from North:', pendingChildrenFromNorth.length);
+    const pendingChildrenFromNorthIds = pendingChildrenFromNorth.map(entry => entry._id);
+
+    const newOrderChildrenIds = new Set([...pendingChildrenFromNorthIds, ...unionIds]);
+    const ids = Array.from(newOrderChildrenIds).map(id => new mongoose.Types.ObjectId(id));
+    await model.updateMany({ _id: { $in: ids } }, { monthlyExpenses: 581.68 });
+
+    console.log('entries to put in order', newOrderChildrenIds.size);
+    let newArray = [];
+    for (const childId of newOrderChildrenIds) {
+        const child = await model.findById(childId).lean();
+        const object = {
+            entryId: childId,
+            selectedSubscriptions: ['monthlyExpenses'],
+            costs: [{
+                fieldName: 'monthlyExpenses',
+                totalCost: child.monthlyExpenses,
+                orderedCost: child.monthlyExpenses,
+            }],
+            totalCost: child.monthlyExpenses,
+            totalCostAllSubscriptions: child.monthlyExpenses
+        };
+        newArray.push(object);
+    }
+
+    for (const project of order.projects) {
+        project.entries = newArray;
+    }
+
+    await order.save();
+
+}
+
+async function resetGazaOrphanPricesTo600() {
+    const model = await createDynamicModel('gaza-orphans');
+    const alreadySelectedEntriesResult = await Order.aggregate([
+        {
+            $match: {
+                'projects.slug': 'gaza-orphans',
+                status: 'paid',
+            },
+        },
+        {
+            $unwind: '$projects',
+        },
+        {
+            $unwind: '$projects.entries',
+        },
+        {
+            $group: {
+                _id: null,
+                entryIds: { $addToSet: '$projects.entries.entryId' },
+            },
+        },
+        {
+            $project: {
+                _id: 0,
+                entryIds: 1,
+            },
+        },
+    ]);
+
+    const alreadySelectedEntries = alreadySelectedEntriesResult[0]?.entryIds || [];
+
+    console.log('Already selected entries:', alreadySelectedEntries.length);
+
+    const dontSelectTheseIds = new Set([
+        ...alreadySelectedEntries.map(id => id.toString()),
+    ]);
+
+    console.log('Dont select these ids:', dontSelectTheseIds.size);
+
+    const mongoIdsToSkip = Array.from(dontSelectTheseIds).map(id => new mongoose.Types.ObjectId(id));
+    await model.updateMany({ _id: { $nin: mongoIdsToSkip } }, { monthlyExpenses: 600 });
+}
 
 mongoose.connection.on('open', async () => {
     console.log('Order cleanup job started...');
@@ -108,6 +269,8 @@ mongoose.connection.on('open', async () => {
     await deleteExpiredOrders(Order);
     await deleteExpiredOrders(Subscription);
     await convertUnpaidToExpired(Order);
+    // await remove600Children();
+    await resetGazaOrphanPricesTo600();
 
     setInterval(async () => {
         try {
@@ -117,7 +280,7 @@ mongoose.connection.on('open', async () => {
         } catch (error) {
             console.error('Error deleting expired orders:', error);
         }
-    }, 60 * 1000); 
+    }, 60 * 1000);
 });
 
 module.exports = connectDB;
