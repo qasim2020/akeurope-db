@@ -28,7 +28,11 @@
                             <img src="{{ben.country.flag}}" style="margin-top: -4px;" alt="{{ben.country.code}} Flag"
                                 width="18" height="14" class="rounded">
                             <span>{{ben.country.name}}</span>
-                        </span> | {{timeDaysAgo ben.orderInfo.createdAt}}
+                        </span> <br>
+                        <span class="text-secondary">
+                            Order came in 
+                            {{timeDaysAgo ben.orderInfo.createdAt}}
+                        </span>
                         {{else}}
                         No active donors.
                         {{/if}}
