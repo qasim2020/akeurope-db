@@ -49,19 +49,6 @@
                             <label class="form-label">Document Access</label>
                             <div class="form-selectgroup form-selectgroup-boxes d-flex flex-column projects">
                                 <label class="form-selectgroup-item flex-fill">
-                                    <input type="checkbox" name="fileAccess" value="editors"
-                                        class="form-selectgroup-input" {{#if (findInArray data.file.access 'editors'
-                                        )}}checked{{/if}}>
-                                    <div class="form-selectgroup-label d-flex align-items-center p-3">
-                                        <div class="me-3">
-                                            <span class="form-selectgroup-check"></span>
-                                        </div>
-                                        <div class="form-selectgroup-label-content d-flex align-items-center">
-                                            <div class="font-weight-medium">Visible to Project Editors</div>
-                                        </div>
-                                    </div>
-                                </label>
-                                <label class="form-selectgroup-item flex-fill">
                                     <input type="checkbox" name="fileAccess" value="customers"
                                         class="form-selectgroup-input" {{#if (findInArray data.file.access 'customers'
                                         )}}checked{{/if}}>
@@ -70,7 +57,20 @@
                                             <span class="form-selectgroup-check"></span>
                                         </div>
                                         <div class="form-selectgroup-label-content d-flex align-items-center">
-                                            <div class="font-weight-medium">Visible to Subscribed Customer</div>
+                                            <div class="font-weight-medium">Visible to Customer</div>
+                                        </div>
+                                    </div>
+                                </label>
+                                <label class="form-selectgroup-item flex-fill">
+                                    <input type="checkbox" name="fileAccess" value="beneficiary"
+                                        class="form-selectgroup-input" {{#if (findInArray data.file.access 'beneficiary'
+                                        )}}checked{{/if}}>
+                                    <div class="form-selectgroup-label d-flex align-items-center p-3">
+                                        <div class="me-3">
+                                            <span class="form-selectgroup-check"></span>
+                                        </div>
+                                        <div class="form-selectgroup-label-content d-flex align-items-center">
+                                            <div class="font-weight-medium">Visible to Beneficiary</div>
                                         </div>
                                     </div>
                                 </label>

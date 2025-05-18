@@ -1,10 +1,3 @@
-/**
- * Compare two objects and return an array of changes.
- * @param {Object} original - The original object.
- * @param {Object} updated - The updated object.
- * @param {string[]} [arrayKeys=[]] - Keys to treat as arrays of objects (e.g., 'fields').
- * @returns {Array} An array of changes.
- */
 function getChanges(original, updated, arrayKeys = []) {
     const changes = [];
   

@@ -1,10 +1,11 @@
 require('dotenv').config();
-
 const express = require('express');
 const http = require('http');
 const session = require('express-session');
 const flash = require('connect-flash');
 const mongoose = require('./config/db');
+mongoose();
+
 const exphbs = require('express-handlebars');
 const path = require('path');
 const hbsHelpers = require('./modules/helpers');
@@ -28,8 +29,6 @@ const fileRoutes = require('./routes/filesRoutes');
 const whatsappRoutes = require('./routes/whatsappRoutes');
 
 const { sendErrorToTelegram } = require('../akeurope-cp/modules/telegramBot');
-
-mongoose();
 
 const app = express();
 app.engine('handlebars', exphbs.engine({helpers: hbsHelpers}));

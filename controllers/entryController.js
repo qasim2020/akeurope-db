@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const Project = require('../models/Project');
 const User = require('../models/User');
 const Customer = require('../models/Customer');
+const Beneficiary = require('../models/Beneficiary');
 const cloudinary = require('cloudinary').v2;
 const moment = require('moment');
 const { createDynamicModel } = require('../models/createDynamicModel');
@@ -385,11 +386,14 @@ exports.entry = async (req, res) => {
         for (const file of files) {
             if (file.uploadedBy?.actorType === 'user') {
                 const user = await User.findById(file.uploadedBy?.actorId).lean();
-                file.actorName = user.name;
-                file.actorRole = user.role;
+                file.actorName = user?.name;
+                file.actorRole = user?.role;
             }
             if (file.uploadedBy?.actorType === 'customer') {
                 file.actorName = (await Customer.findById(file.uploadedBy?.actorId).lean()).name;
+            }
+            if (file.uploadedBy?.actorType === 'benificiary') {
+                file.actorName = (await Beneficiary.findById(file.uploadedBy?.actorId).lean()).phoneNumber;
             }
         }
 

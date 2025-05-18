@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const Project = require('./Project');
 
-const createDynamicModel = async function(slug) {
+const createDynamicModel = async function (slug) {
     try {
         const project = await Project.findOne({ slug: slug });
         if (!project) throw new Error(`Project with slug: "${slug}" not found`);
@@ -29,27 +29,40 @@ const createDynamicModel = async function(slug) {
                     fieldType = Date;
                     break;
                 case 'image':
-                    fieldType = String; 
+                    fieldType = String;
                     break;
                 case 'file':
-                    fieldType = String; 
+                    fieldType = String;
                     break;
                 default:
-                    fieldType = String; 
+                    fieldType = String;
             }
 
             dynamicFields[field.name] = { type: fieldType, unique: unique };
         });
 
         const dynamicSchema = new mongoose.Schema(dynamicFields);
-
         const modelName = project.slug;
 
+        const forms = await mongoose.createConnection(process.env.MONGO_URI_FORMS, {
+            useNewUrlParser: true,
+            useUnifiedTopology: true,
+        }).asPromise();
+
         if (mongoose.models[modelName]) {
-            mongoose.deleteModel(modelName); 
+            mongoose.deleteModel(modelName);
         }
 
-        const DynamicModel = mongoose.model(modelName, dynamicSchema, modelName.toLowerCase());
+        if (forms.models[modelName]) {
+            delete forms.models[modelName];
+        }
+
+        let DynamicModel;
+        if (project.slug === 'egypt-family') {
+            DynamicModel = forms.model(modelName, dynamicSchema, 'familyarabics');
+        } else {
+            DynamicModel = mongoose.model(modelName, dynamicSchema, modelName.toLowerCase());
+        }
         return DynamicModel;
     } catch (error) {
         console.error('Error creating dynamic model:', error);

@@ -3,6 +3,7 @@ const Project = require('../models/Project');
 const Order = require('../models/Order');
 const Subscription = require('../models/Subscription');
 const Customer = require('../models/Customer');
+const Beneficiary = require('../models/Beneficiary');
 const Log = require('../models/Log');
 const User = require('../models/User');
 const { generatePagination } = require('../modules/generatePagination');
@@ -120,7 +121,6 @@ const userLogs = async (req, userId) => {
         };
     } else if (filter === 'project') {
         query = {
-            actorId: { $in: usersWithMatchingProjects.map((user) => user._id) },
             entityType: 'entry',
             action: { $in: regexArray },
         }
@@ -135,7 +135,6 @@ const userLogs = async (req, userId) => {
                     actorId: { $ne: userId },
                 },
                 {
-                    actorId: { $in: usersWithMatchingProjects.map((user) => user._id) },
                     entityType: 'entry',
                     action: { $in: regexArray },
                 }
@@ -257,7 +256,9 @@ const findConnectedIds = async (logs, req) => {
             const testOne = log.actor && log.actor._id.toString();
             const testTwo = req && req.session.user._id.toString();
             log.actorIsSelf = testOne === testTwo;
-        }
+        } else if (log.actorType == 'beneficiary') {
+            log.actor = await Beneficiary.findById(log.actorId).lean();
+        };
         log.viewer = req && req.session.user;
     }
 

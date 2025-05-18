@@ -7,6 +7,7 @@ const mime = require('mime-types');
 const { createDynamicModel } = require('../models/createDynamicModel');
 const User = require('../models/User');
 const Customer = require('../models/Customer');
+const Beneficiary = require('../models/Beneficiary');
 const Project = require('../models/Project');
 
 const { saveLog } = require('../modules/logAction');
@@ -46,9 +47,9 @@ exports.uploadFileToEntry = async (req, res) => {
         let access;
 
         if (req.userPermissions.includes('changeFilesAccess')) {
-            access = ['editors', 'customers'];
+            access = ['editors', 'customers', 'beneficiary'];
         } else {
-            access = ['editors', 'customers'];
+            access = ['editors', 'customers', 'beneficiary'];
         }
 
         const links = [
@@ -80,10 +81,6 @@ exports.uploadFileToEntry = async (req, res) => {
         });
 
         await file.save();
-
-        const project = await Project.findOne({ slug: entitySlug }).lean();
-        const DynamicModel = await createDynamicModel(entitySlug);
-        const entry = await DynamicModel.findById(entityId).lean();
 
         res.status(200).send(file);
     } catch (error) {
@@ -263,6 +260,9 @@ exports.renderEntityFiles = async (req, res) => {
             if (file.uploadedBy?.actorType === 'customer') {
                 file.actorName = (await Customer.findById(file.uploadedBy?.actorId).lean()).name;
             }
+            if (file.uploadedBy?.actorType === 'benificiary') {
+                file.actorName = (await Beneficiary.findById(file.uploadedBy?.actorId).lean()).phoneNumber;
+            }
         }
 
         res.status(200).render('partials/showEntityFiles', {
@@ -291,12 +291,19 @@ exports.file = async (req, res) => {
         }
 
         const dir = path.join(__dirname, '../../');
-        const filePath = path.join(dir, file.path);
-    
-        await fs.access(filePath);
+        let filePath = path.join(dir, file.path);
+
+        try {
+            await fs.access(filePath);
+        } catch (err) {
+            console.warn(`File not found at ${filePath}, trying fallback...`);
+            filePath = path.join(__dirname, '../../akeurope-forms-uploads', file.path);
+            await fs.access(filePath);
+        }
+
         const mimeType = mime.lookup(filePath);
-    
-        if (mimeType.startsWith('image/')) {
+
+        if (mimeType && mimeType.startsWith('image/')) {
             const imageBuffer = await fs.readFile(filePath);
             const base64Image = imageBuffer.toString('base64');
             const dataUri = `data:${mimeType};base64,${base64Image}`;
@@ -321,7 +328,7 @@ exports.file = async (req, res) => {
 exports.update = async (req, res) => {
     try {
         const { fileId } = req.params;
-        const { name, category, access, notes} = req.body;
+        const { name, category, access, notes } = req.body;
 
         const file = await File.findById(fileId);
         if (!file) return res.status(404).send('File not found');
@@ -363,8 +370,17 @@ exports.delete = async (req, res) => {
         if (!file) return res.status(404).send('File not found');
 
         const dir = path.join(__dirname, '../../');
-        const filePath = path.join(dir, file.path);
-        await fs.unlink(filePath);
+        let filePath = path.join(dir, file.path);
+
+        try {
+            await fs.access(filePath);
+            await fs.unlink(filePath);
+        } catch (err) {
+            console.warn(`File not found at ${filePath}, trying fallback...`);
+            filePath = path.join(__dirname, '../../akeurope-forms-uploads', file.path);
+            await fs.access(filePath);
+            await fs.unlink(filePath);
+        }
 
         if (entityType === 'order') {
             const order = (await Order.findById(entityId).lean()) || (await Subscription.findById(entityId).lean());
@@ -414,7 +430,7 @@ exports.getFileModal = async (req, res) => {
 
         for (const link of file.links) {
             if (link.entityType === 'entry') {
-                link.entity = await Customer.findById(link.entityId).lean();
+                console.log(link);
                 const parts = link.entityUrl.split('/');
                 const slug = parts[parts.length - 1];
                 const model = await createDynamicModel(slug);
@@ -443,6 +459,7 @@ exports.getFileModal = async (req, res) => {
             },
         });
     } catch (error) {
+        console.log(error);
         res.status(500).json({
             error: 'Error occured while fetching file modal',
             details: error.message,

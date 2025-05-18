@@ -6,6 +6,19 @@ const Subscription = require('../models/Subscription');
 const { deleteInvoice } = require('../modules/invoice');
 const { sendTelegramMessage } = require('../../akeurope-cp/modules/telegramBot')
 
+console.log('MongoDB connected!');
+
+const formCollection = mongoose.createConnection(process.env.MONGO_URI_FORMS, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+});
+
+formCollection.on('connected', () => {
+    console.log('Forms MongoDB connected');
+});
+
+global.formCollection = formCollection;
+
 const connectDB = async () => {
     try {
         await mongoose.connect(process.env.MONGO_URI, {
@@ -13,7 +26,6 @@ const connectDB = async () => {
             useUnifiedTopology: true,
         });
 
-        console.log('MongoDB connected!');
     } catch (err) {
         console.error(err);
         process.exit(1);
@@ -270,7 +282,7 @@ mongoose.connection.on('open', async () => {
     await deleteExpiredOrders(Subscription);
     await convertUnpaidToExpired(Order);
     // await remove600Children();
-    await resetGazaOrphanPricesTo600();
+    // await resetGazaOrphanPricesTo600();
 
     setInterval(async () => {
         try {

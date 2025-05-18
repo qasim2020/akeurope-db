@@ -155,6 +155,7 @@ const projectEntries = async function (req, res) {
 
     } else {
         entries = await DynamicModel.find(searchQuery).sort(sortOptions).skip(skip).limit(limit).lean();
+        console.log('entries', entries);
     }
 
     for (const entry of entries) {

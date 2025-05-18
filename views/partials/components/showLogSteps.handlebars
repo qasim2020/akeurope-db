@@ -8,42 +8,51 @@
                 <a href="/dashboard" style="color: inherit;">{{log.actor.name}}</a>
             </span>
             {{else if (eq log.viewer.role 'admin')}}
-                {{#if (eq log.actorType 'customer')}}
-                    <span class="badge bg-red-lt">
-                        <a href="/{{log.actorType}}/{{log.actor._id}}" style="color: inherit;">{{log.actor.name}}</a>
-                    </span>
-                {{else}}
-                    {{#if (eq log.actor.role 'admin')}}
-                    <span class="badge bg-green-lt">
-                        <a href="/{{log.actorType}}/{{log.actor._id}}" style="color: inherit;">{{log.actor.name}}</a>
-                    </span>
-                    {{else}}
-                    <span class="badge bg-blue-lt">
-                        <a href="/{{log.actorType}}/{{log.actor._id}}" style="color: inherit;">{{log.actor.name}}</a>
-                    </span>
-                    {{/if}}
-                {{/if}}
+            {{#if (eq log.actorType 'customer')}}
+            <span class="badge bg-red-lt">
+                <a href="/{{log.actorType}}/{{log.actor._id}}" style="color: inherit;">{{log.actor.name}}</a>
+            </span>
+            {{else}}
+            {{#if (eq log.actor.role 'admin')}}
+            <span class="badge bg-green-lt">
+                <a href="/{{log.actorType}}/{{log.actor._id}}" style="color: inherit;">{{log.actor.name}}</a>
+            </span>
+            {{else if (eq log.actorType 'beneficiary')}}
+            <span class="badge bg-orange-lt">
+                {{log.actor.phoneNumber}}
+            </span>
+            {{else}}
+            <span class="badge bg-blue-lt">
+                <a href="/{{log.actorType}}/{{log.actor._id}}" style="color: inherit;">{{log.actor.name}}</a>
+            </span>
+            {{/if}}
+            {{/if}}
             {{else if (eq log.viewer.role 'editor')}}
-                {{#if log.actorIsSelf}}
-                <span class="badge bg-blue-lt">
-                    <a href="/{{log.actorType}}/{{log.actor._id}}" style="color: inherit;">{{log.actor.name}}</a>
-                </span>
-                {{else}}
-                    {{#if (eq log.actor.role 'admin')}}
-                    <span class="badge bg-green-lt">
-                        {{log.actor.name}}
-                    </span>
-                    {{else}}
-                    <span class="badge bg-blue-lt">
-                        {{log.actor.name}}
-                    </span>
-                    {{/if}}
-                {{/if}}
+            {{#if log.actorIsSelf}}
+            <span class="badge bg-blue-lt">
+                <a href="/{{log.actorType}}/{{log.actor._id}}" style="color: inherit;">{{log.actor.name}}</a>
+            </span>
+            {{else}}
+            {{#if (eq log.actor.role 'admin')}}
+            <span class="badge bg-green-lt">
+                {{log.actor.name}}
+            </span>
+            {{else}}
+            <span class="badge bg-blue-lt">
+                {{log.actor.name}}
+            </span>
+            {{/if}}
+            {{/if}}
             {{else if (eq log.actorType 'customer')}}
             <span class="badge bg-red-lt">
                 <a href="/{{log.actorType}}/{{log.actor._id}}" style="color: inherit;">{{log.actor.name}}</a>
             </span>
+            {{else if (eq log.actorType 'beneficiary')}}
+            <span class="badge bg-black-lt">
+                {{log.actor.phoneNumber}}
+            </span>
             {{/if}}
+            {{log log}}
         </div>
         <div class="flex-grow-1 mx-2">
             <hr class="my-2">
@@ -60,6 +69,9 @@
             {{/if}}
             {{#if (eq log.color 'grey')}}
             <div class="status-dot bg-grey d-block me-2"></div>
+            {{/if}}
+            {{#if (eq log.color 'orange')}}
+            <div class="status-dot bg-orange d-block me-2"></div>
             {{/if}}
             {{#if (eq log.entityType 'user')}}
             Admin
@@ -81,7 +93,7 @@
         {{#if log.changes}}
         {{#each log.changes}}
         {{#unless (eq @index 0)}}<br>{{/unless}}
-        
+
         {{#if (eq this.key 'status')}}
         <span class="badge bg-red-lt mt-1">{{camelCaseToNormalString this.key}}</span>
         {{else}}
