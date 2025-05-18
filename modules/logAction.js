@@ -28,6 +28,7 @@ const saveLog = async ({
             entityId,
             actorType,
             actorId,
+            timestamp: new Date(),
             action,
             changes,
             url,

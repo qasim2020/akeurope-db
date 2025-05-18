@@ -10,7 +10,7 @@ const logSchema = new mongoose.Schema({
     changes: [],
     timestamp: {
         type: Date,
-        default: new Date(),
+        required: true,
     },
     color: String,
     isNotification: { type: Boolean, default: false },
