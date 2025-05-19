@@ -141,6 +141,10 @@ const userLogs = async (req, userId) => {
                 {
                     entityType: 'entry',
                     action: { $in: regexArray },
+                },
+                {
+                    entityType: 'beneficiary',
+                    action: { $in: regexArray },
                 }
             ],
         };
