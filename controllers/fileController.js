@@ -430,7 +430,6 @@ exports.getFileModal = async (req, res) => {
 
         for (const link of file.links) {
             if (link.entityType === 'entry') {
-                console.log(link);
                 const parts = link.entityUrl.split('/');
                 const slug = parts[parts.length - 1];
                 const model = await createDynamicModel(slug);

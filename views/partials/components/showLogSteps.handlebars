@@ -57,29 +57,14 @@
             <hr class="my-2">
         </div>
         <div class="d-flex badge">
-            {{#if (eq log.color 'red')}}
-            <div class="status-dot bg-red d-block me-2"></div>
-            {{/if}}
-            {{#if (eq log.color 'blue')}}
-            <div class="status-dot bg-blue d-block me-2"></div>
-            {{/if}}
-            {{#if (eq log.color 'green')}}
-            <div class="status-dot bg-green d-block me-2"></div>
-            {{/if}}
-            {{#if (eq log.color 'grey')}}
-            <div class="status-dot bg-grey d-block me-2"></div>
-            {{/if}}
-            {{#if (eq log.color 'orange')}}
-            <div class="status-dot bg-orange d-block me-2"></div>
-            {{/if}}
-            {{#if (eq log.entityType 'user')}}
-            Admin
-            {{else}}
-            {{#if (eq log.entityType 'order')}}
-            Invoice
-            {{else}}
-            {{capitalizeFirstLetter log.entityType}}
-            {{/if}}
+            {{#if (eq log.actor.role 'admin')}}
+            <div class="status-dot bg-green d-block me-2"></div> Admin
+            {{else if (eq log.actor.role 'editor')}}
+            <div class="status-dot bg-blue d-block me-2"></div> Admin
+            {{else if (eq log.actorType 'customer')}}
+            <div class="status-dot bg-red d-block me-2"></div> Customer
+            {{else if (eq log.actorType 'beneficiary')}}
+            <div class="status-dot bg-orange d-block me-2"></div> Beneficiary
             {{/if}}
         </div>
     </div>
