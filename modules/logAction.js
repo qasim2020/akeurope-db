@@ -122,7 +122,10 @@ const userLogs = async (req, userId) => {
         };
     } else if (filter === 'project') {
         query = {
-            entityType: 'entry',
+            $or: [
+                { entityType: 'entry' },
+                { entityType: 'beneficiary' }
+            ],
             action: { $in: regexArray },
         }
     } else {
