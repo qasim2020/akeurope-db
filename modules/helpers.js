@@ -71,10 +71,12 @@ const dec = function (a) {
 };
 
 const formatDate = function (date) {
+    if (!date) return '';
     return moment(date).format('DD-MM-YYYY');
 };
 
 const formatTime = function (timestamp) {
+    if (!timestamp) return '';
     return moment(timestamp).format('D MMM YYYY [at] h:mm A');
 };
 

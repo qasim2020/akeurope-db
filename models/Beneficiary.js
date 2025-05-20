@@ -5,6 +5,9 @@ const BenSchema = new mongoose.Schema({
   name: {
     type: String,
   },
+  email: {
+    type: String,
+  },
   maxUploads: {
     type: Number,
     default: 1,
