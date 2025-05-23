@@ -6,7 +6,6 @@ const Subscription = require('../models/Subscription');
 const { deleteInvoice } = require('../modules/invoice');
 const { sendTelegramMessage } = require('../../akeurope-cp/modules/telegramBot')
 
-console.log('MongoDB connected!');
 
 const formCollection = mongoose.createConnection(process.env.MONGO_URI_FORMS, {
     useNewUrlParser: true,
@@ -25,6 +24,8 @@ const connectDB = async () => {
             useNewUrlParser: true,
             useUnifiedTopology: true,
         });
+
+        console.log('MongoDB connected!');
 
     } catch (err) {
         console.error(err);

@@ -266,6 +266,7 @@ const findConnectedIds = async (logs, req) => {
             log.actorIsSelf = testOne === testTwo;
         } else if (log.actorType == 'beneficiary') {
             log.actor = await Beneficiary.findById(log.actorId).lean();
+            console.log(log.actor);
         };
         log.viewer = req && req.session.user;
     }

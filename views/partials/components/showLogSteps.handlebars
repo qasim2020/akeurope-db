@@ -19,7 +19,7 @@
             </span>
             {{else if (eq log.actorType 'beneficiary')}}
             <span class="badge bg-orange-lt">
-                {{or log.actor.email log.actor.phoneNumber}}
+                {{or log.actor.email (or log.actor.phoneNumber log.actor.ipCountry)}}
             </span>
             {{else}}
             <span class="badge bg-blue-lt">
@@ -49,7 +49,7 @@
             </span>
             {{else if (eq log.actorType 'beneficiary')}}
             <span class="badge bg-black-lt">
-                {{or log.actor.email log.actor.phoneNumber}}
+                {{or log.actor.email (or log.actor.phoneNumber log.actor.ipCountry)}}
             </span>
             {{/if}}
         </div>

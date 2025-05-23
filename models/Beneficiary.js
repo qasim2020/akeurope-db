@@ -12,6 +12,9 @@ const BenSchema = new mongoose.Schema({
     type: Number,
     default: 1,
   },
+  ipCountry: {
+    type: String,
+  },
   phoneNumber: {
     type: String,
     required: true,
