@@ -1,11 +1,11 @@
 const mongoose = require('mongoose');
 require('dotenv').config();
 const { createDynamicModel } = require('../models/createDynamicModel');
+const File = require('../models/File');
 const Order = require('../models/Order');
 const Subscription = require('../models/Subscription');
 const { deleteInvoice } = require('../modules/invoice');
 const { sendTelegramMessage } = require('../../akeurope-cp/modules/telegramBot')
-
 
 const formCollection = mongoose.createConnection(process.env.MONGO_URI_FORMS, {
     useNewUrlParser: true,
@@ -276,12 +276,46 @@ async function resetGazaOrphanPricesTo600() {
     await model.updateMany({ _id: { $nin: mongoIdsToSkip } }, { monthlyExpenses: 600 });
 }
 
+async function formatGazaPhoneNos() {
+    const model = await createDynamicModel('gaza-orphans');
+    const docs = await model.find({}).lean(); // await here to resolve the array
+
+    for (const doc of docs) {
+        let { phoneNo1, phoneNo2 } = doc;
+
+        const formatNumber = (num) => {
+            if (!num) return null;
+            num = num.trim();
+            if (num.startsWith('+972')) return num;
+            if (num.startsWith('0')) return '+972' + num.slice(1);
+            return '+972' + num;
+        };
+
+        const updatedPhoneNo1 = formatNumber(phoneNo1);
+        const updatedPhoneNo2 = formatNumber(phoneNo2);
+
+        await model.updateOne(
+            { _id: doc._id },
+            { $set: { phoneNo1: updatedPhoneNo1, phoneNo2: updatedPhoneNo2 } }
+        );
+
+        await File.updateMany(
+            { "links.entityId": doc._id },
+            { $set: { access: ['beneficiary', 'customers'] } }
+        );
+    }
+
+    console.log('Phone numbers updated successfully.');
+}
+
+
 mongoose.connection.on('open', async () => {
     console.log('Order cleanup job started...');
 
     await deleteExpiredOrders(Order);
     await deleteExpiredOrders(Subscription);
     await convertUnpaidToExpired(Order);
+    // await formatGazaPhoneNos();
     // await remove600Children();
     // await resetGazaOrphanPricesTo600();
 
