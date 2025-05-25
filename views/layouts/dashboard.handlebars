@@ -6,6 +6,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta http-equiv="X-UA-Compatible" content="ie=edge" />
   <title>Dashboard · akeurope</title>
+
+  <link rel="icon" type="image/png" href="/static/favicon/favicon-96x96.png" sizes="96x96" />
+  <link rel="icon" type="image/svg+xml" href="/static/favicon/favicon.svg" />
+  <link rel="shortcut icon" href="/static/favicon/favicon.ico" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/static/favicon/apple-touch-icon.png" />
+  <meta name="apple-mobile-web-app-title" content="akeurope.org" />
+  <link rel="manifest" href="/static/favicon/site.webmanifest" />
+
   <!-- CSS files -->
   <link href="/tabler/css/tabler.min.css?1692870487" rel="stylesheet" />
   <link href="/tabler/css/tabler-flags.min.css?1692870487" rel="stylesheet" />
@@ -168,7 +176,6 @@
           <div class="d-flex">
             <a href="?theme=dark" class="nav-link px-0 hide-theme-dark" data-bs-toggle="tooltip"
               data-bs-placement="bottom" aria-label="Enable dark mode" data-bs-original-title="Enable dark mode">
-              <!-- Download SVG icon from http://tabler-icons.io/i/moon -->
               <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24"
                 stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                 <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
@@ -177,7 +184,6 @@
             </a>
             <a href="?theme=light" class="nav-link px-0 hide-theme-light" data-bs-toggle="tooltip"
               data-bs-placement="bottom" aria-label="Enable light mode" data-bs-original-title="Enable light mode">
-              <!-- Download SVG icon from http://tabler-icons.io/i/sun -->
               <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24"
                 stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                 <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
@@ -209,7 +215,7 @@
       </div>
     </header>
     <aside
-      class="navbar navbar-vertical navbar-expand-lg navbar {{#if (eq data.sidebarCollapsed true)}}d-lg-none{{/if}}">
+      class="navbar d-print-none navbar-vertical navbar-expand-lg navbar {{#if (eq data.sidebarCollapsed true)}}d-lg-none{{/if}}">
       <div class="container-fluid">
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#sidebar-menu"
           aria-controls="sidebar-menu" aria-expanded="false" aria-label="Toggle navigation">
@@ -428,7 +434,7 @@
     </aside>
 
     <!-- Collapsed Sidebar -->
-    <aside class="collapsed-sidebar d-none d-lg-flex {{#if (neq data.sidebarCollapsed true)}}collapsed{{/if}}">
+    <aside class="collapsed-sidebar d-print-none d-none d-lg-flex {{#if (neq data.sidebarCollapsed true)}}collapsed{{/if}}">
       <div class="container-fluid">
         <h1 class="navbar-brand navbar-brand-autodark m-auto">
           <a href="/dashboard">
@@ -606,11 +612,11 @@
   <script src="/tabler/js/tabler.min.js"></script>
   <script src="https://cdn.socket.io/4.6.0/socket.io.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/fslightbox/index.js"></script>
-  
+
   <script src="/static/files.js"></script>
   <script>
 
-    {{#if (findInArray data.role 'viewNotifications')}}
+    {{#if (findInArray data.role 'viewNotifications') }}
 
     $(document).find('.dropdown .card').on('click', function (event) {
       event.stopPropagation();
@@ -647,7 +653,7 @@
       })
     };
 
-    {{/if}}
+    {{/if }}
 
     let sidebarCollapsed = `{{data.sidebarCollapsed}}`;
 

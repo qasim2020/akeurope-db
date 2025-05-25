@@ -11,7 +11,7 @@
 </div>
 {{else}}
 {{#with data.entry as |entry|}}
-<div class="col-12 col-md-4 mb-auto" id="entry-container" entry-id="{{entry._id}}">
+<div class="col-12 col-md-4 mb-auto d-print-none" id="entry-container" entry-id="{{entry._id}}">
   <div class="d-block card mb-3 data-row">
     <div class="card-header d-flex justify-content-between">
       <h3 class="card-title">Profile</h3>
@@ -106,6 +106,82 @@
     </div>
 
   </div>
+</div>
+<div class="col-12 col-md-4 mb-auto d-none d-print-block" id="print-container" entry-id="{{entry._id}}">
+  <div class="d-block card mb-3 data-row">
+    <h4 class="text-center fs-2">Alkhidmat Europe Orphan SponsorShip Program</h4>
+    <div class="d-flex p-2 rounded-4" style="background-color: #212738; color: white;">
+      <div style="padding-top: 5px; padding-left: 20px;">
+        <img src="/static/images/logo-print.png"
+          style="border-color: white; height: 100px; width: 100px; object-fit: contain !important;">
+      </div>
+      <p style="max-width: 70vw; margin-left: 20px; padding-top: 15px;">
+        The <span class="fw-bold">Prophet Muhammad P.B.U.H</span> said:
+        I and the person who takes care of an orphan will be in Paradise like this." 
+        Then the Prophet P.B.U.H gestured with his index and middle fingers to show closeness. <br></span>
+        <span style="font-style: italic;">(Reported by Bukhari, Muslim, Tirmidhi, and Abu Dawood)</span>
+      </p>
+    </div>
+    <div style="display: flex; align-items: center; margin: 20px 0;">
+      <hr style="flex: 1; border: none; border-top: 1px solid black; margin: 0 10px;">
+      <h3 class="fs-2" style="white-space: nowrap; margin: 0;">Child's Profile</h3>
+      <hr style="flex: 1; border: none; border-top: 1px solid black; margin: 0 10px;">
+    </div>
+    <div class="card-body">
+      <div class="datagrid g-3">
+        {{#each ../data.fields}}
+        {{#unless (or this.subscription (or this.status this.phone))}}
+        <div class="datagrid-item">
+          <div class="datagrid-title fs-5 text-muted fw-bold">{{this.actualName}}</div>
+          <div class="datagrid-content">
+            {{#if (eq this.type "boolean")}}
+            {{#if (eq this.options.0.value (lookup entry this.name))}}
+            <span class="status status-green">{{lookup entry this.name}}</span>
+            {{else}}
+            <span class="status status-red"> {{lookup entry this.name}}</span>
+            {{/if}}
+
+            {{else if (eq this.type "dropdown")}}
+            {{lookup entry this.name}}
+
+            {{else if (eq this.type "date")}}
+            <span class="fs-3">{{formatDate (lookup entry this.name)}}</span>
+
+            {{else if (eq this.type "image")}}
+            {{#if (lookup entry this.name)}}
+            <span class="bg-white">
+              <img src="{{lookup entry this.name}}" alt=""
+                style="max-width: 150px; max-height: 200px; object-fit: contain !important; background: white">
+            </span>
+            {{else}}
+            <a data-fslightbox="gallery" href="/static/images/no-image-placement.png">
+              <img class="img-thumbnail" src="/static/images/no-image-placement.png" alt="" style="max-width: 150px;">
+            </a>
+            {{/if}}
+
+            {{else if (eq this.type "file")}}
+            {{else if this.subscription}}
+            {{else if this.phone}}
+            {{else if this.status}}
+            {{else}}
+            <span class="fs-3">{{lookup entry this.name}}</span>
+            {{/if}}
+
+          </div>
+        </div>
+        {{/unless}}
+        {{/each}}
+      </div>
+    </div>
+  </div>
+  <div style="display: flex; align-items: center; margin-top: 20px;">
+    <hr style="flex: 1; border: none; border-top: 1px solid black; margin: 0 20px 0 10px;">
+    <h4 class="text-black fw-normal text-center" style="margin-bottom: -1px;"> We sincerely appreciate your support.
+    </h4>
+    <hr style="flex: 1; border: none; border-top: 1px solid black; margin: 0px 10px 0 20px;">
+  </div>
+  <h4 class="text-center text-black mt-2 fw-normal">For queries reach us at: info@akeurope.org <br>
+    Or you can visit us at: Tvetenveien 152, 0671 Oslo, Norway</h4>
 </div>
 {{/with}}
 {{/if}}
