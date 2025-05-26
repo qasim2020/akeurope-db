@@ -68,6 +68,14 @@
             <span class="badge bg-green-lt">{{this.totalCostAllMonths}} {{order.currency}}
               in {{this.details.name}} </span>
             {{/each}}
+            {{else if order.products}}
+            {{#each order.products}}
+            {{#each this.variants as |variant|}}
+            {{#if (gt variant.quantity 0)}}
+            <span class="badge bg-orange-lt">{{variant.quantity}} x {{variant.name}} </span>
+            {{/if}}
+            {{/each}}
+            {{/each}}
             {{else}}
             <span class="badge bg-red-lt">{{this.total}} {{order.currency}}
               in {{slugToString this.projectSlug}} </span>
