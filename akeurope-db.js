@@ -108,13 +108,27 @@ app.use(invoiceRoutes);
 app.use(fileRoutes);
 app.use(whatsappRoutes);
 
-
 app.get('/', (req, res) => {
   if (req.session.user) {
     return res.redirect('/dashboard');
   } else {
     res.redirect('/login');
   }
+});
+
+const defaultIcons = [
+  'favicon.ico',
+  'apple-touch-icon.png',
+  'apple-touch-icon-precomposed.png',
+  'web-app-manifest-512x512.png',
+  'apple-touch-icon-120x120-precomposed.png',
+  'apple-touch-icon-120x120.png',
+];
+
+defaultIcons.forEach((icon) => {
+  app.get('/' + icon, (req, res) => {
+    res.sendFile(path.join(__dirname, 'static', 'favicon', icon));
+  });
 });
 
 const server = http.createServer(app);

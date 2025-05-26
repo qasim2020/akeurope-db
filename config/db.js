@@ -25,7 +25,6 @@ const { deleteInvoice } = require('../modules/invoice');
 const { sendTelegramMessage, sendErrorToTelegram } = require('../../akeurope-cp/modules/telegramBot')
 const { formatDate } = require('../modules/helpers');
 
-
 const connectDB = async () => {
     try {
         await mongoose.connect(process.env.MONGO_URI, {
@@ -145,11 +144,9 @@ async function remove600Children() {
         });
     });
     console.log('Children with file uploads:', childrenWithFileUploads.size);
-    // const fileUploadedStatuses = await model.find({ _id: { $in: Array.from(childrenWithFileUploads) } }).select('status');
     const childrenWithStatusUpdatesIds = childrenWithStatusUpdates.map(child => child._id.toString());
     const unionSet = new Set([...childrenWithStatusUpdatesIds, ...childrenWithFileUploads]);
     const unionIds = Array.from(unionSet).map(id => new mongoose.Types.ObjectId(id));
-    console.log('Union of children with status updates and file uploads:', unionIds.length);
     const unionIdStrings = unionIds.map(id => id.toString());
     let modified = false;
     for (const project of order.projects) {
@@ -196,26 +193,20 @@ async function remove600Children() {
 
     const alreadySelectedEntries = alreadySelectedEntriesResult[0]?.entryIds || [];
 
-    console.log('Already selected entries:', alreadySelectedEntries.length);
-
     const dontSelectTheseIds = new Set([
         ...alreadySelectedEntries.map(id => id.toString()),
         ...children.map(id => id.toString()),
     ]);
 
-    console.log('Dont select these ids:', dontSelectTheseIds.size);
-
     const mongoIdsToSkip = Array.from(dontSelectTheseIds).map(id => new mongoose.Types.ObjectId(id));
 
     const pendingChildrenFromNorth = await model.find({ _id: { $nin: mongoIdsToSkip }, status: 'Pending', cluster: 'North' }).limit(261).select('status');
-    console.log('Pending children from North:', pendingChildrenFromNorth.length);
     const pendingChildrenFromNorthIds = pendingChildrenFromNorth.map(entry => entry._id);
 
     const newOrderChildrenIds = new Set([...pendingChildrenFromNorthIds, ...unionIds]);
     const ids = Array.from(newOrderChildrenIds).map(id => new mongoose.Types.ObjectId(id));
     await model.updateMany({ _id: { $in: ids } }, { monthlyExpenses: 581.68 });
 
-    console.log('entries to put in order', newOrderChildrenIds.size);
     let newArray = [];
     for (const childId of newOrderChildrenIds) {
         const child = await model.findById(childId).lean();
