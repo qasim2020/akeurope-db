@@ -1,16 +1,17 @@
 const twilio = require('twilio');
 const client = twilio(process.env.TWILIO_SID, process.env.TWILIO_AUTH_TOKEN);
 const Chat = require('../models/Chat');
+const Beneficiary = require('../models/Beneficiary');
 
 const handleWhatsappMessage = async (incoming) => {
     const isStatus = ['read', 'delivered', 'sent'].includes(incoming.MessageStatus?.toLowerCase());
+    console.log(incoming);
 
     if (isStatus) {
         await Chat.updateOne(
             { messageSid: incoming.MessageSid },
             { $set: { status: incoming.MessageStatus } }
-          );
-        return;
+        );
     }
     const from = incoming.From;
     const waId = incoming.WaId || from.replace('whatsapp:', '');
@@ -21,14 +22,15 @@ const handleWhatsappMessage = async (incoming) => {
         media: incoming.NumMedia && parseInt(incoming.NumMedia) > 0 ? true : false,
     };
 
-    await whatsappUser.findOneAndUpdate(
-        { number: waId },
+    const beneficiary = await Beneficiary.findOneAndUpdate(
+        { phoneNumber: waId },
         {
             $setOnInsert: { name },
             $push: { messages: message },
         },
         { upsert: true, new: true },
     );
+    console.log(beneficiary);
 };
 
 const handleTelMessage = async (incoming) => {

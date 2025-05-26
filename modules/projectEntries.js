@@ -288,7 +288,7 @@ const getAllOrdersByEntryId = async (req, res) => {
                 totalCost: { $ne: 0 },
             },
         },
-    }).lean();
+    }).sort({createdAt: -1}).lean();
 
     for (const order of orders) {
         order.customer = await Customer.findById(order.customerId).lean();

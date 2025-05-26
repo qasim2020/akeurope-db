@@ -12,6 +12,14 @@ router.get(
     allProjects,
     entryController.entry,
 );
+router.get(
+    '/entryPrint/:entryId/project/:slug',
+    authenticate,
+    authorize('viewEntry'),
+    authProject,
+    allProjects,
+    entryController.entryPrint,
+);
 router.get('/getEntryData/:slug', authenticate, authorize('viewEntry'), authProject, entryController.getData);
 router.get('/getEntryModal/:slug/:id', authenticate, authorize('editEntry'), allProjects, authProject, entryController.editModal);
 router.post('/project/entry/:slug', authenticate, authorize('createEntry'), authProject, entryController.createEntry);

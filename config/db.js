@@ -1,11 +1,5 @@
 const mongoose = require('mongoose');
 require('dotenv').config();
-const { createDynamicModel } = require('../models/createDynamicModel');
-const File = require('../models/File');
-const Order = require('../models/Order');
-const Subscription = require('../models/Subscription');
-const { deleteInvoice } = require('../modules/invoice');
-const { sendTelegramMessage } = require('../../akeurope-cp/modules/telegramBot')
 
 const formCollection = mongoose.createConnection(process.env.MONGO_URI_FORMS, {
     useNewUrlParser: true,
@@ -17,6 +11,20 @@ formCollection.on('connected', () => {
 });
 
 global.formCollection = formCollection;
+
+const twilio = require('twilio');
+const twilioClient = twilio(process.env.TWILIO_SID, process.env.TWILIO_AUTH_TOKEN);
+const { createDynamicModel } = require('../models/createDynamicModel');
+const File = require('../models/File');
+const Log = require('../models/Log');
+const Beneficiary = require('../models/Beneficiary');
+const Chat = require('../models/Chat');
+const Order = require('../models/Order');
+const Subscription = require('../models/Subscription');
+const { deleteInvoice } = require('../modules/invoice');
+const { sendTelegramMessage, sendErrorToTelegram } = require('../../akeurope-cp/modules/telegramBot')
+const { formatDate } = require('../modules/helpers');
+
 
 const connectDB = async () => {
     try {
@@ -33,7 +41,7 @@ const connectDB = async () => {
     }
 };
 
-async function deleteExpiredOrders(Collection) {
+async function deleteDraftOrders(Collection) {
 
     const expiryTime = new Date(Date.now() - 1 * 60 * 60 * 1000);
 
@@ -308,21 +316,127 @@ async function formatGazaPhoneNos() {
     console.log('Phone numbers updated successfully.');
 }
 
+async function sendWhatsappMessageWithFormLink(pending) {
+    try {
+        const formattedPhone = '+4792916580';
+        const response = await twilioClient.messages.create({
+            from: `whatsapp:${process.env.TWILIO_PHONE_NUMBER}`,
+            to: `whatsapp:${formattedPhone}`,
+            contentSid: process.env.TWILIO_TEMPLATE_ID,
+            contentVariables: JSON.stringify({ 1: 'Qasim', 2: 'Norway' }),
+        });
+        const chat = new Chat({
+            senderId: new mongoose.Types.ObjectId(),
+            senderType: 'system',
+            from: response.from,
+            to: response.to,
+            message: response.body,
+            status: response.status,
+            messageSid: response.sid,
+        });
+        await chat.save();
+    } catch (error) {
+        console.log(error);
+        sendErrorToTelegram(error.message || error.response?.data || error);
+    }
+}
+
+async function handleGazaOrphanForm() {
+    function getDaysDiff(createdAt) {
+        const now = new Date();
+        const diffInMs = now - createdAt;
+        const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
+        return diffInDays;
+    }
+    const model = await createDynamicModel('gaza-orphans');
+    const docs = await model.find({}).limit().lean();
+    let pending = [];
+    let done = [];
+    let statusMessages = [];
+    let fileMessages = []
+    let error = [];
+    for (const doc of docs) {
+        const files = await File.find({ "links.entityId": doc._id }).sort({ createdAt: -1 });
+        if (files.length > 0) {
+            const diffInDays = getDaysDiff(new Date(files[0].createdAt));
+            if (diffInDays > 6) {
+                pending.push({ entryId: doc._id, phoneNo1: doc.phoneNo1, phoneNo2: doc.phoneNo2 });
+            } else {
+                fileMessages.push(`${doc.name} | ${doc.status.slice(0, 20)}... | ${files[0].name} | file added ${Math.ceil(diffInDays)} days ago - check status is ok`);
+                done.push({ entryId: doc._id, phoneNo1: doc.phoneNo1, phoneNo2: doc.phoneNo2 });
+            }
+        } else {
+            const logs = await Log.find({ entityId: doc._id, entityType: 'entry', changes: { $exists: true } }).select('action changes timestamp').sort({ timestamp: -1 }).lean();
+            if (logs.length > 1) {
+                const diffInDays = getDaysDiff(new Date(logs[0].timestamp));
+                if (diffInDays > 6) {
+                    pending.push({ entryId: doc._id, phoneNo1: doc.phoneNo1, phoneNo2: doc.phoneNo2 });
+                } else {
+                    const logStatus = logs.find(log => log.changes.find(fd => fd.key === 'status')).changes.find(fd => fd.key === 'status');
+                    if (logStatus) {
+                        statusMessages.push(`${doc.name} | ${doc.status.slice(0, 20)}... | ${logStatus.newValue.slice(0, 20)} | status sent ${Math.ceil(diffInDays)} days ago`);
+                        done.push({ entryId: doc._id, phoneNo1: doc.phoneNo1, phoneNo2: doc.phoneNo2 });
+                    } else {
+                        error.push(`${doc._id} | ${doc.status.slice(0, 50)}... | ${log} | Log is not a status update = check if this is ok`);
+                        pending.push({ entryId: doc._id, phoneNo1: doc.phoneNo1, phoneNo2: doc.phoneNo2 });
+                    }
+                }
+            } else {
+                pending.push({ entryId: doc._id, phoneNo1: doc.phoneNo1, phoneNo2: doc.phoneNo2 });
+                error.push(`${doc._id} does not have any log. check this please.`);
+            }
+        }
+    };
+    console.log({ Done: done.length, Pending: pending.length });
+    console.error(error);
+    console.log(statusMessages);
+    console.log(fileMessages);
+    if (error.length > 0) {
+        await sendErrorToTelegram(error.join('\n\n'));
+    }
+    const combinedMessages = [...statusMessages, ...fileMessages];
+    combinedMessages.unshift(`Message will not be sent to ${combinedMessages.length} children guardians.\n\n`)
+    await sendTelegramMessage(combinedMessages.join('\n'));
+    const combinedEntries = [...done, ...pending];
+    const phoneNo1s = combinedEntries.map(val => val.phoneNo1);
+    const phoneNo2s = combinedEntries.map(val => val.phoneNo2);
+    const combinedPhoneNos = new Set([...phoneNo1s, ...phoneNo2s]);
+    let beneficiaries = [];
+    for (const phoneNumber of combinedPhoneNos) {
+        const beneficiary = await Beneficiary.findOneAndUpdate(
+            { phoneNumber },
+            {
+                $set: { phoneNumber },
+                $setOnInsert: {
+                    verified: false,
+                    projects: ['gaza-orphans']
+                }
+            },
+            {
+                upsert: true,
+                new: true
+            }
+        );
+        beneficiaries.push(beneficiary);
+    };
+    console.log(`✅ ${beneficiaries.length} added to Beneficiary collection`);
+    await sendWhatsappMessageWithFormLink(pending);
+}
 
 mongoose.connection.on('open', async () => {
-    console.log('Order cleanup job started...');
-
-    await deleteExpiredOrders(Order);
-    await deleteExpiredOrders(Subscription);
+    await deleteDraftOrders(Order);
+    await deleteDraftOrders(Subscription);
     await convertUnpaidToExpired(Order);
+    // await handleGazaOrphanForm();
     // await formatGazaPhoneNos();
     // await remove600Children();
     // await resetGazaOrphanPricesTo600();
+    // await sendWhatsappMessageWithFormLink();
 
     setInterval(async () => {
         try {
-            await deleteExpiredOrders(Order);
-            await deleteExpiredOrders(Subscription);
+            await deleteDraftOrders(Order);
+            await deleteDraftOrders(Subscription);
             await convertUnpaidToExpired(Order);
         } catch (error) {
             console.error('Error deleting expired orders:', error);

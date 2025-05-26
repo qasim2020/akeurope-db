@@ -1,33 +1,38 @@
 const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
 
-const BenSchema = new mongoose.Schema({
-  name: {
-    type: String,
+const BenSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+    },
+    email: {
+      type: String,
+    },
+    maxUploads: {
+      type: Number,
+      default: 4,
+    },
+    ipCountry: {
+      type: String,
+    },
+    phoneNumber: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    verified: {
+      type: Boolean,
+      default: false,
+    },
+    projects: {
+      type: [String],
+      required: true
+    }
   },
-  email: {
-    type: String,
-  },
-  maxUploads: {
-    type: Number,
-    default: 1,
-  },
-  ipCountry: {
-    type: String,
-  },
-  phoneNumber: {
-    type: String,
-    required: true,
-    unique: true,
-  },
-  verified: {
-    type: Boolean,
-    default: false,
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
-});
+  {
+    timestamps: true,
+    versionKey: false
+  }
+);
 
 module.exports = global.formCollection.model('Beneficiary', BenSchema, 'formUsers');

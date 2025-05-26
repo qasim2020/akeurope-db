@@ -402,6 +402,7 @@ exports.entry = async (req, res) => {
             data: {
                 userId: req.session.user._id,
                 userName: req.session.user.name,
+                userEmail: req.session.user.email,
                 userRole: req.session.user.role.charAt(0).toUpperCase() + req.session.user.role.slice(1),
                 activeMenu: project.slug,
                 projects: req.allProjects,
@@ -415,8 +416,82 @@ exports.entry = async (req, res) => {
                 logs: await visibleLogs(req, res),
                 entryLogs: await entryLogs(req, res),
                 sidebarCollapsed: req.session.sidebarCollapsed,
-                customers: await Customer.find().lean(),
                 payments: await getAllOrdersByEntryId(req),
+                time: Date.now()
+            },
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            error: 'Error fetching entries',
+            details: error.message,
+        });
+    }
+};
+
+exports.entryPrint = async (req, res) => {
+    try {
+        const project = await Project.findOne({
+            slug: req.params.slug,
+        }).lean();
+        if (!project) throw new Error(`Project "${req.params.slug}" not found`);
+
+        const DynamicModel = await createDynamicModel(project.slug);
+        let entry = await DynamicModel.findOne({
+            _id: req.params.entryId,
+        }).lean();
+
+        if (!entry) {
+            entry = { deleted: true };
+        }
+
+        entry.currency = project.currency;
+
+        const neighbors = await fetchEntryNeighbors(DynamicModel, entry);
+
+        let files;
+
+        if (req.userPermissions.includes('changeFilesAccess')) {
+            files = await File.find({ 'links.entityId': req.params.entryId }).sort({ createdAt: -1 }).lean();
+        } else {
+            files = await File.find({ 'links.entityId': req.params.entryId, access: 'editors' }).sort({ createdAt: -1 }).lean();
+        }
+
+        for (const file of files) {
+            if (file.uploadedBy?.actorType === 'user') {
+                const user = await User.findById(file.uploadedBy?.actorId).lean();
+                file.actorName = user?.name;
+                file.actorRole = user?.role;
+            }
+            if (file.uploadedBy?.actorType === 'customer') {
+                file.actorName = (await Customer.findById(file.uploadedBy?.actorId).lean()).name;
+            }
+            if (file.uploadedBy?.actorType === 'benificiary') {
+                file.actorName = (await Beneficiary.findById(file.uploadedBy?.actorId).lean()).phoneNumber;
+            }
+        }
+
+        res.render('partials/showEntryPrint', {
+            layout: 'dashboard',
+            data: {
+                userId: req.session.user._id,
+                userName: req.session.user.name,
+                userEmail: req.session.user.email,
+                userRole: req.session.user.role.charAt(0).toUpperCase() + req.session.user.role.slice(1),
+                activeMenu: project.slug,
+                projects: req.allProjects,
+                project,
+                fields: project.fields,
+                layout: req.session.layout,
+                entry,
+                neighbors,
+                files,
+                role: req.userPermissions,
+                logs: await visibleLogs(req, res),
+                entryLogs: await entryLogs(req, res),
+                sidebarCollapsed: req.session.sidebarCollapsed,
+                payments: await getAllOrdersByEntryId(req),
+                time: Date.now()
             },
         });
     } catch (error) {
