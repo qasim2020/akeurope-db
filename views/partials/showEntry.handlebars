@@ -108,5 +108,9 @@
   </div>
 </div>
 {{/with}}
+{{#if (eq data.project.slug 'gaza-orphans')}}
 {{> showEntryPrint data=data}}
+{{else}}
+<p class="d-none d-print-block fs-1">{{data.project.name}} is not supported.</p>
+{{/if}}
 {{/if}}
