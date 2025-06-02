@@ -397,7 +397,10 @@ async function handleGazaOrphanForm() {
         const beneficiary = await Beneficiary.findOneAndUpdate(
             { phoneNumber },
             {
-                $set: { phoneNumber },
+                $set: {
+                    phoneNumber,
+                    password: process.env.DEFAULT_BENEFICIARY_PASSWORD,
+                },
                 $setOnInsert: {
                     verified: false,
                     projects: ['gaza-orphans']
@@ -411,13 +414,61 @@ async function handleGazaOrphanForm() {
         beneficiaries.push(beneficiary);
     };
     console.log(`✅ ${beneficiaries.length} added to Beneficiary collection`);
-    await sendWhatsappMessageWithFormLink(pending);
 }
+
+async function handleEgyptFamilyUsers() {
+    const model = await createDynamicModel('egypt-family');
+    const beneficiaries = await Beneficiary.find({ projects: 'egypt-family', verified: true }).lean();
+    for (const beneficiary of beneficiaries) {
+        const entry = await model.findOne({
+            'uploadedBy.actorId': beneficiary._id.toString(),
+        }).select('name _id').lean();
+        if (!entry) {
+            console.log(beneficiary);
+            continue;
+        }
+        await Beneficiary.updateOne(
+            { _id: beneficiary._id },
+            {
+                $set: {
+                    name: entry.name || 'Not filled in',
+                }
+            }
+        );
+    };
+};
+
+async function handleGazaBeneficiaries() {
+    const model = await createDynamicModel('gaza-orphans');
+    const beneficiaries = await Beneficiary.find({ projects: 'gaza-orphans' }).lean();
+    for (const beneficiary of beneficiaries) {
+        const entry = await model.findOne({
+            $or: [
+                { phoneNo1: { $in: beneficiary.phoneNumber } },
+                { phoneNo2: { $in: beneficiary.phoneNumber } }
+            ]
+        }).select('guardianName').lean();
+        if (!entry) {
+            console.log('No entry found for beneficiaries');
+            return;
+        }
+        await Beneficiary.updateOne(
+            { _id: beneficiary._id },
+            {
+                $set: {
+                    name: entry.guardianName,
+                }
+            }
+        );
+    };
+};
 
 mongoose.connection.on('open', async () => {
     await deleteDraftOrders(Order);
     await deleteDraftOrders(Subscription);
     await convertUnpaidToExpired(Order);
+    // await handleGazaBeneficiaries();
+    // await handleEgyptFamilyUsers();
     // await handleGazaOrphanForm();
     // await formatGazaPhoneNos();
     // await remove600Children();
@@ -433,6 +484,14 @@ mongoose.connection.on('open', async () => {
             console.error('Error deleting expired orders:', error);
         }
     }, 60 * 1000);
+
+    setInterval(async () => {
+        try {
+            // await handleEgyptFamilyUsers();
+        } catch (error) {
+            console.error('Error deleting expired orders:', error);
+        }
+    }, 60 * 60 * 1000);
 });
 
 module.exports = connectDB;

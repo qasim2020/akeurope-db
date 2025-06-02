@@ -56,6 +56,64 @@ const updateLog = async ({ logId, updates }) => {
     return updatedLog;
 };
 
+const beneficiaryLogs = async (req, res) => {
+    try {
+
+        let entityIds = [];
+        const beneficiary = await Beneficiary.findById(req.params.beneficiaryId).lean();
+
+        for (const slug of beneficiary.projects) {
+            let entriesFound = [];
+            const model = await createDynamicModel(slug);
+            const project = await Project.findOne({ slug }).lean();
+            if (slug === 'egypt-family') {
+                entriesFound = await model.find({'uploadedBy.actorId': beneficiary._id.toString()}).lean();
+            } else {
+                const phoneFields = project.fields.filter(field => field.phone === true);
+                const queryOr = phoneFields.map(field => ({
+                    [field.name]: beneficiary.phoneNumber
+                }));
+                entriesFound = await model.find({
+                    $or: queryOr
+                }).lean();
+            }
+            entityIds.push(entriesFound.map(entry => entry._id.toString()));
+            console.log(entityIds);
+        };
+
+        let query = {
+            entityId: { $in: entityIds },
+            entityType: { $ne: 'order' },
+        };
+
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const total = await Log.countDocuments(query);
+
+        const logs = await Log.find(query)
+            .skip((page - 1) * limit)
+            .limit(limit)
+            .sort({ timestamp: -1 })
+            .lean();
+
+        const totalPages = Math.ceil(total / limit);
+
+        return {
+            logs: await findConnectedIds(logs, req),
+            pagesArray: generatePagination(totalPages, page),
+            currentPage: page,
+            totalPages,
+            hasNextPage: page < totalPages,
+            hasPrevPage: page > 1,
+            nextPage: page + 1,
+            prevPage: page - 1,
+        };
+    } catch (error) {
+        console.log(error);
+        return error;
+    }
+};
+
 const entryLogs = async (req, res) => {
     try {
         let query;
@@ -327,4 +385,5 @@ module.exports = {
     customerLogs,
     orderLogs,
     activtyByEntityType,
+    beneficiaryLogs,
 };

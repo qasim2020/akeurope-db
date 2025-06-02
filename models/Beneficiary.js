@@ -24,9 +24,32 @@ const BenSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    password: {
+      type: String,
+      required: false
+    },
     projects: {
       type: [String],
       required: true
+    },
+    status: {
+      type: String,
+      enum: ['active', 'inactive', 'banned'],
+      default: 'active'
+    },
+    resetPasswordToken: {
+      type: String,
+      unique: true,
+      sparse: true
+    },
+    resetPasswordExpires: {
+      type: Date,
+      sparse: true
+    },
+    resetPasswordLink: {
+      type: String,
+      unique: true,
+      sparse: true
     }
   },
   {

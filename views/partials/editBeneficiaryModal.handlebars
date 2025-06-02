@@ -1,0 +1,75 @@
+<div class="modal modal-blur fade" id="modal-{{data.beneficiary._id}}" tabindex="-1"
+  style="display: none; padding-left: 0px;" aria-modal="true" role="dialog" beneficiaryId="{{data.beneficiary._id}}">
+  <div class="modal-dialog modal-lg" role="document" id="">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Edit Beneficiary</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+
+        <div class="mb-3">
+          <label class="form-label">Name</label>
+          <input type="text" class="name form-control" name="name" placeholder="Name of owner"
+            value="{{data.beneficiary.name}}" disabled />
+        </div>
+
+        {{#if data.beneficiary.phoneNumber}}
+        <div class="mb-3">
+          <label class="form-label">Phone Number</label>
+          <input type="text" class="tel form-control" name="tel" placeholder="+47989898988"
+            value="{{data.beneficiary.phoneNumber}}" disabled />
+          <button class="btn btn-primary mt-2" beneficiary-id="{{data.beneficiary._id}}"
+            onclick="createInviteLink(this)">
+            <ti class="ti ti-refresh fs-4 me-2" style="margin-left: -4px"></ti>
+            Create New Reset Password Link
+          </button>
+        </div>
+        {{/if}}
+
+        {{#if data.beneficiary.email}}
+        <div class="mb-3">
+          <label class="form-label">Email</label>
+          <input type="text" class="tel form-control" name="tel" placeholder="+47989898988"
+            value="{{data.beneficiary.email}}" disabled />
+          <button class="btn btn-primary mt-2" beneficiary-id="{{data.beneficiary._id}}"
+            onclick="sendEmailInvite(this)">
+            <ti class="ti ti-send fs-4 me-2" style="margin-left: -4px"></ti>
+            Send Reset Password Email
+          </button>
+        </div>
+        {{/if}}
+
+        <div class="invite-show {{#unless data.beneficiary.resetPasswordLink}}d-none{{/unless}}">
+          <div class="mb-3">
+            <label class="form-label">Reset Password Link</label>
+            <div class="input-group">
+              <textarea class="form-control invite-link" style="overflow-wrap: break-word;" rows="2"
+                disabled>{{data.beneficiary.resetPasswordLink}}</textarea>
+              <button class="btn btn-primary copy-btn" type="button" onclick="copyInviteLink(this)">
+                <ti class="ti ti-copy fs-3 me-1" style="margin-left: -4px"></ti>
+                Copy
+              </button>
+            </div>
+
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Link Expiry</label>
+            <input type="text" class="form-control invite-expiry"
+              value="{{expiresAfter data.beneficiary.resetPasswordExpires}}" disabled>
+          </div>
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <a href="#" class="btn btn-default ms-auto" data-bs-dismiss="modal">
+          <ti class="ti ti-x fs-3 me-1" style="margin-left: -4px"></ti>
+          Close
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<button href="#" class="btn btn-primary d-none" id="button-{{data.beneficiary._id}}" data-bs-toggle="modal"
+  data-bs-target="#modal-{{data.beneficiary._id}}"></button>

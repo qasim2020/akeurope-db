@@ -1,0 +1,41 @@
+<div class="card mb-3">
+  {{#if data.profiles}}
+  <div class="card-header flex-column align-items-start">
+    <h3 class="card-title">Beneficiary Profiles</h3>
+    <div class="text-secondary">Below children are found for different projects in the database for this beneficiary.
+    </div>
+  </div>
+  <div id="beneficiary-entries-container">
+    <div class="p-3">
+      {{#each data.profiles}}
+      <div project-slug="{{this.project.slug}}" class="fs-5 text-uppercase mb-4 badge">{{this.project.name}}</div>
+      <div class="row">
+        {{#each this.entries as |ben|}}
+        <a data-bs-toggle="popover" data-bs-placement="top" data-bs-trigger="hover focus" title="{{ben.name}}" {{#if
+          ben.statusLogs}} data-bs-html="true" data-bs-content="{{#each ben.statusLogs}}
+          <div class='mb-1'>
+              <span class='font-style-italic'>{{this.actor.name}} · {{formatDate this.timestamp}}</span> <br>
+              <span class='text-secondary'>{{shortenString this.status 200}} </span>
+          </div>
+        {{/each}}" {{else}} data-bs-content="Pending." {{/if}} 
+          class="cursor-pointer col-md-3 col-6 mb-3 text-center position-relative"
+          href="/entry/{{ben._id}}/project/{{../this.project.slug}}">
+          {{#if ben.statusLogs}} 
+          <span class="position-absolute top-0 left-0 ti ti-check" style="padding-top: 3px"></span>
+          {{else}}
+          <span class="position-absolute top-0 left-0 ti ti-x" style="padding-top: 3px"></span>
+          {{/if}}
+          <img class="img-fluid rounded-circle border border-1" alt="{{ben.name}}"
+            src="{{circleCloudinaryUrl (or ben.photo (or ben.photoOfChild ben.photoOfOrphan))}}">
+        </a>
+        {{/each}}
+      </div>
+      {{/each}}
+    </div>
+  </div>
+  {{else}}
+  <div class="card-body">
+    <div class="text-center py-4">No beneficiaries found!</div>
+  </div>
+  {{/if}}
+</div>

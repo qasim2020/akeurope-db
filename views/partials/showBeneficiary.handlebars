@@ -1,0 +1,58 @@
+{{#with data.beneficiary as |beneficiary|}}
+<div id="beneficiary-container">
+
+  <div class="card mb-3 data-row">
+    <div class="card-header">
+      <h3 class="card-title">Beneficiary Information</h3>
+    </div>
+    <div class="card-body">
+      <div class="datagrid">
+
+        <div class="datagrid-item">
+          <div class="datagrid-title">Name</div>
+          <div class="datagrid-content">
+            <span>{{beneficiary.name}}</span>
+          </div>
+        </div>
+
+        <div class="datagrid-item">
+          <div class="datagrid-title">Phone</div>
+          <div class="datagrid-content">
+            <span>{{or beneficiary.phoneNumber 'Not Found'}}</span>
+          </div>
+        </div>
+
+        <div class="datagrid-item">
+          <div class="datagrid-title">Email</div>
+          <div class="datagrid-content">
+            <span>{{or beneficiary.email 'Not Found'}}</span>
+          </div>
+        </div>
+
+        <div class="datagrid-item">
+          <div class="datagrid-title">Projects</div>
+          <div class="datagrid-content">
+            {{#each beneficiary.projects}}
+            <a class="badge bg-blue-lt" href="/project/{{this}}">{{slugToString this}}</a>
+            {{/each}}
+          </div>
+        </div>
+
+        <div class="datagrid-item">
+          <div class="datagrid-title">Status</div>
+          <div class="datagrid-content">
+            {{#if beneficiary.verified}}
+            <span class="text-green fw-bold fs-4">Active</span>
+            {{else}}
+            <span class="text-red fw-bold fs-4">Pending</span>
+            {{/if}}
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+</div>
+{{/with}}

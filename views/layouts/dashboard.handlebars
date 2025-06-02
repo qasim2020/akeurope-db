@@ -231,7 +231,6 @@
           <div class="d-flex">
             <a href="?theme=dark" class="nav-link px-0 hide-theme-dark" data-bs-toggle="tooltip"
               data-bs-placement="bottom" aria-label="Enable dark mode" data-bs-original-title="Enable dark mode">
-              <!-- Download SVG icon from http://tabler-icons.io/i/moon -->
               <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24"
                 stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                 <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
@@ -240,7 +239,6 @@
             </a>
             <a href="?theme=light" class="nav-link px-0 hide-theme-light" data-bs-toggle="tooltip"
               data-bs-placement="bottom" aria-label="Enable light mode" data-bs-original-title="Enable light mode">
-              <!-- Download SVG icon from http://tabler-icons.io/i/sun -->
               <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24"
                 stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                 <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
@@ -276,8 +274,7 @@
           <ul class="navbar-nav pt-lg-3">
             <li class="nav-item">
               <a class="nav-link {{#if (eq 'dashboard' data.activeMenu)}} bg-azure-lt {{/if}}" href="/dashboard">
-                <span
-                  class="nav-link-icon d-lg-inline-block"><!-- Download SVG icon from http://tabler-icons.io/i/home -->
+                <span class="nav-link-icon d-lg-inline-block">
                   <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24"
                     stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                     <path stroke="none" d="M0 0h24v24H0z" fill="none" />
@@ -288,6 +285,26 @@
                 </span>
                 <span class="nav-link-title">
                   Dashboard
+                </span>
+              </a>
+            </li>
+
+            <li class="nav-item">
+              <a class="nav-link {{#if (eq 'beneficiaries' data.activeMenu)}}bg-azure-lt{{/if}}" href="/beneficiaries"
+                data-bs-toggle="tooltip" data-bs-title="Beneficiaries">
+                <span class="nav-link-icon d-lg-inline-block">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="icon icon-tabler icons-tabler-outline icon-tabler-users">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                    <path d="M9 7m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0" />
+                    <path d="M3 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                    <path d="M21 21v-2a4 4 0 0 0 -3 -3.85" />
+                  </svg>
+                </span>
+                <span class="nav-link-title">
+                  Beneficiaries
                 </span>
               </a>
             </li>
@@ -378,7 +395,7 @@
                   </svg>
                 </span>
                 <span class="nav-link-title">
-                  Invoices
+                  Orders
                 </span>
               </a>
             </li>
@@ -387,8 +404,7 @@
             {{#if (findInArray data.role 'viewUsers')}}
             <li class="nav-item">
               <a class="nav-link {{#if (eq 'users' data.activeMenu)}} bg-azure-lt {{/if}}" href="/users">
-                <span
-                  class="nav-link-icon d-lg-inline-block"><!-- Download SVG icon from http://tabler-icons.io/i/checkbox -->
+                <span class="nav-link-icon d-lg-inline-block">
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                     class="icon icon-tabler icons-tabler-outline icon-tabler-device-imac">
@@ -410,8 +426,7 @@
             {{#if (findInArray data.role 'viewSettings')}}
             <li class="nav-item">
               <a class="nav-link" href="/settings">
-                <span
-                  class="nav-link-icon d-lg-inline-block"><!-- Download SVG icon from http://tabler-icons.io/i/checkbox -->
+                <span class="nav-link-icon d-lg-inline-block">
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                     class="icon icon-tabler icons-tabler-outline icon-tabler-settings">
@@ -433,8 +448,8 @@
       </div>
     </aside>
 
-    <!-- Collapsed Sidebar -->
-    <aside class="collapsed-sidebar d-print-none d-none d-lg-flex {{#if (neq data.sidebarCollapsed true)}}collapsed{{/if}}">
+    <aside
+      class="collapsed-sidebar d-print-none d-none d-lg-flex {{#if (neq data.sidebarCollapsed true)}}collapsed{{/if}}">
       <div class="container-fluid">
         <h1 class="navbar-brand navbar-brand-autodark m-auto">
           <a href="/dashboard">
@@ -446,14 +461,30 @@
             <li class="nav-item">
               <a class="nav-link {{#if (eq 'dashboard' data.activeMenu)}} bg-azure-lt {{/if}}" href="/dashboard"
                 data-bs-toggle="tooltip" data-bs-title="Dashboard">
-                <span
-                  class="nav-link-icon d-md-none d-lg-inline-block"><!-- Download SVG icon from http://tabler-icons.io/i/home -->
+                <span class="nav-link-icon d-md-none d-lg-inline-block">
                   <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24"
                     stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                     <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                     <path d="M5 12l-2 0l9 -9l9 9l-2 0" />
                     <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
                     <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+                  </svg>
+                </span>
+              </a>
+            </li>
+
+            <li class="nav-item">
+              <a class="nav-link {{#if (eq 'beneficiaries' data.activeMenu)}}bg-azure-lt{{/if}}" href="/beneficiaries"
+                data-bs-toggle="tooltip" data-bs-title="Beneficiaries">
+                <span class="nav-link-icon d-md-none d-lg-inline-block">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="icon icon-tabler icons-tabler-outline icon-tabler-users">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                    <path d="M9 7m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0" />
+                    <path d="M3 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                    <path d="M21 21v-2a4 4 0 0 0 -3 -3.85" />
                   </svg>
                 </span>
               </a>

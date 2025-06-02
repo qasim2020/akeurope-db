@@ -1,0 +1,37 @@
+<div class="page-header d-print-none">
+  <div class="container-xl">
+    <div class="row g-2 align-items-center">
+      <div class="col">
+        <div class="page-pretitle"> Beneficiary </div>
+        <h2 class="page-title">{{data.beneficiary.name}}</h2>
+      </div>
+      <div class="col-auto ms-auto d-print-none">
+        <div class="btn-list">
+          <a href="#" class="btn btn-primary d-none d-md-inline-block" id="#editBeneficiary" data-bs-toggle="modal"
+            data-bs-target="#modal-{{data.beneficiary._id}}">
+            <ti class="ti ti-pencil fs-4 me-2" style="margin-left: -4px"></ti>
+            Edit Beneficiary
+          </a>
+          <a href="#" class="btn btn-primary d-md-none btn-icon" data-bs-toggle="modal"
+            data-bs-target="#modal-{{data.beneficiary._id}}">
+            <ti class="ti ti-pencil fs-2" style="margin-left: -4px"></ti>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="container-xl pt-4">
+  <div class="row row-cards">
+    <div class="col-md-6 col-12 pt-2 pt-md-0">
+      {{#if data.profiles}} {{> showBeneficiaryProfiles}} {{/if}}
+    </div>
+    <div class="col-md-6 col-12 pt-2 pt-md-0">
+      {{> showBeneficiary}}
+      {{> showBeneficiaryLogs}}
+    </div>
+  </div>
+</div>
+
+{{> editBeneficiaryModal}}
+{{> beneficiaryFrontEnd}}

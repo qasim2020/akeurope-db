@@ -1,0 +1,136 @@
+<div class="page-header d-print-none">
+  <div class="container-xl">
+    <div class="row g-2 align-items-center">
+      <div class="col">
+        <div class="page-pretitle"> Overview </div>
+        <h2 class="page-title"> Beneficiaries
+        </h2>
+      </div>
+      <div class="col-auto ms-auto d-print-none">
+        <div class="btn-list">
+          <a href="#" class="btn btn-secondary-outline d-none d-md-inline-block" onclick="toggleLayout(this)">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+              class="icon icon-tabler icons-tabler-outline icon-tabler-square-toggle-horizontal">
+              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+              <path d="M22 12h-20" />
+              <path d="M4 14v-8a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v8" />
+              <path d="M18 20a2 2 0 0 0 2 -2" />
+              <path d="M4 18a2 2 0 0 0 2 2" />
+              <path d="M14 20l-4 0" />
+            </svg>
+            Toggle layout
+          </a>
+          <a href="#" class="btn btn-secondary-outline d-md-none btn-icon" onclick="toggleLayout(this)">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+              class="icon icon-tabler icons-tabler-outline icon-tabler-square-toggle-horizontal">
+              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+              <path d="M22 12h-20" />
+              <path d="M4 14v-8a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v8" />
+              <path d="M18 20a2 2 0 0 0 2 -2" />
+              <path d="M4 18a2 2 0 0 0 2 2" />
+              <path d="M14 20l-4 0" />
+            </svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container-xl pt-4" id="data-container">
+  {{> showBeneficiaries}}
+</div>
+
+
+{{> beneficiaryFrontEnd}}
+
+<script>
+
+  let newLayout = '{{data.layout}}' == 'grid' ? 'table' : 'grid';
+
+  const toggleLayout = function (elem) {
+    $.ajax({
+      url: '/update-layout',
+      method: 'POST',
+      data: { layout: newLayout },
+      success: function (response) {
+        showData();
+      },
+      error: function () {
+        alert("Failed to update layout.");
+      }
+    });
+
+  }
+
+  const showData = function () {
+    $.ajax({
+      url: '/getBeneficiariesData',
+      method: 'GET',
+      success: function (response) {
+        newLayout = newLayout == 'grid' ? 'table' : 'grid';
+        $("#data-container").html(response);
+      },
+      error: function (error) {
+        alert(error.responseText);
+      }
+    });
+  }
+
+  const getEditBeneficiaryModal = function (elem) {
+    const benId = $(elem).attr("beneficiary-id");
+
+    const modalExists = $(document).find(`#button-${benId}`).length > 0;
+
+    if (modalExists) {
+      $(`#button-${benId}`).remove();
+      $(`#modal-${benId}`).remove();
+    }
+
+    $.ajax({
+      url: `/getEditBeneficiaryModal/${benId}`,
+      type: 'GET',
+      contentType: 'application/json',
+      success: function (response) {
+        $("footer").before(response);
+        $(`#button-${benId}`).trigger("click");
+      },
+      error: function (xhr, status, error) {
+        alert(xhr.responseText);
+      }
+    });
+  }
+
+  const showDataAsSuch = function () {
+    $.ajax({
+      url: '/getBeneficiariesData',
+      method: 'GET',
+      success: function (response) {
+        $("#data-container").html(response);
+      },
+      error: function (error) {
+        alert(error.responseText);
+      }
+    });
+  }
+
+  const doSearch = function (elem, href) {
+    if (!href) {
+      href = $(elem).attr("my-href");
+    }
+    $.ajax({
+      url: `/getBeneficiariesData${href}`,
+      method: 'GET',
+      success: function (response) {
+        $("#data-container").html(response);
+        window.history.pushState(null, '', `/beneficiaries${href}`);
+      },
+      error: function (error) {
+        alert(error.responseText);
+      }
+    });
+  }
+
+</script>

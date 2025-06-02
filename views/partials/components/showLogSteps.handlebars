@@ -19,7 +19,9 @@
             </span>
             {{else if (eq log.actorType 'beneficiary')}}
             <span class="badge bg-orange-lt">
+                <a href="/{{log.actorType}}/{{log.actor._id}}" style="color: inherit;">
                 {{or log.actor.email (or log.actor.phoneNumber log.actor.ipCountry)}}
+                </a>
             </span>
             {{else}}
             <span class="badge bg-blue-lt">

@@ -310,6 +310,21 @@ const expiresOn = (createdAt, months) => {
     return moment(createdAt).add(months, 'months').format('DD-MM-YYYY');
 };
 
+const expiresAfter = (expiryTime) => {
+  const expiry = moment(expiryTime);
+  const now = moment();
+  const duration = moment.duration(expiry.diff(now));
+
+  if (duration.asMilliseconds() <= 0) {
+    return 'Expired';
+  }
+
+  const hours = Math.floor(duration.asHours());
+  const minutes = duration.minutes();
+
+  return `${hours}h ${minutes}m left`;
+};
+
 function removeLinksFromHtml(htmlString) {
     try {
         const parameters = ['project', 'user', 'customer', 'order'];
@@ -377,6 +392,20 @@ const slugToString = function (slug) {
         .split('-')
         .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
         .join(' ');
+};
+
+const getAgeInYearsAndMonths = function (date) {
+    const birthDate = moment(date);
+    const today = moment();
+
+    const years = today.diff(birthDate, 'years');
+    const months = today.diff(birthDate.add(years, 'years'), 'months');
+
+    if (years === 0) {
+        return `${months} months`;
+    } else {
+        return `${years} years`;
+    }
 };
 
 function circleCloudinaryUrl(url) {
@@ -465,4 +494,6 @@ module.exports = {
     roundedCloudinaryUrl,
     shortenCustomerName,
     getFirstName,
+    expiresAfter,
+    getAgeInYearsAndMonths
 };

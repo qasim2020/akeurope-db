@@ -1,0 +1,202 @@
+<script>
+
+  const updateBeneficiary = function (elem) {
+
+    $(elem).closest(".modal").find("input").removeClass("is-invalid");
+    $(elem).closest(".modal").find(".invalid-feedback").remove();
+    $(elem).closest(".modal").find("span").removeClass("border-red");
+    $(elem).closest(".modal").find("span").removeClass("rounded-end");
+    $(elem).closest(".modal").find(".alert").remove();
+
+    let isValid = [];
+
+    $(elem).closest(".modal").find(".form-control, .form-select").each((key, val) => {
+      const isDisabled = $(val).is(":disabled");
+      if (isDisabled) return true;
+      if ($(val).val() == "") {
+        $(val).addClass("is-invalid")
+        if ($(val).siblings("span").length > 0) {
+          $(val).siblings(".invalid-feedback").remove();
+          $(val).siblings("span").after(`<div class="invalid-feedback mb-2">Invalid entry</div> `);
+          $(val).siblings("span").addClass("is-invalid border-red rounded-end");
+          $(val).siblings("input").addClass("is-invalid");
+        } else {
+          $(val).after(`<div class="invalid-feedback">Invalid entry</div> `);
+        }
+      } else {
+        $(val).addClass("is-valid");
+      }
+      isValid.push($(val).val() != "");
+    });
+
+    const data = $(elem)
+      .closest(".modal")
+      .find(".form-select, input, textarea")
+      .toArray()
+      .reduce((total, val) => {
+        Object.assign(total, {
+          [$(val).attr("name")]: $(val).val()
+        });
+        return total;
+      }, {});
+
+    data.status = $(elem).closest(".modal").find(".beneficiary-status input:checked").val();
+    data.role = $(elem).closest('.modal').find('[name=role]:checked').val();
+
+    if (!data.status || !data.role) {
+      isValid.push(false);
+    }
+
+    if (!(isValid.every(val => val === true))) {
+      return false;
+    }
+
+    const beneficiaryId = $(elem).closest(".modal").attr("beneficiaryId");
+    let currentBtnHTML = $(elem).html();
+    $(elem).html(`<span class="spinner-border spinner-border-sm me-2" role="status"></span>`);
+
+    $.ajax({
+      url: `/beneficiary/update/${beneficiaryId}`,
+      type: 'POST',
+      contentType: 'application/json',
+      data: JSON.stringify(data),
+      success: function (response) {
+        $(elem).html(currentBtnHTML);
+        $(".modal-footer").append(`
+        <div class="alert alert-success mt-4 w-100" role="alert">
+          <h4 class="alert-title">Successful!</h4>
+          <div class="text-secondary">Beneficiary updated successfully!</div>
+        </div>`);
+        showDataAsSuch('/getBeneficiaryData/{{data.beneficiary._id}}', '#beneficiary-container');
+        showDataAsSuch('/getBeneficiaryLogs/{{data.beneficiary._id}}', '#logs-container');
+      },
+      error: function (xhr, status, error) {
+        $(elem).html(currentBtnHTML);
+        if (xhr.status != 400) {
+          $(".modal-footer").append(`
+        <div class="alert alert-danger mt-4 w-100" role="alert">
+          <h4 class="alert-title">Failed to create beneficiary!</h4>
+          <div class="text-secondary text-break">${xhr.responseText}</div>
+        </div>`);
+          return false;
+        }
+        xhr.responseJSON.forEach(val => {
+          if (val.elem == "other") {
+            $(".modal-footer").append(`
+          <div class="alert alert-danger mt-4 w-100" role="alert">
+            <h4 class="alert-title">Failed to create beneficiary!</h4>
+            <div class="text-secondary text-break">${val.msg}</div>
+          </div>
+          `);
+            return false;
+          };
+          $(val.elem).addClass("is-invalid");
+          $(val.elem).siblings("span").addClass("border-red rounded-end");
+          $(val.elem).parent("div").append(`<div class="mb-2 invalid-feedback">${val.msg}</div> `);
+        });
+      }
+    });
+
+  }
+
+  const getBeneficiaryLogs = function (elem, href) {
+    href = href || $(elem).attr("my-href");
+    $.ajax({
+      url: href,
+      method: 'GET',
+      success: function (response) {
+        $('#logs-container').replaceWith(response);
+      },
+      error: function (error) {
+        $('#logs-container').html(error.responseText);
+      }
+    })
+  }
+
+  const getActiveSubscriptions = function (elem, href) {
+    href = href || $(elem).attr("my-href");
+    $.ajax({
+      url: href,
+      method: 'GET',
+      success: function (response) {
+        $('#subscriptions-container').replaceWith(response);
+      },
+      error: function (error) {
+        $('#subscriptions-container').html(error.responseText);
+      }
+    })
+  }
+
+  const expiresAfter = (expiryTime) => {
+    const expiry = new Date(expiryTime);
+    const now = new Date();
+    const diffMs = expiry - now;
+
+    if (diffMs <= 0) {
+      return 'Expired';
+    }
+
+    const totalMinutes = Math.floor(diffMs / 60000);
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+
+    return `${hours}h ${minutes}m left`;
+  };
+
+  const createInviteLink = function (elem) {
+    const modal = $(elem).closest('.modal');
+    const beneficiaryId = $(modal).attr("beneficiaryId");
+    $.ajax({
+      url: `/generate-invite-link/${beneficiaryId}`,
+      method: 'POST',
+      success: function (response) {
+        const { resetPasswordExpires, resetPasswordLink } = response;
+        console.log({ resetPasswordExpires, resetPasswordLink });
+        $(modal).find('.invite-link').val(resetPasswordLink).addClass('bg-green-lt border-green');
+        $(modal).find('.invite-expiry').val(expiresAfter(resetPasswordExpires)).addClass('bg-green-lt border-green');
+        $(modal).find('.copy-btn').html(`<ti class="ti ti-copy fs-3 me-1" style="margin-left: -4px"></ti>Copy`);
+        $(modal).find('.invite-show').removeClass('d-none');
+      },
+      error: function (error) {
+        console.log(error);
+        alert(error.responseText);
+      }
+    });
+  };
+
+  function copyInviteLink(elem) {
+    const modal = $(elem).closest('.modal');
+    const link = $(modal).find('.invite-link').val();
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(link).then(() => {
+      }).catch(err => {
+        console.error('Clipboard copy failed:', err);
+        fallbackCopyText(link);
+      });
+    } else {
+      fallbackCopyText(link);
+    }
+    $(modal).find('.copy-btn').html(`<ti class="ti ti-check fs-3 me-1" style="margin-left: -4px"></ti>Copied`);
+  }
+
+  function fallbackCopyText(text) {
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.style.position = 'fixed';
+    document.body.appendChild(textarea);
+    textarea.focus();
+    textarea.select();
+
+    try {
+      document.execCommand('copy');
+    } catch (err) {
+      console.error('Fallback copy failed:', err);
+    }
+
+    document.body.removeChild(textarea);
+  }
+
+  function sendEmailInvite(elem) {
+    alert('Feature not available — Qasim')
+  };
+</script>
