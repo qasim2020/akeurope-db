@@ -75,6 +75,21 @@ const formatDate = function (date) {
     return moment(date).format('DD-MM-YYYY');
 };
 
+
+const getAgeInYearsAndMonths = function (date) {
+    const birthDate = moment(date);
+    const today = moment();
+
+    const years = today.diff(birthDate, 'years');
+    const months = today.diff(birthDate.add(years, 'years'), 'months');
+
+    if (years === 0) {
+        return `${months} months`;
+    } else {
+        return `${years} years`;
+    }
+};
+
 const formatTime = function (timestamp) {
     if (!timestamp) return '';
     return moment(timestamp).format('D MMM YYYY [at] h:mm A');

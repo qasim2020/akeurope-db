@@ -1,29 +1,30 @@
 <style>
+  #print-container {
+    td,
+    th {
+      padding: 4px !important;
+      border: 0px !important;
+    }
 
-  td,
-  th {
-    padding: 4px !important;
-    border: 0px !important;
-  }
+    #child-container td {
+      padding-left: 1rem !important;
+    }
 
-  #child-container td {
-    padding-left: 1rem !important;
-  }
+    #child-container th {
+      padding-right: 1rem !important;
+    }
 
-  #child-container th {
-    padding-right: 1rem !important;
-  }
+    #donor-container th {
+      padding-right: 0.4rem !important;
+    }
 
-  #donor-container th {
-    padding-right: 0.4rem !important;
-  }
+    #manager-container th {
+      padding-left: 0 !important;
+    }
 
-  #manager-container th {
-    padding-left: 0 !important;
-  }
-
-  .info-container {
-    background-color: #f8f8f8 !important;
+    .info-container {
+      background-color: #f8f8f8 !important;
+    }
   }
 </style>
 
@@ -141,9 +142,9 @@
       </div>
       <div class="col-6 ps-2" id="manager-container">
         <div class="" style="display: flex; align-items: center; margin: 20px 0;">
-        <hr style="flex: 1; border: none; border-top: 1px solid black; margin: 0 10px;">
-        <h3 class="fs-2" style="white-space: nowrap; margin: 0;">Manager Responsible</h3>
-      </div>
+          <hr style="flex: 1; border: none; border-top: 1px solid black; margin: 0 10px;">
+          <h3 class="fs-2" style="white-space: nowrap; margin: 0;">Manager Responsible</h3>
+        </div>
         <table class="table info-container">
           <tbody>
             <tr>
