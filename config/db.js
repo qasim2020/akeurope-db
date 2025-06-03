@@ -399,7 +399,6 @@ async function handleGazaOrphanForm() {
             {
                 $set: {
                     phoneNumber,
-                    password: process.env.DEFAULT_BENEFICIARY_PASSWORD,
                 },
                 $setOnInsert: {
                     verified: false,
