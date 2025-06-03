@@ -133,4 +133,19 @@
     });
   }
 
+  $(document).on('keypress', '[my-href]', function (e) {
+    if (e.which === 13 || e.keyCode === 13) {
+
+      e.preventDefault();
+
+      const href = $(this).attr("my-href");
+      const key = $(this).attr("my-key");
+      const value = $(this).val();
+      const regex = new RegExp(`${key}=([^&]*)`, "g");
+      const updatedHref = href.replace(regex, `${key}=${value}`);
+
+      doSearch('', updatedHref);
+
+    }
+  });
 </script>

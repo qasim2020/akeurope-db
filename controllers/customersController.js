@@ -23,6 +23,7 @@ const { getVippsPaymentByOrderId, getVippsSubscriptionsByOrderId } = require('..
 const Order = require('../models/Order');
 const Donor = require('../models/Donor');
 const Subscription = require('../models/Subscription');
+const { generateSearchQueryFromSchema } = require('../modules/generateSearchQuery.js');
 
 const sessionCollection = mongoose.connection.collection('sessions_customer_portal');
 
@@ -43,7 +44,10 @@ async function killUserSessions(userId) {
 }
 
 exports.customers = async (req, res) => {
-    const customers = await Customer.find().sort({_id: -1}).lean();
+
+    const { searchQuery } = generateSearchQueryFromSchema(req, Customer.schema);
+
+    const customers = await Customer.find(searchQuery).sort({_id: -1}).lean();
 
     const pagination = createPagination({
         req,
@@ -78,7 +82,8 @@ exports.customers = async (req, res) => {
 
 exports.getCustomersData = async (req, res) => {
     try {
-        const customers = await Customer.find().sort({_id: -1}).lean();
+        const { searchQuery } = generateSearchQueryFromSchema(req, Customer.schema);
+        const customers = await Customer.find(searchQuery).sort({_id: -1}).lean();
 
         const pagination = createPagination({
             req,
@@ -101,6 +106,7 @@ exports.getCustomersData = async (req, res) => {
             },
         });
     } catch (error) {
+        console.log(error);
         res.status(500).json({
             error: 'An error occurred while fetching customer partial',
             details: error.message,
@@ -379,7 +385,6 @@ exports.activeSubscriptions = async (req,res) => {
         res.status(500).json({ message: 'Could not fetch subscriptions', error });
     }
 }
-
 
 exports.customer = async (req, res) => {
     try {

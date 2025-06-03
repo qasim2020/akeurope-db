@@ -25,6 +25,7 @@ const Order = require('../models/Order');
 const Donor = require('../models/Donor');
 const Subscription = require('../models/Subscription');
 const { sendTelegramMessageInGazaGroup } = require('../../akeurope-cp/modules/telegramBot.js');
+const { generateSearchQueryFromSchema } = require('../modules/generateSearchQuery.js');
 
 const sessionCollection = mongoose.connection.collection('sessions_customer_portal');
 
@@ -45,9 +46,15 @@ async function killUserSessions(userId) {
 }
 
 exports.beneficiaries = async (req, res) => {
+    const { searchQuery } = generateSearchQueryFromSchema(req, Beneficiary.schema);
     const beneficiaries = await Beneficiary.find({
-        projects: { $in: req.allProjects.map(project => project.slug.toString()) },
-    }).sort({ createdAt: -1 }).lean();
+        $and: [
+            { projects: { $in: req.allProjects.map(project => project.slug.toString()) } },
+            searchQuery
+        ]
+    })
+        .sort({ createdAt: -1 })
+        .lean();
 
     const pagination = createPagination({
         req,
@@ -82,9 +89,15 @@ exports.beneficiaries = async (req, res) => {
 exports.getBeneficiariesData = async (req, res) => {
     try {
 
+        const { searchQuery } = generateSearchQueryFromSchema(req, Beneficiary.schema);
         const beneficiaries = await Beneficiary.find({
-            projects: { $in: req.allProjects.map(project => project.slug.toString()) },
-        }).sort({ createdAt: -1 }).lean();
+            $and: [
+                { projects: { $in: req.allProjects.map(project => project.slug.toString()) } },
+                searchQuery
+            ]
+        })
+            .sort({ createdAt: -1 })
+            .lean();
 
         const pagination = createPagination({
             req,
@@ -277,7 +290,6 @@ exports.beneficiary = async (req, res) => {
     }
 };
 
-
 exports.generateInviteLink = async (req, res) => {
     try {
         const { beneficiaryId } = req.params;
@@ -290,10 +302,10 @@ exports.generateInviteLink = async (req, res) => {
         const token = crypto.randomBytes(20).toString('hex');
         beneficiary.resetPasswordToken = token;
         beneficiary.resetPasswordExpires = Date.now() + (24 * 3600000);
-        beneficiary.resetPasswordLink = `${process.env.ORPHAN_PORTAL_URL}/resetlink/${beneficiary._id}/${token}`;
+        beneficiary.resetPasswordLink = `${process.env.BENEFICIARY_PORTAL_URL}/resetlink/${beneficiary._id}/${token}`;
         await beneficiary.save();
-        res.status(200).json({ 
-            resetPasswordLink: beneficiary.resetPasswordLink, 
+        res.status(200).json({
+            resetPasswordLink: beneficiary.resetPasswordLink,
             resetPasswordExpires: beneficiary.resetPasswordExpires
         });
     } catch (error) {

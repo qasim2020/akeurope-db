@@ -113,4 +113,82 @@ const generateSearchQuery = function (req, project) {
     return { searchQuery, fieldFilters };
 };
 
-module.exports = { generateSearchQuery };
+const generateSearchQueryFromSchema = (req, schema) => {
+    const search = req.query.search || '';
+    const fieldFilters = {};
+    const paths = schema.paths;
+
+    const stringFields = [];
+    const numberFields = [];
+    const dateFields = [];
+
+    for (const key in paths) {
+        if (['_id', '__v'].includes(key)) continue;
+
+        const type = paths[key].instance;
+
+        if (req.query[key]) {
+            const value = req.query[key];
+
+            if (type === 'Date' && isDateString(value)) {
+                const dateQuery = parseDateQuery(value);
+                fieldFilters[key] = dateQuery || new Date(value);
+            } else if (type === 'Number') {
+                const num = parseFloat(value);
+                if (!isNaN(num)) fieldFilters[key] = num;
+            } else if (type === 'Boolean') {
+                fieldFilters[key] = value === 'true';
+            } else {
+                fieldFilters[key] = value;
+            }
+        }
+
+        if (['String'].includes(type)) {
+            stringFields.push({ [key]: new RegExp(search, 'i') });
+        } else if (type === 'Number') {
+            numberFields.push(key);
+        } else if (type === 'Date') {
+            dateFields.push(key);
+        }
+    }
+
+    let searchQuery = {};
+
+    if (Object.keys(fieldFilters).length > 0) {
+        Object.assign(searchQuery, fieldFilters);
+    }
+
+    if (search) {
+        const conditions = [];
+
+        if (stringFields.length > 0) {
+            conditions.push({ $or: stringFields });
+        }
+
+        const searchAsNumber = parseFloat(search);
+        if (!isNaN(searchAsNumber)) {
+            conditions.push({
+                $or: numberFields.map((key) => ({
+                    [key]: searchAsNumber,
+                })),
+            });
+        }
+
+        const searchAsDate = new Date(search);
+        if (!isNaN(searchAsDate.getTime())) {
+            conditions.push({
+                $or: dateFields.map((key) => ({
+                    [key]: searchAsDate,
+                })),
+            });
+        }
+
+        if (conditions.length > 0) {
+            searchQuery.$or = conditions;
+        }
+    }
+
+    return { searchQuery, fieldFilters };
+};
+
+module.exports = { generateSearchQuery, generateSearchQueryFromSchema };
