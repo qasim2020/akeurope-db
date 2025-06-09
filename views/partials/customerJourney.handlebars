@@ -1,0 +1,108 @@
+<div class="card">
+    <div class="">
+        <div class="card-header">
+            <h3 class="card-title">Customers' Journey</h3>
+        </div>
+
+        {{#with data.journey as |track|}}
+        <div class="card-header d-flex align-items-center border-0">
+            <p class="m-0 text-secondary">Page <span>{{track.currentPage}}</span> of <span>{{track.totalPages}}</span>
+            </p>
+            <ul class="pagination m-0 ms-auto">
+                <li class="page-item {{#if (eq track.hasPrevPage false)}}disabled{{/if}}">
+                    <a class="page-link" tabindex="-1" aria-disabled="true"
+                        my-href="/getActivityData?entityType={{track.entityType}}&page={{dec track.currentPage}}"
+                        onclick="getJourneyData(this)">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="icon">
+                            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                            <path d="M15 6l-6 6l6 6"></path>
+                        </svg>
+                    </a>
+                </li>
+                {{#each track.pagesArray}}
+                <li class="page-item {{#if (eq track.currentPage this)}}active{{/if}}">
+                    <a class="page-link" my-href="/getActivityData?entityType={{track.entityType}}&page={{this}}"
+                        onclick="getJourneyData(this)">{{this}}</a>
+                </li>
+                {{/each}}
+                <li class="page-item {{#if (eq track.hasNextPage false)}}disabled{{/if}}">
+                    <a class="page-link" tabindex="-1" aria-disabled="true"
+                        my-href="/getActivityData?entityType={{log.entityType}}&page={{inc track.currentPage}}"
+                        onclick="getJourneyData(this)">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="icon">
+                            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                            <path d="M9 6l6 6l-6 6"></path>
+                        </svg>
+                    </a>
+                </li>
+            </ul>
+        </div>
+        {{/with}}
+    </div>
+    <div class="d-flex justify-content-center mb-auto">
+        <div class="w-100 list-group list-group-flush list-group-hoverable notifications">
+            <div class="accordion" id="accordion-journey">
+                {{#each data.journey.tracks as |track|}}
+                <div class="accordion-item rounded-0 border border-x-0 {{#unless @last}}border-bottom-0{{/unless}}"
+                    style="margin-bottom: -1px;">
+                    <div class="accordion-header">
+                        <button class="accordion-button {{#if (neq @index 0)}}collapsed{{/if}}" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#collapse-{{@index}}" aria-expanded="false">
+                            <span class="badge me-1">{{formatTime track.createdAt}}</span>
+                            <span class="badge {{#if track.paid}}bg-green-lt{{else}}bg-red-lt{{/if}}">
+                                <span class="d-none d-sm-inline-block">
+                                    {{shortenString track.geo.ip '15'}} -
+                                </span>
+                                {{track.geo.country}}
+                                <span class="d-none d-sm-inline-block">
+                                    - {{track.timezone}}
+                                </span>
+                            </span>
+                        </button>
+                    </div>
+                </div>
+                <div id="collapse-{{@index}}" class="accordion-collapse collapse {{#if (eq @index 0)}}show{{/if}}"
+                    data-bs-parent="#accordion-journey">
+                    <div class="accordion-body">
+                        <ul class="steps steps-vertical">
+                            {{#each track.hits as |hit|}}
+                            <li class="step-item">
+                                <div class="d-flex align-items-center justify-content-between mb-1 overflow-hidden">
+                                    <div class="d-flex align-items-center">
+                                        <span class="badge">{{formatTime hit.createdAt}}</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h4 class="mb-2">
+                                        {{#if referrer}}
+                                        <a href="{{hit.referrer}}" target="_blank">{{hit.referrer}}</a>
+                                        {{else}}
+                                        None
+                                        {{/if}}
+                                        → <a href="{{hit.fullUrl}}" target="_blank">{{hit.fullUrl}}</a>
+                                    </h4>
+
+                                    <p class="mb-0">
+                                        <strong>UTM:</strong> 
+                                        source=<code>{{hit.utm.source}}</code>,
+                                        medium=<code>{{hit.utm.medium}}</code>,
+                                        campaign=<code>{{hit.utm.campaign}}</code>,
+                                        term=<code>{{hit.utm.term}}</code>,
+                                        content=<code>{{hit.utm.content}}</code>,
+                                    </p>
+                                </div>
+                            </li>
+                            {{/each}}
+                        </ul>
+                    </div>
+                </div>
+                {{/each}}
+            </div>
+        </div>
+    </div>
+</div>
+</div>

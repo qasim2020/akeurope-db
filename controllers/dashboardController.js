@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const { visibleLogs, activtyByEntityType, userLogs } = require('../modules/logAction');
 const { dataForUserPage } = require('../modules/users');
+const { customerJourney } = require('../modules/customerJourney');
 
 exports.showDashboard = async (req, res) => {
     try {
@@ -15,6 +16,7 @@ exports.showDashboard = async (req, res) => {
                     role: req.userPermissions,
                     activeMenu: 'dashboard',
                     projects: req.allProjects,
+                    journey: await customerJourney(req,res),
                     logs: await visibleLogs(req, res),
                     activity: await activtyByEntityType(req, res),
                     sidebarCollapsed: req.session.sidebarCollapsed ? req.session.sidebarCollapsed : false,
