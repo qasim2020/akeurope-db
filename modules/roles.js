@@ -67,14 +67,16 @@ const roles = {
         'viewOrderOutline',
         'uploadImage',
         'chat',
-        'changeFilesAccess'
+        'changeFilesAccess',
+        'viewBeneficiaries',
+        'editBeneficiaries',
     ],
     viewer: ['viewEntry'],
 };
 
 async function getDynamicPermissions(role, userId) {
     const user = await User.findById(userId).lean();
-    if (!user) throw new Error ('user not found while fetching role for user');
+    if (!user) throw new Error('user not found while fetching role for user');
     return user.projects || [];
 }
 
