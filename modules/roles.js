@@ -46,6 +46,7 @@ const roles = {
         'chat',
         'viewBeneficiaries',
         'editBeneficiaries',
+        'viewJourney'
     ],
     editor: [
         'viewSelf',

@@ -378,6 +378,15 @@ const shortenCustomerName = function(string) {
     return `${start}...`;    
 }
 
+const endingString = function(string, length) {
+  if (typeof string !== 'string') return string;
+  if (string.length <= length) {
+    return string;
+  }
+  const end = string.slice(-length); 
+  return `..${end}`;
+};
+
 const shortenString = function(string, length) {
     if (typeof string !== 'string') return string;
     if (string.length <= length) {
@@ -496,5 +505,6 @@ module.exports = {
     shortenCustomerName,
     getFirstName,
     expiresAfter,
-    getAgeInYearsAndMonths
+    getAgeInYearsAndMonths,
+    endingString,
 };

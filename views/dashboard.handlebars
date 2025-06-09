@@ -1,7 +1,7 @@
 <!-- Page header -->
 <div class="page-header d-print-none">
   <div class="container-xl">
-    <div class="row g-2 align-items-center">
+    <div class="row g-2 align-items-end">
       <div class="col">
         <!-- Page pre-title -->
         <div class="page-pretitle">
@@ -10,6 +10,12 @@
         <h2 class="page-title">
           Akeurope Admin Portal
         </h2>
+      </div>
+      <div class="col-auto" id="dash-view-toggle">
+        <button class="badge cursor-pointer p-2 mb-1 bg-blue-lt" data-c-target="#activity-container"
+          onclick="toggleDashView(this)">Recent Activity</button>
+        <button class="badge cursor-pointer p-2 mb-1 bg-blue-lt" data-c-target="#journey-container"
+          onclick="toggleDashView(this)">Customer Journey</button>
       </div>
     </div>
   </div>
@@ -51,5 +57,37 @@
       }
     })
   }
+
+  const getJourneyData = function (elem, href) {
+    href = href || $(elem).attr("my-href");
+    $.ajax({
+      url: href,
+      method: 'GET',
+      success: function (response) {
+        $('#journey-container').html(response);
+      },
+      error: function (error) {
+        $('#journey-container').html(error.responseText);
+      }
+    })
+  }
+
+  const toggleDashView = function (elem) {
+    const container = $('#dash-view-toggle');
+    const target = $(elem).data('c-target');
+    $(target).toggleClass('d-none');
+    $(elem).toggleClass('bg-blue-lt');
+    const activeViews = container.find('.bg-blue-lt');
+    if (activeViews.length === 1) {
+      const activeTarget = activeViews.data('c-target');
+      $(activeTarget).addClass('col-12').removeClass('col-lg-6')
+    } else {
+      activeViews.each(function () {
+        const activeTarget = $(this).data('c-target');
+        $(activeTarget).removeClass('col-12').addClass('col-lg-6');
+      });
+    }
+  }
+
 
 </script>

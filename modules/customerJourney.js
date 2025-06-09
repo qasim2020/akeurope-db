@@ -14,11 +14,13 @@ const getTracks = async (query, page, limit) => {
         { $sort: { createdAt: -1 } },
         {
             $group: {
-                _id: { ip: '$geo.ip', ua: '$userAgent' },
+                _id: { ip: '$geo.ip' },
                 firstHit: { $first: '$$ROOT' },
                 earliestCreated: { $first: '$createdAt' },
                 hits: {
                     $push: {
+                        userAgent: '$userAgent',
+                        platform: '$platform',
                         referrer: '$referrer',
                         fullUrl: '$fullUrl',
                         utm: '$utm',
@@ -46,6 +48,24 @@ const getTracks = async (query, page, limit) => {
         for (const order of track.orders) {
             track.paid = order.status === 'paid' ? true : false;
         }
+
+        const timeline = [...track.hits.map(hit => ({ ...hit, type: 'hit' }))];
+
+        for (const order of track.orders) {
+            const index = timeline.findIndex(hit => new Date(hit.createdAt) <= new Date(order.createdAt));
+            const orderEntry = { ...order, type: 'order' };
+
+            if (index === -1) {
+                timeline.unshift(orderEntry);
+            } else {
+                timeline.splice(index + 1, 0, orderEntry);
+            }
+        }
+
+        timeline.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        
+        track.hits = timeline;
+
     };
 
     return tracks;
@@ -55,10 +75,17 @@ const getTracks = async (query, page, limit) => {
 const customerJourney = async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 13;
+        const limit = parseInt(req.query.limit) || 15;
 
         const query = {};
-        const total = await Tracker.countDocuments(query);
+
+        const countResult = await Tracker.aggregate([
+            { $match: query },
+            { $group: { _id: { ip: '$geo.ip' } } },
+            { $count: 'total' }
+        ]);
+
+        const total = countResult[0]?.total || 0;
 
         const tracks = await getTracks(query, page, limit);
 

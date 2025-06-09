@@ -48,6 +48,15 @@ exports.getActivityData = async (req, res) => {
     });
 };
 
+exports.getJourneyData = async (req, res) => {
+    res.render('partials/customerJourney', {
+        layout: false,
+        data: {
+            journey: await customerJourney(req,res),
+        },
+    });
+};
+
 exports.renderPartial = async (req, res) => {
     try {
         const { partialName, data } = req.body;
