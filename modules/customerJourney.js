@@ -39,8 +39,8 @@ const getTracks = async (query, page, limit) => {
 
     for (const track of tracks) {
         track.orders = [
-            ...await Order.find({ cloudflareIp: track.geo.ip }).sort({ createdAt: -1 }).lean(),
-            ...await Subscription.find({ cloudflareIp: track.geo.ip }).sort({ createdAt: -1 }).lean(),
+            ...await Order.find({ cloudflareIp: track.geo.ip, status: 'paid' }).sort({ createdAt: -1 }).lean(),
+            ...await Subscription.find({ cloudflareIp: track.geo.ip, status: 'paid' }).sort({ createdAt: -1 }).lean(),
         ];
         if (track.orders.length === 0) {
             track.paid = false;
