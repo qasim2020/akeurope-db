@@ -1,3 +1,4 @@
+config/revenue.csv
 .env
 node_modules
 invoices

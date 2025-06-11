@@ -503,33 +503,52 @@ async function calculateRevenueFromDonor() {
     let revenue = 0;
     const rateCache = new Map();
 
+    let array = [];
+
     for (const donor of donors) {
         let currencyRate;
 
         const allPayments = [
-            ...(donor.payments || []),
-            ...(donor.subscriptions || []),
-            ...(donor.vippsCharges || []),
-            ...(donor.vippsPayments || []),
+            ...(donor.payments ?? []),
+            ...(donor.subscriptions ?? []),
+            ...(donor.vippsCharges ?? []),
+            ...(donor.vippsPayments ?? []),
         ];
 
-        if (donor.email === 'dr_saminabano@yahoo.com') {
-            console.log(allPayments)
+        if (donor.email === 'nida@sarahalidigital.com') {
+            continue;
         }
 
         for (const payment of allPayments) {
+
             const currency = payment.currency?.toUpperCase() || payment.amount.currency.toUpperCase();
             let amount;
+            let method = [];
+            let query = {};
             if (payment.agreementId) {
                 amount = payment.amount / 100;
+                method = 'vipps subscription';
+                query = { _id: payment.externalId };
             } else if (payment.price) {
                 amount = payment.price / 100;
-            } else if (payment.paymentMethod ) {
+                method = 'stripe subscription';
+                query = { _id: payment.orderId };
+            } else if (payment.paymentMethod) {
                 amount = payment.amount.value / 100;
+                method = 'vipps one-time';
+                query = { vippsReference: payment.reference };
             } else {
                 amount = payment.amount;
+                method = 'stripe one-time';
+                query = { _id: payment.orderId };
             }
-            
+
+            const order = (await Order.findOne(query).lean()) || (await Subscription.findOne(query).lean());
+
+            if (!order) {
+                continue;
+            };
+
             if (rateCache.has(currency)) {
                 currencyRate = rateCache.get(currency);
             } else {
@@ -538,7 +557,14 @@ async function calculateRevenueFromDonor() {
                 rateCache.set(currency, currencyRate);
             }
 
-            console.log(currency, amount, '→ NOK', amount * currencyRate);
+            array.push({
+                date: order.createdAt,
+                orderNo: Number(order.orderNo),
+                email: donor.email,
+                method,
+                originalPaid: `${amount} ${currency}`,
+                convertedNOK: `${(amount * currencyRate).toFixed(2)}`,
+            });
 
             revenue += amount * currencyRate;
         };
@@ -546,6 +572,28 @@ async function calculateRevenueFromDonor() {
     }
 
     console.log(revenue, 'revenue calculated');
+    exportToCSV(array, 'revenue.csv');
+}
+
+const fs = require('fs');
+const path = require('path');
+
+function exportToCSV(array, filename = 'export.csv') {
+    if (!Array.isArray(array) || array.length === 0) return;
+
+    const headers = Object.keys(array[0]);
+    const csvRows = [
+        headers.join(','), // header row
+        ...array.map(row =>
+            headers.map(field => {
+                const value = row[field] ?? '';
+                return `"${String(value).replace(/"/g, '""')}"`;
+            }).join(',')
+        )
+    ];
+
+    fs.writeFileSync(path.join(__dirname, filename), csvRows.join('\n'), 'utf8');
+    console.log(`✅ Exported ${filename}`);
 }
 
 mongoose.connection.on('open', async () => {
