@@ -496,9 +496,10 @@ async function calculateRevenueFromDonor() {
         $or: [
             { payments: { $exists: true, $ne: [] } },
             { subscriptions: { $exists: true, $ne: [] } },
-            { vippsCharges: { $exists: true, $ne: [] } }
+            { vippsCharges: { $exists: true, $ne: [] } },
+            { vippsPayments: { $exists: true, $ne: [] } }
         ]
-    }).lean();
+    }).sort({createdAt: -1}).lean();
 
     let revenue = 0;
     const rateCache = new Map();
@@ -546,6 +547,7 @@ async function calculateRevenueFromDonor() {
             const order = (await Order.findOne(query).lean()) || (await Subscription.findOne(query).lean());
 
             if (!order) {
+                console.log(payment);
                 continue;
             };
 

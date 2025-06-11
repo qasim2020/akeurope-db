@@ -12,6 +12,8 @@ const SubscriptionRecordSchema = new mongoose.Schema(
         countryCode: { type: String, required: true },
         projectSlug: { type: String, required: true },
         status: { type: String, enum: ['draft', 'pending payment', 'processing', 'paid'], default: 'draft' },
+        vippsAgreementId: { type: String, required: false, index: false },
+        vippsReference: { type: String, required: false, index: false },
     },
     {
         timestamps: true,
