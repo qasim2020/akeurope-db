@@ -185,6 +185,30 @@ exports.getEditOrderModal = async (req, res) => {
     }
 };
 
+exports.getSendUpdateModal = async (req, res) => {
+    try {
+        const order = await getSingleOrder(req, res);
+        const customers = await Customer.find().lean();
+        const projects = await Project.find().lean();
+        const files = await File.find({ 'links.entityId': order._id }).sort({ createdAt: -1 }).lean();
+        res.render('partials/sendUpdateModalOrder', {
+            layout: false,
+            data: {
+                order,
+                customers,
+                projects,
+                files,
+            },
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(404).render('error', {
+            heading: 'Server Error',
+            error: error,
+        });
+    }
+};
+
 exports.getOrderTotalCost = async (req, res) => {
     try {
         const order = await getSingleOrder(req, res);

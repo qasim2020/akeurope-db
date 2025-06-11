@@ -1,6 +1,6 @@
 <script src="https://pfau-software.de/json-viewer/dist/iife/index.js"></script>
 
-<div class="page-header d-print-none">
+<div class="page-header d-print-none" order-id="{{data.order._id}}">
   <div class="mt-3 mx-3">
     <div class="row g-2 align-items-center">
       <div class="col">
@@ -11,9 +11,9 @@
           </span>
         </h2>
       </div>
-      {{#if data.order.projects}}
       <div class="col-auto ms-auto d-print-none">
         <div class="btn-list">
+          {{#if data.order.projects}}
           <a href="#" class="btn btn-primary d-none d-md-inline-block" id="#editOrder" data-bs-toggle="modal"
             data-bs-target="#modal-{{data.order._id}}">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
@@ -39,9 +39,26 @@
               <path d="M19 16v6"></path>
             </svg>
           </a>
+          {{/if}}
+          <button class="btn btn-primary d-none d-md-inline-block" onclick="getSendUpdateModal(this)">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+              class="icon icon-tabler icons-tabler-outline icon-tabler-bolt">
+              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+              <path d="M13 3l0 7l6 0l-8 11l0 -7l-6 0l8 -11" />
+            </svg>
+            Send Update
+          </button>
+          <button href="#" class="btn btn-primary d-md-none btn-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+              class="icon icon-tabler icons-tabler-outline icon-tabler-bolt">
+              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+              <path d="M13 3l0 7l6 0l-8 11l0 -7l-6 0l8 -11" />
+            </svg>
+          </button>
         </div>
       </div>
-      {{/if}}
     </div>
 
   </div>
@@ -55,13 +72,11 @@
     </div>
     <div class="d-block col-12 col-md-6">
       {{#if (findInArray data.role 'viewFiles')}}
-      <div class="card mb-3" id="files-container" 
-      entity-type="order" 
-      entity-id="{{data.order._id}}" 
-      entity-slug="none"
-      entity-url="/order/{{data.order._id}}" 
-      file-types="application/pdf"
-      file-url="/uploadFileToOrder">
+      <div class="card mb-3" id="files-container" entity-type="order" entity-id="{{data.order._id}}" entity-slug="none"
+        entity-url="/order/{{data.order._id}}" 
+        file-types="application/pdf,image/*,video/*"
+        file-url="/uploadFileToOrder"
+        video-url="/uploadVideoToOrder">
         {{> showEntityFiles}}
       </div>
       {{/if}}
@@ -82,7 +97,7 @@
     console.log('refreshing containers');
     const hrefLogs = `/getOrderLogs/{{data.order._id}}?page=1`;
     getOrderLogs(modal, hrefLogs);
-    {{#if data.order.projects}}
+    {{#if data.order.projects }}
     const hrefOrder = `/getOrderData/{{data.order._id}}`;
     loadOrderInContainer(modal, hrefOrder);
     const hrefProjects = `/getOrderProjects/{{data.order._id}}`;
@@ -206,6 +221,35 @@
       success: function (response) {
         $("footer").before(response);
         $(`#button-file-upload-${orderId}`).trigger("click");
+      },
+      error: function (xhr, status, error) {
+        alert(xhr.responseText);
+      }
+    });
+  }
+
+  const getSendUpdateModal = function (elem) {
+    const orderId = $('.page-header').attr('order-id');
+
+    if (!orderId) {
+      return alert('No order ID found');
+    }
+
+    const modalExists = $(document).find(`#button-update-${orderId}`).length > 0;
+
+    if (modalExists) {
+      $(`#button-${orderId}`).remove();
+      $(`#modal-update-${orderId}`).remove(); 
+    }
+
+    $.ajax({
+      url: `/getSendUpdateModal-order/${orderId}`,
+      type: 'GET',
+      contentType: 'application/json',
+      success: function (response) {
+        $("footer").before(response);
+        $(`#button-update-${orderId}`).trigger("click");
+        initializePopovers();
       },
       error: function (xhr, status, error) {
         alert(xhr.responseText);

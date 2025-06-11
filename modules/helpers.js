@@ -14,6 +14,7 @@ const categoryOptions = function (selectedCategory, options) {
     const categories = [
         { value: "thankyou", label: "Thank You Note" },
         { value: "general", label: "General" },
+        { value: 'qurbani', label: "Qurbani"},
         { value: "health", label: "Health Report" },
         { value: "paymentProof", label: "Payment Proof" },
         { value: "schoolReport", label: "School Report" },

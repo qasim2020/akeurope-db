@@ -9,6 +9,7 @@ router.get('/file/:fileId', authenticate, authorize('viewFiles'), fileController
 router.post('/uploadFileToEntry', authenticate, authorize('uploadFiles'), uploadFile.single('file'), fileController.uploadFileToEntry);
 router.post('/uploadVideoToEntry', authenticate, authorize('uploadFiles'), uploadVideo.single('file'), fileController.uploadVideoToEntry);
 router.post('/uploadFileToOrder', authenticate, authorize('uploadFiles'), uploadFile.single('file'), fileController.uploadFileToOrder);
+router.post('/uploadVideoToOrder', authenticate, authorize('uploadFiles'), uploadVideo.single('file'), fileController.uploadVideoToOrder);
 router.post('/fileUpdate/:fileId', authenticate, authorize('editFiles'), fileController.update);
 router.post('/fileDelete/:fileId', authenticate, authorize('deleteFiles'), fileController.delete);
 

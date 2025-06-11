@@ -1,0 +1,51 @@
+<div class="modal modal-blur fade" id="modal-update-{{data.order._id}}" tabindex="-1" role="dialog"
+  order-id="{{data.order._id}}">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Send Update to Customer</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label">Message</label>
+          <textarea class="form-control" name="message" rows="4" placeholder="Type your update..."></textarea>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Select Files to Attach</label>
+          <div class="list-group">
+            {{#each data.files}}
+            <label class="list-group-item d-flex align-items-center">
+              <input class="form-check-input me-2" type="checkbox" name="selectedFiles" value="{{this.url}}">
+              <span class="me-auto">
+                <strong>{{this.name}}</strong><br>
+                <small class="text-muted">{{this.size}} · Uploaded {{timeAgo this.createdAt}}</small>
+              </span>
+            </label>
+            {{/each}}
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <button type="submit" class="btn btn-primary w-100">Send Update</button>
+        </div>
+
+        <div class="d-block">
+          <div id="emailStatus" class="badge">Email: Pending</div>
+          <div id="messageStatus" class="badge">Message: Pending</div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <div class="ms-auto">
+          <a href="#" class="btn btn-link link-default cancel-btn" data-bs-dismiss="modal"> Close </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<button href="#" class="btn btn-primary d-none" id="button-update-{{data.order._id}}" data-bs-toggle="modal"
+  data-bs-target="#modal-update-{{data.order._id}}"></button>

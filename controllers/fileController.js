@@ -44,13 +44,7 @@ exports.uploadFileToEntry = async (req, res) => {
 
         if (!entitySlug) throw new Error('entitySlug is required');
 
-        let access;
-
-        if (req.userPermissions.includes('changeFilesAccess')) {
-            access = ['editors', 'customers', 'beneficiary'];
-        } else {
-            access = ['editors', 'customers', 'beneficiary'];
-        }
+        const access = ['editors', 'customers', 'beneficiary'];
 
         const links = [
             {
@@ -101,13 +95,7 @@ exports.uploadVideoToEntry = async (req, res) => {
 
         if (!entitySlug) throw new Error('entitySlug is required');
 
-        let access;
-
-        if (req.userPermissions.includes('changeFilesAccess')) {
-            access = ['editors', 'customers'];
-        } else {
-            access = ['editors', 'customers'];
-        }
+        const access = ['editors', 'customers', 'beneficiary'];
 
         const links = [
             {
@@ -146,7 +134,7 @@ exports.uploadVideoToEntry = async (req, res) => {
     }
 };
 
-exports.uploadFileToOrder = async (req, res) => {
+exports.uploadVideoToOrder = async (req, res) => {
     try {
         const fileMulter = req.file;
 
@@ -156,15 +144,9 @@ exports.uploadFileToOrder = async (req, res) => {
 
         const { entityId, entityType, entityUrl } = req.body;
 
-        if (!entityId) throw new Error('entityId, entityType, entitySlug are required');
+        if (!entityId || !entityType || !entityUrl) throw new Error('entityId, entityType, entityUrl are required');
 
-        let access;
-
-        if (req.userPermissions.includes('changeFilesAccess')) {
-            access = ['customers'];
-        } else {
-            throw new Error('You are not authorized to add files to an invoice');
-        }
+        const access = ['customers'];
 
         const links = [
             {
@@ -181,9 +163,60 @@ exports.uploadFileToOrder = async (req, res) => {
 
         const file = new File({
             links,
-            category: 'paymentProof',
+            category: 'general',
             access,
-            name: fileMulter.filename,
+            name: fileMulter.originalname,
+            size: fileMulter.size / 1000,
+            path: `/videos/${fileMulter.filename}`,
+            mimeType: fileMulter.mimetype,
+            uploadedBy: {
+                actorType: 'user',
+                actorId: req.session.user._id,
+                actorUrl: `/user/${req.session.user._id}`,
+            },
+        });
+
+        await file.save();
+
+        res.status(200).send(file);
+    } catch (error) {
+        console.log(error);
+        res.status(500).send(error.toString());
+    }
+};
+
+exports.uploadFileToOrder = async (req, res) => {
+    try {
+        const fileMulter = req.file;
+
+        if (!fileMulter) {
+            return res.status(400).json({ message: 'No file uploaded' });
+        }
+
+        const { entityId, entityType, entityUrl } = req.body;
+
+        if (!entityId || !entityType || !entityUrl) throw new Error('entityId, entityType, entityUrl are required');
+
+        const access = ['customers'];
+
+        const links = [
+            {
+                entityId,
+                entityType,
+                entityUrl,
+            },
+            {
+                entityId: req.session.user._id,
+                entityType: 'user',
+                entityUrl: `/user/${req.session.user._id}`,
+            },
+        ];
+
+        const file = new File({
+            links,
+            category: 'general',
+            access,
+            name: fileMulter.originalname,
             size: fileMulter.size / 1000,
             path: `/uploads/${fileMulter.filename}`,
             mimeType: fileMulter.mimetype,
@@ -195,17 +228,6 @@ exports.uploadFileToOrder = async (req, res) => {
         });
 
         await file.save();
-
-        const order = (await Order.findById(entityId).lean()) || (await Subscription.findById(entityId).lean());
-
-        await saveLog(
-            logTemplates({
-                type: 'orderNewFile',
-                entity: order,
-                actor: req.session.user,
-                file,
-            }),
-        );
 
         res.status(200).send(file);
     } catch (error) {

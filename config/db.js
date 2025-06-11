@@ -21,9 +21,11 @@ const Beneficiary = require('../models/Beneficiary');
 const Chat = require('../models/Chat');
 const Order = require('../models/Order');
 const Subscription = require('../models/Subscription');
+const Donor = require('../models/Donor');
 const { deleteInvoice } = require('../modules/invoice');
 const { sendTelegramMessage, sendErrorToTelegram } = require('../../akeurope-cp/modules/telegramBot')
 const { formatDate } = require('../modules/helpers');
+const { getCurrencyRates } = require('../modules/getCurrencyRates')
 
 const connectDB = async () => {
     try {
@@ -461,6 +463,90 @@ async function handleGazaBeneficiaries() {
         );
     };
 };
+;
+
+async function calculateRevenueFromOrders() {
+    const orders = [
+        ...await Order.find({ status: 'paid' }).lean(),
+        ...await Subscription.find({ status: 'paid' }).lean()
+    ];
+
+    let revenue = 0;
+    const rateCache = new Map();
+
+    for (const order of orders) {
+        let currencyRate;
+
+        if (rateCache.has(order.currency)) {
+            currencyRate = rateCache.get(order.currency);
+        } else {
+            const currencyRates = await getCurrencyRates(order.currency);
+            currencyRate = parseFloat(currencyRates.rates.get('NOK').toFixed(2));
+            rateCache.set(order.currency, currencyRate);
+        }
+
+        const totalCost = order.total || order.totalCost;
+        revenue += totalCost * currencyRate;
+    }
+    console.log(revenue, 'revenue calculated');
+};
+
+async function calculateRevenueFromDonor() {
+    const donors = await Donor.find({
+        $or: [
+            { payments: { $exists: true, $ne: [] } },
+            { subscriptions: { $exists: true, $ne: [] } },
+            { vippsCharges: { $exists: true, $ne: [] } }
+        ]
+    }).lean();
+
+    let revenue = 0;
+    const rateCache = new Map();
+
+    for (const donor of donors) {
+        let currencyRate;
+
+        const allPayments = [
+            ...(donor.payments || []),
+            ...(donor.subscriptions || []),
+            ...(donor.vippsCharges || []),
+            ...(donor.vippsPayments || []),
+        ];
+
+        if (donor.email === 'dr_saminabano@yahoo.com') {
+            console.log(allPayments)
+        }
+
+        for (const payment of allPayments) {
+            const currency = payment.currency?.toUpperCase() || payment.amount.currency.toUpperCase();
+            let amount;
+            if (payment.agreementId) {
+                amount = payment.amount / 100;
+            } else if (payment.price) {
+                amount = payment.price / 100;
+            } else if (payment.paymentMethod ) {
+                amount = payment.amount.value / 100;
+            } else {
+                amount = payment.amount;
+            }
+            
+            if (rateCache.has(currency)) {
+                currencyRate = rateCache.get(currency);
+            } else {
+                const currencyRates = await getCurrencyRates(currency);
+                currencyRate = parseFloat(currencyRates.rates.get('NOK').toFixed(2));
+                rateCache.set(currency, currencyRate);
+            }
+
+            console.log(currency, amount, '→ NOK', amount * currencyRate);
+
+            revenue += amount * currencyRate;
+        };
+
+    }
+
+    console.log(revenue, 'revenue calculated');
+}
 
 mongoose.connection.on('open', async () => {
     await deleteDraftOrders(Order);
@@ -473,6 +559,8 @@ mongoose.connection.on('open', async () => {
     // await remove600Children();
     // await resetGazaOrphanPricesTo600();
     // await sendWhatsappMessageWithFormLink();
+    // await calculateRevenueFromOrders();
+    await calculateRevenueFromDonor();
 
     setInterval(async () => {
         try {
