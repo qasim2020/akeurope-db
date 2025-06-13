@@ -9,8 +9,18 @@
 
       <div class="modal-body">
         <div class="mb-3">
+          <label class="form-label">Subject</label>
+          <input class="form-control" name="subject" placeholder="Message heading" />
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Salutation</label>
+          <input class="form-control" name="salute" placeholder="Assalam-o-alaikum dear..." value="Assalam-o-alaikum dear {{data.order.customer.name}}" />
+        </div>
+
+        <div class="mb-3">
           <label class="form-label">Message</label>
-          <textarea class="form-control" name="message" rows="4" placeholder="Type your update..."></textarea>
+          <textarea class="form-control" name="message" rows="4" placeholder="Write your update"></textarea>
         </div>
 
         <div class="mb-3">
@@ -18,7 +28,7 @@
           <div class="list-group">
             {{#each data.files}}
             <label class="list-group-item d-flex align-items-center">
-              <input class="form-check-input me-2" type="checkbox" name="selectedFiles" value="{{this.url}}">
+              <input class="form-check-input me-2" type="checkbox" name="selectedFiles" value="{{this._id}}">
               <span class="me-auto">
                 <strong>{{this.name}}</strong><br>
                 <small class="text-muted">{{this.size}} · Uploaded {{timeAgo this.createdAt}}</small>
@@ -29,7 +39,7 @@
         </div>
 
         <div class="mb-3">
-          <button type="submit" class="btn btn-primary w-100">Send Update</button>
+          <button type="submit" class="btn btn-primary w-100" onclick="sendUpdate(this)">Send Update</button>
         </div>
 
         <div class="d-block">

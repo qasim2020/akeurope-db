@@ -13,6 +13,8 @@ const logSchema = new mongoose.Schema({
         required: true,
     },
     color: String,
+    emailSent: { type: Boolean, default: false, required: false },
+    smsSent: { type: Boolean, default: false, required: false },
     isNotification: { type: Boolean, default: false },
     isRead: { type: Boolean, default: false },
     isReadByCustomer: { type: Boolean, default: true },

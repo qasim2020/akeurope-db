@@ -18,5 +18,6 @@ router.get('/getOrderLogs/:orderId', authenticate, authorize('viewOrders'), orde
 router.get('/getOrderData/:orderId', authenticate, authorize('viewOrders'), ordersController.getOrderData);
 router.get('/getOrderProjects/:orderId', authenticate, authorize('viewEntry'), ordersController.getOrderProjects);
 router.get('/getSendUpdateModal-order/:orderId', authenticate, authorize('viewOrders'), ordersController.getSendUpdateModal);
+router.post('/sendOrderUpdateOnEmail/:orderId', authenticate, authorize('viewOrders'), ordersController.sendOrderUpdateOnEmail);
 
 module.exports = router;

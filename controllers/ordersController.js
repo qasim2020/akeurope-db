@@ -7,6 +7,7 @@ const Subscription = require('../models/Subscription');
 const { saveLog, visibleLogs, orderLogs } = require('../modules/logAction');
 const { logTemplates } = require('../modules/logTemplates');
 const { getChanges } = require('../modules/getChanges');
+const { sendEmailWithAttachments } = require('../modules/emails');
 const {
     getPaginatedOrders,
     getSingleOrder,
@@ -21,6 +22,7 @@ const { getVippsPaymentByOrderId, getVippsSubscriptionByOrderId } = require('../
 const { deleteInvoice, sendInvoiceToCustomer, sendThanksToCustomer, sendClarifyEmailToCustomer } = require('../modules/invoice');
 const Log = require('../models/Log');
 const { createDynamicModel } = require('../models/createDynamicModel');
+const { sendEmailWithAttachment } = require('../modules/emails');
 
 exports.viewOrders = async (req, res) => {
     try {
@@ -71,7 +73,7 @@ exports.viewOrder = async (req, res) => {
         const payment = await getPaymentByOrderId(order._id);
         const subscriptions = await getSubscriptionsByOrderId(order._id);
 
-        order.vippsInfo = (await getVippsPaymentByOrderId(order.vippsReference)) || 
+        order.vippsInfo = (await getVippsPaymentByOrderId(order.vippsReference)) ||
             (await getVippsSubscriptionByOrderId(order.vippsAgreementId));
 
         if (payment) order.payment = payment;
@@ -187,7 +189,9 @@ exports.getEditOrderModal = async (req, res) => {
 
 exports.getSendUpdateModal = async (req, res) => {
     try {
-        const order = await getSingleOrder(req, res);
+        const order = (await Order.findById(req.params.orderId).lean()) ||
+            (await Subscription.findById(req.params.orderId).lean());
+        order.customer = await Customer.findById(order.customerId).lean();
         const customers = await Customer.find().lean();
         const projects = await Project.find().lean();
         const files = await File.find({ 'links.entityId': order._id }).sort({ createdAt: -1 }).lean();
@@ -384,3 +388,43 @@ exports.getOrderProjects = async (req, res) => {
         });
     }
 };
+
+exports.sendOrderUpdateOnEmail = async (req, res) => {
+    try {
+        const order = (await Order.findById(req.params.orderId).lean()) ||
+            (await Subscription.findById(req.params.orderId).lean());
+
+        if (!order) {
+            throw new Error('Order not found');
+        }
+
+        const { subject, salute, message, files } = req.body;
+
+        if (!subject || !message || !salute) {
+            return res.status(400).send('Subject, salute & message are required');
+        }
+
+        const customer = await Customer.findById(order.customerId).lean();
+
+        if (!customer) {
+            return res.status(404).send('Customer not found');
+        }
+
+        await sendEmailWithAttachments(customer.email, salute, subject, message, order._id, files);
+
+        await saveLog(
+            logTemplates({
+                type: 'orderUpdateSent',
+                entity: order,
+                order,
+                message,
+                actor: req.session.user,
+            }),
+        );
+
+        res.status(200).send('Order update sent successfully!');
+    } catch (error) {
+        console.log(error);
+        res.status(500).send(error.message || 'An error occurred while sending the order update');
+    }
+}

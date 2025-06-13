@@ -67,16 +67,15 @@
   {{> showOrderEntries}}
   <div class="row row-deck row-cards">
     <div class="col-12 col-md-6 mb-auto d-flex flex-column">
+      {{> showOrderProducts}}
       {{> showOrder}}
       {{> showOrderInvoice}}
     </div>
     <div class="d-block col-12 col-md-6">
       {{#if (findInArray data.role 'viewFiles')}}
       <div class="card mb-3" id="files-container" entity-type="order" entity-id="{{data.order._id}}" entity-slug="none"
-        entity-url="/order/{{data.order._id}}" 
-        file-types="application/pdf,image/*,video/*"
-        file-url="/uploadFileToOrder"
-        video-url="/uploadVideoToOrder">
+        entity-url="/order/{{data.order._id}}" file-types="application/pdf,image/*,video/*"
+        file-url="/uploadFileToOrder" video-url="/uploadVideoToOrder">
         {{> showEntityFiles}}
       </div>
       {{/if}}
@@ -89,6 +88,10 @@
 {{> emptyOrderModal}}
 {{/if}}
 
+
+
+
+
 <script src="/static/orders.js"></script>
 
 <script>
@@ -97,12 +100,13 @@
     console.log('refreshing containers');
     const hrefLogs = `/getOrderLogs/{{data.order._id}}?page=1`;
     getOrderLogs(modal, hrefLogs);
-    {{#if data.order.projects }}
-    const hrefOrder = `/getOrderData/{{data.order._id}}`;
-    loadOrderInContainer(modal, hrefOrder);
-    const hrefProjects = `/getOrderProjects/{{data.order._id}}`;
-    loadOrderProjects(hrefProjects);
-    {{/if}}
+    const projects = "{{gt data.order.projects 0}}";
+    if (projects === 'true') {
+      const hrefOrder = `/getOrderData/{{data.order._id}}`;
+      loadOrderInContainer(modal, hrefOrder);
+      const hrefProjects = `/getOrderProjects/{{data.order._id}}`;
+      loadOrderProjects(hrefProjects);
+    }
   }
 
   const loadOrderInContainer = function (elem, href) {
@@ -239,7 +243,7 @@
 
     if (modalExists) {
       $(`#button-${orderId}`).remove();
-      $(`#modal-update-${orderId}`).remove(); 
+      $(`#modal-update-${orderId}`).remove();
     }
 
     $.ajax({
@@ -250,6 +254,42 @@
         $("footer").before(response);
         $(`#button-update-${orderId}`).trigger("click");
         initializePopovers();
+      },
+      error: function (xhr, status, error) {
+        alert(xhr.responseText);
+      }
+    });
+  }
+
+  const sendUpdate = function (elem) {
+    const modal = $(elem).closest('.modal');
+    const orderId = $(modal).attr('order-id');
+    const subject = $(modal).find('input[name="subject"]').val();
+    const salute = $(modal).find('input[name="salute"]').val();
+    const message = $(modal).find('textarea[name="message"]').val();
+    const selectedFiles = $(modal).find('input[name="selectedFiles"]:checked').map(function () {
+      return this.value;
+    }).get();
+
+    if (!message.trim() || !subject.trim() || !salute.trim()) {
+      return alert('Please enter heading, salutation and message before sending the update.');
+    }
+
+    const currentBtnHtml = $(elem).html();
+    $(elem).html(`
+      <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+      Sending Update...
+    `);
+
+    $.ajax({
+      url: `/sendOrderUpdateOnEmail/${orderId}`,
+      type: 'POST',
+      contentType: 'application/json',
+      data: JSON.stringify({ subject, message, salute, files: selectedFiles }),
+      success: function (response) {
+        $(elem).html(currentBtnHtml);
+        $('#emailStatus').text('Email: Sent');
+        refreshContainers(modal);
       },
       error: function (xhr, status, error) {
         alert(xhr.responseText);
