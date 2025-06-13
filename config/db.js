@@ -610,7 +610,7 @@ mongoose.connection.on('open', async () => {
     // await resetGazaOrphanPricesTo600();
     // await sendWhatsappMessageWithFormLink();
     // await calculateRevenueFromOrders();
-    await calculateRevenueFromDonor();
+    // await calculateRevenueFromDonor();
 
     setInterval(async () => {
         try {
