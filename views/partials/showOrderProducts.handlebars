@@ -19,8 +19,8 @@
           <div class="datagrid-content">
             <span>
               {{#if order.vippsInfo}}Vipps{{/if}}
-              {{#if order.stripeInfo}}Stripe{{/if}}
-              {{#unless (or order.vippsInfo order.stripeInfo)}}Manual{{/unless}}
+              {{#if (or order.payment order.subscriptions)}}Stripe{{/if}}
+              {{#unless (or order.vippsInfo (or order.payment order.subscriptions))}}Manual{{/unless}}
             </span>
           </div>
         </div>
