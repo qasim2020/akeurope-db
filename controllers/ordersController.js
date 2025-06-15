@@ -23,6 +23,13 @@ const { deleteInvoice, sendInvoiceToCustomer, sendThanksToCustomer, sendClarifyE
 const Log = require('../models/Log');
 const { createDynamicModel } = require('../models/createDynamicModel');
 const { sendEmailWithAttachment } = require('../modules/emails');
+const { getProducts, getJSONProject, makeProductOrder, incrementVariantToProductOrder,
+    findProjectInFile,
+    decrementVariantToProductOrder,
+    calculateProductOrder,
+    removeUnorderedProducts,
+    changeProductOrderCurrency } = require('../modules/productActions');
+const Country = require('../models/Country');
 
 exports.viewOrders = async (req, res) => {
     try {
@@ -34,6 +41,7 @@ exports.viewOrders = async (req, res) => {
         };
 
         const customers = await Customer.find().lean();
+
         res.render('orders', {
             layout: 'dashboard',
             data: {
@@ -48,6 +56,8 @@ exports.viewOrders = async (req, res) => {
                 sidebarCollapsed: req.session.sidebarCollapsed,
                 customers,
                 orders,
+                countries: await Country.find({}).sort({ name: 1 }).lean(),
+                products: await getProducts(),
                 pagination,
             },
         });
@@ -428,3 +438,153 @@ exports.sendOrderUpdateOnEmail = async (req, res) => {
         res.status(500).send(error.message || 'An error occurred while sending the order update');
     }
 }
+
+exports.createProductOrder = async (req, res) => {
+    try {
+        const { slug, code, customerId } = req.params;
+        const project = await getJSONProject(slug);
+        const country = await Country.findOne({ code }).lean();
+        const currency = country.currency.code;
+        project.currency = currency;
+        const order = await makeProductOrder(currency, country, slug, customerId);
+        res.render('partials/productEntries', {
+            layout: false,
+            data: {
+                order
+            },
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).send(error.message || 'server error');
+    }
+}
+
+exports.updateProductOrder = async (req, res) => {
+    try {
+        let order = await Subscription.findOne({ _id: req.params.orderId }).lean();
+
+        if (!order) throw new Error('Order not found!');
+
+        if (!['draft', 'cancelled', 'aborted', 'created', 'expired', 'rejected'].includes(order.status))
+            throw new Error(`Order can not be edited in ${order.status} mode`);
+
+        if (req.query.incrementVariant) {
+            const { variantId } = req.query;
+            await incrementVariantToProductOrder(order._id, variantId);
+            await calculateProductOrder(order._id);
+            const freshOrder = await Subscription.findById(order._id).lean();
+            let foundEntry;
+            for (const product of freshOrder.products) {
+                for (const variant of product.variants) {
+                    if (variant.id === variantId) {
+                        foundEntry = variant;
+                    }
+                }
+            }
+
+            if (!foundEntry) throw new Error('Variant not found.');
+
+            res.render('partials/productVariant', {
+                layout: false,
+                order: freshOrder,
+                variant: foundEntry,
+            });
+
+        }
+
+        if (req.query.decrementVariant) {
+            const { variantId } = req.query;
+            await decrementVariantToProductOrder(order._id, variantId);
+            await calculateProductOrder(order._id);
+            const freshOrder = await Subscription.findById(order._id).lean();
+            let foundEntry;
+            for (const product of freshOrder.products) {
+                for (const variant of product.variants) {
+                    if (variant.id === variantId) {
+                        foundEntry = variant;
+                    }
+                }
+            }
+
+            if (!foundEntry) throw new Error('Variant not found.');
+
+            res.render('partials/productVariant', {
+                layout: false,
+                order: freshOrder,
+                variant: foundEntry,
+            });
+        };
+
+        if (req.query.setCurrency) {
+            const { setCurrency: currency } = req.query;
+            await changeProductOrderCurrency(currency, order._id);
+            await calculateProductOrder(order._id);
+            res.status(200).send('currency changed');
+        };
+        
+    } catch (error) {
+        console.log(error);
+        res.status(400).send(error.message || 'Server error. Could not update order!');
+    }
+};
+
+exports.getProductOrderData = async (req, res) => {
+    try {
+        const order = await Order.findById(req.params.orderId).lean();
+        if (!order) throw new Error('Order not found!');
+        const customerId = order.customerId;
+        if (customerId.toString() !== process.env.TEMP_CUSTOMER_ID) throw new Error('Unauthorized request!');
+        const formattedOrder = await formatOrderWidget(order);
+        res.send(formattedOrder);
+    } catch (error) {
+        console.log(error);
+        res.status(400).send('Server error. Could not get order data!');
+    }
+};
+
+exports.renderOrderEntries = async (req, res) => {
+    try {
+        const order = await Subscription.findOne({ _id: req.params.orderId }).lean();
+        const project = await findProjectInFile(req.params.slug);
+        if (!order || !project) throw new Error('Order or project not found!');
+        res.render('partials/productEntries', {
+            layout: false,
+            data: {
+                order,
+                project,
+            },
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(400).send('Server error. Could not fetch entries!');
+    }
+};
+
+exports.changeOverlayOrderStatus = async (req, res) => {
+    try {
+        const { orderId } = req.params;
+        const { status } = req.body;
+        const order = await Subscription.findOneAndUpdate({ _id: orderId }, {
+            $set: {
+                status
+            }
+        }, {
+            new: true,
+            lean: true
+        });
+        if (status === 'paid') {
+            await removeUnorderedProducts(orderId);
+        }
+        res.status(200).render('partials/components/invoice-status-buttons', {
+            layout: false,
+            data: {
+                order,
+            },
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(404).send({
+            error: error,
+        });
+    }
+};

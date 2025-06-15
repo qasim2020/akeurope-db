@@ -2,6 +2,23 @@ const mongoose = require('mongoose');
 
 const Counter = require('./Counter');
 
+const VariantSchema = new mongoose.Schema({
+    name: { type: String, required: true },
+    id: { type: String, required: true },
+    price: { type: Number, required: true },
+    quantity: { type: Number, default: 0 },
+    orderedCost: { type: Number, default: 0 },
+});
+
+const ProductSchema = new mongoose.Schema({
+    name: { type: String, required: true },
+    desc: { type: String, required: true },
+    id: { type: String, required: true },
+    variants: { type: [VariantSchema], default: [] },
+    orderedCost: { type: Number, default: 0 },
+    quantity: { type: Number, default: 0 },
+});
+
 const SubscriptionRecordSchema = new mongoose.Schema(
     {
         orderNo: { type: String },
@@ -11,6 +28,7 @@ const SubscriptionRecordSchema = new mongoose.Schema(
         monthlySubscription: { type: Boolean, default: false },
         countryCode: { type: String, required: true },
         projectSlug: { type: String, required: true },
+        products: { type: [ProductSchema], default: [], required: false },
         status: { type: String, enum: ['draft', 'pending payment', 'processing', 'paid'], default: 'draft' },
         vippsAgreementId: { type: String, required: false, index: false },
         vippsReference: { type: String, required: false, index: false },

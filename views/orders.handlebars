@@ -20,10 +20,31 @@
               <path d="M12 5l0 14" />
               <path d="M5 12l14 0" />
             </svg>
-            Create new invoice
+            Create Linked Order
           </a>
           <a href="#" class="btn btn-primary d-md-none btn-icon" data-bs-toggle="modal"
             data-bs-target="#modal-new-order" aria-label="modal-new-order">
+            <!-- Download SVG icon from http://tabler-icons.io/i/plus -->
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24"
+              stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+              <path d="M12 5l0 14" />
+              <path d="M5 12l14 0" />
+            </svg>
+          </a>
+
+          <a href="#" class="btn btn-primary d-none d-md-inline-block" id="createProductOrder" data-bs-toggle="modal"
+            data-bs-target="#modal-product-new">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24"
+              stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+              <path d="M12 5l0 14" />
+              <path d="M5 12l14 0" />
+            </svg>
+            Create Product Order
+          </a>
+          <a href="#" class="btn btn-primary d-md-none btn-icon" data-bs-toggle="modal"
+            data-bs-target="#modal-product-new" aria-label="modal-product-new">
             <!-- Download SVG icon from http://tabler-icons.io/i/plus -->
             <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24"
               stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
@@ -45,6 +66,7 @@
 
 {{#if (findInArray data.role "createOrders")}}
 {{> emptyOrderModal}}
+{{> productOrderModal}}
 {{/if}}
 
 <script src="/static/orders.js"></script>
@@ -110,7 +132,6 @@
     }
 
     const isCreateModal = $(document).find(`.modal[order-id=${orderId}]`).length > 0;
-    console.log({isCreateModal});
     if (isCreateModal) {
       const modal = new bootstrap.Modal(document.getElementById('modal-new-order'))
       modal.show();

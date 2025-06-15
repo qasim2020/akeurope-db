@@ -14,7 +14,7 @@ const getModalData = function (modal) {
     };
 };
 
-const addNewEntries = function(elem) {
+const addNewEntries = function (elem) {
     const modal = $(elem).closest('.modal');
     const { customerId, slug } = getModalData(modal);
     const toggleState = $(modal).find(`.${slug}`).attr('toggleState');
@@ -23,7 +23,7 @@ const addNewEntries = function(elem) {
         alert('No order exists yet to add to that');
         return;
     }
-    let url = `/getPaginatedEntriesForDraftOrder/${slug}/${customerId}?orderId=${orderId}&toggleState=${toggleState}&addNewEntries=10`; 
+    let url = `/getPaginatedEntriesForDraftOrder/${slug}/${customerId}?orderId=${orderId}&toggleState=${toggleState}&addNewEntries=10`;
     startSpinner(modal);
     $.ajax({
         url,
@@ -680,10 +680,10 @@ const deleteOrder = function (elem) {
 };
 
 const changeOrderStatus = function (elem) {
-    const orderId = $(elem).closest('.modal').attr('order-id');
     const modal = $(elem).closest('.modal');
+    const orderId = $(modal).attr('order-id');
     if (!orderId) {
-        alert('Order does not exist!');
+        changeOverlayOrderStatus(elem);
         return;
     }
     const status = $(elem).attr('value');
@@ -706,7 +706,7 @@ const changeOrderStatus = function (elem) {
     });
 };
 
-const refreshModal = function(modal) {
+const refreshModal = function (modal) {
     const orderId = $(modal).attr('order-id');
     $('.project-in-order').each((index, project) => {
         const { select, search, customerId, currency } = getModalData(modal);
@@ -717,7 +717,7 @@ const refreshModal = function(modal) {
             method: 'GET',
             success: function (response) {
                 $(modal).find(`[projectSlug=${projectSlug}]`).replaceWith(response);
-                refreshFsLightbox(); 
+                refreshFsLightbox();
             },
             error: function (error) {
                 alert(error.responseText);
@@ -838,3 +838,105 @@ const toggleInvoice = function (elem) {
             .attr({ class: 'col-12 opposite-invoice' });
     }
 };
+
+const createProductOrder = function (elem) {
+    const modal = $(elem).closest('.modal');
+    const customerId = $(modal).find('select[name=customerId]').val();
+    const code = $(modal).find('select[name=country').val();
+    const slug = $(modal).find('input[name=project-slug').val();
+    $.ajax({
+        url: `/createProductOrder/${slug}/${customerId}/${code}`,
+        method: 'GET',
+        success: (response) => {
+            $(modal).find('.order-summary').html(response);
+            initializePopovers();
+        },
+        error: (error) => {
+            alert(error.responseText);
+        },
+    })
+}
+
+const addToOrder = async (elem) => {
+    try {
+        const { orderId, variantId } = changeOrderVariant(elem);
+        const response = await $.ajax({
+            url: `/product-update-order/${orderId}?incrementVariant=true&variantId=${variantId}`,
+            method: 'POST',
+            contentType: 'application/json',
+        });
+        $(elem).closest('.variant').replaceWith(response);
+    } catch (error) {
+        console.log(error);
+        alert(error.message || error.responseText || 'Order expired. Please refresh your browser.');
+    }
+}
+
+const removeFromOrder = async (elem) => {
+    try {
+        const { orderId, variantId } = changeOrderVariant(elem);
+        const response = await $.ajax({
+            url: `/product-update-order/${orderId}?decrementVariant=true&variantId=${variantId}`,
+            method: 'POST',
+            contentType: 'application/json',
+        });
+        $(elem).closest('.variant').replaceWith(response);
+    } catch (error) {
+        console.log(error);
+        alert(error.message || error.responseText || 'Order expired. Please refresh your browser.');
+    }
+}
+
+const changeOrderVariant = (elem) => {
+    const orderId = $('#product-entries').attr('order-id');
+    const variantId = $(elem).closest('.variant').attr('variant-id');
+    if (!orderId || !variantId) {
+        console.log({ orderId, variantId });
+        throw new Error('Order Id and entry Id are required');
+    }
+    $('.donation-amount').html(`<span class="spinner-border spinner-border-sm ms-2" role="status"></span>`);
+    const variant = $(elem).closest('.variant');
+    $(variant).find('.ti:first').replaceWith(`
+                    <span class="text-small spinner-border spinner-border-sm mt-1" role="status" 
+                    style="width: 10px; height: 10px; margin-right: 12px"></span>`);
+    return { orderId, variantId };
+}
+
+const changeOverlayOrderStatus = async function (elem) {
+    const modal = $(elem).closest('.modal');
+    const orderId = $(modal).find('#product-entries').attr('order-id');
+    const status = $(elem).attr('value');
+    const data = {
+        status,
+    };
+    await $.ajax({
+        url: `/changeOverlayOrderStatus/${orderId}`,
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(data),
+        success: (response) => {
+            $(modal).find('.invoice-status').html(response);
+            drawOrderEntries(modal);
+        },
+        error: (error) => {
+            alert(error.responseText);
+        },
+    });
+};
+
+const drawOrderEntries = async function (modal) {
+    try {
+        const orderId = $(modal).find('#product-entries').attr('order-id');
+        const slug = $(modal).find('input[name=project-slug').val();
+        const response = await $.ajax({
+            url: `/product-render-entries/${orderId}/${slug}`,
+            method: 'GET',
+            contentType: 'application/json',
+        });
+        $('#product-entries').replaceWith(response);
+        initializePopovers();
+    } catch (xhr) {
+        console.error("Error:", xhr);
+        alert('Could not fetch entries to render on your window. Refresh your window.');
+    }
+}

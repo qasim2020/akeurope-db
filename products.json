@@ -1,0 +1,70 @@
+[
+    {
+        "name": "Qurbani Eid 2025",
+        "slug": "qurbani-eid-2025",
+        "currency": "NOK",
+        "products": [
+            {
+                "name": "Qurbani in Pakistan 🇵🇰",
+                "desc": "Over 25.3% of the population in Pakistan is living below the poverty line, countless families in Pakistan struggle to secure daily meals. This Eid ul-Adha, through your support we can reach these families.",
+                "id": "qurbani-pakistan",
+                "variants": [
+                    {
+                        "name": "Goat in Pakistan",
+                        "id": "goat-in-pakistan",
+                        "price": 2100
+                    },
+                    {
+                        "name": "1/7 Cow Share in Pakistan",
+                        "id": "cow-share-in-pakistan",
+                        "price": 900
+                    },
+                    {
+                        "name": "Cow in Pakistan",
+                        "id": "cow-in-pakistan",
+                        "price": 6300
+                    }
+                ]
+            },
+            {
+                "name": "Qurbani in Egypt 🇪🇬",
+                "desc": "This year, we are performing Qurbani for Gaza in Egypt. The animals are slaughtered in Egypt, and the meat is packed in durable, canned boxes that can be stored for up to two years. When the border opens, the meat will be delivered into Gaza. Some of it will also be distributed to Palestinian refugees currently living in Egypt.",
+                "id": "qurbani-egypt",
+                "variants": [
+                    {
+                        "name": "1/7 Cow Share in Egypt",
+                        "id": "cow-share-in-egypt",
+                        "price": 1900
+                    },
+                    {
+                        "name": "Cow in Egypt",
+                        "id": "cow-in-egypt",
+                        "price": 13100
+                    }
+                ]
+            },
+            {
+                "name": "Qurbani in Uganda 🇺🇬",
+                "desc": "Over 29% of children in Uganda are suffering from stunting, your Qurbani will provide vital protein to these malnourished families.",
+                "id": "qurbani-uganda",
+                "variants": [
+                    {
+                        "name": "Goat in Uganda",
+                        "id": "goat-in-uganda",
+                        "price": 900
+                    },
+                    {
+                        "name": "1/7 Cow in Uganda",
+                        "id": "cow-share-in-uganda",
+                        "price": 1300
+                    },
+                    {
+                        "name": "Cow in Uganda",
+                        "id": "cow-in-uganda",
+                        "price": 8800
+                    }
+                ]
+            }
+        ]
+    }
+]

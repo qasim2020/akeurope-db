@@ -1,0 +1,70 @@
+<div class="modal modal-blur fade"
+  id="{{#if data.order}}modal-product-{{data.order._id}}{{else}}modal-product-new{{/if}}" tabindex="-1"
+  style="display: none; padding-left: 0px;" role="dialog" {{#if data.order}}order-id="{{data.order._id}}" {{/if}}>
+  <div class="modal-dialog modal-xl" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">{{#if data.order}}Edit Order{{else}}Create New Order{{/if}}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-12 col-lg-6">
+            <div class="mb-3">
+              <label class="form-label">Select Customer</label>
+              <select name="customerId" class="form-select order-change">
+                {{#each data.customers}}
+                <option value="{{this._id}}" {{#if (eq this.email ../data.order.customer.email)}}selected{{/if}}>
+                  {{this.name}}</option>
+                {{/each}}
+              </select>
+              <small class="text-muted">
+                If your customer is not listed here, <a href="/customers">click here</a> to add a
+                new customer.
+              </small>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Select Country</label>
+              <select name="country" class="form-select order-change">
+                {{#each data.countries}}
+                <option value="{{this.code}}">{{this.name}} · {{this.currency.code}}</option>
+                {{/each}}
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Select Project</label>
+              <div class="list-group">
+                {{#each data.products}}
+                <label class="list-group-item d-flex align-items-center">
+                  <input class="form-check-input me-2" type="radio" name="project-slug" value="{{this.slug}}"
+                    onclick="createProductOrder(this)" />
+                  <span class="me-auto">
+                    <strong>{{this.name}}</strong><br>
+                  </span>
+                </label>
+                {{/each}}
+              </div>
+            </div>
+            <div class="mb-3 invoice-status">
+              {{> components/invoice-status-buttons}}
+            </div>
+          </div>
+          <div class="col-12 col-lg-6 order-summary">
+
+          </div>
+
+        </div>
+      </div>
+      <div class="modal-footer">
+        <div class="ms-auto">
+          <a href="#" class="btn btn-link link-default cancel-btn" data-bs-dismiss="modal"> Close </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{{#if data.order}}
+<button href="#" class="btn btn-primary d-none" id="button-{{data.order._id}}" data-bs-toggle="modal"
+  data-bs-target="#modal-product-{{data.order._id}}"></button>
+{{/if}}

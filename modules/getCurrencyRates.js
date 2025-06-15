@@ -3,7 +3,6 @@ const { CurrencyRate } = require('../models/CurrencyRate');
 
 const getCurrencyRates = async (baseCurrency = 'USD') => {
     const today = new Date().toISOString().split('T')[0];
-
     let currencyRates = await CurrencyRate.findOne({ baseCurrency, date: today });
     if (currencyRates) {
         return currencyRates;

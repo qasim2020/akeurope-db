@@ -20,4 +20,10 @@ router.get('/getOrderProjects/:orderId', authenticate, authorize('viewEntry'), o
 router.get('/getSendUpdateModal-order/:orderId', authenticate, authorize('viewOrders'), ordersController.getSendUpdateModal);
 router.post('/sendOrderUpdateOnEmail/:orderId', authenticate, authorize('viewOrders'), ordersController.sendOrderUpdateOnEmail);
 
+router.get('/createProductOrder/:slug/:customerId/:code',  ordersController.createProductOrder);
+router.post('/product-update-order/:orderId', authenticate, authorize('viewOrders'), ordersController.updateProductOrder);
+router.get('/product-render-entries/:orderId/:slug', authenticate, authorize('viewOrders'), ordersController.renderOrderEntries);
+router.get('/overlay-order/:orderId', authenticate, authorize('viewOrders'), ordersController.getProductOrderData);
+router.post('/changeOverlayOrderStatus/:orderId', authenticate, authorize('editOrders'), ordersController.changeOverlayOrderStatus);
+
 module.exports = router;
