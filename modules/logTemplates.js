@@ -379,6 +379,18 @@ const logTemplates = ({ type, entity, actor, project, file, order, entry, color,
             isRead: true,
             isReadByCustomer: true,
         } : null,
+        customerCreatedFromSolidus: {
+            ...commons('customer', entity._id),
+            action: `<a href="/customer/${entity._id}">${entity.name}</a> profile imported from solidus.`,
+            color: 'blue',
+            isNotification: false,
+        },
+        customerCreatedFromSharePoint: {
+            ...commons('customer', entity._id),
+            action: `<a href="/customer/${entity._id}">${entity.name}</a> profile imported from share point.`,
+            color: 'blue',
+            isNotification: false,
+        },
     };
 
     if (templates[type] == null) {

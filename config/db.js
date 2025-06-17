@@ -12,6 +12,9 @@ formCollection.on('connected', () => {
 
 global.formCollection = formCollection;
 
+const fs = require('fs');
+const path = require('path');
+const ExcelJS = require('exceljs');
 const twilio = require('twilio');
 const twilioClient = twilio(process.env.TWILIO_SID, process.env.TWILIO_AUTH_TOKEN);
 const { createDynamicModel } = require('../models/createDynamicModel');
@@ -20,12 +23,16 @@ const Log = require('../models/Log');
 const Beneficiary = require('../models/Beneficiary');
 const Chat = require('../models/Chat');
 const Order = require('../models/Order');
+const User = require('../models/User');
 const Subscription = require('../models/Subscription');
+const Customer = require('../models/Customer');
 const Donor = require('../models/Donor');
+const { saveLog } = require('../modules/logAction');
 const { deleteInvoice } = require('../modules/invoice');
 const { sendTelegramMessage, sendErrorToTelegram } = require('../../akeurope-cp/modules/telegramBot')
 const { formatDate } = require('../modules/helpers');
-const { getCurrencyRates } = require('../modules/getCurrencyRates')
+const { getCurrencyRates } = require('../modules/getCurrencyRates');
+const { logTemplates } = require('../modules/logTemplates');
 
 const connectDB = async () => {
     try {
@@ -499,7 +506,7 @@ async function calculateRevenueFromDonor() {
             { vippsCharges: { $exists: true, $ne: [] } },
             { vippsPayments: { $exists: true, $ne: [] } }
         ]
-    }).sort({createdAt: -1}).lean();
+    }).sort({ createdAt: -1 }).lean();
 
     let revenue = 0;
     const rateCache = new Map();
@@ -577,9 +584,6 @@ async function calculateRevenueFromDonor() {
     exportToCSV(array, 'revenue.csv');
 }
 
-const fs = require('fs');
-const path = require('path');
-
 function exportToCSV(array, filename = 'export.csv') {
     if (!Array.isArray(array) || array.length === 0) return;
 
@@ -598,10 +602,163 @@ function exportToCSV(array, filename = 'export.csv') {
     console.log(`✅ Exported ${filename}`);
 }
 
+function norwayPhoneNo(phone) {
+    if (typeof phone !== 'string') {
+        phone = phone.toString();
+    }
+    // Remove any spaces, dashes, parentheses but keep leading +
+    phone = phone.replace(/[^\d+]/g, '');
+
+    // If starts with +, assume fully formatted international, return as is
+    if (phone.startsWith('+')) return phone;
+
+    // Remove a single leading zero if present
+    if (phone.startsWith('0')) phone = phone.slice(1);
+
+    const len = phone.length;
+
+    // If 8 or 12 digits, it's a Norwegian number
+    if (len === 8 || len === 12) {
+        return `+47${phone}`;
+    }
+
+    // Otherwise, return clean number—may be invalid
+    return phone;
+}
+
+async function readKontakterSolidus() {
+    try {
+        const filePath = path.join(__dirname, 'kontakter.xlsx');
+        const workbook = new ExcelJS.Workbook();
+        await workbook.xlsx.readFile(filePath);
+
+        const worksheet = workbook.worksheets[0];
+        const rows = [];
+
+        worksheet.eachRow({ includeEmpty: false }, (row, rowNumber) => {
+            rows.push(row.values.slice(1));
+        });
+
+        const headers = rows[0];
+        const dataRows = rows.slice(1);
+        const jsonData = dataRows.map(row => {
+            return headers.reduce((acc, key, idx) => {
+                acc[key] = row[idx] ?? '';
+                return acc;
+            }, {});
+        });
+
+        const solidusCustomers = jsonData.map(row => {
+            const email = row['Email'];
+            const tel = row['Phone'] || row['Mobile'];
+            if (!email) return null;
+            return {
+                name: `${row['First name']} | ${row['Last name']} | ${row['Contact']}`,
+                address: `${row['Address']} ${row['Addresse2']} ${row['Zip code']} ${row['City']} ${row['Kommune']} ${row['Land']}`,
+                email,
+                tel: norwayPhoneNo(tel),
+            }
+        }).filter(val => val !== null);
+
+        const userId = '6723c1075170ac0124060952';
+        const user = await User.findOne({ _id: userId }).lean();
+
+        for (const customer of solidusCustomers) {
+            const dbc = await Customer.findOneAndUpdate({ email: customer.email }, {
+                $setOnInsert: {
+                    name: customer.name.replace(',', ''),
+                    address: customer.address.replace('undefined', ''),
+                    tel: customer.tel
+                }
+            }, {
+                upsert: true,
+                new: true,
+            })
+
+            await saveLog(
+                logTemplates({
+                    type: 'customerCreatedFromSolidus',
+                    entity: dbc,
+                    actor: user,
+                }),
+            );
+        }
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+async function readKontakterSharePoint() {
+    try {
+        const filePath = path.join(__dirname, 'sharepoint.xlsx');
+        console.log(filePath);
+        const workbook = new ExcelJS.Workbook();
+        await workbook.xlsx.readFile(filePath);
+
+        const worksheet = workbook.worksheets[0];
+        const rows = [];
+
+        worksheet.eachRow({ includeEmpty: false }, (row, rowNumber) => {
+            rows.push(row.values.slice(1));
+        });
+
+        const headers = rows[0];
+        const dataRows = rows.slice(1);
+        const jsonData = dataRows.map(row => {
+            return headers.reduce((acc, key, idx) => {
+                acc[key] = row[idx] ?? '';
+                return acc;
+            }, {});
+        });
+
+        const customers = jsonData.map(row => {
+            const email = row['E-mail'];
+            const tel = row['Mobil'];
+            if (!email) return null;
+            const address = (`${row['Adresse']} ${row['Postnummer']} ${row['City']} ${row['District']} ${row['Country']} ${row['Land']}`).replace('undefined', '').trim();
+            return {
+                name: `${row['Fornavn']} || ${row['LastName']} || ${row['OrganizationName'].replace('undefined', '').trim()}`,
+                address,
+                email,
+                tel: norwayPhoneNo(tel),
+            }
+        }).filter(val => val !== null);
+
+        const userId = '6723c1075170ac0124060952';
+        const user = await User.findOne({ _id: userId }).lean();
+
+        for (const customer of customers) {
+            const dbc = await Customer.findOneAndUpdate({ email: customer.email }, {
+                $setOnInsert: {
+                    name: customer.name,
+                    address: customer.address,
+                    tel: customer.tel
+                }
+            }, {
+                upsert: true,
+                new: true
+            });
+
+            await saveLog(
+                logTemplates({
+                    type: 'customerCreatedFromSharePoint',
+                    entity: dbc,
+                    actor: user,
+                }),
+            );
+
+        }
+    } catch (error) {
+        console.log(error);
+    }
+}
+
 mongoose.connection.on('open', async () => {
     await deleteDraftOrders(Order);
     await deleteDraftOrders(Subscription);
     await convertUnpaidToExpired(Order);
+    await readKontakterSharePoint();
+    await readKontakterSolidus();
     // await handleGazaBeneficiaries();
     // await handleEgyptFamilyUsers();
     // await handleGazaOrphanForm();
