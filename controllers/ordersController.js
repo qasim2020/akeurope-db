@@ -282,19 +282,6 @@ exports.deleteOrder = async (req, res) => {
         if (order.projects?.length > 0) {
             for (const project of order.projects) {
                 project.detail = await Project.findOne({ slug: project.slug }).lean();
-                const model = await createDynamicModel(project.slug);
-                for (const entryInOrder of project.entries) {
-                    const entry = await model.findById(entryInOrder.entryId).lean();
-                    await saveLog(
-                        logTemplates({
-                            type: 'entryRemovedFromOrder',
-                            entity: entry,
-                            order,
-                            project,
-                            actor: req.session.user,
-                        }),
-                    );
-                }
             }
         }
 

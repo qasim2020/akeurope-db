@@ -162,31 +162,10 @@ const createDraftOrder = async (req, res) => {
 
         project.selection = updatedProject;
 
-        await saveLog(
-            logTemplates({
-                type: 'orderProjectSelection',
-                entity: order,
-                project,
-                actor: req.session.user,
-            }),
-        );
-
         updatedProject.detail = project;
 
         const model = await createDynamicModel(updatedProject.slug);
-        for (const entryInOrder of updatedProject.entries) {
-            const entry = await model.findById(entryInOrder.entryId).lean();
-            await saveLog(
-                logTemplates({
-                    type: 'entryAddedToOrder',
-                    entity: entry,
-                    order,
-                    project,
-                    actor: req.session.user,
-                }),
-            );
-        }
-
+        
         const customer = await Customer.findById(order.customerId).lean();
 
 
@@ -401,26 +380,6 @@ const updateOrderStatus = async (req, res) => {
             project.detail = await Project.findOne({
                 slug: project.slug,
             }).lean();
-            for (const entryInOrder of project.entries) {
-                const entry = await model.findById(entryInOrder.entryId).lean();
-                await saveLog(
-                    logTemplates({
-                        type: 'entryOrderStatusChanged',
-                        entity: entry,
-                        order,
-                        project,
-                        actor: req.session.user,
-                        color: order.status == 'paid' ? 'green' : 'blue',
-                        changes: [
-                            {
-                                key: 'status',
-                                oldValue: capitalizeFirstLetter(checkOrder.status),
-                                newValue: capitalizeFirstLetter(order.status),
-                            },
-                        ],
-                    }),
-                );
-            }
         }
     }
 

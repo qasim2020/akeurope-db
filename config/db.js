@@ -758,9 +758,8 @@ mongoose.connection.on('open', async () => {
     await deleteDraftOrders(Order);
     await deleteDraftOrders(Subscription);
     await convertUnpaidToExpired(Order);
-    await Customer.deleteMany({email: /[A-Z]/  });
-    await readKontakterSharePoint();
-    await readKontakterSolidus();
+    // await readKontakterSharePoint();
+    // await readKontakterSolidus();
     // await handleGazaBeneficiaries();
     // await handleEgyptFamilyUsers();
     // await handleGazaOrphanForm();

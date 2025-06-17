@@ -54,23 +54,6 @@ const runQueriesOnOrder = async (req, res) => {
     if (req.query.currency) {
         const currency = req.query.currency;
         order = await Order.findOneAndUpdate({ _id: orderId }, { $set: { currency: currency } }, { new: true, lean: true });
-
-        if (order.currency != existingOrder.currency) {
-            await saveLog(
-                logTemplates({
-                    type: 'orderCurrencyChanged',
-                    entity: order,
-                    changes: [
-                        {
-                            key: 'currency',
-                            oldValue: existingOrder.currency,
-                            newValue: currency,
-                        },
-                    ],
-                    actor: req.session.user,
-                }),
-            );
-        }
     }
 
     if (req.query.months > 0) {
