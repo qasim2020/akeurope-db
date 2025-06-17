@@ -91,8 +91,6 @@ const customerJourney = async (req, res) => {
 
         const totalPages = Math.ceil(total / limit);
 
-        console.log(JSON.stringify(tracks, 0, 2));
-
         return {
             tracks,
             pagesArray: generatePagination(totalPages, page),

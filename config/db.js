@@ -664,24 +664,27 @@ async function readKontakterSolidus() {
         const user = await User.findOne({ _id: userId }).lean();
 
         for (const customer of solidusCustomers) {
-            const dbc = await Customer.findOneAndUpdate({ email: customer.email }, {
-                $setOnInsert: {
-                    name: customer.name.replace(',', ''),
-                    address: customer.address.replace('undefined', ''),
-                    tel: customer.tel
-                }
-            }, {
-                upsert: true,
-                new: true,
-            })
+            const checkCustomer = await Customer.findOne({ email: customer.email }).lean();
+            if (!checkCustomer) {
+                const dbc = await Customer.findOneAndUpdate({ email: customer.email }, {
+                    $setOnInsert: {
+                        name: customer.name.replace(',', ''),
+                        address: customer.address.replace('undefined', ''),
+                        tel: customer.tel
+                    }
+                }, {
+                    upsert: true,
+                    new: true,
+                })
 
-            await saveLog(
-                logTemplates({
-                    type: 'customerCreatedFromSolidus',
-                    entity: dbc,
-                    actor: user,
-                }),
-            );
+                await saveLog(
+                    logTemplates({
+                        type: 'customerCreatedFromSolidus',
+                        entity: dbc,
+                        actor: user,
+                    }),
+                );
+            }
         }
     } catch (error) {
         console.log(error);
@@ -728,24 +731,27 @@ async function readKontakterSharePoint() {
         const user = await User.findOne({ _id: userId }).lean();
 
         for (const customer of customers) {
-            const dbc = await Customer.findOneAndUpdate({ email: customer.email }, {
-                $setOnInsert: {
-                    name: customer.name,
-                    address: customer.address,
-                    tel: customer.tel
-                }
-            }, {
-                upsert: true,
-                new: true
-            });
+            const checkCustomer = await Customer.findOne({ email: customer.email }).lean();
+            if (!checkCustomer) {
+                const dbc = await Customer.findOneAndUpdate({ email: customer.email }, {
+                    $setOnInsert: {
+                        name: customer.name,
+                        address: customer.address,
+                        tel: customer.tel
+                    }
+                }, {
+                    upsert: true,
+                    new: true
+                });
 
-            await saveLog(
-                logTemplates({
-                    type: 'customerCreatedFromSharePoint',
-                    entity: dbc,
-                    actor: user,
-                }),
-            );
+                await saveLog(
+                    logTemplates({
+                        type: 'customerCreatedFromSharePoint',
+                        entity: dbc,
+                        actor: user,
+                    }),
+                );
+            }
 
         }
     } catch (error) {
