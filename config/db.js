@@ -606,23 +606,18 @@ function norwayPhoneNo(phone) {
     if (typeof phone !== 'string') {
         phone = phone.toString();
     }
-    // Remove any spaces, dashes, parentheses but keep leading +
     phone = phone.replace(/[^\d+]/g, '');
 
-    // If starts with +, assume fully formatted international, return as is
     if (phone.startsWith('+')) return phone;
 
-    // Remove a single leading zero if present
     if (phone.startsWith('0')) phone = phone.slice(1);
 
     const len = phone.length;
 
-    // If 8 or 12 digits, it's a Norwegian number
-    if (len === 8 || len === 12) {
+    if (len === 8) {
         return `+47${phone}`;
     }
 
-    // Otherwise, return clean number—may be invalid
     return phone;
 }
 
@@ -655,7 +650,7 @@ async function readKontakterSolidus() {
             return {
                 name: `${row['First name']} | ${row['Last name']} | ${row['Contact']}`,
                 address: `${row['Address']} ${row['Addresse2']} ${row['Zip code']} ${row['City']} ${row['Kommune']} ${row['Land']}`,
-                email,
+                email: email.toLowerCase(),
                 tel: norwayPhoneNo(tel),
             }
         }).filter(val => val !== null);
@@ -722,7 +717,7 @@ async function readKontakterSharePoint() {
             return {
                 name: `${row['Fornavn']} || ${row['LastName']} || ${row['OrganizationName'].replace('undefined', '').trim()}`,
                 address,
-                email,
+                email: email.toLowerCase(),
                 tel: norwayPhoneNo(tel),
             }
         }).filter(val => val !== null);
@@ -763,6 +758,7 @@ mongoose.connection.on('open', async () => {
     await deleteDraftOrders(Order);
     await deleteDraftOrders(Subscription);
     await convertUnpaidToExpired(Order);
+    await Customer.deleteMany({email: /[A-Z]/  });
     await readKontakterSharePoint();
     await readKontakterSolidus();
     // await handleGazaBeneficiaries();
