@@ -113,7 +113,7 @@ exports.viewOrder = async (req, res) => {
                 orderLogs: await orderLogs(req, res),
                 sidebarCollapsed: req.session.sidebarCollapsed,
                 projects: req.allProjects,
-                customers: await Customer.find().lean(),
+                customers: await Customer.find().sort({name: -1}).lean(),
                 activeMenu: 'orders',
                 order,
                 orderJson: JSON.stringify(order),
