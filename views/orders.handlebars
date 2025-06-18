@@ -70,6 +70,7 @@
 {{/if}}
 
 <script src="/static/orders.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
 
 <script>
 
@@ -152,5 +153,38 @@
       }
     });
   }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    var el = document.getElementById('select-customer-product');
+
+    if (!el) {
+      console.log("Element #select-customer-product not found!");
+      return;
+    }
+
+    if (window.TomSelect) {
+      new TomSelect('#select-customer-product', {
+        create: false,
+        sortField: {
+          field: "text",
+          direction: "asc"
+        },
+        placeholder: 'Select a customer...'
+      });
+
+      new TomSelect('#select-country-product', {
+        create: false,
+        sortField: {
+          field: "text",
+          direction: "asc"
+        },
+        placeholder: 'Select the country...'
+      });
+
+      console.log("TomSelect initialized successfully.");
+    } else {
+      console.log("TomSelect is not available.");
+    }
+  });
 
 </script>
