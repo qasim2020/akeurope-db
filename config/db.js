@@ -424,6 +424,99 @@ async function handleGazaOrphanForm() {
     console.log(`✅ ${beneficiaries.length} added to Beneficiary collection`);
 }
 
+async function createDirectDonorLongUpdatesSheet() {
+    function getDaysDiff(createdAt) {
+        const now = new Date();
+        const diffInMs = now - createdAt;
+        const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
+        return diffInDays;
+    }
+
+    const model = await createDynamicModel('gaza-orphans');
+    const orders = await Order.find({
+        'projects.slug': 'gaza-orphans',
+        status: 'paid',
+        customerId: {
+            $nin: [
+                new mongoose.Types.ObjectId('68496e48dbce9ead4cd7fc53'),
+                new mongoose.Types.ObjectId('67dd7d90d39f5002372bba2a')
+            ]
+        }
+    }).lean();
+
+    let error = [];
+    let entries = [];
+
+    for (const order of orders) {
+        const project = order.projects.find(prj => prj.slug === 'gaza-orphans');
+        if (!project) continue;
+        const customer = await Customer.findById(order.customerId).lean();
+        for (const orderEntry of project.entries) {
+            const entryId = orderEntry.entryId;
+            const doc = await model.findOne({ _id: entryId }).select('ser name gender orphanId dateOfBirth fatherDateOfDeath guardianName guardianId phoneNo1 phoneNo2 displacementGov displacementArea orphanAddress relationToTheOrphan cluster status').lean();
+            const files = await File.find({ "links.entityId": doc._id }).sort({ createdAt: -1 });
+            if (files.length > 0) {
+                const diffInDays = getDaysDiff(new Date(files[0].createdAt));
+                if (diffInDays > 6) {
+                    doc.photoVideoUpdate = `Pending | File uploaded ${Math.ceil(diffInDays)} days ago.`;
+                } else {
+                    doc.photoVideoUpdate = `Done | File uploaded ${Math.ceil(diffInDays)} days ago`;
+                }
+            } else {
+                doc.photoVideoUpdate = `Pending | No file uploaded yet.`;
+            }
+            const logs = await Log.find({ entityId: doc._id, entityType: 'entry', changes: { $exists: true } }).select('action changes timestamp').sort({ timestamp: -1 }).lean();
+            if (logs.length > 1) {
+                const diffInDays = getDaysDiff(new Date(logs[0].timestamp));
+                if (diffInDays > 30) {
+                    doc.statusUpdate = `Pending | Update sent ${Math.ceil(diffInDays)} days ago.`;
+                } else {
+                    const logStatus = logs.find(log => log.changes.find(fd => fd.key === 'status')).changes.find(fd => fd.key === 'status');
+                    if (logStatus) {
+                        doc.statusUpdate = `Done | Update sent ${Math.ceil(diffInDays)} days ago`;
+                    } else {
+                        error.push(`${doc._id} | ${doc.status.slice(0, 50)}... | Log is not a status update = check if this is ok`);
+                    }
+                }
+            } else {
+                doc.statusUpdate = `Pending | ${doc.name} does not have any log. Check this please.`;
+            }
+            doc.donor = customer.name;
+            doc.dateOfBirth = formatDate(doc.dateOfBirth);
+            doc.fatherDateOfDeath = formatDate(doc.fatherDateOfDeath);
+            doc.address = `${doc.displacementGov} ${doc.displacementArea} ${doc.orphanAddress}`;
+            doc.phoneNo1 = doc.phoneNo1.replace(/(.{4})/g, '$1 ').trim();
+            doc.phoneNo2 = doc.phoneNo2.replace(/(.{4})/g, '$1 ').trim();
+            delete doc.displacementGov;
+            delete doc.displacementArea;
+            delete doc.orphanAddress;
+            delete doc._id;
+            const tarteeb = {
+                Ser: doc.ser,
+                'Orphan ID': doc.orphanId,
+                Name: doc.name,
+                Donor: customer.name,
+                'Long Update': doc.statusUpdate,
+                'File Upload': doc.photoVideoUpdate,
+                Guardian: `${doc.guardianName} (${doc.relationToTheOrphan})`,
+                'Guardian Phone No 1': doc.phoneNo1,
+                'Guardian Phone No 2': doc.phoneNo2,
+                'Guardian ID': doc.guardianId,
+                DOB: doc.dateOfBirth,
+                FDOD: doc.fatherDateOfDeath,
+                Cluster: doc.cluster,
+                Address: doc.address,
+                'Current Status': doc.status
+            };
+            entries.push(tarteeb);
+        }
+    }
+    if (error.length > 0) {
+        await sendErrorToTelegram(error.join('\n\n'));
+    }
+    exportToCSV(entries, `gaza-${formatDate(Date.now())}.csv`);
+}
+
 async function handleEgyptFamilyUsers() {
     const model = await createDynamicModel('egypt-family');
     const beneficiaries = await Beneficiary.find({ projects: 'egypt-family', verified: true }).lean();
@@ -770,6 +863,7 @@ mongoose.connection.on('open', async () => {
     // await sendWhatsappMessageWithFormLink();
     // await calculateRevenueFromOrders();
     // await calculateRevenueFromDonor();
+    await createDirectDonorLongUpdatesSheet();
 
     setInterval(async () => {
         try {
@@ -783,11 +877,11 @@ mongoose.connection.on('open', async () => {
 
     setInterval(async () => {
         try {
-            // await handleEgyptFamilyUsers();
+            await createDirectDonorLongUpdatesSheet();
         } catch (error) {
             console.error('Error deleting expired orders:', error);
         }
-    }, 60 * 60 * 1000);
+    }, 24 * 60 * 60 * 1000);
 });
 
 module.exports = connectDB;

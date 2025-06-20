@@ -90,108 +90,117 @@
       <thead>
         <tr>
           <th></th>
+          <th>Active Order</th>
           {{#each data.fields}}
           {{#if this.subscription}}
           <th class="text-danger fw-bold">{{this.actualName}}
+            {{else}}
+          <th>{{this.actualName}}</th>
+          {{/if}}
+          {{/each}}
+        </tr>
+      </thead>
+      <tbody>
+        {{#each data.entries as |entry|}}
+        <tr class="data-row {{#if (eq entry.isPaid 1)}}bg-red-lt{{/if}}">
+          <td>
+            <a href="/entry/{{entry._id}}/project/{{../data.project.slug}}"
+              class="btn btn-primary btn-icon cursor-pointer">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                class="icon icon-tabler icons-tabler-outline icon-tabler-user m-0">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                <path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0" />
+                <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+              </svg>
+            </a>
+            <button class="btn btn-secondary-outline btn-icon edit-entry cursor-pointer" entry-id="{{entry._id}}">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                class="icon icon-tabler icons-tabler-outline icon-tabler-pencil-plus m-0">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4"></path>
+                <path d="M13.5 6.5l4 4"></path>
+                <path d="M16 19h6"></path>
+                <path d="M19 16v6"></path>
+              </svg>
+            </button>
+            <button class="btn text-red btn-icon cursor-pointer" entry-id="{{entry._id}}" onclick="deleteEntry(this)">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                class="icon icon-tabler icons-tabler-outline icon-tabler-trash-x m-0">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                <path d="M4 7h16" />
+                <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" />
+                <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" />
+                <path d="M10 12l4 4m0 -4l-4 4" />
+              </svg>
+            </button>
+          </td>
+
+          <td class="data-row">
+            {{#if entry.isPaid}}
+            <span class="text-red">{{entry.customer.name}}</span>
+            {{else}}
+            <span>Not Found</span>
+            {{/if}}
+          </td>
+
+          {{#each ../data.fields}}
+
+          {{#if (eq this.type "boolean")}}
+          {{#if (eq this.options.0.value (lookup entry this.name))}}
+          <td> <span class="status status-green"> {{lookup entry this.name}}</span> </td>
+          {{else}}
+          <td> <span class="status status-red"> {{lookup entry this.name}}</span> </td>
+          {{/if}}
+
+          {{else if (eq this.type "dropdown")}}
+          <td class="{{#if (neq @key 0)}}text-secondary{{/if}}">{{lookup entry this.name}}</td>
+
+          {{else if (eq this.type "date")}}
+          <td class="{{#if (neq @key 0)}}text-secondary{{/if}}"> {{formatDate (lookup entry this.name)}} </td>
+
+          {{else if (eq this.type "image")}}
+          {{#if (lookup entry this.name)}}
+          <td>
+            <a data-fslightbox="gallery" href="{{lookup entry this.name}}">
+              <img class="img-thumbnai p-0 overflow-hidden rounded-3 border"
+                src="{{resizeCloudinaryUrl (lookup entry this.name) 't_w-250'}}" alt="" style="max-width: 50px;">
+            </a>
+          </td>
+          {{else}}
+          <td>
+            <a data-fslightbox="gallery" href="/static/images/no-image-placement.png">
+              <img class="img-thumbnail p-0 overflow-hidden rounded-3 border"
+                src="/static/images/no-image-placement.png" alt="" style="max-width: 50px;">
+            </a>
+          </td>
+          {{/if}}
+
+          {{else if (eq this.type "file")}}
+          {{#if (lookup entry this.name)}}
+          <td class="text-secondary">
+            <a href="{{lookup entry this.name}}" target="_blank">Download File</a>
+          </td>
+          {{else}}
+          <td class="{{#if (neq @key 0)}}text-secondary{{/if}}"> <span>No file uploaded</span> </td>
+          {{/if}}
+
+          {{else if this.subscription}}
+          <td class="text-danger fw-bold">{{lookup entry this.name}}<sup class="ms-1">{{../../data.project.currency}} /
+              Month</sup></td>
+          {{else}}
+          <td class="text-secondary"> {{shortenString (lookup entry this.name) 40}} </td>
+          {{/if}}
+
+          {{/each}}
+        </tr>
+        {{/each}}
+      </tbody>
+    </table>
   </div>
-  {{else}}
-  <th>{{this.actualName}}</th>
-  {{/if}}
-  {{/each}}
-  </tr>
-  </thead>
-  <tbody>
-    {{#each data.entries as |entry|}}
-    <tr class="data-row {{#if (eq entry.isPaid 1)}}bg-red-lt{{/if}}">
-      <td>
-        <a href="/entry/{{entry._id}}/project/{{../data.project.slug}}" class="btn btn-primary btn-icon cursor-pointer">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-            class="icon icon-tabler icons-tabler-outline icon-tabler-user m-0">
-            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-            <path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0" />
-            <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
-          </svg>
-        </a>
-        <button class="btn btn-secondary-outline btn-icon edit-entry cursor-pointer" entry-id="{{entry._id}}">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-            class="icon icon-tabler icons-tabler-outline icon-tabler-pencil-plus m-0">
-            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-            <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4"></path>
-            <path d="M13.5 6.5l4 4"></path>
-            <path d="M16 19h6"></path>
-            <path d="M19 16v6"></path>
-          </svg>
-        </button>
-        <button class="btn text-red btn-icon cursor-pointer" entry-id="{{entry._id}}" onclick="deleteEntry(this)">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-            class="icon icon-tabler icons-tabler-outline icon-tabler-trash-x m-0">
-            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-            <path d="M4 7h16" />
-            <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" />
-            <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" />
-            <path d="M10 12l4 4m0 -4l-4 4" />
-          </svg>
-        </button>
-      </td>
-
-      {{#each ../data.fields}}
-
-      {{#if (eq this.type "boolean")}}
-      {{#if (eq this.options.0.value (lookup entry this.name))}}
-      <td> <span class="status status-green"> {{lookup entry this.name}}</span> </td>
-      {{else}}
-      <td> <span class="status status-red"> {{lookup entry this.name}}</span> </td>
-      {{/if}}
-
-      {{else if (eq this.type "dropdown")}}
-      <td class="{{#if (neq @key 0)}}text-secondary{{/if}}">{{lookup entry this.name}}</td>
-
-      {{else if (eq this.type "date")}}
-      <td class="{{#if (neq @key 0)}}text-secondary{{/if}}"> {{formatDate (lookup entry this.name)}} </td>
-
-      {{else if (eq this.type "image")}}
-      {{#if (lookup entry this.name)}}
-      <td>
-        <a data-fslightbox="gallery" href="{{lookup entry this.name}}">
-          <img class="img-thumbnai p-0 overflow-hidden rounded-3 border"
-            src="{{resizeCloudinaryUrl (lookup entry this.name) 't_w-250'}}" alt="" style="max-width: 50px;">
-        </a>
-      </td>
-      {{else}}
-      <td>
-        <a data-fslightbox="gallery" href="/static/images/no-image-placement.png">
-          <img class="img-thumbnail p-0 overflow-hidden rounded-3 border" src="/static/images/no-image-placement.png"
-            alt="" style="max-width: 50px;">
-        </a>
-      </td>
-      {{/if}}
-
-      {{else if (eq this.type "file")}}
-      {{#if (lookup entry this.name)}}
-      <td class="text-secondary">
-        <a href="{{lookup entry this.name}}" target="_blank">Download File</a>
-      </td>
-      {{else}}
-      <td class="{{#if (neq @key 0)}}text-secondary{{/if}}"> <span>No file uploaded</span> </td>
-      {{/if}}
-
-      {{else if this.subscription}}
-      <td class="text-danger fw-bold">{{lookup entry this.name}}<sup class="ms-1">{{../../data.project.currency}} /
-          Month</sup></td>
-      {{else}}
-      <td class="{{#if (neq @key 0)}}text-secondary{{/if}}"> {{shortenString (lookup entry this.name) 40}} </td>
-      {{/if}}
-
-      {{/each}}
-    </tr>
-    {{/each}}
-  </tbody>
-  </table>
-</div>
-{{> dataNavigationFooter}}
+  {{> dataNavigationFooter}}
 </div>
 
 {{/if}}

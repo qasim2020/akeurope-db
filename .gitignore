@@ -1,6 +1,7 @@
 config/revenue.csv
 config/kontakter.xlsx
 config/sharepoint.xlsx
+config/gaza-*.csv
 .env
 node_modules
 invoices
