@@ -563,7 +563,6 @@ async function handleGazaBeneficiaries() {
         );
     };
 };
-;
 
 async function calculateRevenueFromOrders() {
     const orders = [
@@ -847,10 +846,35 @@ async function readKontakterSharePoint() {
     }
 }
 
+function formatPakistaniPhone(phone) {
+    if (!phone) return 'Not Listed'; 
+    phone = phone.replace(/[^0-9]/g, ''); // remove all non-numeric characters
+    if (phone.startsWith('0')) {
+        phone = phone.slice(1); // remove starting 0
+    }
+    return `+92${phone}`;
+}
+
+async function fixPakOrphanPhoneNos() {
+    const model = await createDynamicModel('pakistan-orphans');
+    const entries = await model.find().lean();
+    for (const entry of entries) {
+        if (entry.guardianPhoneNo1?.startsWith('+') || entry.guardianPhoneNo2?.startsWith('+')) continue;
+        const phone1 = formatPakistaniPhone(entry.guardianPhoneNo1);
+        const phone2 = formatPakistaniPhone(entry.guardianPhoneNo2);
+        await model.updateOne({_id: entry._id},{$set: {
+            guardianPhoneNo1: phone1,
+            guardianPhoneNo2: phone2,
+        }});
+    }
+
+}
+
 mongoose.connection.on('open', async () => {
     await deleteDraftOrders(Order);
     await deleteDraftOrders(Subscription);
     await convertUnpaidToExpired(Order);
+    await fixPakOrphanPhoneNos();
     // await Customer.deleteMany({email: /[A-Z]/  });
     // await readKontakterSharePoint();
     // await readKontakterSolidus();
