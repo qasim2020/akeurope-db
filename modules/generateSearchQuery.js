@@ -69,7 +69,7 @@ const generateSearchQuery = function (req, project) {
     }
 
     const stringFields = project.fields
-        .filter((field) => /string|boolean|image|file|dropdown/i.test(field.type))
+        .filter((field) => /string|textarea|boolean|image|file|dropdown/i.test(field.type))
         .map((field) => ({ [field.name]: new RegExp(search, 'i') }));
     const numberFields = project.fields.filter((field) => field.type === 'number');
     const dateFields = project.fields.filter((field) => field.type === 'date');

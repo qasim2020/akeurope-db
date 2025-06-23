@@ -847,7 +847,7 @@ async function readKontakterSharePoint() {
 }
 
 function formatPakistaniPhone(phone) {
-    if (!phone) return 'Not Listed'; 
+    if (!phone) return 'Not Listed';
     phone = phone.replace(/[^0-9]/g, ''); // remove all non-numeric characters
     if (phone.startsWith('0')) {
         phone = phone.slice(1); // remove starting 0
@@ -862,12 +862,35 @@ async function fixPakOrphanPhoneNos() {
         if (entry.guardianPhoneNo1?.startsWith('+') || entry.guardianPhoneNo2?.startsWith('+')) continue;
         const phone1 = formatPakistaniPhone(entry.guardianPhoneNo1);
         const phone2 = formatPakistaniPhone(entry.guardianPhoneNo2);
-        await model.updateOne({_id: entry._id},{$set: {
-            guardianPhoneNo1: phone1,
-            guardianPhoneNo2: phone2,
-        }});
+        await model.updateOne({ _id: entry._id }, {
+            $set: {
+                guardianPhoneNo1: phone1,
+                guardianPhoneNo2: phone2,
+            }
+        });
     }
 
+}
+
+function scheduleDailyTask(taskFn, hour = 5, minute = 0) {
+    const now = new Date();
+    const nextRun = new Date();
+
+    nextRun.setHours(hour, minute, 0, 0);
+
+    if (nextRun <= now) {
+        // If time already passed today, schedule for tomorrow
+        nextRun.setDate(nextRun.getDate() + 1);
+    }
+
+    const delay = nextRun - now;
+
+    console.log(`Scheduled task will run after ${(delay / 60 / 60 / 1000).toFixed(2)} hours`);
+
+    setTimeout(() => {
+        taskFn(); // First run at 5 AM
+        setInterval(taskFn, 24 * 60 * 60 * 1000); // Then every 24 hours
+    }, delay);
 }
 
 mongoose.connection.on('open', async () => {
@@ -886,7 +909,7 @@ mongoose.connection.on('open', async () => {
     // await sendWhatsappMessageWithFormLink();
     // await calculateRevenueFromOrders();
     // await calculateRevenueFromDonor();
-    await createDirectDonorLongUpdatesSheet();
+    // await createDirectDonorLongUpdatesSheet();
 
     setInterval(async () => {
         try {
@@ -898,13 +921,13 @@ mongoose.connection.on('open', async () => {
         }
     }, 60 * 1000);
 
-    setInterval(async () => {
+    scheduleDailyTask(async () => {
         try {
             await createDirectDonorLongUpdatesSheet();
         } catch (error) {
-            console.error('Error deleting expired orders:', error);
+            console.error('Error running scheduled donor updates:', error);
         }
-    }, 24 * 60 * 60 * 1000);
+    }, 5, 0);
 });
 
 module.exports = connectDB;
