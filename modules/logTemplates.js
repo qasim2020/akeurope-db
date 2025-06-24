@@ -365,7 +365,7 @@ const logTemplates = ({ type, entity, actor, project, file, order, entry, color,
                 : null,
         orderDeletedFile: file
             ? {
-                ...commons('order', entity._id),
+                ...commons('user', actor._id),
                 action: `Document <span class="fw-bold">${file.name}</span> deleted in <a href="/order/${entity._id}">Order-${entity.orderNo}</a> `,
                 color: 'red',
             }
