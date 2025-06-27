@@ -391,6 +391,15 @@ const logTemplates = ({ type, entity, actor, project, file, order, entry, color,
             color: 'blue',
             isNotification: false,
         },
+        // NEW CHANGES FROM 27 JUN 2025
+        customerEmailUpdated: message ? {
+            ...commons('customer', entity._id),
+            action: message,
+            color: 'blue',
+            isNotification: true,
+            isRead: true,
+            isReadByCustomer: false,
+        } : null,
     };
 
     if (templates[type] == null) {

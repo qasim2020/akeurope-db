@@ -30,9 +30,13 @@ const Donor = require('../models/Donor');
 const { saveLog } = require('../modules/logAction');
 const { deleteInvoice } = require('../modules/invoice');
 const { sendTelegramMessage, sendErrorToTelegram } = require('../../akeurope-cp/modules/telegramBot')
-const { formatDate } = require('../modules/helpers');
+const { formatDate, getAgeInYearsAndMonths } = require('../modules/helpers');
 const { getCurrencyRates } = require('../modules/getCurrencyRates');
 const { logTemplates } = require('../modules/logTemplates');
+const emailConfig = require('../config/emailConfig.js');
+const { getPortalUrl } = require('../modules/emails');
+const nodemailer = require('nodemailer');
+const handlebars = require('handlebars');
 
 const connectDB = async () => {
     try {
@@ -893,6 +897,115 @@ function scheduleDailyTask(taskFn, hour = 5, minute = 0) {
     }, delay);
 }
 
+const sendGazaEmail = async (data) => {
+    const fss = require('fs').promises;
+    let transporter = nodemailer.createTransport(emailConfig);
+
+    const templatePath = path.join(__dirname, '../views/emails/gazaUpdate27June2025.handlebars');
+    const templateSource = await fss.readFile(templatePath, 'utf8');
+    const compiledTemplate = handlebars.compile(templateSource);
+
+    const { portalUrl, newUser } = await getPortalUrl(data.customer);
+
+    const to = process.env.ENV === 'test' ? 'qasimali24@gmail.com' : data.customer.email;
+
+    const mailOptions = {
+        from: `"Alkhidmat Europe" <${process.env.EMAIL_USER}>`,
+        to,
+        subject: 'Update on Your Sponsored Beneficiary in Gaza',
+        html: compiledTemplate({
+            name: data.customer.name,
+            orders: data.orders,
+            entries: data.entries,
+            tooManyEntries: data.entries.length > 15 ? true : false,
+            pluralEntries: data.entries.length > 1 ? true : false,
+            portalUrl,
+            newUser,
+        }),
+    };
+
+    await transporter.sendMail(mailOptions);
+
+}
+
+async function sendGazaUpdate() {
+    try {
+        const orders = await Order.find({
+            'projects.slug': 'gaza-orphans',
+            status: 'paid',
+            customerId: {
+                $nin: [
+                    new mongoose.Types.ObjectId('68496e48dbce9ead4cd7fc53'),
+                    new mongoose.Types.ObjectId('67dd7d90d39f5002372bba2a')
+                ]
+            }
+        }).sort({createdAt: 1}).lean();
+
+        const customerIds = new Set(orders.map(order => order.customerId.toString()));
+        const customers = [];
+        const model = await createDynamicModel('gaza-orphans');
+
+        const userId = '6723c1075170ac0124060952';
+        const user = await User.findOne({ _id: userId }).lean();
+
+        function delay(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        for (const customerId of customerIds) {
+            const customer = await Customer.findById(customerId).lean();
+            const customerOrders = orders.filter(order => order.customerId.toString() === customer._id.toString());
+            const entries = [];
+            for (const order of customerOrders) {
+                for (const project of order.projects) {
+                    if (project.slug !== 'gaza-orphans') continue;
+                    for (const projectEntry of project.entries) {
+                        const entry = await model.findById(projectEntry.entryId).lean();
+                        entry.age = getAgeInYearsAndMonths(entry.dateOfBirth);
+                        entries.push(entry);
+                    }
+                }
+            }
+            const data = {
+                customer,
+                orders: customerOrders,
+                entries: entries
+            };
+
+            await delay(1000);
+
+            const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+
+            const recentLogs = await Log.find({
+                entityId: customer._id,
+                timestamp: { $gt: twentyFourHoursAgo },
+                action: /Gaza update/i
+            }).lean();
+
+            if (recentLogs.length > 0) {
+                console.log(`Don’t send a message to ${customer.name}`);
+            } else {
+                console.log(customer.name);
+                console.log(`Sending email to ${customer.name}`);
+                await sendGazaEmail(data);
+                await saveLog(
+                    logTemplates({
+                        type: 'customerEmailUpdated',
+                        message: `Gaza Update for <a href="/customer/${customer._id}">${customer.name}</a><br> <i>Due to ongoing conflict and telecom disruptions in Gaza, report delivery may be delayed. Our team is working on ground to resolve the pending reports as soon as possible. Jazakum Allahu Khairan for your patience and support.</i>`,
+                        entity: customer,
+                        actor: user,
+                    }),
+                );
+                console.log(`Email sent to ${customer.name}`);
+            }
+        }
+    } catch (error) {
+        console.log(error);
+        sendErrorToTelegram(error.message || 'Script error. please check logs.');
+    }
+
+}
+
 mongoose.connection.on('open', async () => {
     await deleteDraftOrders(Order);
     await deleteDraftOrders(Subscription);
@@ -910,6 +1023,7 @@ mongoose.connection.on('open', async () => {
     // await calculateRevenueFromOrders();
     // await calculateRevenueFromDonor();
     // await createDirectDonorLongUpdatesSheet();
+    await sendGazaUpdate();
 
     setInterval(async () => {
         try {

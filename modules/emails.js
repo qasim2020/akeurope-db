@@ -6,6 +6,27 @@ const handlebars = require('handlebars');
 const nodemailer = require('nodemailer');
 const File = require('../models/File');
 const crypto = require('crypto');
+const moment = require('moment');
+const Customer = require('../models/Customer');
+
+const getPortalUrl = async (customer) => {
+    let portalUrl = '',
+        newUser = false;
+    if (!customer.password) {
+        const inviteToken = crypto.randomBytes(32).toString('hex');
+        const inviteExpires = moment().add(24, 'hours').toDate();
+        await Customer.findOneAndUpdate({ _id: customer._id }, { $set: { inviteToken, inviteExpires } }, { new: true });
+        portalUrl = `${process.env.CUSTOMER_PORTAL_URL}/register/${inviteToken}`;
+        newUser = true;
+    } else {
+        portalUrl = `${process.env.CUSTOMER_PORTAL_URL}/login`;
+        newUser = false;
+    }
+    return {
+        portalUrl,
+        newUser,
+    };
+};
 
 const sendEmail = async (email, name, subject, message, link, linkLabel) => {
     let transporter = nodemailer.createTransport(emailConfig);
@@ -74,5 +95,6 @@ const sendEmailWithAttachments = async (email, salute, subject, message, entityI
 
 module.exports = {
     sendEmail,
-    sendEmailWithAttachments
+    sendEmailWithAttachments,
+    getPortalUrl,
 }
