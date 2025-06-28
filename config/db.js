@@ -972,7 +972,6 @@ async function sendGazaUpdate() {
                 entries: entries
             };
 
-            await delay(1000);
 
             const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
 
@@ -985,6 +984,8 @@ async function sendGazaUpdate() {
             if (recentLogs.length > 0) {
                 console.log(`Don’t send a message to ${customer.name}`);
             } else {
+                await delay(1000);
+
                 console.log(customer.name);
                 console.log(`Sending email to ${customer.name}`);
                 await sendGazaEmail(data);
@@ -1023,7 +1024,7 @@ mongoose.connection.on('open', async () => {
     // await calculateRevenueFromOrders();
     // await calculateRevenueFromDonor();
     // await createDirectDonorLongUpdatesSheet();
-    await sendGazaUpdate();
+    // await sendGazaUpdate();
 
     setInterval(async () => {
         try {
