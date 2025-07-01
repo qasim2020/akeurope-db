@@ -67,12 +67,9 @@
       {{> showEntryPaymentsOutline}}
       {{/if}}
       {{#if (findInArray data.role 'viewFiles')}}
-      <div class="card mb-3" id="files-container" 
-        entity-type="entry" entity-id="{{data.entry._id}}" entity-slug="{{data.project.slug}}" 
-        entity-url="/entry/{{data.entry._id}}/project/{{data.project.slug}}" 
-        file-types="application/pdf,image/*,video/*"
-        file-url="/uploadFileToEntry"
-        video-url="/uploadVideoToEntry">
+      <div class="card mb-3" id="files-container" entity-type="entry" entity-id="{{data.entry._id}}"
+        entity-slug="{{data.project.slug}}" entity-url="/entry/{{data.entry._id}}/project/{{data.project.slug}}"
+        file-types="application/pdf,image/*,video/*" file-url="/uploadFileToEntry" video-url="/uploadVideoToEntry">
         {{> showEntityFiles data=data beneficiary=true}}
       </div>
       {{/if}}
@@ -143,7 +140,7 @@
     }
   });
 
-  const refreshContainers = function() {
+  const refreshContainers = function () {
     showDataAsSuch('/getSingleEntryData/{{data.entry._id}}/project/{{data.project.slug}}', '#entry-container');
     showDataAsSuch('/getSingleEntryLogs/{{data.entry._id}}/project/{{data.project.slug}}', '#logs-container');
   }
@@ -165,17 +162,17 @@
         dropdownParent: 'body',
         controlInput: '<input>',
         load: function (query, callback) {
-          if (!query.length) return callback(); 
+          if (!query.length) return callback();
 
           $.ajax({
-            url: `/searchEntry/{{data.project.slug}}?q=${query}`, 
+            url: `/searchEntry/{{data.project.slug}}?q=${query}`,
             type: 'GET',
             dataType: 'json',
             success: function (response) {
               callback(response.data);
             },
             error: function () {
-              callback(); 
+              callback();
             }
           });
         },
@@ -199,5 +196,75 @@
       console.log("TomSelect is not available.");
     }
   });
+
+  const getSendUpdateModal = function (elem) {
+
+    const entryId = '{{data.entry._id}}';
+    const slug = '{{data.project.slug}}';
+
+    if (!entryId || !slug) {
+      return alert('No entryId or Slug found');
+    }
+
+    const modalExists = $(document).find(`#button-update-${entryId}`).length > 0;
+
+    if (modalExists) {
+      $(`#button-${entryId}`).remove();
+      $(`#modal-update-${entryId}`).remove();
+    }
+
+    $.ajax({
+      url: `/getSendUpdateModal-entry/${entryId}/${slug}`,
+      type: 'GET',
+      contentType: 'application/json',
+      success: function (response) {
+        $("footer").before(response);
+        $(`#button-update-${entryId}`).trigger("click");
+        initializePopovers();
+      },
+      error: function (xhr, status, error) {
+        alert(xhr.responseText);
+      }
+    });
+  }
+
+
+  const sendUpdateToDonor = function (elem) {
+    const modal = $(elem).closest('.modal');
+    const entryId = '{{data.entry._id}}';
+    const slug = '{{data.project.slug}}';
+    const subject = $(modal).find('input[name="subject"]').val();
+    const salute = $(modal).find('input[name="salute"]').val();
+    const message = $(modal).find('textarea[name="message"]').val();
+    const selectedFiles = $(modal).find('input[name="selectedFiles"]:checked').map(function () {
+      return this.value;
+    }).get();
+
+    if (!message.trim() || !subject.trim() || !salute.trim()) {
+      return alert('Please enter heading, salutation and message before sending the update.');
+    }
+
+    const currentBtnHtml = $(elem).html();
+    $(elem).html(`
+      <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+      Sending Update...
+    `);
+
+    $.ajax({
+      url: `/sendEntryUpdateOnEmail/${entryId}/${slug}`,
+      type: 'POST',
+      contentType: 'application/json',
+      data: JSON.stringify({ subject, message, salute, files: selectedFiles }),
+      success: function (response) {
+        $(elem).html(currentBtnHtml);
+        $('#emailStatus').text('Email: Sent');
+        refreshContainers(modal);
+      },
+      error: function (xhr, status, error) {
+        alert(xhr.responseText);
+      }
+    });
+  }
+
 
 </script>

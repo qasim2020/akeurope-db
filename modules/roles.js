@@ -46,7 +46,8 @@ const roles = {
         'chat',
         'viewBeneficiaries',
         'editBeneficiaries',
-        'viewJourney'
+        'viewJourney',
+        'sendEntryUpdates',
     ],
     editor: [
         'viewSelf',
@@ -70,6 +71,7 @@ const roles = {
         'changeFilesAccess',
         'viewBeneficiaries',
         'editBeneficiaries',
+        'sendEntryUpdates',
     ],
     viewer: ['viewEntry'],
 };

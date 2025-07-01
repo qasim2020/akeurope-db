@@ -30,11 +30,11 @@ const getPortalUrl = async (customer) => {
 
 const sendEmail = async (email, name, subject, message, link, linkLabel) => {
     let transporter = nodemailer.createTransport(emailConfig);
-    
+
     const templatePath = path.join(__dirname, '../views/emails/notificationEmail.handlebars');
     const templateSource = await fs.readFile(templatePath, 'utf8');
     const compiledTemplate = handlebars.compile(templateSource);
-    
+
     const mailOptions = {
         from: process.env.EMAIL_USER,
         to: email,
@@ -46,7 +46,7 @@ const sendEmail = async (email, name, subject, message, link, linkLabel) => {
             linkLabel
         }),
     };
-    
+
     transporter.sendMail(mailOptions, async (err) => {
         if (err) {
             throw new Error('Error sending email', err);
@@ -55,7 +55,11 @@ const sendEmail = async (email, name, subject, message, link, linkLabel) => {
     });
 }
 
-const sendEmailWithAttachments = async (email, salute, subject, message, entityId, files) => {
+const emailOrderUpdate = async (email, salute, subject, message, entityId, files) => {
+
+    const customer = await Customer.findOne({ email }).lean();
+    const { portalUrl, newUser } = await getPortalUrl(customer);
+
     const filesMadePublic = [];
     for (const fileId of files) {
         const file = await File.findOne({ 'links.entityId': entityId, _id: fileId });
@@ -72,8 +76,8 @@ const sendEmailWithAttachments = async (email, salute, subject, message, entityI
     };
 
     let transporter = nodemailer.createTransport(emailConfig);
-    
-    const templatePath = path.join(__dirname, '../views/emails/notificationEmailWithAttachments.handlebars');
+
+    const templatePath = path.join(__dirname, '../views/emails/emailOrderUpdate.handlebars');
     const templateSource = await fs.readFile(templatePath, 'utf8');
     const compiledTemplate = handlebars.compile(templateSource);
 
@@ -86,15 +90,60 @@ const sendEmailWithAttachments = async (email, salute, subject, message, entityI
         html: compiledTemplate({
             salute,
             message,
+            portalUrl,
             files: filesMadePublic,
         }),
     };
-    
+
+    await transporter.sendMail(mailOptions);
+}
+
+const emailEntryUpdate = async (email, salute, subject, message, entityId, files) => {
+
+    const customer = await Customer.findOne({ email }).lean();
+    const { portalUrl, newUser } = await getPortalUrl(customer);
+
+    const filesMadePublic = [];
+    for (const fileId of files) {
+        const file = await File.findOne({ 'links.entityId': entityId, _id: fileId });
+        if (!file) {
+            throw new Error(`File with ID ${fileId} not found`);
+        }
+        const secretToken = crypto.randomBytes(32).toString('hex');
+        file.secretToken = file.secretToken ? file.secretToken : secretToken;
+        file.public = true;
+        await file.save();
+        const objectFile = file.toObject();
+        objectFile.url = `${process.env.CUSTOMER_PORTAL_URL}/file-open/${file.secretToken}`;
+        filesMadePublic.push(objectFile);
+    };
+
+    let transporter = nodemailer.createTransport(emailConfig);
+
+    const templatePath = path.join(__dirname, '../views/emails/emailEntryUpdate.handlebars');
+    const templateSource = await fs.readFile(templatePath, 'utf8');
+    const compiledTemplate = handlebars.compile(templateSource);
+
+    const toEmail = process.env.ENV === 'test' ? 'qasimali24@gmail.com' : email;
+
+    const mailOptions = {
+        from: `"Alkhidmat Europe" <${process.env.EMAIL_USER}>`,
+        to: toEmail,
+        subject,
+        html: compiledTemplate({
+            salute,
+            message,
+            portalUrl,
+            files: filesMadePublic,
+        }),
+    };
+
     await transporter.sendMail(mailOptions);
 }
 
 module.exports = {
     sendEmail,
-    sendEmailWithAttachments,
+    emailOrderUpdate,
+    emailEntryUpdate,
     getPortalUrl,
 }

@@ -71,4 +71,7 @@ router.get(
 
 router.get('/searchEntry/:slug', authenticate, authorize('viewEntry'), entryController.searchEntry);
 
+router.get('/getSendUpdateModal-entry/:entryId/:slug', authenticate, authorize('sendEntryUpdates'), entryController.getSendUpdateModal);
+router.post('/sendEntryUpdateOnEmail/:entryId/:slug', authenticate, authorize('sendEntryUpdates'), entryController.sendEntryUpdateOnEmail);
+
 module.exports = router;

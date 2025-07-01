@@ -6,13 +6,14 @@ const Beneficiary = require('../models/Beneficiary');
 const cloudinary = require('cloudinary').v2;
 const moment = require('moment');
 const { createDynamicModel } = require('../models/createDynamicModel');
+const { emailEntryUpdate } = require('../modules/emails');
 const {
     projectEntries,
     fetchEntrySubscriptionsAndPayments,
     getPaidOrdersByEntryId,
     getAllOrdersByEntryId,
 } = require('../modules/projectEntries');
-const { saveLog, visibleLogs, entryLogs } = require('../modules/logAction');
+const { saveLog, visibleLogs, entryLogs, orderLogs } = require('../modules/logAction');
 const { logTemplates } = require('../modules/logTemplates');
 const { getChanges } = require('../modules/getChanges');
 const { createDraftOrder, updateDraftOrder, getPendingOrderEntries, formatOrder } = require('../modules/orders');
@@ -715,6 +716,89 @@ exports.searchEntry = async (req, res) => {
         res.status(500).json({
             error: 'Error searching entries',
             details: error.message,
+        });
+    }
+};
+
+exports.sendEntryUpdateOnEmail = async (req, res) => {
+    try {
+        const { entryId, slug } = req.params;
+        const model = await createDynamicModel(slug);
+        const entry = await model.findById(entryId).lean();
+        const order = await Order.findOne({
+            status: 'paid',
+            'projects.entries.entryId': entry._id
+        });
+        if (!order) throw new Error(`${entry.name} has no orders`);
+        const customer = await Customer.findById(order.customerId).lean();
+        const { subject, salute, message, files } = req.body;
+        if (!subject || !message || !salute) {
+            return res.status(400).send('Subject, salute & message are required');
+        }
+        if (!customer) {
+            return res.status(404).send('Customer not found');
+        }
+        await emailEntryUpdate(customer.email, salute, subject, message, entry._id, files);
+        const project = await Project.findOne({slug}).lean();
+        await saveLog(
+            logTemplates({
+                type: 'entryUpdateSent',
+                entity: entry,
+                project,
+                order,
+                message,
+                actor: req.session.user,
+            }),
+        );
+        await saveLog(
+            logTemplates({
+                type: 'customerEntryUpdateSent',
+                entity: customer,
+                entry,
+                project,
+                order,
+                message,
+                actor: req.session.user,
+            }),
+        );
+        res.status(200).send('Entry update sent successfully!');
+    } catch (error) {
+        console.log(error);
+        res.status(500).send(error.message || 'An error occurred while sending the order update');
+    }
+}
+
+exports.getSendUpdateModal = async (req, res) => {
+    try {
+        const { entryId, slug } = req.params;
+        const model = await createDynamicModel(slug);
+        const entry = await model.findById(entryId).lean();
+        const orders = await Order.find({
+            status: 'paid',
+            'projects.entries.entryId': entry._id
+        });
+        if (orders.length > 1) throw new Error(`${entry.name} has more than 1 paid orders - impossible - please resolve`);
+        if (orders.length === 0) throw new Error(`${entry.name} has zero active orders.`);
+        if (!orders) throw new Error(`${entry.name} has no orders`);
+        const order = orders[0];
+        const customer = await Customer.findById(order.customerId).lean();
+        const files = await File.find({ 'links.entityId': entry._id }).sort({ createdAt: -1 }).lean();
+        const project = await Project.findOne({slug}).lean();
+        res.render('partials/sendUpdateModalEntry', {
+            layout: false,
+            data: {
+                entry,
+                project,
+                order,
+                customer,
+                files,
+            },
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(404).render('error', {
+            heading: 'Server Error',
+            error: error,
         });
     }
 };

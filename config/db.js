@@ -984,9 +984,12 @@ async function sendGazaUpdate() {
             if (recentLogs.length > 0) {
                 console.log(`Don’t send a message to ${customer.name}`);
             } else {
+<<<<<<< Updated upstream
                 await delay(1000);
 
                 console.log(customer.name);
+=======
+>>>>>>> Stashed changes
                 console.log(`Sending email to ${customer.name}`);
                 await sendGazaEmail(data);
                 await saveLog(

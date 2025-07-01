@@ -7,7 +7,7 @@ const Subscription = require('../models/Subscription');
 const { saveLog, visibleLogs, orderLogs } = require('../modules/logAction');
 const { logTemplates } = require('../modules/logTemplates');
 const { getChanges } = require('../modules/getChanges');
-const { sendEmailWithAttachments } = require('../modules/emails');
+const { emailOrderUpdate } = require('../modules/emails');
 const {
     getPaginatedOrders,
     getSingleOrder,
@@ -22,7 +22,6 @@ const { getVippsPaymentByOrderId, getVippsSubscriptionByOrderId } = require('../
 const { deleteInvoice, sendInvoiceToCustomer, sendThanksToCustomer, sendClarifyEmailToCustomer } = require('../modules/invoice');
 const Log = require('../models/Log');
 const { createDynamicModel } = require('../models/createDynamicModel');
-const { sendEmailWithAttachment } = require('../modules/emails');
 const { getProducts, getJSONProject, makeProductOrder, incrementVariantToProductOrder,
     findProjectInFile,
     decrementVariantToProductOrder,
@@ -407,7 +406,7 @@ exports.sendOrderUpdateOnEmail = async (req, res) => {
             return res.status(404).send('Customer not found');
         }
 
-        await sendEmailWithAttachments(customer.email, salute, subject, message, order._id, files);
+        await emailOrderUpdate(customer.email, salute, subject, message, order._id, files);
 
         await saveLog(
             logTemplates({
