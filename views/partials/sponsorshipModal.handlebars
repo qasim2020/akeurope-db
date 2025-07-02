@@ -1,0 +1,39 @@
+<div class="modal modal-blur fade" id="modal-sponsorship-{{data.entry._id}}" tabindex="-1" role="dialog"
+  entry-id="{{data.entry._id}}">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Handle Sponsorship</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label">Start Date</label>
+          <input class="form-control" name="subject" placeholder="Message heading"
+            value="Update · {{data.entry.name}} · {{data.project.name}}" />
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">End Date</label>
+          <input class="form-control" name="salute" placeholder="Assalam-o-alaikum dear..."
+            value="Assalam-o-alaikum dear {{data.customer.name}}" />
+        </div>
+
+        <div class="mb-3">
+          <button type="submit" class="btn btn-primary w-100" onclick="sendUpdateToDonor(this)">Get Orders</button>
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <div class="ms-auto">
+          <a href="#" class="btn btn-link link-default cancel-btn" data-bs-dismiss="modal"> Close </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<button href="#" class="btn btn-primary d-none" id="button-sponsorship-{{data.entry._id}}" data-bs-toggle="modal"
+  data-bs-target="#modal-sponsorship-{{data.entry._id}}"></button>

@@ -4,6 +4,7 @@ const User = require('../models/User');
 const Customer = require('../models/Customer');
 const Beneficiary = require('../models/Beneficiary');
 const cloudinary = require('cloudinary').v2;
+const Sponsorship = require('../models/Sponsorship');
 const moment = require('moment');
 const { createDynamicModel } = require('../models/createDynamicModel');
 const { emailEntryUpdate } = require('../modules/emails');
@@ -164,7 +165,7 @@ exports.updateEntry = async (req, res) => {
 
             if (fieldValue !== undefined) {
                 entryData[fieldName] = fieldValue;
-            } 
+            }
 
             if (field.status === true && fieldValue?.length > 0) {
                 if (!existingEntry.name) {
@@ -213,7 +214,7 @@ Jazak Allah`,
                     entryData[fieldName] = existingEntry[fieldName];
                 } else if (existingEntry[fieldName] != fieldValue) {
                     entryData[fieldName] = fieldValue;
-                } 
+                }
             }
         });
 
@@ -235,11 +236,11 @@ Jazak Allah`,
             await DynamicModel.findByIdAndUpdate(existingEntry._id, entryData);
         }
 
-        if (notifyCustomer.sendEmail || notifyCustomer.sendText) 
-            sendNotificationToDonor(notifyCustomer, existingEntry, req.session.user, project, changedEntries );
+        if (notifyCustomer.sendEmail || notifyCustomer.sendText)
+            sendNotificationToDonor(notifyCustomer, existingEntry, req.session.user, project, changedEntries);
 
         res.status(200).send('Entry updated successfully');
-        
+
     } catch (error) {
         console.log(error);
         res.status(500).json({
@@ -739,7 +740,7 @@ exports.sendEntryUpdateOnEmail = async (req, res) => {
             return res.status(404).send('Customer not found');
         }
         await emailEntryUpdate(customer.email, salute, subject, message, entry._id, files);
-        const project = await Project.findOne({slug}).lean();
+        const project = await Project.findOne({ slug }).lean();
         await saveLog(
             logTemplates({
                 type: 'entryUpdateSent',
@@ -783,7 +784,7 @@ exports.getSendUpdateModal = async (req, res) => {
         const order = orders[0];
         const customer = await Customer.findById(order.customerId).lean();
         const files = await File.find({ 'links.entityId': entry._id }).sort({ createdAt: -1 }).lean();
-        const project = await Project.findOne({slug}).lean();
+        const project = await Project.findOne({ slug }).lean();
         res.render('partials/sendUpdateModalEntry', {
             layout: false,
             data: {
@@ -802,3 +803,33 @@ exports.getSendUpdateModal = async (req, res) => {
         });
     }
 };
+
+exports.getSponsorshipModal = async (req, res) => {
+    try {
+        const { entryId, slug } = req.params;
+        const model = await createDynamicModel(slug);
+        const entry = await model.findById(entryId).lean();
+        const project = await Project.findOne({slug}).lean();
+        const orders = await Order.find({
+            status: 'paid',
+            'projects.entries.entryId': entry._id
+        });
+        if (orders.length > 1) throw new Error(`${entry.name} has more than 1 paid orders - impossible - please resolve`);
+        if (orders.length === 0) throw new Error(`${entry.name} has zero active orders.`);
+        if (!orders) throw new Error(`${entry.name} has no orders`);
+        const order = orders[0];
+        const customer = await Customer.findById(order.customerId).lean();
+        res.render('partials/sponsorshipModal', {
+            layout: false,
+            data: {
+                entry,
+                project,
+                order,
+                customer
+            },
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(404).send(error.message || 'Error! Check Logs.')
+    }
+}

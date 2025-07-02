@@ -30,13 +30,14 @@ const Donor = require('../models/Donor');
 const { saveLog } = require('../modules/logAction');
 const { deleteInvoice } = require('../modules/invoice');
 const { sendTelegramMessage, sendErrorToTelegram } = require('../../akeurope-cp/modules/telegramBot')
-const { formatDate, getAgeInYearsAndMonths } = require('../modules/helpers');
+const { formatDate, getAgeInYearsAndMonths, slugToString } = require('../modules/helpers');
 const { getCurrencyRates } = require('../modules/getCurrencyRates');
 const { logTemplates } = require('../modules/logTemplates');
 const emailConfig = require('../config/emailConfig.js');
 const { getPortalUrl } = require('../modules/emails');
 const nodemailer = require('nodemailer');
 const handlebars = require('handlebars');
+const Project = require('../models/Project.js');
 
 const connectDB = async () => {
     try {
@@ -629,11 +630,14 @@ async function calculateRevenueFromDonor() {
             let amount;
             let method = [];
             let query = {};
+            let date;
             if (payment.agreementId) {
+                date = payment.due;
                 amount = payment.amount / 100;
                 method = 'vipps subscription';
                 query = { _id: payment.externalId };
             } else if (payment.price) {
+                date = payment.currentPeriodStart;
                 amount = payment.price / 100;
                 method = 'stripe subscription';
                 query = { _id: payment.orderId };
@@ -642,6 +646,7 @@ async function calculateRevenueFromDonor() {
                 method = 'vipps one-time';
                 query = { vippsReference: payment.reference };
             } else {
+                date = payment.created;
                 amount = payment.amount;
                 method = 'stripe one-time';
                 query = { _id: payment.orderId };
@@ -650,9 +655,17 @@ async function calculateRevenueFromDonor() {
             const order = (await Order.findOne(query).lean()) || (await Subscription.findOne(query).lean());
 
             if (!order) {
+                console.log(donor.email);
                 console.log(payment);
                 continue;
             };
+
+            if (payment.paymentMethod) {
+                date = order.createdAt;
+            }
+
+            const slug = order.projects && order.projects.length > 0 ? order.projects[0].slug : order.projectSlug;
+            const project = slugToString(slug);
 
             if (rateCache.has(currency)) {
                 currencyRate = rateCache.get(currency);
@@ -662,8 +675,15 @@ async function calculateRevenueFromDonor() {
                 rateCache.set(currency, currencyRate);
             }
 
+            if (!date) {
+                console.log(payment);
+                throw new Error('no date found')
+            }
+
             array.push({
                 date: order.createdAt,
+                month: new Date(date).getMonth() + 1,
+                project,
                 orderNo: Number(order.orderNo),
                 email: donor.email,
                 method,
@@ -676,7 +696,6 @@ async function calculateRevenueFromDonor() {
 
     }
 
-    console.log(revenue, 'revenue calculated');
     exportToCSV(array, 'revenue.csv');
 }
 
@@ -939,7 +958,7 @@ async function sendGazaUpdate() {
                     new mongoose.Types.ObjectId('67dd7d90d39f5002372bba2a')
                 ]
             }
-        }).sort({createdAt: 1}).lean();
+        }).sort({ createdAt: 1 }).lean();
 
         const customerIds = new Set(orders.map(order => order.customerId.toString()));
         const customers = [];

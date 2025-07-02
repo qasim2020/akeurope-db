@@ -266,5 +266,50 @@
     });
   }
 
+  const toggleDonations = function (elem) {
+    const isActive = $(elem).hasClass('btn-outline-green');
+    if (isActive) {
+      $(elem).removeClass('btn-outline-green');
+      $(elem).addClass('btn-outline-red');
+      $(elem).html('<i class="ti ti-toggle-left-filled"></i>');
+    } else {
+      $(elem).addClass('btn-outline-green');
+      $(elem).removeClass('btn-outline-red');
+      $(elem).html('<i class="ti ti-toggle-right-filled"></i>');
+    }
+
+    loadSponsorshipModal(elem);
+  }
+
+  const loadSponsorshipModal = function (elem) {
+    const entryId = '{{data.entry._id}}';
+    const slug = '{{data.project.slug}}';
+
+    if (!entryId || !slug) {
+      return alert('No entryId or Slug found');
+    }
+
+    const modalExists = $(document).find(`#button-sponsorship-${entryId}`).length > 0;
+
+    if (modalExists) {
+      $(`#button-sponsorship-${entryId}`).remove();
+      $(`#modal-sponsorship-${entryId}`).remove();
+    }
+
+    $.ajax({
+      url: `/getSponsorshipModal/${entryId}/${slug}`,
+      type: 'GET',
+      contentType: 'application/json',
+      success: function (response) {
+        $("footer").before(response);
+        $(`#button-sponsorship-${entryId}`).trigger("click");
+        initializePopovers();
+      },
+      error: function (xhr, status, error) {
+        alert(xhr.responseText);
+      }
+    });
+  }
+
 
 </script>
