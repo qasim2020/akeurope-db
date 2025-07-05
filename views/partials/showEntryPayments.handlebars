@@ -28,29 +28,45 @@
         <tr>
           <th>Invoice #</th>
           <th>Date</th>
+          <th>Donor</th>
           <th>Amount</th>
-          <th>Expiry/ Renewel</th>
+          <th>Description</th>
           <th>Status</th>
-          <th>Customer</th>
         </tr>
       </thead>
       <tbody>
         {{#each data.payments}}
         <tr>
-          <td><a href="/order/{{_id}}">{{orderNo}}</a></td>
+          <td>
+            {{#if (findInArray ../data.role 'viewOrders')}}
+            <a href="/order/{{_id}}">{{orderNo}}</a>
+            {{else}}
+            {{orderNo}}
+            {{/if}}
+            {{#if monthlySubscription}} <i class="ti ti-refresh ms-1"></i> {{/if}}
+          </td>
           <td>{{formatDate createdAt}}</td>
+          <td>
+            {{#if (findInArray ../data.role 'viewOrders')}}
+            <a href='/customer/{{customer._id}}'>{{customer.name}}</a>
+            {{else}}
+            {{customer.name}}
+            {{/if}}
+          </td>
           <td>
             {{#each entry.costs}}
             {{#if totalOrderedCost}}
-            {{totalOrderedCost}} {{../currency}} in {{camelCaseToNormalString fieldName}} <br>
+            {{totalOrderedCost}} {{../currency}}<br>
             {{/if}}
             {{/each}}
           </td>
-          {{#if (eq monthlySubscription 'false')}}
-          <td>Expires after {{project.months}} month(s) on {{expiresOn createdAt project.months}}</td>
-          {{else}}
-          <td>Renews on {{expiresOn createdAt 1}}</td>
-          {{/if}}
+          <td>
+            {{#if monthlySubscription}}
+            Renews on {{expiresOn createdAt 1}}
+            {{else}}
+            Expires on {{expiresOn createdAt project.months}}
+            {{/if}}
+          </td>
           <td>
             {{#if (eq status 'paid')}}
             {{{getOrderIcon status}}}
@@ -59,7 +75,6 @@
             {{capitalizeFirstLetter status}}
             {{/if}}
           </td>
-          <td><a href='/customer/{{customer._id}}'>{{customer.name}}</a></td>
         </tr>
         {{/each}}
       </tbody>

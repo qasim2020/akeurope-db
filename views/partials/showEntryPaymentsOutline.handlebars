@@ -10,7 +10,8 @@
           <th>Invoice #</th>
           <th>Date</th>
           <th>Amount</th>
-          <th>Expiry/ Renewel</th>
+          <th>Monthly Subscription</th>
+          <th>Description</th>
           <th>Status</th>
           <th>Customer</th>
         </tr>
@@ -27,11 +28,13 @@
             {{/if}}
             {{/each}}
           </td>
-          {{#if (eq monthlySubscription 'false')}}
-          <td>Expires after {{project.months}} month(s) on {{expiresOn createdAt project.months}}</td>
-          {{else}}
-          <td>Renews on {{expiresOn createdAt 1}}</td>
-          {{/if}}
+          <td>
+            {{#if monthlySubscription}}
+            Renews on {{expiresOn createdAt 1}}
+            {{else}}
+            Expires on {{expiresOn createdAt project.months}}
+            {{/if}}
+          </td>
           <td>
             {{#if (eq status 'paid')}}
             {{{getOrderIcon status}}}
