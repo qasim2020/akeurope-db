@@ -116,6 +116,7 @@
       method: 'GET',
       success: function (response) {
         $(`#data-container`).html(response);
+        window.history.pushState(null, '', `/orders${href}`);
       },
       error: function (error) {
         alert(error.responseText);
@@ -187,4 +188,38 @@
     }
   });
 
+
+  const doPageSearch = function (elem, href) {
+    if (!href) {
+      href = $(elem).attr("my-href");
+    }
+    $.ajax({
+      url: `/getOrdersData${href}`,
+      method: 'GET',
+      success: function (response) {
+        $("#data-container").html(response);
+        window.history.pushState(null, '', `/orders${href}`);
+      },
+      error: function (error) {
+        alert(error.responseText);
+      }
+    });
+  }
+
+
+  $(document).on('keypress', '[my-href]', function (e) {
+    if (e.which === 13 || e.keyCode === 13) {
+
+      e.preventDefault();
+
+      const href = $(this).attr("my-href");
+      const key = $(this).attr("my-key");
+      const value = $(this).val();
+      const regex = new RegExp(`${key}=([^&]*)`, "g");
+      const updatedHref = href.replace(regex, `${key}=${value}`);
+
+      doPageSearch('', updatedHref);
+
+    }
+  });
 </script>

@@ -165,7 +165,7 @@ const createDraftOrder = async (req, res) => {
         updatedProject.detail = project;
 
         const model = await createDynamicModel(updatedProject.slug);
-        
+
         const customer = await Customer.findById(order.customerId).lean();
 
 
@@ -181,11 +181,53 @@ const createDraftOrder = async (req, res) => {
 };
 
 const getPaginatedOrders = async (req, res) => {
-    const orders = await Order.find().sort({ _id: -1 }).lean();
-    const subs = await Subscription.find().sort({ _id: -1 }).lean();
 
-    const mergedData = [...orders, ...subs].sort((a, b) => b.orderNo - a.orderNo);
+    const { search } = req.query;
 
+    const orderQuery = {};
+    const subQuery = {};
+
+    if (search) {
+        const searchRegex = new RegExp(search, 'i');
+
+        const isNumeric = !isNaN(search);
+
+        if (isNumeric) {
+            orderQuery.orderNo = Number(search);
+            subQuery.orderNo = search;
+        } else {
+            orderQuery.$or = [
+                { countryCode: searchRegex },
+                { status: searchRegex },
+                { currency: searchRegex },
+            ];
+
+            subQuery.$or = [
+                { countryCode: searchRegex },
+                { status: searchRegex },
+                { currency: searchRegex },
+            ];
+        }
+    }
+
+    let orders = await Order.find(orderQuery).sort({ _id: -1 }).populate('customerId', 'name email').lean();
+    let subs = await Subscription.find(subQuery).sort({ _id: -1 }).populate('customerId', 'name email').lean();
+    
+    let mergedData = [...orders, ...subs].sort((a, b) => b.orderNo - a.orderNo);
+
+    if (search) {
+        const searchRegex = new RegExp(search, 'i');
+
+        mergedData = orders.filter(order =>
+            order.customerId?.name?.match(searchRegex) ||
+            order.customerId?.email?.match(searchRegex) ||
+            String(order.orderNo).includes(search) ||
+            order.status.match(searchRegex) ||
+            order.countryCode.match(searchRegex) ||
+            order.currency.match(searchRegex)
+        );
+    }
+    
     const pagination = createPagination({
         req,
         totalEntries: mergedData.length,
@@ -519,7 +561,7 @@ const getPendingOrderEntries = async (req, res) => {
 
 const getSubscriptionByOrderId = async (orderId) => {
     try {
-        const temp = await Donor.findOne({'subscriptions.orderId': orderId}).lean();
+        const temp = await Donor.findOne({ 'subscriptions.orderId': orderId }).lean();
 
         const donor = await Donor.findOne(
             {
@@ -537,7 +579,7 @@ const getSubscriptionByOrderId = async (orderId) => {
 
 const getSubscriptionsByOrderId = async (orderId) => {
     try {
-        const donor = await Donor.findOne({'subscriptions.orderId': orderId}).lean();
+        const donor = await Donor.findOne({ 'subscriptions.orderId': orderId }).lean();
         if (!donor) return false;
         const subscriptions = donor.subscriptions.filter(sub => sub.orderId.toString() === orderId.toString());
         return subscriptions;
