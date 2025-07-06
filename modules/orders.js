@@ -212,22 +212,25 @@ const getPaginatedOrders = async (req, res) => {
 
     let orders = await Order.find(orderQuery).sort({ _id: -1 }).populate('customerId', 'name email').lean();
     let subs = await Subscription.find(subQuery).sort({ _id: -1 }).populate('customerId', 'name email').lean();
-    
+
     let mergedData = [...orders, ...subs].sort((a, b) => b.orderNo - a.orderNo);
 
     if (search) {
         const searchRegex = new RegExp(search, 'i');
 
-        mergedData = orders.filter(order =>
-            order.customerId?.name?.match(searchRegex) ||
-            order.customerId?.email?.match(searchRegex) ||
-            String(order.orderNo).includes(search) ||
-            order.status.match(searchRegex) ||
-            order.countryCode.match(searchRegex) ||
-            order.currency.match(searchRegex)
-        );
+        mergedData = mergedData.filter(order => {
+            const orderNo = order.orderNo.toString();
+            const isMatch =
+                order.customerId?.name?.match(searchRegex) ||
+                order.customerId?.email?.match(searchRegex) ||
+                order.status.match(searchRegex) ||
+                order.currency.match(searchRegex) ||
+                orderNo.includes(search);
+            return isMatch;
+        });
+
     }
-    
+
     const pagination = createPagination({
         req,
         totalEntries: mergedData.length,
