@@ -184,52 +184,47 @@ const getPaginatedOrders = async (req, res) => {
 
     const { search } = req.query;
 
-    const orderQuery = {};
-    const subQuery = {};
+    let orders = await Order.find()
+        .sort({ _id: -1 })
+        .populate('customerId', 'name email')
+        .lean();
+
+    let subs = await Subscription.find()
+        .sort({ _id: -1 })
+        .populate('customerId', 'name email')
+        .lean();
+
+    let mergedData = [...orders, ...subs];
 
     if (search) {
         const searchRegex = new RegExp(search, 'i');
 
-        const isNumeric = !isNaN(search);
+        const filterFn = record => {
+            const customerName = record.customerId?.name || '';
+            const customerEmail = record.customerId?.email || '';
+            const status = record.status || '';
+            const currency = record.currency || '';
+            const orderNo = record.orderNo?.toString() || '';
+            const projectSlug = record.projectSlug || '';
 
-        if (isNumeric) {
-            orderQuery.orderNo = Number(search);
-            subQuery.orderNo = search;
-        } else {
-            orderQuery.$or = [
-                { countryCode: searchRegex },
-                { status: searchRegex },
-                { currency: searchRegex },
-            ];
+            const projectNames = Array.isArray(record.projects)
+                ? record.projects.map(p => p?.name || '').join(' ')
+                : '';
 
-            subQuery.$or = [
-                { countryCode: searchRegex },
-                { status: searchRegex },
-                { currency: searchRegex },
-            ];
-        }
+            return (
+                searchRegex.test(customerName) ||
+                searchRegex.test(customerEmail) ||
+                searchRegex.test(status) ||
+                searchRegex.test(currency) ||
+                orderNo.includes(search) ||
+                searchRegex.test(projectSlug) ||
+                searchRegex.test(projectNames)
+            );
+        };
+
+        mergedData = mergedData.filter(filterFn);
     }
 
-    let orders = await Order.find(orderQuery).sort({ _id: -1 }).populate('customerId', 'name email').lean();
-    let subs = await Subscription.find(subQuery).sort({ _id: -1 }).populate('customerId', 'name email').lean();
-
-    let mergedData = [...orders, ...subs].sort((a, b) => b.orderNo - a.orderNo);
-
-    if (search) {
-        const searchRegex = new RegExp(search, 'i');
-
-        mergedData = mergedData.filter(order => {
-            const orderNo = order.orderNo.toString();
-            const isMatch =
-                order.customerId?.name?.match(searchRegex) ||
-                order.customerId?.email?.match(searchRegex) ||
-                order.status.match(searchRegex) ||
-                order.currency.match(searchRegex) ||
-                orderNo.includes(search);
-            return isMatch;
-        });
-
-    }
 
     const pagination = createPagination({
         req,
