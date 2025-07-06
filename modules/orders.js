@@ -194,7 +194,9 @@ const getPaginatedOrders = async (req, res) => {
         .populate('customerId', 'name email')
         .lean();
 
-    let mergedData = [...orders, ...subs];
+    let mergedData = [...orders, ...subs].sort( (a, b) => {
+        return new Date(b.createdAt) - new Date(a.createdAt);
+    });
 
     if (search) {
         const searchRegex = new RegExp(search, 'i');
