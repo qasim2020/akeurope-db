@@ -381,7 +381,7 @@ const logTemplates = ({ type, entity, actor, project, file, order, entry, color,
         } : null,
         entryUpdateSent: message && project ? {
             ...commons('entry', entity._id),
-            action: `<span class="badge bg-red-lt mt-1">Status</span> ${message}`,
+            action: `<a href="/entry/${entity._id}/project/${project.slug}">${entity.name}</a> updated. <br> <span class="badge bg-red-lt mt-1">Status</span> ${message}`,
             color: 'blue',
             isNotification: true,
             isRead: true,

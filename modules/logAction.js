@@ -67,7 +67,7 @@ const beneficiaryLogs = async (req, res) => {
             const model = await createDynamicModel(slug);
             const project = await Project.findOne({ slug }).lean();
             if (slug === 'egypt-family') {
-                entriesFound = await model.find({'uploadedBy.actorId': beneficiary._id.toString()}).lean();
+                entriesFound = await model.find({ 'uploadedBy.actorId': beneficiary._id.toString() }).lean();
             } else {
                 const phoneFields = project.fields.filter(field => field.phone === true);
                 const queryOr = phoneFields.map(field => ({
@@ -161,14 +161,17 @@ const entryLogs = async (req, res) => {
 const userLogs = async (req, userId) => {
     const user = await User.findById(userId).lean();
     const userProjects = user.projects;
-    const regexArray = userProjects.map((slug) => new RegExp(slug, 'i'));
-    const usersWithMatchingProjects = await User.find({
-        projects: { $in: user.projects },
-    }).lean();
+    const userEntries = [];
+    for (const slug of userProjects) {
+        const model = await createDynamicModel(slug);
+        const entries = await model.find({}).select('_id').lean();
+        userEntries.push(...entries.map(entry => entry._id.toString()));
+    }
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const filter = req.query.showBy || 'project';
     let query;
+
     if (filter === 'actor') {
         query = {
             actorId: userId,
@@ -180,12 +183,8 @@ const userLogs = async (req, userId) => {
         };
     } else if (filter === 'project') {
         query = {
-            $or: [
-                { entityType: 'entry' },
-                { entityType: 'beneficiary' }
-            ],
-            action: { $in: regexArray },
-        }
+            entityId: { $in: userEntries }
+        };
     } else {
         query = {
             $or: [
