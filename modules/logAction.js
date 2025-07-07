@@ -196,12 +196,7 @@ const userLogs = async (req, userId) => {
                     actorId: { $ne: userId },
                 },
                 {
-                    entityType: 'entry',
-                    action: { $in: regexArray },
-                },
-                {
-                    entityType: 'beneficiary',
-                    action: { $in: regexArray },
+                    entityId: { $in: userEntries }
                 }
             ],
         };
