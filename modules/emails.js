@@ -98,7 +98,7 @@ const emailOrderUpdate = async (email, salute, subject, message, entityId, files
     await transporter.sendMail(mailOptions);
 }
 
-const emailEntryUpdate = async (email, salute, subject, message, entityId, files) => {
+const emailEntryUpdate = async (email, salute, subject, message, entityId, files, entry) => {
 
     const customer = await Customer.findOne({ email }).lean();
     const { portalUrl, newUser } = await getPortalUrl(customer);
@@ -133,12 +133,14 @@ const emailEntryUpdate = async (email, salute, subject, message, entityId, files
         html: compiledTemplate({
             salute,
             message,
+            entry,
             portalUrl,
             files: filesMadePublic,
         }),
     };
 
     await transporter.sendMail(mailOptions);
+    
 }
 
 module.exports = {

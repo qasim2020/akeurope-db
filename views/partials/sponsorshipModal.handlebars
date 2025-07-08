@@ -8,22 +8,19 @@
       </div>
 
       <div class="modal-body">
-        <div class="mb-3">
-          <label class="form-label">Start Date</label>
-          <input class="form-control" name="subject" placeholder="Message heading"
-            value="Update · {{data.entry.name}} · {{data.project.name}}" />
-        </div>
-
-        <div class="mb-3">
-          <label class="form-label">End Date</label>
-          <input class="form-control" name="salute" placeholder="Assalam-o-alaikum dear..."
-            value="Assalam-o-alaikum dear {{data.customer.name}}" />
-        </div>
-
-        <div class="mb-3">
-          <button type="submit" class="btn btn-primary w-100" onclick="sendUpdateToDonor(this)">Get Orders</button>
-        </div>
-
+        {{log data.orders}}
+        {{#each data.orders}}
+        <div class="card mb-3">
+          <div class="card-body">
+            <h5 class="card-title">Order #{{this.orderNo}}</h5>
+            <p class="card-text">From: {{formatDate this.createdAt}}</p>
+            <p class="card-text">To: {{expiresOn this.createdAt this.project.months}}</p>
+            <p class="card-text">Status: {{capitalizeFirstLetter this.status}}</p>
+            <p class="card-text">Amount: {{this.entry.perMonthCost}} {{this.currency}}</p>
+            <p class="card-text">Customer: {{this.customerId.name}}</p>
+            <button class="btn btn-danger">Stop Sponsorship</button>
+          </div>
+        {{/each}}
       </div>
 
       <div class="modal-footer">

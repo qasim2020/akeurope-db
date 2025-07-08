@@ -19,6 +19,7 @@ const { logTemplates } = require('../modules/logTemplates');
 const { getChanges } = require('../modules/getChanges');
 const { createDraftOrder, updateDraftOrder, getPendingOrderEntries, formatOrder } = require('../modules/orders');
 const { sendNotificationToDonor } = require('../modules/notifyCustomer');
+const { sendTelegramMessage } = require('../../akeurope-cp/modules/telegramBot')
 const { getEntityFiles } = require('../modules/filesUtils.js');
 const Order = require('../models/Order');
 const File = require('../models/File');
@@ -739,29 +740,39 @@ exports.sendEntryUpdateOnEmail = async (req, res) => {
         if (!customer) {
             return res.status(404).send('Customer not found');
         }
-        await emailEntryUpdate(customer.email, salute, subject, message, entry._id, files);
+        await emailEntryUpdate(customer.email, salute, subject, message, entry._id, files, entry);
+        await sendTelegramMessage(`Email sent to ${customer.name} | ${customer.email} \n\n ${message}`);
         const project = await Project.findOne({ slug }).lean();
+
+        const statusLog = [{
+            key: 'status',
+            oldValue: '',
+            newValue: message
+        }];
+
         await saveLog(
             logTemplates({
-                type: 'entryUpdateSent',
+                type: 'entryUpdated',
                 entity: entry,
                 project,
+                changes: statusLog,
                 order,
                 message,
                 actor: req.session.user,
-            }),
+            })
         );
+
         await saveLog(
             logTemplates({
-                type: 'customerEntryUpdateSent',
+                type: 'donorEntryUpdated',
                 entity: customer,
                 entry,
                 project,
-                order,
-                message,
+                changes: statusLog,
                 actor: req.session.user,
             }),
         );
+
         res.status(200).send('Entry update sent successfully!');
     } catch (error) {
         console.log(error);
@@ -809,23 +820,29 @@ exports.getSponsorshipModal = async (req, res) => {
         const { entryId, slug } = req.params;
         const model = await createDynamicModel(slug);
         const entry = await model.findById(entryId).lean();
-        const project = await Project.findOne({slug}).lean();
+        const project = await Project.findOne({ slug }).lean();
         const orders = await Order.find({
             status: 'paid',
             'projects.entries.entryId': entry._id
-        });
-        if (orders.length > 1) throw new Error(`${entry.name} has more than 1 paid orders - impossible - please resolve`);
-        if (orders.length === 0) throw new Error(`${entry.name} has zero active orders.`);
-        if (!orders) throw new Error(`${entry.name} has no orders`);
-        const order = orders[0];
-        const customer = await Customer.findById(order.customerId).lean();
+        }).populate('customerId', 'name email phoneNumber').lean();
+        for (const order of orders) {
+            for (const project of order.projects) {
+                for (const orderEntry of project.entries) {
+                    if (orderEntry.entryId.toString() === entry._id.toString()) {
+                        order.project = project;
+                        orderEntry.months = project.months;
+                        orderEntry.perMonthCost = orderEntry.totalCost;
+                        order.entry = orderEntry;
+                    }
+                }
+            }
+        }
         res.render('partials/sponsorshipModal', {
             layout: false,
             data: {
                 entry,
                 project,
-                order,
-                customer
+                orders
             },
         });
     } catch (error) {

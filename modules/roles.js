@@ -48,6 +48,7 @@ const roles = {
         'editBeneficiaries',
         'viewJourney',
         'sendEntryUpdates',
+        'handleSponsorships',
     ],
     editor: [
         'viewSelf',

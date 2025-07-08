@@ -301,6 +301,33 @@
         initializePopovers();
       },
       error: function (xhr, status, error) {
+        console.log(error);
+        alert(error);
+      }
+    });
+  }
+
+  const getOrders = function (elem) {
+    const modal = $(elem).closest('.modal');
+    const entryId = '{{data.entry._id}}';
+    const slug = '{{data.project.slug}}';
+    const startDate = $(modal).find('input[name="startDate"]').val();
+    const endDate = $(modal).find('input[name="endDate"]').val();
+
+    if (!startDate || !endDate) {
+      return alert('Please select both start and end dates.');
+    }
+
+    $.ajax({
+      url: `/getEntryOrders/${entryId}/${slug}/${startDate}/${endDate}`,
+      type: 'GET',
+      contentType: 'application/json',
+      success: function (response) {
+        $('#orders-container').replaceWith(response);
+        $(modal).find('.cancel-btn').trigger('click');
+        initializePopovers();
+      },
+      error: function (xhr, status, error) {  
         alert(xhr.responseText);
       }
     });
