@@ -8,6 +8,10 @@ require('dotenv').config();
 exports.login = async (req, res) => {
   
   let { email, password, rememberMe } = req.body;
+
+  if (!email || !password) {
+    return res.status(400).send("Email and password are required!");
+  }
   
   email = email.toLowerCase();
 
@@ -33,6 +37,7 @@ exports.login = async (req, res) => {
 
   } else {
 
+    console.log(error);
     res.status(400).send("User not found/ Credentials are wrong!");
 
   }
