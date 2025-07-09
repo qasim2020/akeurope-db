@@ -429,7 +429,7 @@ async function handleGazaOrphanForm() {
     console.log(`✅ ${beneficiaries.length} added to Beneficiary collection`);
 }
 
-async function createDirectDonorLongUpdatesSheet() {
+async function createDirectDonorGazaUpdate() {
     function getDaysDiff(createdAt) {
         const now = new Date();
         const diffInMs = now - createdAt;
@@ -520,6 +520,89 @@ async function createDirectDonorLongUpdatesSheet() {
         await sendErrorToTelegram(error.join('\n\n'));
     }
     exportToCSV(entries, `gaza-${formatDate(Date.now())}.csv`);
+}
+
+async function createDirectDonorPakistanStudentUpdate() {
+    function getDaysDiff(createdAt) {
+        const now = new Date();
+        const diffInMs = now - createdAt;
+        const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
+        return diffInDays;
+    }
+
+    const model = await createDynamicModel('alfalah-student-scholarship-2025');
+    const orders = await Order.find({
+        'projects.slug': 'alfalah-student-scholarship-2025',
+        status: 'paid',
+        customerId: {
+            $nin: [
+                new mongoose.Types.ObjectId('6792d001b5a200b74a21d8be'),
+            ]
+        }
+    }).lean();
+
+    let error = [];
+    let entries = [];
+
+    for (const order of orders) {
+        const project = order.projects.find(prj => prj.slug === 'alfalah-student-scholarship-2025');
+        if (!project) continue;
+        const customer = await Customer.findById(order.customerId).lean();
+        for (const orderEntry of project.entries) {
+            const entryId = orderEntry.entryId;
+            await model.updateOne({ _id: entryId }, {status: 'Active'});
+            const doc = await model.findOne({ _id: entryId }).lean();
+            const files = await File.find({ "links.entityId": doc._id }).sort({ createdAt: -1 });
+            if (files.length > 0) {
+                const diffInDays = getDaysDiff(new Date(files[0].createdAt));
+                if (diffInDays > 30) {
+                    doc.photoVideoUpdate = `Pending | File uploaded ${Math.ceil(diffInDays)} days ago.`;
+                } else {
+                    doc.photoVideoUpdate = `Done | File uploaded ${Math.ceil(diffInDays)} days ago`;
+                }
+            } else {
+                doc.photoVideoUpdate = `Pending | No file uploaded yet.`;
+            }
+            const logs = await Log.find({ entityId: doc._id, entityType: 'entry' }).select('action changes timestamp').sort({ timestamp: -1 }).lean();
+            if (logs.length > 1) {
+                const statusLogs = logs.filter(log => (log.changes.some(fd => fd.key === 'status') || log.action.includes('status') || log.action.includes('Report')));
+                if (statusLogs.length == 0) {
+                    doc.statusUpdate = `Pending | No status update found.`;
+                } else {
+                    let latestStatusUpdate = statusLogs[0];
+                    const diffInDays = getDaysDiff(new Date(latestStatusUpdate.timestamp));
+                    if (diffInDays > 30) {
+                        doc.statusUpdate = `Pending | Update sent ${Math.ceil(diffInDays)} days ago.`;
+                    } else {
+                        doc.statusUpdate = `Done | Update sent ${Math.ceil(diffInDays)} days ago`;
+                    }
+                }
+            } else {
+                doc.statusUpdate = `Pending | ${doc.name} does not have any log. Check this please.`;
+            }
+            const tarteeb = {
+                Ser: doc.ser,
+                'Reg No': doc.registrationNo,
+                Name: doc.name,
+                Gender: doc.gender,
+                Father: doc.fatherName,
+                District: doc.district,
+                Donor: customer.name,
+                'Status Update': doc.statusUpdate,
+                'File Upload': doc.photoVideoUpdate,
+                Institute: `${doc.institute} (${doc.classCategory}, ${doc.class})`,
+                'Scholarship Rate': `${doc.scholarshipRate} PKR`,
+                'Scholarship Start Date': formatDate(doc.scholarshipStartDate),
+                'Scholarship End Date': formatDate(doc.scholarshipEndDate),
+                'Current Status': doc.status
+            };
+            entries.push(tarteeb);
+        }
+    }
+    if (error.length > 0) {
+        await sendErrorToTelegram(error.join('\n\n'));
+    }
+    exportToCSV(entries, `alfalah-${formatDate(Date.now())}.csv`);
 }
 
 async function handleEgyptFamilyUsers() {
@@ -1056,7 +1139,8 @@ mongoose.connection.on('open', async () => {
 
     scheduleDailyTask(async () => {
         try {
-            await createDirectDonorLongUpdatesSheet();
+            await createDirectDonorGazaUpdate();
+            await createDirectDonorPakistanStudentUpdate();
         } catch (error) {
             console.error('Error running scheduled donor updates:', error);
         }
