@@ -5,10 +5,11 @@ const { projectEntries } = require("../modules/projectEntries");
 const { saveLog, visibleLogs } = require("../modules/logAction");
 const { logTemplates } = require("../modules/logTemplates");
 const { getChanges } = require("../modules/getChanges");
+const Country = require('../models/Country');
 
-exports.createProject = async(req,res) => {
+exports.createProject = async (req, res) => {
   try {
-    const { name, slug, status, currency, location, language, fields} = req.body;
+    const { name, slug, status, currency, location, language, fields } = req.body;
 
     const project = new Project({
       _id: new mongoose.Types.ObjectId(),
@@ -22,11 +23,11 @@ exports.createProject = async(req,res) => {
     });
 
     await project.save();
-    
-    await saveLog(logTemplates({ 
+
+    await saveLog(logTemplates({
       type: 'projectCreated',
       entity: project,
-      actor: req.session.user 
+      actor: req.session.user
     }));
 
     res.status(200).send("Saved successfully");
@@ -38,18 +39,25 @@ exports.createProject = async(req,res) => {
 
 }
 
-exports.editModal = async(req,res) => {
-  let project = await Project.findOne({_id: req.params.projId}).lean();
-  res.render('partials/editProjectModal', { layout: false, data: {project} });
+exports.editModal = async (req, res) => {
+  let project = await Project.findOne({ _id: req.params.projId }).lean();
+  const countries = await Country.find({}).sort({ name: 1 }).lean();
+  res.render('partials/editProjectModal', {
+    layout: false,
+    data: {
+      project,
+      countries
+    }
+  });
 }
 
-exports.updateProject = async(req,res) => {
+exports.updateProject = async (req, res) => {
   try {
     const { id } = req.params;
     const { name, slug, currency, status, location, fields, language } = req.body;
-    
+
     const originalProject = await Project.findById(id);
-    
+
     if (!originalProject) {
       return res.status(404).send("Project not found");
     }
@@ -63,23 +71,23 @@ exports.updateProject = async(req,res) => {
       location,
       fields,
     };
-    
+
     changeDetails = getChanges(originalProject, updatedData, ['fields']);
 
     if (changeDetails.length > 0) {
-                             
-        await saveLog(logTemplates({ 
-            type: 'projectUpdated',
-            entity: originalProject,
-            actor: req.session.user,
-            changes: changeDetails
-        }));
-            
-        await Project.findByIdAndUpdate(
-            id,
-            updatedData,
-            { new: true } 
-        );
+
+      await saveLog(logTemplates({
+        type: 'projectUpdated',
+        entity: originalProject,
+        actor: req.session.user,
+        changes: changeDetails
+      }));
+
+      await Project.findByIdAndUpdate(
+        id,
+        updatedData,
+        { new: true }
+      );
 
     }
 
@@ -92,7 +100,7 @@ exports.updateProject = async(req,res) => {
 
 };
 
-exports.project = async(req,res) => {
+exports.project = async (req, res) => {
   try {
 
     if (!req.userPermissions.includes(req.params.slug)) {
@@ -102,7 +110,9 @@ exports.project = async(req,res) => {
       })
     }
 
-    const { entries, project, pagination } = await projectEntries(req,res);
+    const { entries, project, pagination } = await projectEntries(req, res);
+
+    const countries = await Country.find({}).sort({ name: 1 }).lean();
 
     const newEntryId = new mongoose.Types.ObjectId();
     res.render('project', {
@@ -112,6 +122,7 @@ exports.project = async(req,res) => {
         userName: req.session.user.name,
         userRole: req.session.user.role.charAt(0).toUpperCase() + req.session.user.role.slice(1),
         project,
+        countries,
         fields: project.fields,
         entries,
         layout: req.session.layout,
@@ -120,7 +131,7 @@ exports.project = async(req,res) => {
         activeMenu: project.slug,
         role: req.userPermissions,
         pagination,
-        logs: await visibleLogs(req,res),
+        logs: await visibleLogs(req, res),
         sidebarCollapsed: req.session.sidebarCollapsed
       }
     });

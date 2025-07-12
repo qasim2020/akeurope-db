@@ -70,10 +70,12 @@
 </div>
 
 {{#if (findInArray data.role "createProject")}}
-{{> emptyProjectModal}}
+{{> editProjectModal}}
 {{/if}}
 
 {{> projectsFrontEnd}}
+
+<script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
 
 <script>
 
@@ -105,5 +107,6 @@
       }
     });
   }
+
 
 </script>

@@ -2,6 +2,7 @@ const Project = require('../models/Project');
 const { createDynamicModel } = require('../models/createDynamicModel');
 const { countPaidEntriesInProject } = require('../modules/projectEntries');
 const { visibleLogs } = require('../modules/logAction');
+const Country = require('../models/Country');
 
 exports.projects = async (req, res) => {
     let projects = await Project.find({
@@ -14,15 +15,18 @@ exports.projects = async (req, res) => {
         project.paid = await countPaidEntriesInProject(project.slug);
     }
 
+    const countries = await Country.find({}).lean();
+
     res.render('projects', {
         layout: 'dashboard',
         data: {
             userId: req.session.user._id,
             userName: req.session.user.name,
             userRole:
-                req.session.user.role.charAt(0).toUpperCase() +
-                req.session.user.role.slice(1),
+            req.session.user.role.charAt(0).toUpperCase() +
+            req.session.user.role.slice(1),
             projects: projects,
+            countries: countries,
             layout: req.session.layout,
             activeMenu: 'allProjects',
             role: req.userPermissions,

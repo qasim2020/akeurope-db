@@ -18,25 +18,34 @@
             value="{{data.project.slug}}" />
         </div>
         <div class="mb-3">
+          <label for="projectType" class="form-label">Type</label>
+          <select class="form-select form-control project-type" name="type" onchange="setProjectType(this)">
+            <option value="orphan">Orphan Sponsorship</option>
+            <option value="scholarship">Student Sponsorship</option>
+          </select>
+        </div>
+        <div class="mb-3">
+          <label for="" class="form-label">Discription</label>
+          <textarea class="form-control project-description" name="projectType" id="" cols="30" rows="5"
+            placeholder="write project description"></textarea>
+        </div>
+        <div class="mb-3">
           <label class="form-label">Project location</label>
           <input type="text" class="project-location form-control" name="example-text-input" placeholder="Pakistan etc"
             value="{{data.project.location}}" />
         </div>
+
         <div class="mb-3">
           <label class="form-label">Country Language</label>
-          <input type="text" class="project-language form-control" name="example-text-input" placeholder="English/ Arabic etc"
-            value="{{data.project.language}}"/>
+          <input type="text" class="project-language form-control" name="example-text-input"
+            placeholder="English/ Arabic etc" value="{{data.project.language}}" />
         </div>
         <div class="mb-3">
-          <label for="invoiceAmount" class="form-label">Project Currency</label>
-          <select class="form-select form-control project-sub-cost-currency" name="currency">
-            <option value="USD" selected>USD ($)</option>
-            <option value="NOK">NOK (kr)</option>
-            <option value="GBP">GBP (£)</option>
-            <option value="EUR">EUR (€)</option>
-            <option value="PKR">PKR (₨)</option>
-            <option value="ILS">ILS (₪)</option>
-            <option value="EGP">EGP (£)</option>
+          <label class="form-label">Select Currency</label>
+          <select class="form-select form-control project-currency" id="project-currency" name="currency">
+            {{#each data.countries}}
+            <option value="{{this.currency.code}}">{{this.name}} · {{this.currency.code}}</option>
+            {{/each}}
           </select>
         </div>
         <label class="form-label">Project status</label>
@@ -71,7 +80,6 @@
             </label>
           </div>
         </div>
-
       </div>
       <div class="modal-body">
         <label class="form-label">Project fields</label>
@@ -145,7 +153,7 @@
             <span class="badge cursor-pointer p-2 my-1 me-2"
               onclick="alert('This is a temp field. You need to enter a field name first.')">Field # 1</span>
           </div>
-          <input type="text" class="d-none" disabled>
+          <input type="text" class="d-none" disabled="true">
         </div>
 
         <div class="mb-3 form-field visible-field">
@@ -166,8 +174,8 @@
           <p class="card-subtitle mb-3">Fields that show different subscription options for each project
             entry. Can only be numbers.</p>
           <div class="card d-block p-2 mb-3 form-control subscription-field-selectors">
-           <span class="badge cursor-pointer p-2 my-1 me-2"
-              onclick="alert('This is a temp field. Please add a Number field above to select it.')">Field # 1</span> 
+            <span class="badge cursor-pointer p-2 my-1 me-2"
+              onclick="alert('This is a temp field. Please add a Number field above to select it.')">Field # 1</span>
           </div>
           <input type="text" class="d-none" disabled>
         </div>
@@ -194,8 +202,29 @@
           <input type="text" class="d-none" disabled>
         </div>
 
-      </div>
+        <div class="mb-3 form-field s-start-field d-none">
+          <div class="form-label">Sponsorship Start Date Field</div>
+          <p class="card-subtitle mb-3">Date when the sponsorship will start. Only works for projects with type
+            scholarships. Can only be a date field.</p>
+          <div class="card d-block p-2 mb-3 form-control s-start-field-selectors">
+            <span class="badge cursor-pointer p-2 my-1 me-2"
+              onclick="alert('This is a temp field. Please add a String field above to select it.')">Field # 1</span>
+          </div>
+          <input type="text" class="d-none" disabled>
+        </div>
 
+        <div class="mb-3 form-field s-stop-field d-none">
+          <div class="form-label">Sponsorship End Date Field</div>
+          <p class="card-subtitle mb-3">Date when the sponsorship will stop. Only works for projects with type
+            scholarships. Can only be a date field.</p>
+          <div class="card d-block p-2 mb-3 form-control s-stop-field-selectors">
+            <span class="badge cursor-pointer p-2 my-1 me-2"
+              onclick="alert('This is a temp field. Please add a String field above to select it.')">Field # 1</span>
+          </div>
+          <input type="text" class="d-none" disabled>
+        </div>
+
+      </div>
       <div class="modal-footer">
         <a href="#" class="btn btn-link link-secondary" data-bs-dismiss="modal">
           Cancel

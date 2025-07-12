@@ -1,10 +1,14 @@
-<div class="modal modal-blur fade" id="modal-{{data.project.slug}}" tabindex="-1"
-    style="display: none; padding-left: 0px;" role="dialog" projSlug="{{data.project.slug}}"
-    projId="{{data.project._id}}">
+<div class="modal modal-blur fade" tabindex="-1" style="display: none; padding-left: 0px;" role="dialog" {{#if
+    data.project}} id="modal-{{data.project.slug}}" projSlug="{{data.project.slug}}" projId="{{data.project._id}}"
+    {{else}} id="modal-new-project" projSlug="new-project" {{/if}}>
     <div class="modal-dialog modal-lg" role="document" id="">
         <div class="modal-content">
             <div class="modal-header">
+                {{#if data.project}}
                 <h5 class="modal-title">Edit project</h5>
+                {{else}}
+                <h5 class="modal-title">Create project</h5>
+                {{/if}}
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
@@ -17,12 +21,29 @@
                 <div class="mb-3">
                     <label class="form-label">Slug</label>
                     <input type="text" class="form-control project-slug" name="example-text-input"
-                        placeholder="name-of-project" value="{{data.project.slug}}" disabled />
+                        placeholder="name-of-project" value="{{data.project.slug}}" {{#if data.project}}disabled="true"
+                        {{/if}} />
+                </div>
+
+                <div class="mb-3">
+                    <label for="projectType" class="form-label">Type</label>
+                    <select class="form-select form-control project-type" name="type" onchange="setProjectType(this)">
+                        <option value="orphan" {{#if (eq data.project.type 'orphan' )}}selected{{/if}}>Orphan
+                            Sponsorship</option>
+                        <option value="scholarship" {{#if (eq data.project.type 'scholarship' )}}selected{{/if}}>Student
+                            Sponsorship</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label for="" class="form-label">Discription</label>
+                    <textarea class="form-control project-description" name="projectType" id="" cols="30" rows="5"
+                        placeholder="write project description">{{data.project.description}}</textarea>
                 </div>
 
                 <div class="mb-3">
                     <label class="form-label">Project location</label>
-                    <input type="text" class="form-control project-location" name="example-text-input"
+                    <input type="text" class="project-location form-control" name="example-text-input"
                         placeholder="Pakistan etc" value="{{data.project.location}}" />
                 </div>
 
@@ -34,14 +55,11 @@
 
                 <div class="mb-3">
                     <label for="invoiceAmount" class="form-label">Project Currency</label>
-                    <select class="form-select form-control project-sub-cost-currency" name="currency">
-                        <option value="USD" {{#if (eq data.project.currency 'USD' )}}selected{{/if}}>USD ($)</option>
-                        <option value="NOK" {{#if (eq data.project.currency 'NOK' )}}selected{{/if}}>NOK (kr)</option>
-                        <option value="GBP" {{#if (eq data.project.currency 'GBP' )}}selected{{/if}}>GBP (£)</option>
-                        <option value="EUR" {{#if (eq data.project.currency 'EUR' )}}selected{{/if}}>EUR (€)</option>
-                        <option value="PKR" {{#if (eq data.project.currency 'PKR' )}}selected{{/if}}>PKR (₨)</option>
-                        <option value="ILS" {{#if (eq data.project.currency 'ILS' )}}selected{{/if}}>ILS (₪)</option>
-                        <option value="EGP" {{#if (eq data.project.currency 'EGP' )}}selected{{/if}}>EGP (£)</option>
+                    <select class="form-select form-control project-currency" id="project-currency" name="currency">
+                        {{#each data.countries}}
+                        <option value="{{this.currency.code}}" {{#if (eq ../data.project.currency this.currency.code
+                            )}}selected{{/if}}>{{this.name}} · {{this.currency.code}}</option>
+                        {{/each}}
                     </select>
                 </div>
 
@@ -86,6 +104,7 @@
             <div class="modal-body">
                 <label class="form-label">Enter project fields</label>
                 <p class="card-subtitle mb-3">Drag and drop the fields to change their order</p>
+                {{#if data.project}}
                 <div class="accordion" id="accordion-{{data.project.slug}}">
                     {{#each data.project.fields}}
                     <div class="accordion-item accordion-edit-project form-field">
@@ -229,10 +248,59 @@
                             </div>
                         </div>
                     </div>
-
                     {{/each}}
-
                 </div>
+                {{else}}
+                <div class="accordion" id="accordion-new-project">
+                    <div class="accordion-item accordion-edit-project form-field">
+                        <h2 class="accordion-header d-flex justify-content-between" id="">
+                            <button class="accordion-button " type="button" data-bs-toggle="collapse"
+                                data-bs-target="#collapse-new-project-1" aria-expanded="true">
+                                Field # 1
+                            </button>
+                        </h2>
+                        <div id="collapse-new-project-1" class="accordion-collapse collapse show"
+                            data-bs-parent="#accordion-new-project">
+                            <div class="accordion-body pt-0">
+                                <div class="mb-3">
+                                    <label class="form-label">Name</label>
+                                    <input id="" type="text" class="form-control" name="example-text-input"
+                                        placeholder="Field name" value="" />
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Type</label>
+                                    <select class="form-select">
+                                        <option value="string">String</option>
+                                        <option value="textarea">Long text</option>
+                                        <option value="number">Number</option>
+                                        <option value="boolean">Boolean</option>
+                                        <option value="dropdown">Dropdown</option>
+                                        <option value="date">Date (Calendar)</option>
+                                        <option value="image">Image upload</option>
+                                        <option value="file">File upload</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3 text-center">
+                                    <button class="btn btn-outline-danger border delete-project-field">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                            stroke-linecap="round" stroke-linejoin="round"
+                                            class="icon icon-tabler icons-tabler-outline icon-tabler-trash">
+                                            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                            <path d="M4 7l16 0" />
+                                            <path d="M10 11l0 6" />
+                                            <path d="M14 11l0 6" />
+                                            <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" />
+                                            <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" />
+                                        </svg>
+                                        Delete this field
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {{/if}}
                 <div class="text-center mt-3">
                     <button class="btn btn-outline-secondary border add-project-field">
                         <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24"
@@ -251,7 +319,8 @@
                     <div class="form-label">Select non-repeatable field</div>
                     <p class="card-subtitle mb-3">This is a unique field in your project that never repeats. It can be
                         an email, id card number, mobile number, or slug etc. </p>
-                    <div class="card d-block p-2 mb-3 form-control primary-field-selectors">
+                    {{#if data.project}}
+                    <div class="card d-block p-2 mb-3 form-control selector primary-field-selector">
                         {{#each data.project.fields}}
                         {{#if (regexMatch this.type '^(string|textarea|number)$')}}
                         <span class="badge cursor-pointer p-2 mb-1 {{#if this.primary}} bg-blue-lt {{/if}}"
@@ -259,8 +328,16 @@
                         {{/if}}
                         {{/each}}
                     </div>
-                    <input type="text" class="d-none" disabled {{#each data.project.fields}} {{#if this.primary}}
-                        value="{{this.actualName}}" {{/if}} {{/each}}>
+                    <input type="text" class="d-none" disabled="true" {{#each data.project.fields}} {{#if this.primary}}
+                        value="{{this.actualName}}" {{/if}} {{/each}} />
+                    {{else}}
+                    <div class="card d-block p-2 mb-3 form-control selector primary-field-selector">
+                        <span class="badge cursor-pointer p-2 my-1 me-2"
+                            onclick="alert('This is a temp field. You need to enter a field name first.')">Field #
+                            1</span>
+                    </div>
+                    <input type="text" class="d-none" disabled="true">
+                    {{/if}}
                 </div>
 
                 <div class="mb-3 form-field visible-field">
@@ -271,7 +348,8 @@
                     </p>
                     <button class="btn btn-sm p-2
                      my-2" onclick="toggleSelection(this)">Toggle Selection</button>
-                    <div class="card d-block p-2 mb-3 form-control visible-field-selectors">
+                    {{#if data.project}}
+                    <div class="card d-block p-2 mb-3 form-control selector visible-field-selector">
                         {{#each data.project.fields}}
                         <span class="badge cursor-pointer p-2 mb-1 {{#if this.visible}} bg-blue-lt {{/if}}"
                             onclick="setVisibleField(this)">{{this.actualName}}</span>
@@ -279,13 +357,22 @@
                     </div>
                     <input type="text" class="d-none" disabled
                         value="{{#each data.project.fields}}{{#if (eq this.visible true)}}{{this.actualName}}{{/if}}{{/each}}">
+                    {{else}}
+                    <div class="card d-block p-2 mb-3 form-control selector visible-field-selector">
+                        <span class="badge cursor-pointer p-2 my-1 me-2"
+                            onclick="alert('This is a temp field. You need to enter a field name first.')">Field #
+                            1</span>
+                    </div>
+                    <input type="text" class="d-none" disabled="true">
+                    {{/if}}
                 </div>
 
                 <div class="mb-3 form-field subscription-field">
                     <div class="form-label">Subscription fields</div>
                     <p class="card-subtitle mb-3">Fields that show different subscription options for each project
                         entry. Can only be numbers.</p>
-                    <div class="card d-block p-2 mb-3 form-control subscription-field-selectors">
+                    {{#if data.project}}
+                    <div class="card d-block p-2 mb-3 form-control selector subscription-field-selector">
                         {{#each data.project.fields}}
                         {{#if (regexMatch this.type '^(number)$')}}
                         <span class="badge cursor-pointer p-2 mb-1 {{#if this.subscription}} bg-blue-lt {{/if}}"
@@ -293,15 +380,24 @@
                         {{/if}}
                         {{/each}}
                     </div>
-                    <input type="text" class="d-none" disabled
-                        value="{{#each data.project.fields}}{{#if (eq this.subscription true)}}{{this.actualName}}{{/if}}{{/each}}">
+                    <input type="text" class="d-none" disabled="true"
+                        value="{{#each data.project.fields}}{{#if (eq this.subscription true)}}{{this.actualName}}{{/if}}{{/each}}" />
+                    {{else}}
+                    <div class="card d-block p-2 mb-3 form-control selector subscription-field-selector">
+                        <span class="badge cursor-pointer p-2 my-1 me-2"
+                            onclick="alert('This is a temp field. Please add a Number field above to select it.')">Field
+                            # 1</span>
+                    </div>
+                    <input type="text" class="d-none" disabled="true" />
+                    {{/if}}
                 </div>
 
                 <div class="mb-3 form-field status-field">
                     <div class="form-label">Status Field</div>
                     <p class="card-subtitle mb-3">One field that shows the status of the child for example when was the
                         last contact or any updates. Can only be long text area.</p>
-                    <div class="card d-block p-2 mb-3 form-control status-field-selector">
+                    {{#if data.project}}
+                    <div class="card d-block p-2 mb-3 form-control selector status-field-selector">
                         {{#each data.project.fields}}
                         {{#if (regexMatch this.type '^(textarea)$')}}
                         <span class="badge cursor-pointer p-2 mb-1 {{#if this.status}} bg-blue-lt {{/if}}"
@@ -309,8 +405,16 @@
                         {{/if}}
                         {{/each}}
                     </div>
-                    <input type="text" class="d-none" disabled
-                        value="{{#each data.project.fields}}{{#if (eq this.status true)}}{{this.actualName}}{{/if}}{{/each}}">
+                    <input type="text" class="d-none" disabled="true"
+                        value="{{#each data.project.fields}}{{#if (eq this.status true)}}{{this.actualName}}{{/if}}{{/each}}" />
+                    {{else}}
+                    <div class="card d-block p-2 mb-3 form-control selector status-field-selector">
+                        <span class="badge cursor-pointer p-2 my-1 me-2"
+                            onclick="alert('This is a temp field. Please add a TextArea field above to select it.')">Field
+                            # 1</span>
+                    </div>
+                    <input type="text" class="d-none" disabled="true" />
+                    {{/if}}
                 </div>
 
                 <div class="mb-3 form-field phone-field">
@@ -318,7 +422,8 @@
                     <p class="card-subtitle mb-3">Phone number where whatsapp is working, so a chat session can be
                         created with
                         the beneficiary. Can only be string field.</p>
-                    <div class="card d-block p-2 mb-3 form-control phone-field-selector">
+                    {{#if data.project}}
+                    <div class="card d-block p-2 mb-3 form-control selector phone-field-selector">
                         {{#each data.project.fields}}
                         {{#if (regexMatch this.type '^(string)$')}}
                         <span class="badge cursor-pointer p-2 mb-1 {{#if this.phone}} bg-blue-lt {{/if}}"
@@ -326,8 +431,64 @@
                         {{/if}}
                         {{/each}}
                     </div>
-                    <input type="text" class="d-none" disabled
-                        value="{{#each data.project.fields}}{{#if (eq this.phone true)}}{{this.actualName}}{{/if}}{{/each}}">
+                    <input type="text" class="d-none" disabled="true"
+                        value="{{#each data.project.fields}}{{#if (eq this.phone true)}}{{this.actualName}}{{/if}}{{/each}}" />
+                    {{else}}
+                    <div class="card d-block p-2 mb-3 form-control selector phone-field-selector">
+                        <span class="badge cursor-pointer p-2 my-1 me-2"
+                            onclick="alert('This is a temp field. Please add a String field above to select it.')">Field
+                            # 1</span>
+                    </div>
+                    <input type="text" class="d-none" disabled="true" />
+                    {{/if}}
+                </div>
+
+                <div class="mb-3 form-field s-start-field">
+                    <div class="form-label">Sponsorship Start Date Field</div>
+                    <p class="card-subtitle mb-3">Date when the sponsorship will start. Only works for projects with
+                        type scholarships. Can only be a date field.</p>
+                    {{#if data.project}}
+                    <div class="card d-block p-2 mb-3 form-control selector s-start-field-selector">
+                        {{#each data.project.fields}}
+                        {{#if (regexMatch this.type '^(date)$')}}
+                        <span class="badge cursor-pointer p-2 mb-1 {{#if this.phone}} bg-blue-lt {{/if}}"
+                            onclick="setSStartField(this)">{{this.actualName}}</span>
+                        {{/if}}
+                        {{/each}}
+                    </div>
+                    <input type="text" class="d-none" disabled="true" />
+                    {{else}}
+                    <div class="card d-block p-2 mb-3 form-control selector s-start-field-selector">
+                        <span class="badge cursor-pointer p-2 my-1 me-2"
+                            onclick="alert('This is a temp field. Please add a Date field above to select it.')">Field
+                            # 1</span>
+                    </div>
+                    <input type="text" class="d-none" disabled="true" />
+                    {{/if}}
+                </div>
+
+                <div class="mb-3 form-field s-stop-field">
+                    <div class="form-label">Sponsorship End Date Field</div>
+                    <p class="card-subtitle mb-3">Date when the sponsorship will stop. Only works for projects with type
+                        scholarships. Can only be a date field.</p>
+                    {{#if data.project}}
+                    <div class="card d-block p-2 mb-3 form-control selector s-stop-field-selector">
+                        {{#each data.project.fields}}
+                        {{#if (regexMatch this.type '^(date)$')}}
+                        <span class="badge cursor-pointer p-2 mb-1 {{#if this.phone}} bg-blue-lt {{/if}}"
+                            onclick="setSStopField(this)">{{this.actualName}}</span>
+                        {{/if}}
+                        {{/each}}
+                    </div>
+                    <input type="text" class="d-none" disabled="true" />
+                    {{else}}
+                    <div class="card d-block p-2 mb-3 form-control selector s-stop-field-selector">
+                        <span class="badge cursor-pointer p-2 my-1 me-2"
+                            onclick="alert('This is a temp field. Please add a Date field above to select it.')">Field
+                            # 1</span>
+                    </div>
+                    <input type="text" class="d-none" disabled="true" />
+                    {{/if}}
                 </div>
 
             </div>
@@ -335,6 +496,7 @@
                 <a href="#" class="btn btn-link link-secondary" data-bs-dismiss="modal">
                     Cancel
                 </a>
+                {{#if data.project}}
                 <a href="#" class="btn btn-primary ms-auto" onclick="updateProject(this)">
                     <!-- Download SVG icon from http://tabler-icons.io/i/plus -->
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
@@ -347,6 +509,19 @@
                     </svg>
                     Update project
                 </a>
+                {{else}}
+                <a href="#" class="btn btn-primary ms-auto" onclick="createNewProject(this)">
+                    <!-- Download SVG icon from http://tabler-icons.io/i/plus -->
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24"
+                        stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                        <path d="M12 5l0 14"></path>
+                        <path d="M5 12l14 0"></path>
+                    </svg>
+                    Create new project
+                </a>
+                {{/if}}
             </div>
 
         </div>

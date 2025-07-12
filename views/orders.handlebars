@@ -188,7 +188,6 @@
     }
   });
 
-
   const doPageSearch = function (elem, href) {
     if (!href) {
       href = $(elem).attr("my-href");
@@ -206,7 +205,6 @@
     });
   }
 
-
   $(document).on('keypress', '[my-href]', function (e) {
     if (e.which === 13 || e.keyCode === 13) {
 
@@ -222,4 +220,5 @@
 
     }
   });
+  
 </script>

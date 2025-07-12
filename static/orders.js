@@ -790,7 +790,6 @@ const emailThanks = function (elem) {
     });
 };
 
-
 const emailClarify = function (elem) {
     const modal = $(elem).closest('.modal');
     const orderId = $(modal).attr('order-id');

@@ -27,8 +27,18 @@
 
     const checkModalValidity = function (modal) {
         let isValid = [];
-        $(modal).find("input").each((key, val) => {
-            if ($(val).val() == "") {
+        $(modal).find(".form-control").each((key, val) => {
+            const isTomSelector = $(val).hasClass("ts-wrapper");
+            if (isTomSelector) 
+                return;
+            const isSelector = $(val).hasClass("selector");
+            let value;
+            if (isSelector) {
+                value = $(val).siblings("input").val();
+            } else {
+                value = $(val).val();
+            }
+            if (!value || value.trim() === "" || value.length === 0) {
                 $(val).addClass("is-invalid");
                 if ($(val).siblings(".form-control").length > 0) {
                     $(val).siblings(".form-control").addClass("is-invalid");
@@ -46,7 +56,7 @@
                 $(val).addClass("is-valid");
                 $(val).siblings(".form-control").addClass("is-valid");
             }
-            isValid.push($(val).val() != "");
+            isValid.push(value != "");
         });
 
         if (highlightRepeatingValues(modal)) {
@@ -89,6 +99,8 @@
                 subscription: checkSubscriptionField($(val).find("input:first").val(), $(modal)),
                 status: checkStatusField($(val).find("input:first").val(), $(modal)),
                 phone: checkPhoneField($(val).find("input:first").val(), $(modal)),
+                sStart: $(modal).find(".s-start-field input").val() == $(val).find("input:first").val(),
+                sStop: $(modal).find(".s-stop-field input").val() == $(val).find("input:first").val(),
             }
         }).get();
 
@@ -126,6 +138,8 @@
                     filter: '.sortable-disabled',
                     chosenClass: 'active'
                 });
+                const currencyEl = $(`.modal[projId=${projId}]`).find(".project-currency");
+                startTomSelectCurrency(currencyEl)
             },
             error: function (xhr, status, error) {
                 alert(xhr.responseText);
@@ -142,6 +156,8 @@
         const isValidModal = checkModalValidity(modal);
         if (isValidModal == false) return;
         const data = getModalFilledData(modal);
+        console.log(data);
+        return;
 
         let currentBtnHTML = $(elem).html();
         $(elem).html(`<span class="spinner-border spinner-border-sm" role="status"></span>`);
@@ -160,10 +176,11 @@
             error: function (xhr, status, error) {
                 $(elem).html(currentBtnHTML);
                 $(".modal-footer").append(`
-        <div class="w-100 d-block alert alert-danger mt-4" role="alert">
-          <h4 class="alert-title">Could not save.</h4>
-          <div class="text-secondary">${xhr.responseText}</div>
-        </div>`);
+                    <div class="w-100 d-block alert alert-danger mt-4" role="alert">
+                    <h4 class="alert-title">Could not save.</h4>
+                    <div class="text-secondary">${xhr.responseText}</div>
+                    </div>
+                `);
             }
         });
 
@@ -171,12 +188,14 @@
 
     const createNewProject = function (elem) {
 
-        const modal = $("#create-project");
+        const modal = $("#modal-new-project");
 
         resetModal(modal);
         const isValidModal = checkModalValidity(modal);
         if (isValidModal == false) return;
         const data = getModalFilledData(modal);
+        console.log(data);
+        return;
 
         let currentBtnHTML = $(elem).html();
         $(elem).html(`<span class="spinner-border spinner-border-sm me-2" role="status"></span>`);
@@ -315,19 +334,21 @@
         if ($(this).hasClass("form-select")) {
             addOptions(this);
         }
-        addVisibleField(this);
         addPrimaryField(this);
+        addVisibleField(this);
         addSubscriptionField(this);
         addStatusField(this);
         addPhoneField(this);
+        addSStartField(this);
+        addSStopField(this);
         let input = $(this).closest(".accordion-item").find("input").val();
         let type = $(this).closest(".accordion-item").find(".form-select").val();
         $(this).closest(".accordion-item").find(".accordion-button").html(`
-      <span class='d-none d-md-inline-block me-2'>Field is </span>
-      <span class="badge bg-azure-lt me-2">${input}</span>
-      <span class='d-none d-md-inline-block me-2'>with type of </span>
-      <span class="badge bg-blue-lt">${type}</span>
-    `);
+            <span class='d-none d-md-inline-block me-2'>Field is </span>
+            <span class="badge bg-azure-lt me-2">${input}</span>
+            <span class='d-none d-md-inline-block me-2'>with type of </span>
+            <span class="badge bg-blue-lt">${type}</span>
+        `);
     })
 
     const addPrimaryField = function (elem) {
@@ -347,7 +368,7 @@
                 html += `<span class="p-2 badge cursor-pointer me-2 my-1" onclick="setPrimaryField(this)">${val}</span>`;
             }
         });
-        $(elem).closest(".modal").find(".primary-field-selectors").html(html);
+        $(elem).closest(".modal").find(".primary-field-selector").html(html);
         $(elem).closest(".modal").find(".primary-field input").removeClass("is-valid").val("");
         $(elem).closest(".modal").find(".primary-field .form-control").removeClass("is-valid");
         $(elem).closest(".modal").find(".primary-field .form-control").removeClass("is-invalid");
@@ -366,7 +387,7 @@
                 html += `<span class="p-2 badge cursor-pointer me-2 my-1" onclick="setVisibleField(this)">${val}</span>`;
             }
         });
-        $(elem).closest(".modal").find(".visible-field-selectors").html(html);
+        $(elem).closest(".modal").find(".visible-field-selector").html(html);
         $(elem).closest(".modal").find(".visible-field input").removeClass("is-valid").val("");
         $(elem).closest(".modal").find(".visible-field .form-control").removeClass("is-valid");
         $(elem).closest(".modal").find(".visible-field .form-control").removeClass("is-invalid");
@@ -391,7 +412,7 @@
                 html += `<span class="p-2 badge cursor-pointer me-2 my-1" onclick="setSubscriptionField(this)">${val}</span>`;
             }
         });
-        $(elem).closest(".modal").find(".subscription-field-selectors").html(html);
+        $(elem).closest(".modal").find(".subscription-field-selector").html(html);
         $(elem).closest(".modal").find(".subscription-field input").removeClass("is-valid").val("");
         $(elem).closest(".modal").find(".subscription-field .form-control").removeClass("is-valid");
         $(elem).closest(".modal").find(".subscription-field .form-control").removeClass("is-invalid");
@@ -416,7 +437,7 @@
                 html += `<span class="p-2 badge cursor-pointer me-2 my-1" onclick="setStatusField(this)">${val}</span>`;
             }
         });
-        $(elem).closest(".modal").find(".status-field-selectors").html(html);
+        $(elem).closest(".modal").find(".status-field-selector").html(html);
         $(elem).closest(".modal").find(".status-field input").removeClass("is-valid").val("");
         $(elem).closest(".modal").find(".status-field .form-control").removeClass("is-valid");
         $(elem).closest(".modal").find(".status-field .form-control").removeClass("is-invalid");
@@ -440,11 +461,59 @@
                 html += `<span class="p-2 badge cursor-pointer me-2 my-1" onclick="setPhoneField(this)">${val}</span>`;
             }
         });
-        $(elem).closest(".modal").find(".phone-field-selectors").html(html);
+        $(elem).closest(".modal").find(".phone-field-selector").html(html);
         $(elem).closest(".modal").find(".status-field input").removeClass("is-valid").val("");
         $(elem).closest(".modal").find(".status-field .form-control").removeClass("is-valid");
         $(elem).closest(".modal").find(".status-field .form-control").removeClass("is-invalid");
         $(elem).closest(".modal").find(".status-field .invalid-feedback").remove();
+    }
+
+    const addSStartField = function (elem) {
+        let allFields = $(elem).closest(".modal").find(".accordion-item").map((key, val) => {
+            const inputType = $(val).find(".form-select:first").val();
+            if (/^(date)$/.test(inputType)) {
+                return $(val).find("input:first").val()
+            } else {
+                return null;
+            }
+        }).filter(val => val != null);
+        if (allFields.length === 0)
+            return;
+        let html = ``;
+        allFields.each((key, val) => {
+            if (val.length > 0) {
+                html += `<span class="p-2 badge cursor-pointer me-2 my-1" onclick="setSStartField(this)">${val}</span>`;
+            }
+        });
+        $(elem).closest(".modal").find(".s-start-field-selector").html(html);
+        $(elem).closest(".modal").find(".s-start-field input").removeClass("is-valid").val("");
+        $(elem).closest(".modal").find(".s-start-field .form-control").removeClass("is-valid");
+        $(elem).closest(".modal").find(".s-start-field .form-control").removeClass("is-invalid");
+        $(elem).closest(".modal").find(".s-start-field .invalid-feedback").remove();
+    }
+
+    const addSStopField = function (elem) {
+        let allFields = $(elem).closest(".modal").find(".accordion-item").map((key, val) => {
+            const inputType = $(val).find(".form-select:first").val();
+            if (/^(date)$/.test(inputType)) {
+                return $(val).find("input:first").val()
+            } else {
+                return null;
+            }
+        }).filter(val => val != null);
+        if (allFields.length === 0)
+            return;
+        let html = ``;
+        allFields.each((key, val) => {
+            if (val.length > 0) {
+                html += `<span class="p-2 badge cursor-pointer me-2 my-1" onclick="setSStopField(this)">${val}</span>`;
+            }
+        });
+        $(elem).closest(".modal").find(".s-stop-field-selector").html(html);
+        $(elem).closest(".modal").find(".s-stop-field input").removeClass("is-valid").val("");
+        $(elem).closest(".modal").find(".s-stop-field .form-control").removeClass("is-valid");
+        $(elem).closest(".modal").find(".s-stop-field .form-control").removeClass("is-invalid");
+        $(elem).closest(".modal").find(".s-stop-field .invalid-feedback").remove();
     }
 
     const checkSubscriptionField = function (field, modal) {
@@ -499,6 +568,20 @@
         $(elem).toggleClass("bg-blue-lt");
         const array = $(elem).closest(".phone-field").find(".bg-blue-lt").map((key, val) => $(val).html()).get();
         $(elem).closest(".phone-field").find("input").val(array.length > 0 ? array.join(',') : '');
+        clearMsgs(elem);
+    }
+
+    const setSStartField = function (elem) {
+        $(elem).siblings().removeClass("bg-blue-lt");
+        $(elem).toggleClass("bg-blue-lt");
+        $(elem).closest(".s-start-field").find("input").val($(elem).html());
+        clearMsgs(elem);
+    }
+
+    const setSStopField = function (elem) {
+        $(elem).siblings().removeClass("bg-blue-lt");
+        $(elem).toggleClass("bg-blue-lt");
+        $(elem).closest(".s-stop-field").find("input").val($(elem).html());
         clearMsgs(elem);
     }
 
@@ -609,10 +692,10 @@
             } else {
                 $(element).addClass("bg-blue-lt");
                 return $(element).text();
-            }            
+            }
         }).get().filter(val => val != null).join(',');
         console.log(newValues);
-        parentDiv.find("input").val(newValues); 
+        parentDiv.find("input").val(newValues);
     }
 
     $(document).on('hide.bs.modal', '.modal', function () {
@@ -637,5 +720,45 @@
     });
 
     let newLayout = '{{data.layout}}' == 'grid' ? 'table' : 'grid';
+
+    const setProjectType = function (elem) {
+        const modal = $(elem).closest(".modal");
+        const projectType = $(elem).val();
+        console.log({ projectType });
+        if (projectType === "orphan") {
+            modal.find(".s-start-field").addClass("d-none");
+            modal.find(".s-stop-field").addClass("d-none");
+        } else {
+            modal.find(".s-start-field").removeClass("d-none");
+            modal.find(".s-stop-field").removeClass("d-none");
+        };
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        var el = document.getElementById('project-currency');
+        startTomSelectCurrency(el);
+    });
+
+    const startTomSelectCurrency = function (el) {
+        if (!el) {
+            console.log(`Element ${$(el).attr('id')} not found!`);
+            return;
+        }
+
+        if (window.TomSelect) {
+            new TomSelect($(el), {
+                create: false,
+                sortField: {
+                    field: "text",
+                    direction: "asc"
+                },
+                placeholder: 'Select currency...'
+            });
+
+            console.log("TomSelect initialized successfully.");
+        } else {
+            console.log("TomSelect is not available.");
+        }
+    }
 
 </script>
