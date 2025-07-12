@@ -1145,7 +1145,7 @@ mongoose.connection.on('open', async () => {
         } catch (error) {
             console.error('Error running scheduled donor updates:', error);
         }
-    }, 5, 0);
+    }, 1, 0);
 });
 
 module.exports = {
