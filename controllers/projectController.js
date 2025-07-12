@@ -9,12 +9,15 @@ const Country = require('../models/Country');
 
 exports.createProject = async (req, res) => {
   try {
-    const { name, slug, status, currency, location, language, fields } = req.body;
+
+    const { name, slug, type, description, location, currency, language, status, fields } = req.body;
 
     const project = new Project({
       _id: new mongoose.Types.ObjectId(),
       name,
       slug: toKebabCase(slug),
+      type,
+      description,
       status,
       currency,
       location,
@@ -42,7 +45,7 @@ exports.createProject = async (req, res) => {
 exports.editModal = async (req, res) => {
   let project = await Project.findOne({ _id: req.params.projId }).lean();
   const countries = await Country.find({}).sort({ name: 1 }).lean();
-  res.render('partials/editProjectModal', {
+  res.render('partials/modalProject', {
     layout: false,
     data: {
       project,
@@ -54,7 +57,7 @@ exports.editModal = async (req, res) => {
 exports.updateProject = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, slug, currency, status, location, fields, language } = req.body;
+    const { name, slug, type, description, location, currency, language, status, fields } = req.body;
 
     const originalProject = await Project.findById(id);
 
@@ -65,6 +68,8 @@ exports.updateProject = async (req, res) => {
     const updatedData = {
       name,
       slug: toKebabCase(slug),
+      type,
+      description,
       status,
       currency,
       language,

@@ -1,260 +1,27 @@
 <script>
-    function toCamelCase(str) {
-        return str
-            .toLowerCase()
-            .replace(/[^a-zA-Z0-9]+(.)/g,
-                (match, chr) => chr.toUpperCase()
-            );
-    }
 
-    function toKebabCase(str) {
-        return str
-            .toLowerCase()                // Convert entire string to lowercase
-            .replace(/[^a-z0-9]+/g, '-')  // Replace non-alphanumeric characters with hyphens
-            .replace(/(^-|-$)/g, '');     // Remove leading or trailing hyphens if any
-    }
+    let newLayout = '{{data.layout}}' == 'grid' ? 'table' : 'grid';
 
-    const resetModal = function (modal) {
-        $(modal).find("input, .form-control").removeClass("is-invalid");
-        $(modal).find("input, .form-control").removeClass("is-valid");
-        $(modal).find(".invalid-feedback").remove();
-        $(modal).find("span").removeClass("border-red");
-        $(modal).find("span").removeClass("rounded-end");
-        $(modal).find(".alert").remove();
-        $(modal).closest(".modal").find(".accordion-item").removeClass("bg-red-lt");
-        return true;
-    }
+    $(document).on('hide.bs.modal', '.modal', function () {
+        console.log('modal started hiding');
 
-    const checkModalValidity = function (modal) {
-        let isValid = [];
-        $(modal).find(".form-control").each((key, val) => {
-            const isTomSelector = $(val).hasClass("ts-wrapper");
-            if (isTomSelector) 
-                return;
-            const isSelector = $(val).hasClass("selector");
-            let value;
-            if (isSelector) {
-                value = $(val).siblings("input").val();
-            } else {
-                value = $(val).val();
-            }
-            if (!value || value.trim() === "" || value.length === 0) {
-                $(val).addClass("is-invalid");
-                if ($(val).siblings(".form-control").length > 0) {
-                    $(val).siblings(".form-control").addClass("is-invalid");
-                }
-                if ($(val).closest(".accordion-item").length > 0) {
-                    $(val).closest(".accordion-item").addClass("bg-red-lt");
-                }
-                if ($(val).siblings("span").length > 0) {
-                    $(val).siblings("span").after(`<div class="invalid-feedback mb-2">Invalid entry</div> `);
-                    $(val).siblings("span").addClass("is-invalid border-red rounded-end");
-                } else {
-                    $(val).after(`<div class="invalid-feedback">Invalid entry</div> `);
-                }
-            } else {
-                $(val).addClass("is-valid");
-                $(val).siblings(".form-control").addClass("is-valid");
-            }
-            isValid.push(value != "");
-        });
+        $(this).find(':focus, .btn-close').blur();
 
-        if (highlightRepeatingValues(modal)) {
-            return false;
-        };
+        // Step 2: Move focus to the first visible & focusable element outside the modal
+        const $fallbackFocus = $('body')
+            .find('a, button, input, textarea, select, [tabindex]:not([tabindex="-1"])')
+            .filter(':visible')
+            .not(this)
+            .first();
 
-        if (!(isValid.every(val => val === true))) {
-            return false;
-        };
-
-        return true;
-
-    }
-
-    const getModalFilledData = function (modal) {
-        const name = $(modal).find(".project-name").val();
-        const slug = $(modal).find(".project-slug").val();
-        const location = $(modal).find(".project-location").val();
-        const language = $(modal).find(".project-language").val();
-        const status = $(modal).find(".project-status").find("input:checked").val();
-        const currency = $(modal).find(".project-sub-cost-currency").val();
-
-        const fields = $(modal).find(".accordion-item").map((key, val) => {
-            let options = [];
-            if ($(val).find(".dynamic-options").length > 0) {
-                $(val).find(".dynamic-options input").each((key, dynamicField) => {
-                    options.push({
-                        label: $(dynamicField).attr("data-label"),
-                        value: $(dynamicField).val()
-                    })
-                });
-            }
-            return {
-                name: toCamelCase($(val).find("input:first").val()),
-                actualName: $(val).find("input:first").val(),
-                type: $(val).find(".form-select").val(),
-                options: options.length > 0 ? options : undefined,
-                primary: $(modal).find(".primary-field input").val() == $(val).find("input:first").val(),
-                visible: checkVisibleField($(val).find("input:first").val(), $(modal)),
-                subscription: checkSubscriptionField($(val).find("input:first").val(), $(modal)),
-                status: checkStatusField($(val).find("input:first").val(), $(modal)),
-                phone: checkPhoneField($(val).find("input:first").val(), $(modal)),
-                sStart: $(modal).find(".s-start-field input").val() == $(val).find("input:first").val(),
-                sStop: $(modal).find(".s-stop-field input").val() == $(val).find("input:first").val(),
-            }
-        }).get();
-
-        return {
-            name, status, location, language, slug, currency, fields,
+        if ($fallbackFocus.length) {
+            $fallbackFocus.focus();
         }
-    }
+    });
 
-    const showEditProjectModal = function (elem) {
-
-        const projId = $(elem).attr("project-id");
-
-        const modalExists = $(document).find(`#button-${projId}`).length > 0;
-
-        if (modalExists) {
-            $(`.modal[projId=${projId}]`).remove();
-            $(`#button-${projId}`).remove();
-        }
-
-        $.ajax({
-            url: `/getProjectModal/${projId}`,
-            type: 'GET',
-            contentType: 'application/json',
-            success: function (response) {
-                $("footer").before(response);
-                $(`#button-${projId}`).trigger("click");
-                let allAccordions = $(".accordion").length - 1;
-                let el = document.querySelectorAll(".accordion")[allAccordions];
-                new Sortable(el, {
-                    animation: 100,
-                    group: '.accordion',
-                    draggable: '.accordion-item',
-                    handle: '.accordion-header',
-                    sort: true,
-                    filter: '.sortable-disabled',
-                    chosenClass: 'active'
-                });
-                const currencyEl = $(`.modal[projId=${projId}]`).find(".project-currency");
-                startTomSelectCurrency(currencyEl)
-            },
-            error: function (xhr, status, error) {
-                alert(xhr.responseText);
-            }
-        });
-
-    }
-
-    const updateProject = function (elem) {
-
-        const modal = $(elem).closest(".modal");
-
-        resetModal(modal);
-        const isValidModal = checkModalValidity(modal);
-        if (isValidModal == false) return;
-        const data = getModalFilledData(modal);
-        console.log(data);
-        return;
-
-        let currentBtnHTML = $(elem).html();
-        $(elem).html(`<span class="spinner-border spinner-border-sm" role="status"></span>`);
-
-        const id = $(modal).attr("projId");
-
-        $.ajax({
-            url: `/project/update/${id}`,
-            type: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify(data),
-            success: function (response) {
-                $(elem).html(currentBtnHTML);
-                window.location.href = "/projects";
-            },
-            error: function (xhr, status, error) {
-                $(elem).html(currentBtnHTML);
-                $(".modal-footer").append(`
-                    <div class="w-100 d-block alert alert-danger mt-4" role="alert">
-                    <h4 class="alert-title">Could not save.</h4>
-                    <div class="text-secondary">${xhr.responseText}</div>
-                    </div>
-                `);
-            }
-        });
-
-    };
-
-    const createNewProject = function (elem) {
-
-        const modal = $("#modal-new-project");
-
-        resetModal(modal);
-        const isValidModal = checkModalValidity(modal);
-        if (isValidModal == false) return;
-        const data = getModalFilledData(modal);
-        console.log(data);
-        return;
-
-        let currentBtnHTML = $(elem).html();
-        $(elem).html(`<span class="spinner-border spinner-border-sm me-2" role="status"></span>`);
-
-        $.ajax({
-            url: '/project/create',
-            type: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify(data),
-            success: function (response) {
-                $(elem).html(currentBtnHTML);
-                window.location.href = "/projects";
-            },
-            error: function (xhr, status, error) {
-                $(elem).html(currentBtnHTML);
-                $(".modal-footer").append(`
-        <div class="w-100 d-block alert alert-danger mt-4" role="alert">
-          <h4 class="alert-title">Could not save.</h4>
-          <div class="text-secondary">${xhr.responseText}</div>
-        </div>`);
-            }
-        });
-
-    }
-
-    const highlightRepeatingValues = function ($container) {
-        const valueCounts = new Map();
-        let hasRepeatingValues = false;
-
-        $container.find(".accordion-item").each((key, val) => {
-            const $input = $(val).find("input:first");
-            const inputValue = $input.val();
-
-            if (valueCounts.has(inputValue)) {
-                valueCounts.set(inputValue, valueCounts.get(inputValue) + 1);
-            } else {
-                valueCounts.set(inputValue, 1);
-            }
-        });
-
-        $container.find(".accordion-item").each((key, val) => {
-            const $input = $(val).find("input:first");
-            const inputValue = $input.val();
-
-            if (valueCounts.get(inputValue) > 1) {
-                hasRepeatingValues = true;
-
-                $input.addClass("is-invalid");
-
-                if ($input.next('.invalid-feedback').length === 0) {
-                    $input.after('<div class="invalid-feedback">This value is repeated.</div>');
-                }
-
-                $(val).addClass("bg-red-lt");
-            }
-        });
-
-        return hasRepeatingValues;
-    }
+    $(document).on('hidden.bs.modal', '.modal', function () {
+        $(this).removeAttr('aria-hidden');
+    });
 
     document.addEventListener('DOMContentLoaded', function () {
         let el = document.querySelector('.accordion');
@@ -350,6 +117,288 @@
             <span class="badge bg-blue-lt">${type}</span>
         `);
     })
+
+    document.addEventListener("DOMContentLoaded", function () {
+        var el = document.getElementById('project-currency');
+        startTomSelectCurrency(el);
+    });
+
+    const startTomSelectCurrency = function (el) {
+        if (!el) {
+            console.log(`Element ${$(el).attr('id')} not found!`);
+            return;
+        }
+
+        if (window.TomSelect) {
+            new TomSelect($(el), {
+                create: false,
+                sortField: {
+                    field: "text",
+                    direction: "asc"
+                },
+                placeholder: 'Select currency...'
+            });
+
+            console.log("TomSelect initialized successfully.");
+        } else {
+            console.log("TomSelect is not available.");
+        }
+    }
+
+    const toCamelCase = function (str) {
+        return str
+            .toLowerCase()
+            .replace(/[^a-zA-Z0-9]+(.)/g,
+                (match, chr) => chr.toUpperCase()
+            );
+    }
+
+    const toKebabCase = function (str) {
+        return str
+            .toLowerCase()                // Convert entire string to lowercase
+            .replace(/[^a-z0-9]+/g, '-')  // Replace non-alphanumeric characters with hyphens
+            .replace(/(^-|-$)/g, '');     // Remove leading or trailing hyphens if any
+    }
+
+    const resetModal = function (modal) {
+        $(modal).find("input, .form-control").removeClass("is-invalid");
+        $(modal).find("input, .form-control").removeClass("is-valid");
+        $(modal).find(".invalid-feedback").remove();
+        $(modal).find("span").removeClass("border-red");
+        $(modal).find("span").removeClass("rounded-end");
+        $(modal).find(".alert").remove();
+        $(modal).closest(".modal").find(".accordion-item").removeClass("bg-red-lt");
+        return true;
+    }
+
+    const checkModalValidity = function (modal) {
+        let isValid = [];
+        $(modal).find(".form-control").each((key, val) => {
+            const isTomSelector = $(val).hasClass("ts-wrapper");
+            const isHidden = $(val).closest('.form-field').hasClass("d-none");
+            if (isTomSelector || isHidden) return;
+            const isSelector = $(val).hasClass("selector");
+            let value;
+            if (isSelector) {
+                value = $(val).siblings("input").val();
+            } else {
+                value = $(val).val();
+            }
+            if (!value || value.trim() === "" || value.length === 0) {
+                $(val).addClass("is-invalid");
+                if ($(val).siblings(".form-control").length > 0) {
+                    $(val).siblings(".form-control").addClass("is-invalid");
+                }
+                if ($(val).closest(".accordion-item").length > 0) {
+                    $(val).closest(".accordion-item").addClass("bg-red-lt");
+                }
+                if ($(val).siblings("span").length > 0) {
+                    $(val).siblings("span").after(`<div class="invalid-feedback mb-2">Invalid entry</div> `);
+                    $(val).siblings("span").addClass("is-invalid border-red rounded-end");
+                } else {
+                    $(val).after(`<div class="invalid-feedback">Invalid entry</div> `);
+                }
+            } else {
+                $(val).addClass("is-valid");
+                $(val).siblings(".form-control").addClass("is-valid");
+            }
+            isValid.push(value != "");
+        });
+
+        if (highlightRepeatingValues(modal)) {
+            return false;
+        };
+
+        if (!(isValid.every(val => val === true))) {
+            return false;
+        };
+
+        return true;
+
+    }
+
+    const getModalFilledData = function (modal) {
+        const name = $(modal).find(".project-name").val();
+        const slug = $(modal).find(".project-slug").val();
+        const location = $(modal).find(".project-location").val();
+        const language = $(modal).find(".project-language").val();
+        const type = $(modal).find(".project-type").val();
+        const status = $(modal).find(".project-status").find("input:checked").val();
+        const currency = $(modal).find(".project-sub-cost-currency").val();
+
+        const fields = $(modal).find(".accordion-item").map((key, val) => {
+            let options = [];
+            if ($(val).find(".dynamic-options").length > 0) {
+                $(val).find(".dynamic-options input").each((key, dynamicField) => {
+                    options.push({
+                        label: $(dynamicField).attr("data-label"),
+                        value: $(dynamicField).val()
+                    })
+                });
+            }
+            return {
+                name: toCamelCase($(val).find("input:first").val()),
+                actualName: $(val).find("input:first").val(),
+                type: $(val).find(".form-select").val(),
+                options: options.length > 0 ? options : undefined,
+                primary: $(modal).find(".primary-field input").val() == $(val).find("input:first").val(),
+                visible: checkVisibleField($(val).find("input:first").val(), $(modal)),
+                subscription: checkSubscriptionField($(val).find("input:first").val(), $(modal)),
+                status: checkStatusField($(val).find("input:first").val(), $(modal)),
+                phone: checkPhoneField($(val).find("input:first").val(), $(modal)),
+                sStart: $(modal).find(".s-start-field input").val() == $(val).find("input:first").val(),
+                sStop: $(modal).find(".s-stop-field input").val() == $(val).find("input:first").val(),
+            }
+        }).get();
+
+        return {
+            name, status, type, location, language, slug, currency, fields,
+        }
+    }
+
+    const showEditProjectModal = function (elem) {
+
+        const projId = $(elem).attr("project-id");
+
+        const modalExists = $(document).find(`#button-${projId}`).length > 0;
+
+        if (modalExists) {
+            $(`.modal[projId=${projId}]`).remove();
+            $(`#button-${projId}`).remove();
+        }
+
+        $.ajax({
+            url: `/getProjectModal/${projId}`,
+            type: 'GET',
+            contentType: 'application/json',
+            success: function (response) {
+                $("footer").before(response);
+                $(`#button-${projId}`).trigger("click");
+                let allAccordions = $(".accordion").length - 1;
+                let el = document.querySelectorAll(".accordion")[allAccordions];
+                new Sortable(el, {
+                    animation: 100,
+                    group: '.accordion',
+                    draggable: '.accordion-item',
+                    handle: '.accordion-header',
+                    sort: true,
+                    filter: '.sortable-disabled',
+                    chosenClass: 'active'
+                });
+                const currencyEl = $(`.modal[projId=${projId}]`).find(".project-currency");
+                startTomSelectCurrency(currencyEl)
+            },
+            error: function (xhr, status, error) {
+                alert(xhr.responseText);
+            }
+        });
+
+    }
+
+    const updateProject = function (elem) {
+
+        const modal = $(elem).closest(".modal");
+
+        resetModal(modal);
+        const isValidModal = checkModalValidity(modal);
+        if (isValidModal == false) return;
+        const data = getModalFilledData(modal);
+
+        let currentBtnHTML = $(elem).html();
+        $(elem).html(`<span class="spinner-border spinner-border-sm" role="status"></span>`);
+
+        const id = $(modal).attr("projId");
+
+        $.ajax({
+            url: `/project/update/${id}`,
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(data),
+            success: function (response) {
+                $(elem).html(currentBtnHTML);
+                window.location.href = "/projects";
+            },
+            error: function (xhr, status, error) {
+                $(elem).html(currentBtnHTML);
+                $(".modal-footer").append(`
+                    <div class="w-100 d-block alert alert-danger mt-4" role="alert">
+                    <h4 class="alert-title">Could not save.</h4>
+                    <div class="text-secondary">${xhr.responseText}</div>
+                    </div>
+                `);
+            }
+        });
+
+    };
+
+    const createNewProject = function (elem) {
+
+        const modal = $("#modal-new-project");
+
+        resetModal(modal);
+        const isValidModal = checkModalValidity(modal);
+        if (isValidModal == false) return;
+        const data = getModalFilledData(modal);
+
+        let currentBtnHTML = $(elem).html();
+        $(elem).html(`<span class="spinner-border spinner-border-sm me-2" role="status"></span>`);
+
+        $.ajax({
+            url: '/project/create',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(data),
+            success: function (response) {
+                $(elem).html(currentBtnHTML);
+                window.location.href = "/projects";
+            },
+            error: function (xhr, status, error) {
+                $(elem).html(currentBtnHTML);
+                $(".modal-footer").append(`
+                    <div class="w-100 d-block alert alert-danger mt-4" role="alert">
+                    <h4 class="alert-title">Could not save.</h4>
+                    <div class="text-secondary">${xhr.responseText}</div>
+                    </div>
+                `);
+            }
+        });
+
+    }
+
+    const highlightRepeatingValues = function ($container) {
+        const valueCounts = new Map();
+        let hasRepeatingValues = false;
+
+        $container.find(".accordion-item").each((key, val) => {
+            const $input = $(val).find("input:first");
+            const inputValue = $input.val();
+
+            if (valueCounts.has(inputValue)) {
+                valueCounts.set(inputValue, valueCounts.get(inputValue) + 1);
+            } else {
+                valueCounts.set(inputValue, 1);
+            }
+        });
+
+        $container.find(".accordion-item").each((key, val) => {
+            const $input = $(val).find("input:first");
+            const inputValue = $input.val();
+
+            if (valueCounts.get(inputValue) > 1) {
+                hasRepeatingValues = true;
+
+                $input.addClass("is-invalid");
+
+                if ($input.next('.invalid-feedback').length === 0) {
+                    $input.after('<div class="invalid-feedback">This value is repeated.</div>');
+                }
+
+                $(val).addClass("bg-red-lt");
+            }
+        });
+
+        return hasRepeatingValues;
+    }
 
     const addPrimaryField = function (elem) {
         let allFields = $(elem).closest(".modal").find(".accordion-item").map((key, val) => {
@@ -462,10 +511,10 @@
             }
         });
         $(elem).closest(".modal").find(".phone-field-selector").html(html);
-        $(elem).closest(".modal").find(".status-field input").removeClass("is-valid").val("");
-        $(elem).closest(".modal").find(".status-field .form-control").removeClass("is-valid");
-        $(elem).closest(".modal").find(".status-field .form-control").removeClass("is-invalid");
-        $(elem).closest(".modal").find(".status-field .invalid-feedback").remove();
+        $(elem).closest(".modal").find(".phone-field input").removeClass("is-valid").val("");
+        $(elem).closest(".modal").find(".phone-field .form-control").removeClass("is-valid");
+        $(elem).closest(".modal").find(".phone-field .form-control").removeClass("is-invalid");
+        $(elem).closest(".modal").find(".phone-field .invalid-feedback").remove();
     }
 
     const addSStartField = function (elem) {
@@ -698,29 +747,6 @@
         parentDiv.find("input").val(newValues);
     }
 
-    $(document).on('hide.bs.modal', '.modal', function () {
-        console.log('modal started hiding');
-
-        $(this).find(':focus, .btn-close').blur();
-
-        // Step 2: Move focus to the first visible & focusable element outside the modal
-        const $fallbackFocus = $('body')
-            .find('a, button, input, textarea, select, [tabindex]:not([tabindex="-1"])')
-            .filter(':visible')
-            .not(this)
-            .first();
-
-        if ($fallbackFocus.length) {
-            $fallbackFocus.focus();
-        }
-    });
-
-    $(document).on('hidden.bs.modal', '.modal', function () {
-        $(this).removeAttr('aria-hidden');
-    });
-
-    let newLayout = '{{data.layout}}' == 'grid' ? 'table' : 'grid';
-
     const setProjectType = function (elem) {
         const modal = $(elem).closest(".modal");
         const projectType = $(elem).val();
@@ -732,33 +758,6 @@
             modal.find(".s-start-field").removeClass("d-none");
             modal.find(".s-stop-field").removeClass("d-none");
         };
-    }
-
-    document.addEventListener("DOMContentLoaded", function () {
-        var el = document.getElementById('project-currency');
-        startTomSelectCurrency(el);
-    });
-
-    const startTomSelectCurrency = function (el) {
-        if (!el) {
-            console.log(`Element ${$(el).attr('id')} not found!`);
-            return;
-        }
-
-        if (window.TomSelect) {
-            new TomSelect($(el), {
-                create: false,
-                sortField: {
-                    field: "text",
-                    direction: "asc"
-                },
-                placeholder: 'Select currency...'
-            });
-
-            console.log("TomSelect initialized successfully.");
-        } else {
-            console.log("TomSelect is not available.");
-        }
     }
 
 </script>

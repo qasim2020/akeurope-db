@@ -1,3 +1,4 @@
+{{log data.project}}
 <div class="modal modal-blur fade" tabindex="-1" style="display: none; padding-left: 0px;" role="dialog" {{#if
     data.project}} id="modal-{{data.project.slug}}" projSlug="{{data.project.slug}}" projId="{{data.project._id}}"
     {{else}} id="modal-new-project" projSlug="new-project" {{/if}}>
@@ -419,9 +420,7 @@
 
                 <div class="mb-3 form-field phone-field">
                     <div class="form-label">Phone Number Fields</div>
-                    <p class="card-subtitle mb-3">Phone number where whatsapp is working, so a chat session can be
-                        created with
-                        the beneficiary. Can only be string field.</p>
+                    <p class="card-subtitle mb-3">Phone number where whatsapp is working. Can only be string field.</p>
                     {{#if data.project}}
                     <div class="card d-block p-2 mb-3 form-control selector phone-field-selector">
                         {{#each data.project.fields}}
@@ -443,7 +442,7 @@
                     {{/if}}
                 </div>
 
-                <div class="mb-3 form-field s-start-field">
+                <div class="mb-3 form-field s-start-field {{#if (neq data.project.type 'scholarship')}} d-none {{/if}}">
                     <div class="form-label">Sponsorship Start Date Field</div>
                     <p class="card-subtitle mb-3">Date when the sponsorship will start. Only works for projects with
                         type scholarships. Can only be a date field.</p>
@@ -451,12 +450,13 @@
                     <div class="card d-block p-2 mb-3 form-control selector s-start-field-selector">
                         {{#each data.project.fields}}
                         {{#if (regexMatch this.type '^(date)$')}}
-                        <span class="badge cursor-pointer p-2 mb-1 {{#if this.phone}} bg-blue-lt {{/if}}"
+                        <span class="badge cursor-pointer p-2 mb-1 {{#if this.sStart}} bg-blue-lt {{/if}}"
                             onclick="setSStartField(this)">{{this.actualName}}</span>
                         {{/if}}
                         {{/each}}
                     </div>
-                    <input type="text" class="d-none" disabled="true" />
+                    <input type="text" class="d-none" disabled="true" {{#each data.project.fields}} {{#if this.sStart}}
+                        value="{{this.actualName}}" {{/if}} {{/each}} />
                     {{else}}
                     <div class="card d-block p-2 mb-3 form-control selector s-start-field-selector">
                         <span class="badge cursor-pointer p-2 my-1 me-2"
@@ -467,7 +467,7 @@
                     {{/if}}
                 </div>
 
-                <div class="mb-3 form-field s-stop-field">
+                <div class="mb-3 form-field s-stop-field {{#if (neq data.project.type 'scholarship')}} d-none {{/if}}">
                     <div class="form-label">Sponsorship End Date Field</div>
                     <p class="card-subtitle mb-3">Date when the sponsorship will stop. Only works for projects with type
                         scholarships. Can only be a date field.</p>
@@ -475,12 +475,13 @@
                     <div class="card d-block p-2 mb-3 form-control selector s-stop-field-selector">
                         {{#each data.project.fields}}
                         {{#if (regexMatch this.type '^(date)$')}}
-                        <span class="badge cursor-pointer p-2 mb-1 {{#if this.phone}} bg-blue-lt {{/if}}"
+                        <span class="badge cursor-pointer p-2 mb-1 {{#if this.sStop}} bg-blue-lt {{/if}}"
                             onclick="setSStopField(this)">{{this.actualName}}</span>
                         {{/if}}
                         {{/each}}
                     </div>
-                    <input type="text" class="d-none" disabled="true" />
+                    <input type="text" class="d-none" disabled="true" {{#each data.project.fields}} {{#if this.sStop}}
+                        value="{{this.actualName}}" {{/if}} {{/each}} />
                     {{else}}
                     <div class="card d-block p-2 mb-3 form-control selector s-stop-field-selector">
                         <span class="badge cursor-pointer p-2 my-1 me-2"
@@ -498,7 +499,6 @@
                 </a>
                 {{#if data.project}}
                 <a href="#" class="btn btn-primary ms-auto" onclick="updateProject(this)">
-                    <!-- Download SVG icon from http://tabler-icons.io/i/plus -->
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                         class="icon icon-tabler icons-tabler-outline icon-tabler-upload">
@@ -511,7 +511,6 @@
                 </a>
                 {{else}}
                 <a href="#" class="btn btn-primary ms-auto" onclick="createNewProject(this)">
-                    <!-- Download SVG icon from http://tabler-icons.io/i/plus -->
                     <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24"
                         stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round"
                         stroke-linejoin="round">
@@ -528,5 +527,7 @@
     </div>
 </div>
 
+{{#if data.project}}
 <button href="#" class="btn btn-primary d-none" id="button-{{data.project._id}}" data-bs-toggle="modal"
     data-bs-target="#modal-{{data.project.slug}}"></button>
+{{/if}}
