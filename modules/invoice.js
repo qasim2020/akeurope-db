@@ -253,7 +253,7 @@ const sendThanksToCustomer = async (order, customer) => {
     }
 
     const mailOptions = {
-        from: process.env.EMAIL_USER,
+        from: `"Alkhidmat Europe" <${process.env.EMAIL_USER}>`,
         to: customer.email,
         subject: `Thank you for your order`,
         html: compiledTemplate({ order, customer, project, inviteLink }),
@@ -294,7 +294,7 @@ const sendClarifyEmailToCustomer = async (order, customer) => {
     }
 
     const mailOptions = {
-        from: process.env.EMAIL_USER,
+        from: `"Alkhidmat Europe" <${process.env.EMAIL_USER}>`,
         to: customer.email,
         subject: `Clarification Regarding Your Recent Sponsorship Email`,
         html: compiledTemplate({ order, customer, project, inviteLink }),
@@ -321,7 +321,7 @@ const sendInvoiceToCustomer = async (order, customer) => {
     const compiledTemplate = handlebars.compile(templateSource);
 
     const mailOptions = {
-        from: process.env.EMAIL_USER,
+        from: `"Alkhidmat Europe" <${process.env.EMAIL_USER}>`,
         to: customer.email,
         subject: `Invoice from Akeurope - ${order.totalCost}`,
         html: compiledTemplate({

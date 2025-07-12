@@ -36,7 +36,7 @@ const sendEmail = async (email, name, subject, message, link, linkLabel) => {
     const compiledTemplate = handlebars.compile(templateSource);
 
     const mailOptions = {
-        from: process.env.EMAIL_USER,
+        from: `"Alkhidmat Europe" <${process.env.EMAIL_USER}>`,
         to: email,
         subject,
         html: compiledTemplate({

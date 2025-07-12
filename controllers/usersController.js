@@ -142,7 +142,7 @@ exports.createUser = async (req, res) => {
         const compiledTemplate = handlebars.compile(templateSource);
 
         const mailOptions = {
-            from: process.env.EMAIL_USER,
+            from: `"Alkhidmat Europe" <${process.env.EMAIL_USER}>`,
             to: email,
             subject: 'Invited to akeurope dashboard',
             html: compiledTemplate({
@@ -346,7 +346,7 @@ exports.sendInvite = async (req, res) => {
         const compiledTemplate = handlebars.compile(templateSource);
 
         const mailOptions = {
-            from: process.env.EMAIL_USER,
+            from: `"Alkhidmat Europe" <${process.env.EMAIL_USER}>`,
             to: user.email,
             subject: 'Invited to akeurope dashboard',
             html: compiledTemplate({
