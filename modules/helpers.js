@@ -443,6 +443,11 @@ const getMonth = function(date) {
     return moment(date).format('MMM-YY'); 
 }
 
+const formatNumber = function (num) {
+    if (typeof num !== 'number') return '0';
+    return num.toLocaleString();
+};
+
 const hasAny = function (a, b) {
     const isTruthy = val => {
         if (Array.isArray(val)) return val.length > 0;
@@ -453,7 +458,8 @@ const hasAny = function (a, b) {
     return isTruthy(a) || isTruthy(b);
 };
 
-module.exports = {
+module.exports = { 
+    formatNumber,
     getMonth,
     slugToString,
     capitalizeAll,

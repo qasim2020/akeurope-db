@@ -3,14 +3,14 @@ const express = require('express');
 const http = require('http');
 const session = require('express-session');
 const flash = require('connect-flash');
-const mongoose = require('./config/db');
-mongoose();
+const {connectDB} = require('./config/db');
+connectDB();
 
 const exphbs = require('express-handlebars');
 const path = require('path');
 const hbsHelpers = require('./modules/helpers');
 const MongoStore = require('connect-mongo');
-const { initSocket } = require('./sockets');
+const { initSocket } = require('./sockets'); 
 
 const { router } = require('./routes/authRoutes');
 const authRoutes = require('./routes/authRoutes');

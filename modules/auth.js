@@ -13,7 +13,7 @@ const authenticate = (req, res, next) => {
 
 const authorize = (permission) => {
     return async (req, res, next) => {
-        try {
+        try { 
             const userRole = req.user?.role;
             const userId = req.user?._id;
             const userProjects = req.user?.projects || [];

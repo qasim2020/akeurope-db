@@ -678,6 +678,7 @@ async function calculateRevenueFromOrders() {
     console.log(revenue, 'revenue calculated');
 };
 
+
 async function calculateRevenueFromDonor() {
     const donors = await Donor.find({
         $or: [
@@ -1147,4 +1148,6 @@ mongoose.connection.on('open', async () => {
     }, 5, 0);
 });
 
-module.exports = connectDB;
+module.exports = {
+    connectDB
+};

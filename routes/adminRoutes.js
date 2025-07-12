@@ -14,4 +14,4 @@ router.post('/toggleSidebar', authenticate, authorize('viewDashboard'), dashboar
 router.get('/getFreshNotifications', authenticate, authorize('viewDashboard'), dashboardController.notifications);
 router.get('/socket-url', authenticate, authorize('viewDashboard'), (req, res) => res.json({ socketUrl: process.env.URL }) );
 
-module.exports = router;
+module.exports = router; 
