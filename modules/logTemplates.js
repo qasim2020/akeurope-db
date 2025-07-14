@@ -281,6 +281,15 @@ const logTemplates = ({ type, entity, actor, project, file, order, entry, color,
                 color: 'blue',
             }
             : null,
+            sponsorshipStopped: project
+            ? {
+                ...commons('order', entity._id),
+                action: `${project.selection ? project.selection.entries.length : null
+                    } x entries selected in project <a href="/project/${project.slug}">${project.name}</a> of <a href="/order/${entity._id
+                    }">Order-${entity.orderNo}</a>`,
+                color: 'blue',
+            }
+            : null,
         orderTotalCostChanged: {
             ...commons('order', entity._id),
             action: `Total cost changed in <a href="/order/${entity._id}">Order-${entity.orderNo}</a>`,
@@ -427,6 +436,7 @@ const logTemplates = ({ type, entity, actor, project, file, order, entry, color,
     }
 
     return templates[type];
+    
 };
 
 module.exports = { logTemplates };

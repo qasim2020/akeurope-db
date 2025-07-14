@@ -18,7 +18,9 @@
             <p class="card-text">Status: {{capitalizeFirstLetter this.status}}</p>
             <p class="card-text">Amount: {{this.entry.perMonthCost}} {{this.currency}}</p>
             <p class="card-text">Customer: {{this.customerId.name}}</p>
-            <button class="btn btn-danger">Stop Sponsorship</button>
+            <button class="btn btn-danger btn-sm" onclick="stopSponsorship('{{this._id}}', '{{../data.entry._id}}', '{{../data.project.slug}}')">
+              Stop Sponsorship
+            </button>
           </div>
         {{/each}}
       </div>

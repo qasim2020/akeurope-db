@@ -8,7 +8,7 @@ const SponsorshipSchema = new mongoose.Schema(
         startedAt: Date,
         stoppedAt: Date,
         reasonStopped: String,
-        monthsSponsored: Number,
+        daysSponsored: Number,
         totalPaid: Number,
     },
     {

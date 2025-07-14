@@ -291,7 +291,7 @@
       $(`#modal-sponsorship-${entryId}`).remove();
     }
 
-    $.ajax({
+    $.ajax({ 
       url: `/getSponsorshipModal/${entryId}/${slug}`,
       type: 'GET',
       contentType: 'application/json',
@@ -306,6 +306,32 @@
       }
     });
   }
+
+  const stopSponsorship = function(orderId, entryId, projectSlug) {
+  const reason = prompt('Please provide a reason for stopping sponsorship:');
+  if (!reason) return;
+  
+  const currentBtnHtml = event.target.innerHTML;
+  event.target.innerHTML = `
+    <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+    Stopping...
+  `;
+  
+  $.ajax({
+    url: `/stopSponsorship/${orderId}/${entryId}/${projectSlug}`,
+    type: 'POST',
+    contentType: 'application/json',
+    data: JSON.stringify({ reason }),
+    success: function(response) {
+      alert('Sponsorship stopped successfully');
+      loadSponsorshipModal();
+    },
+    error: function(xhr, status, error) {
+      event.target.innerHTML = currentBtnHtml;
+      alert(xhr.responseText);
+    }
+  });
+};
 
   const getOrders = function (elem) {
     const modal = $(elem).closest('.modal');

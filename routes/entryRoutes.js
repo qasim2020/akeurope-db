@@ -76,4 +76,6 @@ router.post('/sendEntryUpdateOnEmail/:entryId/:slug', authenticate, authorize('s
 
 router.get('/getSponsorshipModal/:entryId/:slug', authenticate, authorize('handleSponsorships'), entryController.getSponsorshipModal);
 
+router.post('/stopSponsorship/:orderId/:entryId/:slug', entryController.stopSponsorship);
+
 module.exports = router;

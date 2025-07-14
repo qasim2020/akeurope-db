@@ -429,9 +429,9 @@ exports.entry = async (req, res) => {
             error: 'Error fetching entries',
             details: error.message,
         });
-    }
+    } 
 };
-
+ 
 exports.entryPrint = async (req, res) => {
     try {
         const project = await Project.findOne({
@@ -813,6 +813,161 @@ exports.getSendUpdateModal = async (req, res) => {
             error: error,
         });
     }
+};
+
+exports.stopSponsorship = async (req, res) => {
+  try {
+    const { orderId, entryId, slug } = req.params;
+    const { reason } = req.body;
+    
+    if (!reason) {
+      return res.status(400).send('Reason is required');
+    }
+    
+    const order = await Order.findById(orderId).populate('customerId');
+    if (!order) {
+      return res.status(404).send('Order not found');
+    }
+    
+    const project = await Project.findOne({ slug }).lean();
+    const DynamicModel = await createDynamicModel(slug);
+    const entry = await DynamicModel.findById(entryId).lean();
+    
+    const orderProject = order.projects.find(p => p.slug === slug);
+    const orderEntry = orderProject?.entries.find(e => e.entryId.toString() === entryId);
+    
+    if (!orderProject || !orderEntry) {
+      return res.status(404).send('Entry not found in order');
+    }
+    
+    const startDate = new Date(order.createdAt);
+    const stopDate = new Date();
+    const daysSponsored = Math.ceil((stopDate - startDate) / (1000 * 60 * 60 * 24));
+    
+    const dailyRate = orderEntry.totalCost / 30;
+    const actualAmountPaid = dailyRate * daysSponsored;
+    
+    const sponsorship = new Sponsorship({
+      entryId: new mongoose.Types.ObjectId(entryId),
+      customerId: order.customerId._id,
+      projectSlug: slug,
+      startedAt: order.createdAt,
+      stoppedAt: stopDate,
+      reasonStopped: reason,
+      daysSponsored:daysSponsored ,
+      totalPaid: actualAmountPaid
+    });
+    
+    await sponsorship.save();
+    
+    const unpaidOrders = await Order.find({
+      customerId: order.customerId._id,
+      status: { $ne: 'paid' },
+      'projects.slug': slug,
+      'projects.entries.entryId': new mongoose.Types.ObjectId(entryId),
+      createdAt: { $gte: new Date() }
+    });
+    
+    if (unpaidOrders.length > 0) {
+      const activelySponsored = await Order.distinct('projects.entries.entryId', {
+        status: 'paid',
+        'projects.slug': slug
+      });
+      
+      const endedSponsorships = await Sponsorship.find({
+        projectSlug: slug,
+        stoppedAt: { $lt: new Date() } 
+      }).distinct('entryId');
+      const unavailableEntries = [...activelySponsored, ...endedSponsorships];
+      
+      const replacementEntry = await DynamicModel.findOne({
+        _id: { $nin: unavailableEntries }
+      }).lean();
+      
+      if (replacementEntry) {
+        for (const unpaidOrder of unpaidOrders) {
+          await Order.updateOne(
+            { 
+              _id: unpaidOrder._id,
+              'projects.slug': slug,
+              'projects.entries.entryId': new mongoose.Types.ObjectId(entryId)
+            },
+            { 
+              $set: { 
+                'projects.$.entries.$[entry].entryId': replacementEntry._id 
+              }
+            },
+            { 
+              arrayFilters: [{ 'entry.entryId': new mongoose.Types.ObjectId(entryId) }] 
+            }
+          );
+        }
+        
+        await saveLog(
+          logTemplates({
+            type: 'entryReplaced',
+            entity: entry,
+            actor: req.session.user,
+            project,
+            changes: [{
+              key: 'replacement',
+              oldValue: entry.name || entry._id,
+              newValue: replacementEntry.name || replacementEntry._id
+            }],
+            message: `Entry replaced with ${replacementEntry.name || replacementEntry._id} due to sponsorship stop`
+          })
+        );
+      } else {
+        await saveLog(
+          logTemplates({
+            type: 'noReplacementFound',
+            entity: entry,
+            actor: req.session.user,
+            project,
+            changes: [{
+              key: 'replacement',
+              oldValue: entry.name || entry._id,
+              newValue: 'No replacement available'
+            }],
+            message: `No replacement entry found for stopped sponsorship`
+          })
+        );
+      }
+    }
+    
+    await saveLog(
+      logTemplates({
+        type: 'sponsorshipStopped',
+        entity: entry,
+        actor: req.session.user,
+        project,
+        entry,
+        changes: [{
+          key: 'sponsorship',
+          oldValue: 'Active',
+          newValue: `Stopped: ${reason}`
+        }, {
+          key: 'daysSponsored',
+          oldValue: '',
+          newValue: daysSponsored.toString()
+        }, {
+          key: 'dailyRate',
+          oldValue: '',
+          newValue: dailyRate.toFixed(2)
+        }, {
+          key: 'amountPaid',
+          oldValue: '',
+          newValue: actualAmountPaid.toString()
+        }]
+      })
+    );
+    
+    res.status(200).send('Sponsorship stopped successfully');
+    
+  } catch (error) {
+    console.log(error);
+    res.status(500).send(error.message || 'Error stopping sponsorship');
+  }
 };
 
 exports.getSponsorshipModal = async (req, res) => {
