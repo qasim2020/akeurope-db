@@ -1285,7 +1285,7 @@ mongoose.connection.on('open', async () => {
     // await calculateRevenueFromDonor();
     // await createDirectDonorLongUpdatesSheet();
     // await sendGazaUpdate();
-    await gazaOrphanSelectionTimeLine();
+    // await gazaOrphanSelectionTimeLine();
 
     setInterval(async () => {
         try {
