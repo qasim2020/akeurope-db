@@ -550,7 +550,7 @@ async function createDirectDonorPakistanStudentUpdate() {
         const customer = await Customer.findById(order.customerId).lean();
         for (const orderEntry of project.entries) {
             const entryId = orderEntry.entryId;
-            await model.updateOne({ _id: entryId }, {status: 'Active'});
+            await model.updateOne({ _id: entryId }, { status: 'Active' });
             const doc = await model.findOne({ _id: entryId }).lean();
             const files = await File.find({ "links.entityId": doc._id }).sort({ createdAt: -1 });
             if (files.length > 0) {
@@ -678,6 +678,112 @@ async function calculateRevenueFromOrders() {
     console.log(revenue, 'revenue calculated');
 };
 
+async function getOrderType(orderId) {
+    const order = await Order.findById(orderId).lean() || await Subscription.findById(orderId).lean();
+    const customer = await Customer.findById(order.customerId).lean();
+    const donor = await Donor.findOne({ email: customer.email }).lean();
+
+    if (!donor) {
+        return {
+            type: 'manual one time',
+            amount: `${order.total || order.totalCost} ${order.currency}`,
+            date: formatDate(order.createdAt),
+            payments: '1',
+        }
+    }
+
+    const allPayments = [
+        ...(donor.payments ?? []),
+        ...(donor.subscriptions ?? []),
+        ...(donor.vippsCharges ?? []),
+        ...(donor.vippsPayments ?? []),
+    ];
+
+    const paymentsWithTypes = [];
+
+    for (const payment of allPayments) {
+        const currency = payment.currency?.toUpperCase() || payment.amount.currency.toUpperCase();
+        let amount, method, orderId, vippsReference, date;
+
+        if (payment.agreementId) {
+            date = payment.due;
+            amount = payment.amount / 100;
+            method = 'vipps subscription';
+            orderId = payment.externalId;
+        } else if (payment.price) {
+            date = payment.currentPeriodStart;
+            amount = payment.price / 100;
+            method = 'stripe subscription';
+            orderId = payment.orderId;
+        } else if (payment.paymentMethod) {
+            date = order.createdAt;
+            amount = payment.amount.value / 100;
+            method = 'vipps one-time';
+            vippsReference = payment.reference;
+        } else {
+            date = payment.created;
+            amount = payment.amount;
+            method = 'stripe one-time';
+            orderId = payment.orderId;
+        }
+
+        paymentsWithTypes.push({
+            date,
+            amount,
+            method,
+            orderId,
+            vippsReference,
+            currency,
+        })
+
+    };
+
+    let type = {};
+    const paymentsOnOrder = [];
+
+    for (const payment of paymentsWithTypes) {
+        const isOrderMatch = payment.orderId?.toString() === order._id.toString();
+        const isVippsMatch = order.vippsReference && order.vippsReference === payment.vippsReference;
+
+        if (isOrderMatch || isVippsMatch) {
+            type = {
+                orderId: payment.orderId || payment.vippsReference,
+                type: payment.method,
+                amount: `${payment.amount} ${payment.currency}`,
+                date: formatDate(order.createdAt),
+            }
+            paymentsOnOrder.push({
+                orderId: payment.orderId || payment.vippsReference,
+                type: payment.method,
+                amount: `${payment.amount} ${payment.currency}`,
+                date: formatDate(payment.date),
+            });
+        };
+        // if (customer.name === 'Ismail Oucheni') {
+        //     console.log(order._id);
+        //     console.log(payment.orderId);
+        //     console.log(payment);
+        //     console.log(type);
+        //     console.log(paymentsOnOrder);
+        //     console.log('---------------------------------');
+        //     throw new Error('Debugging Ismail Oucheni');
+        // };
+    }
+
+    if (paymentsOnOrder.length === 0) {
+        return {
+            type: 'manual one time',
+            amount: `${order.total || order.totalCost} ${order.currency}`,
+            date: formatDate(order.createdAt),
+            payments: '1',
+        }
+    } else {
+        return {
+            ...type,
+            payments: paymentsOnOrder,
+        };
+    }
+};
 
 async function calculateRevenueFromDonor() {
     const donors = await Donor.find({
@@ -1109,6 +1215,58 @@ async function sendGazaUpdate() {
 
 }
 
+async function gazaOrphanSelectionTimeLine() {
+    const model = await createDynamicModel('gaza-orphans');
+    const orders = await Order.find({
+        $and: [
+            {
+                customerId: {
+                    $nin: [
+                        new mongoose.Types.ObjectId('68496e48dbce9ead4cd7fc53'),
+                        new mongoose.Types.ObjectId('67dd7d90d39f5002372bba2a')
+                    ]
+                }
+            },
+            {
+                $or: [
+                    { status: 'paid' },
+                    { status: 'expired' }
+                ]
+            }
+        ]
+    })
+        .sort({ createdAt: 1 })
+        .lean();
+
+    const entries = [];
+
+    for (const order of orders) {
+        const customer = await Customer.findById(order.customerId).lean();
+        const type = await getOrderType(order._id);
+        const project = order.projects.find(prj => prj.slug === 'gaza-orphans');
+        if (!project) continue;
+        for (const orderEntry of project.entries) {
+            const entryId = orderEntry.entryId;
+            const doc = await model.findOne({ _id: entryId }).lean();
+            entries.push({
+                createdAt: formatDate(order.createdAt),
+                orderNo: order.orderNo,
+                donor: customer.name,
+                type: type.type,
+                status: order.status,
+                payments: type.payments.length,
+                beneficiary: doc.name,
+                cluster: doc.cluster,
+            });
+        }
+    }
+
+    const sortedEntries = entries.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+
+    exportToCSV(sortedEntries, `gaza-timeline-${formatDate(Date.now())}.csv`);
+
+};
+
 mongoose.connection.on('open', async () => {
     await deleteDraftOrders(Order);
     await deleteDraftOrders(Subscription);
@@ -1127,6 +1285,7 @@ mongoose.connection.on('open', async () => {
     // await calculateRevenueFromDonor();
     // await createDirectDonorLongUpdatesSheet();
     // await sendGazaUpdate();
+    await gazaOrphanSelectionTimeLine();
 
     setInterval(async () => {
         try {
