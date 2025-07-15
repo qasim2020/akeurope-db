@@ -19,6 +19,74 @@
         });
     }
 
+    const saveEntry = function (elem) {
+
+        $(elem).closest(".modal").find("input").removeClass("is-invalid");
+        $(elem).closest(".modal").find(".invalid-feedback").remove();
+        $(elem).closest(".modal").find("span").removeClass("border-red");
+        $(elem).closest(".modal").find("span").removeClass("rounded-end");
+        $(elem).closest(".modal").find(".alert").remove();
+
+        let isValid = [];
+
+        $(elem).closest(".modal").find(".form-control, .form-select").each((key, val) => {
+            if ($(val).val() == "") {
+                $(val).addClass("is-invalid")
+                if ($(val).siblings("span").length > 0) {
+                    $(val).siblings(".invalid-feedback").remove();
+                    $(val).siblings("span").after(`<div class="invalid-feedback mb-2">Invalid entry</div> `);
+                    $(val).siblings("span").addClass("is-invalid border-red rounded-end");
+                    $(val).siblings("input").addClass("is-invalid");
+                } else {
+                    $(val).after(`<div class="invalid-feedback">Invalid entry</div> `);
+                }
+            } else {
+                $(val).addClass("is-valid");
+            }
+            isValid.push($(val).val() != "");
+        });
+
+        const data = $(elem)
+            .closest(".modal")
+            .find(".form-select, input, textarea")
+            .toArray() // Convert jQuery collection to an array
+            .reduce((total, val) => {
+                Object.assign(total, {
+                    [$(val).attr("name")]: $(val).val()
+                });
+                return total;
+            }, {});
+
+        data.entryId = $(elem).closest(".modal").attr("entryId");
+
+        if (!(isValid.every(val => val === true))) {
+            return false;
+        }
+
+        let currentBtnHTML = $(elem).html();
+        $(elem).html(`<span class="spinner-border spinner-border-sm me-2" role="status"></span>`);
+
+        $.ajax({
+            url: "/project/entry/{{data.project.slug}}",
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(data),
+            success: function (response) {
+                $(elem).html(currentBtnHTML);
+                window.location.href = `/project/{{data.project.slug}}`;
+            },
+            error: function (xhr, status, error) {
+                $(elem).html(currentBtnHTML);
+                $(".modal-footer").append(`
+        <div class="w-100 d-block alert alert-danger mt-4" role="alert">
+          <h4 class="alert-title">Could not save.</h4>
+          <div class="text-secondary">${xhr.responseText}</div>
+        </div>`);
+            }
+        });
+
+    }
+
     const editEntry = function (elem) {
 
         $(elem).closest('.modal').find('textarea').removeClass('is-invalid');
@@ -221,9 +289,9 @@
             }
 
             {{!-- const validatedPhoneNo = await $.ajax({
-                url: `/validate-phone-number/${phoneNo}`,
-                method: 'GET'
-            }); --}}
+                        url: `/validate-phone-number/${phoneNo}`,
+                        method: 'GET'
+                    }); --}}
 
             const validatedPhoneNo = phoneNo;
 
