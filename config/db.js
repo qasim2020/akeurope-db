@@ -108,7 +108,7 @@ async function convertUnpaidToExpired(Collection) {
                             },
                         },
                         unit: 'day',
-                        amount: 2,
+                        amount: 10, // 10 days grace period
                     },
                 },
             },
@@ -124,6 +124,8 @@ async function convertUnpaidToExpired(Collection) {
     ]);
 
     const expiredIds = expiredOrders.map(order => order._id);
+
+    console.log(expiredOrders);
 
     if (expiredIds.length) {
         await Collection.updateMany(
