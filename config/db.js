@@ -33,6 +33,7 @@ const { sendTelegramMessage, sendErrorToTelegram } = require('../../akeurope-cp/
 const { formatDate, getAgeInYearsAndMonths, slugToString } = require('../modules/helpers');
 const { getCurrencyRates } = require('../modules/getCurrencyRates');
 const { logTemplates } = require('../modules/logTemplates');
+const { getMonthlyTriggerDates } = require('../modules/orders');
 const emailConfig = require('../config/emailConfig.js');
 const { getPortalUrl } = require('../modules/emails');
 const nodemailer = require('nodemailer');
@@ -85,57 +86,33 @@ async function deleteDraftOrders(Collection) {
 async function convertUnpaidToExpired(Collection) {
     const now = new Date();
 
-    const expiredOrders = await Collection.aggregate([
-        {
-            $match: {
-                status: 'paid',
-            },
-        },
-        {
-            $addFields: {
-                maxMonths: { $max: '$projects.months' },
-            },
-        },
-        {
-            $addFields: {
-                expirationDate: {
-                    $dateAdd: {
-                        startDate: {
-                            $dateAdd: {
-                                startDate: '$createdAt',
-                                unit: 'month',
-                                amount: '$maxMonths',
-                            },
-                        },
-                        unit: 'day',
-                        amount: 10, // 10 days grace period
-                    },
-                },
-            },
-        },
-        {
-            $match: {
-                expirationDate: { $lte: now },
-            },
-        },
-        {
-            $project: { _id: 1 },
-        },
-    ]);
+    const orders = await Collection.find({ createdAt: { $lt: new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000) }, status: 'paid' });
 
-    const expiredIds = expiredOrders.map(order => order._id);
+    for (const order of orders) {
+        const triggerDates = getMonthlyTriggerDates(order.createdAt);
+        if (order.projects?.length > 1) {
+            sendTelegramMessage(`Order ${order._id} has more than one project, skipping expiry test...`);
+            continue;
+        }
+        const project = order.projects[0];
+        const months = project.months;
+        const requiredCharges = triggerDates.filter(date => date < now);
+        if (months < requiredCharges.length) {
+            const pendingDate = requiredCharges[months];
+            const pendingDays = (pendingDate - now) / (1000 * 60 * 60 * 24);
+            if (pendingDays < -5) {
+                await Collection.updateOne({ _id: order._id }, { $set: { status: 'expired' } });
+                console.log(`Order ${order._id} | ${order.orderNo} in ${project.slug} marked as expired.`);
+                sendTelegramMessage(`Order ${order._id} | ${order.orderNo} in ${project.slug} marked as expired.`);
+            } else {
+                console.log(`Order ${order._id} | ${order.orderNo} in ${project.slug} will expire after ${Math.ceil(pendingDays + 5)} days.`);
+                sendTelegramMessage(`Order ${order._id} | ${order.orderNo} in ${project.slug} will expire after ${Math.ceil(pendingDays + 5)} days.`);
+            }
+        }
 
-    console.log(expiredOrders);
 
-    if (expiredIds.length) {
-        await Collection.updateMany(
-            { _id: { $in: expiredIds } },
-            { $set: { status: 'expired' } }
-        );
-        sendTelegramMessage(`Marked ${expiredIds.length} orders as expired`);
-    } else {
-        console.log('No expired orders found');
-    }
+    };
+
 }
 
 async function remove600Children() {
@@ -1293,7 +1270,6 @@ mongoose.connection.on('open', async () => {
         try {
             await deleteDraftOrders(Order);
             await deleteDraftOrders(Subscription);
-            await convertUnpaidToExpired(Order);
         } catch (error) {
             console.error('Error deleting expired orders:', error);
         }
@@ -1303,6 +1279,7 @@ mongoose.connection.on('open', async () => {
         try {
             await createDirectDonorGazaUpdate();
             await createDirectDonorPakistanStudentUpdate();
+            await convertUnpaidToExpired(Order);
         } catch (error) {
             console.error('Error running scheduled donor updates:', error);
         }

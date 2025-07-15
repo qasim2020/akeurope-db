@@ -605,8 +605,40 @@ const getPaymentByOrderId = async (orderId) => {
     }
 };
 
+const getMonthlyTriggerDates = orderCreationDate => {
+    const createdAt = new Date(orderCreationDate);
+    const futureLimit = new Date();
+    futureLimit.setDate(futureLimit.getDate());
+    const vippsTriggerDates = [];
+    const originalDay = createdAt.getDate();
+    
+    let current = new Date(createdAt);
+    
+    while (true) {
+        const year = current.getFullYear();
+        const month = current.getMonth();
+        const lastDay = new Date(year, month + 1, 0).getDate();
+        const chargeDate = new Date(year, month, Math.min(originalDay, lastDay));
+        const triggerDate = new Date(chargeDate);
+        triggerDate.setDate(triggerDate.getDate() + 1);
+        
+        if (triggerDate > futureLimit) break;
+        
+        vippsTriggerDates.push(triggerDate);
+        
+        // Fix: Set to the 1st of next month, then adjust to originalDay
+        current = new Date(year, month + 1, 1);
+        // Then set the day, but don't let it overflow to next month
+        const nextMonthLastDay = new Date(year, month + 2, 0).getDate();
+        current.setDate(Math.min(originalDay, nextMonthLastDay));
+    }
+    
+    return vippsTriggerDates;
+}
+
 module.exports = {
     getSubscriptionsByOrderId,
+    getMonthlyTriggerDates,
     getSubscriptionByOrderId,
     getPaymentByOrderId,
     createDraftOrder,
