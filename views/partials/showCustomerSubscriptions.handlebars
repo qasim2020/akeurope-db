@@ -1,7 +1,7 @@
+
 {{#if (gt data.activeSubscriptions.totalEntries 0)}}
 <div id="subscriptions-container">
     {{#with data.activeSubscriptions as |list|}}
-
     <div class="card-header border-0 flex-column align-items-start">
         {{#if (gt list.totalEntries 1)}}
         <h3 class="card-title">Active Beneficiaries ({{list.totalEntries}})</h3>
@@ -82,4 +82,84 @@
     </div>
     {{/with}}
 </div>
+{{/if}}
+
+{{#if data.previousSponsorships}}
+{{#if (gt data.previousSponsorships.length 0)}}
+<div id="previous-sponsorships-container" class="mt-4">
+    <div class="card-header border-0 flex-column align-items-start">
+        {{#if (gt data.previousSponsorships.length 1)}}
+        <h3 class="card-title">Previous Sponsorships ({{data.previousSponsorships.length}})</h3>
+        <div class="text-secondary">
+            Below are the orphans/beneficiaries you have previously sponsored. Thank you for your past contributions to their lives.
+            These sponsorships have ended, but you can see the impact you made during your sponsorship period.
+        </div>
+        {{else}}
+        <h3 class="card-title">Previous Sponsorship</h3>
+        <div class="text-secondary">
+            Below is the orphan/beneficiary you have previously sponsored. Thank you for your past contribution to their life.
+            This sponsorship has ended, but you can see the impact you made during your sponsorship period.
+        </div>
+        {{/if}}
+    </div>
+
+    <div class="p-3">
+        {{#each data.previousSponsorships as |sponsorship|}}
+        {{#if sponsorship.project}}
+        <div class="mb-4">
+            <div project-slug="{{sponsorship.project.slug}}" class="fs-5 text-uppercase mb-3 badge badge-outline text-muted">
+                {{sponsorship.project.name}}
+            </div>
+            
+            {{#if sponsorship.entry}}
+            <div class="row">
+                <div class="col-md-3 col-6 mb-3 text-center position-relative">
+                    <a data-bs-toggle="popover" data-bs-placement="top" data-bs-trigger="hover focus" 
+                        title="{{sponsorship.entry.name}}" data-bs-html="true"
+                        data-bs-content="
+                            <strong>Sponsorship Details:</strong><br>
+                            Duration: {{sponsorship.durationInMonths}} months ({{sponsorship.daysSponsored}} days)<br>
+                            Total Paid: {{sponsorship.formattedTotalPaid}}<br>
+                            Started: {{formatDate sponsorship.startedAt}}<br>
+                            Stopped: {{formatDate sponsorship.stoppedAt}}<br>
+                            {{#if sponsorship.reasonStopped}}
+                            Reason: {{sponsorship.reasonStopped}}
+                            {{/if}}
+                        "
+                        class="cursor-pointer" href="/entry/{{sponsorship.entry._id}}/project/{{sponsorship.project.slug}}">
+                        
+                        <span class="position-absolute top-0 left-0 ti ti-clock-pause text-muted" 
+                              style="padding-top: 3px" title="Sponsorship Ended"></span>
+                        
+                        <img class="img-fluid rounded-circle border border-1" 
+                             alt="{{sponsorship.entry.name}}" 
+                             style="filter: grayscale(30%); opacity: 0.8;"
+                             src="{{circleCloudinaryUrl (or sponsorship.entry.photo (or sponsorship.entry.photoOfChild sponsorship.entry.photoOfOrphan))}}">
+                        
+                        <div class="mt-2">
+                            <small class="text-muted d-block">{{sponsorship.entry.name}}</small>
+                            <small class="text-muted d-block">
+                                {{sponsorship.durationInMonths}} months
+                                {{#if sponsorship.formattedTotalPaid}}
+                                • {{sponsorship.formattedTotalPaid}}
+                                {{/if}}
+                            </small>
+                            <small class="text-muted d-block">
+                                Ended: {{formatDate sponsorship.stoppedAt}}
+                            </small>
+                        </div>
+                    </a>
+                </div>
+            </div>
+            {{else}}
+            <div class="text-muted">
+                <small>Beneficiary information not available</small>
+            </div>
+            {{/if}}
+        </div>
+        {{/if}}
+        {{/each}}
+    </div>
+</div>
+{{/if}}
 {{/if}}

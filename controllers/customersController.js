@@ -7,6 +7,7 @@ const fs = require('fs').promises;
 const handlebars = require('handlebars');
 const moment = require('moment');
 const nodemailer = require('nodemailer');
+const Sponsorship = require('../models/Sponsorship')
 
 const Customer = require('../models/Customer');
 const Project = require('../models/Project');
@@ -61,7 +62,7 @@ exports.customers = async (req, res) => {
 
     const customersPaginated = customers.slice(skip, skip + limit);
 
-    res.render('customers', {
+    res.render('customers', { 
         layout: 'dashboard',
         data: {
             layout: req.session.layout,
@@ -421,6 +422,8 @@ exports.customer = async (req, res) => {
                 (await getVippsSubscriptionsByOrderId(subscription.vippsAgreementId));
         };
 
+        const previousSponsorships = await getPreviousSponsorships(customer._id);
+
         res.render('customer', {
             layout: 'dashboard',
             data: {
@@ -439,6 +442,7 @@ exports.customer = async (req, res) => {
                 orders,
                 activeSubscriptions,
                 subscriptions,
+                previousSponsorships,
             },
         });
     } catch (error) {
@@ -449,3 +453,51 @@ exports.customer = async (req, res) => {
         });
     }
 };
+
+async function getPreviousSponsorships(customerId) {
+    try {
+        const sponsorships = await Sponsorship.find({
+            customerId: customerId,
+            stoppedAt: { $exists: true } 
+        }).sort({ stoppedAt: -1 }).lean(); 
+
+        if (!sponsorships || sponsorships.length === 0) {
+            return [];
+        }
+
+        const entryIds = sponsorships.map(s => s.entryId);
+        const projectSlugs = [...new Set(sponsorships.map(s => s.projectSlug))];
+
+        const entries = await Entry.find({ _id: { $in: entryIds } }).lean();
+        
+        const projects = await Project.find({ slug: { $in: projectSlugs } }).lean();
+
+        const entryMap = entries.reduce((acc, entry) => {
+            acc[entry._id.toString()] = entry;
+            return acc;
+        }, {});
+
+        const projectMap = projects.reduce((acc, project) => {
+            acc[project.slug] = project;
+            return acc;
+        }, {});
+
+        const enrichedSponsorships = sponsorships.map(sponsorship => {
+            const entry = entryMap[sponsorship.entryId.toString()];
+            const project = projectMap[sponsorship.projectSlug];
+            
+            return {
+                ...sponsorship,
+                entry: entry || null,
+                project: project || null,
+                durationInMonths: sponsorship.daysSponsored ? Math.floor(sponsorship.daysSponsored / 30) : 0,
+                formattedTotalPaid: sponsorship.totalPaid ? `$${sponsorship.totalPaid.toFixed(2)}` : 'N/A'
+            };
+        });
+
+        return enrichedSponsorships;
+    } catch (error) {
+        console.error('Error fetching previous sponsorships:', error);
+        return [];
+    }
+}

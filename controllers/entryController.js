@@ -854,85 +854,106 @@ exports.stopSponsorship = async (req, res) => {
       startedAt: order.createdAt,
       stoppedAt: stopDate,
       reasonStopped: reason,
-      daysSponsored:daysSponsored ,
+      daysSponsored: daysSponsored,
       totalPaid: actualAmountPaid
     });
     
     await sponsorship.save();
     
-    const unpaidOrders = await Order.find({
-      customerId: order.customerId._id,
-      status: { $ne: 'paid' },
+    const orderExpiryDate = new Date(order.createdAt);
+    orderExpiryDate.setMonth(orderExpiryDate.getMonth() + 12);
+    orderExpiryDate.setDate(orderExpiryDate.getDate() + 10);
+    
+    const occupiedEntryIds = await Order.distinct('projects.entries.entryId', {
       'projects.slug': slug,
-      'projects.entries.entryId': new mongoose.Types.ObjectId(entryId),
-      createdAt: { $gte: new Date() }
+      status: { $in: ['paid', 'draft', 'aborted', 'pending payment', 'processing'] }
     });
     
-    if (unpaidOrders.length > 0) {
-      const activelySponsored = await Order.distinct('projects.entries.entryId', {
-        status: 'paid',
-        'projects.slug': slug
-      });
-      
-      const endedSponsorships = await Sponsorship.find({
-        projectSlug: slug,
-        stoppedAt: { $lt: new Date() } 
-      }).distinct('entryId');
-      const unavailableEntries = [...activelySponsored, ...endedSponsorships];
-      
-      const replacementEntry = await DynamicModel.findOne({
-        _id: { $nin: unavailableEntries }
-      }).lean();
-      
-      if (replacementEntry) {
-        for (const unpaidOrder of unpaidOrders) {
-          await Order.updateOne(
-            { 
-              _id: unpaidOrder._id,
-              'projects.slug': slug,
-              'projects.entries.entryId': new mongoose.Types.ObjectId(entryId)
-            },
-            { 
-              $set: { 
-                'projects.$.entries.$[entry].entryId': replacementEntry._id 
-              }
-            },
-            { 
-              arrayFilters: [{ 'entry.entryId': new mongoose.Types.ObjectId(entryId) }] 
-            }
-          );
+    const endedSponsorshipEntryIds = await Sponsorship.distinct('entryId', {
+      projectSlug: slug,
+      stoppedAt: { $exists: true }
+    });
+    
+    const unavailableEntryIds = [
+      ...occupiedEntryIds.map(id => id.toString()),
+      ...endedSponsorshipEntryIds.map(id => id.toString()),
+      entryId 
+    ];
+    
+    const replacementEntry = await DynamicModel.findOne({
+      _id: { $nin: unavailableEntryIds.map(id => new mongoose.Types.ObjectId(id)) },
+    }).lean();
+    
+    console.log(`Looking for replacement entry with cost: ${orderEntry.totalCost}`);
+    console.log(`Order expiry date: ${orderExpiryDate}`);
+    console.log(`Unavailable entries count: ${unavailableEntryIds.length}`);
+    console.log(`Replacement entry found: ${replacementEntry ? replacementEntry._id : 'None'}`);
+    
+    if (replacementEntry) {
+      await Order.updateOne(
+        { 
+          _id: orderId,
+          'projects.slug': slug,
+          'projects.entries.entryId': new mongoose.Types.ObjectId(entryId)
+        },
+        { 
+          $set: { 
+            'projects.$.entries.$[entry].entryId': replacementEntry._id 
+          }
+        },
+        { 
+          arrayFilters: [{ 'entry.entryId': new mongoose.Types.ObjectId(entryId) }] 
         }
-        
-        await saveLog(
-          logTemplates({
-            type: 'entryReplaced',
-            entity: entry,
-            actor: req.session.user,
-            project,
-            changes: [{
-              key: 'replacement',
-              oldValue: entry.name || entry._id,
-              newValue: replacementEntry.name || replacementEntry._id
-            }],
-            message: `Entry replaced with ${replacementEntry.name || replacementEntry._id} due to sponsorship stop`
-          })
-        );
-      } else {
-        await saveLog(
-          logTemplates({
-            type: 'noReplacementFound',
-            entity: entry,
-            actor: req.session.user,
-            project,
-            changes: [{
-              key: 'replacement',
-              oldValue: entry.name || entry._id,
-              newValue: 'No replacement available'
-            }],
-            message: `No replacement entry found for stopped sponsorship`
-          })
-        );
-      }
+      );
+      
+      await saveLog(
+        logTemplates({
+          type: 'entryReplaced',
+          entity: entry,
+          actor: req.session.user,
+          project,
+          entry,
+          changes: [{
+            key: 'replacement',
+            oldValue: entry.name || entry._id,
+            newValue: replacementEntry.name || replacementEntry._id
+          }, {
+            key: 'replacementReason',
+            oldValue: '',
+            newValue: `Sponsorship stopped: ${reason}`
+          }, {
+            key: 'replacementCost',
+            oldValue: '',
+            newValue: orderEntry.totalCost.toString()
+          }],
+          message: `Entry replaced with ${replacementEntry.name || replacementEntry._id} due to sponsorship stop. Same cost: ${orderEntry.totalCost}`
+        })
+      );
+      
+      console.log(`Successfully replaced entry ${entryId} with ${replacementEntry._id} in order ${orderId}`);
+      
+    } else {
+      await saveLog(
+        logTemplates({
+          type: 'noReplacementFound',
+          entity: entry,
+          actor: req.session.user,
+          project,
+          entry,
+          changes: [{
+            key: 'replacement',
+            oldValue: entry.name || entry._id,
+            newValue: 'No replacement available'
+          }, {
+            key: 'searchCriteria',
+            oldValue: '',
+            newValue: `Cost: ${orderEntry.totalCost}, Expiry: ${orderExpiryDate.toISOString()}`
+          }],
+          message: `No replacement entry found for stopped sponsorship. Searched for cost: ${orderEntry.totalCost}, before expiry: ${orderExpiryDate}`
+        })
+      );
+      
+      console.log(`No replacement entry found for cost: ${orderEntry.totalCost}`);
     }
     
     await saveLog(
@@ -958,14 +979,22 @@ exports.stopSponsorship = async (req, res) => {
           key: 'amountPaid',
           oldValue: '',
           newValue: actualAmountPaid.toString()
+        }, {
+          key: 'orderExpiry',
+          oldValue: '',
+          newValue: orderExpiryDate.toISOString()
         }]
       })
     );
     
-    res.status(200).send('Sponsorship stopped successfully');
+    const responseMessage = replacementEntry 
+      ? `Sponsorship stopped successfully. Entry replaced with ${replacementEntry.name || replacementEntry._id}`
+      : 'Sponsorship stopped successfully. No replacement entry found.';
+    
+    res.status(200).send(responseMessage);
     
   } catch (error) {
-    console.log(error);
+    console.log('Error in stopSponsorship:', error);
     res.status(500).send(error.message || 'Error stopping sponsorship');
   }
 };
