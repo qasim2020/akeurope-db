@@ -4,6 +4,7 @@ const SponsorshipSchema = new mongoose.Schema(
     {
         entryId: mongoose.Schema.Types.ObjectId,
         customerId: mongoose.Schema.Types.ObjectId,
+        orderId: mongoose.Schema.Types.ObjectId,
         projectSlug: String,
         startedAt: Date,
         stoppedAt: Date,

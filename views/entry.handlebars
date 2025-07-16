@@ -138,6 +138,7 @@
   const refreshContainers = function () {
     showDataAsSuch('/getSingleEntryData/{{data.entry._id}}/project/{{data.project.slug}}', '#entry-container');
     showDataAsSuch('/getSingleEntryLogs/{{data.entry._id}}/project/{{data.project.slug}}', '#logs-container');
+    showDataAsSuch('/getSingleEntryPayments/{{data.entry._id}}/project/{{data.project.slug}}', '#payments-container');
   }
 
   document.addEventListener("DOMContentLoaded", function () {
@@ -260,21 +261,6 @@
     });
   }
 
-  const toggleDonations = function (elem) {
-    const isActive = $(elem).hasClass('btn-outline-green');
-    if (isActive) {
-      $(elem).removeClass('btn-outline-green');
-      $(elem).addClass('btn-outline-red');
-      $(elem).html('<i class="ti ti-toggle-left-filled"></i>');
-    } else {
-      $(elem).addClass('btn-outline-green');
-      $(elem).removeClass('btn-outline-red');
-      $(elem).html('<i class="ti ti-toggle-right-filled"></i>');
-    }
-
-    loadSponsorshipModal(elem);
-  }
-
   const loadSponsorshipModal = function (elem) {
     const entryId = '{{data.entry._id}}';
     const slug = '{{data.project.slug}}';
@@ -290,7 +276,7 @@
       $(`#modal-sponsorship-${entryId}`).remove();
     }
 
-    $.ajax({ 
+    $.ajax({
       url: `/getSponsorshipModal/${entryId}/${slug}`,
       type: 'GET',
       contentType: 'application/json',
@@ -306,31 +292,31 @@
     });
   }
 
-  const stopSponsorship = function(orderId, entryId, projectSlug) {
-  const reason = prompt('Please provide a reason for stopping sponsorship:');
-  if (!reason) return;
-  
-  const currentBtnHtml = event.target.innerHTML;
-  event.target.innerHTML = `
-    <span class="spinner-border spinner-border-sm me-2" role="status"></span>
-    Stopping...
-  `;
-  
-  $.ajax({
-    url: `/stopSponsorship/${orderId}/${entryId}/${projectSlug}`,
-    type: 'POST',
-    contentType: 'application/json',
-    data: JSON.stringify({ reason }),
-    success: function(response) {
-      alert('Sponsorship stopped successfully');
-      loadSponsorshipModal();
-    },
-    error: function(xhr, status, error) {
-      event.target.innerHTML = currentBtnHtml;
-      alert(xhr.responseText);
-    }
-  });
-};
+  const stopSponsorship = function (elem, orderId, entryId, projectSlug) {
+    const reason = prompt('Please provide a reason for stopping sponsorship:');
+    if (!reason) return;
+
+    const currentBtnHtml = $(elem).html();
+    $(elem).html(`
+      <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+      Stopping...
+    `);
+
+    $.ajax({
+      url: `/stopSponsorship/${orderId}/${entryId}/${projectSlug}`,
+      type: 'POST',
+      contentType: 'application/json',
+      data: JSON.stringify({ reason }),
+      success: function (response) {
+        $(elem).html('Sponsorship Stopped').removeClass('btn-danger').addClass('btn-success').attr({ 'onclick': '' });
+        refreshContainers();
+      },
+      error: function (xhr, status, error) {
+        event.target.innerHTML = currentBtnHtml;
+        alert(xhr.responseText);
+      }
+    });
+  };
 
   const getOrders = function (elem) {
     const modal = $(elem).closest('.modal');
@@ -352,7 +338,7 @@
         $(modal).find('.cancel-btn').trigger('click');
         initializePopovers();
       },
-      error: function (xhr, status, error) {  
+      error: function (xhr, status, error) {
         alert(xhr.responseText);
       }
     });

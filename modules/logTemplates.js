@@ -281,7 +281,7 @@ const logTemplates = ({ type, entity, actor, project, file, order, entry, color,
                 color: 'blue',
             }
             : null,
-            sponsorshipStopped: project
+        sponsorshipStopped: project
             ? {
                 ...commons('order', entity._id),
                 action: `${project.selection ? project.selection.entries.length : null
@@ -425,6 +425,37 @@ const logTemplates = ({ type, entity, actor, project, file, order, entry, color,
             isRead: true,
             isReadByCustomer: false,
         } : null,
+        entrySponsorshipStopped: project && entry ? {
+            ...commons('entry', entity._id),
+            action: `<a href="/entry/${entity._id}/project/${project.slug}">${entity.name || entity.nameOfOrphan || 'Entry'}
+            </a> sponship stopped.`,
+            project,
+            changes,
+            color: 'blue',
+            isNotification: true,
+            isRead: true,
+            isReadByCustomer: false,
+        } : null,
+        customerEntryReplaced: project && order ? {
+            ...commons('customer', entity._id),
+            action: `<a href="/order/${order._id}">Order ${order.orderNo}</a> updated.`,
+            project,
+            changes,
+            color: 'blue',
+            isNotification: true,
+            isRead: true,
+            isReadByCustomer: false,
+        } : null,
+        orderEntryReplaced: project ? {
+            ...commons('order', entity._id),
+            action: `<a href="/order/${entity._id}">Order ${entity.orderNo}</a> updated.`,
+            project,
+            changes,
+            color: 'blue',
+            isNotification: true,
+            isRead: true,
+            isReadByCustomer: false,
+        } : null,
     };
 
     if (templates[type] == null) {
@@ -436,7 +467,7 @@ const logTemplates = ({ type, entity, actor, project, file, order, entry, color,
     }
 
     return templates[type];
-    
+
 };
 
 module.exports = { logTemplates };
