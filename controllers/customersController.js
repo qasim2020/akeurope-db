@@ -25,6 +25,7 @@ const Order = require('../models/Order');
 const Donor = require('../models/Donor');
 const Subscription = require('../models/Subscription');
 const { generateSearchQueryFromSchema } = require('../modules/generateSearchQuery.js');
+const { createDynamicModel } = require('../models/createDynamicModel.js');
 
 const sessionCollection = mongoose.connection.collection('sessions_customer_portal');
 
@@ -468,7 +469,12 @@ async function getPreviousSponsorships(customerId) {
         const entryIds = sponsorships.map(s => s.entryId);
         const projectSlugs = [...new Set(sponsorships.map(s => s.projectSlug))];
 
-        const entries = await Entry.find({ _id: { $in: entryIds } }).lean();
+        const entries = [];
+        for (const slug of projectSlugs) {
+            const model = await createDynamicModel(slug);
+            const projEntries = await model.find({ _id: { $in: entryIds } }).lean();
+            entries.push(projEntries);
+        }
         
         const projects = await Project.find({ slug: { $in: projectSlugs } }).lean();
 

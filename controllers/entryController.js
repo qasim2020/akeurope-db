@@ -859,14 +859,33 @@ exports.stopSponsorship = async (req, res) => {
             status: { $in: ['paid', 'draft', 'aborted', 'pending payment', 'processing'] }
         });
 
-        const endedSponsorshipEntryIds = await Sponsorship.distinct('entryId', {
-            projectSlug: slug,
-            stoppedAt: { $exists: true }
-        });
+        let projectUnavailableEntryIds;
+        if (project.type === 'orphan') {
+            const sponsorshipField = project.fields.find(f => f.subscription)?.name;
+            const cutoffDate = new Date();
+            cutoffDate.setFullYear(cutoffDate.getFullYear() - 17);
+            cutoffDate.setMonth(cutoffDate.getMonth() - 10);
+            projectUnavailableEntryIds = await DynamicModel.find({
+                dateOfBirth: {
+                    $lte: cutoffDate
+                },
+                [sponsorshipField]: { $ne: entry[sponsorshipField]}
+            }).select('_id').lean();
+        } else if (project.type === 'scholarship') {
+            const sponsorshipEndDateField = project.fields.find(f => f.sStop)?.name;
+            const sponsorshipField = project.fields.find(f => f.subscription)?.name;
+            const now = new Date();
+            const oneMonthFromNow = new Date();
+            oneMonthFromNow.setMonth(now.getMonth() + 1);
+            projectUnavailableEntryIds = await DynamicModel.find({
+                [sponsorshipEndDateField]: { $lt: oneMonthFromNow },
+                [sponsorshipField]: { $ne: entry[sponsorshipField]}
+            }).select(`_id`).lean();
+        }
 
         const unavailableEntryIds = [
             ...occupiedEntryIds.map(id => id.toString()),
-            ...endedSponsorshipEntryIds.map(id => id.toString()),
+            ...projectUnavailableEntryIds.map(val => val._id.toString()),
             entryId
         ];
 
@@ -884,7 +903,7 @@ exports.stopSponsorship = async (req, res) => {
         console.log(`Replacement entry found: ${replacementEntry ? replacementEntry._id : 'None'}`);
 
         const sponsorship = new Sponsorship({
-            entryId: new mongoose.Types.ObjectId(entryId),
+            entryId: entry._id,
             customerId: customer._id,
             orderId: order._id,
             projectSlug: slug,
