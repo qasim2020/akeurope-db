@@ -88,6 +88,7 @@ async function convertUnpaidToExpired(Collection) {
 
     const orders = await Collection.find({ createdAt: { $lt: new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000) }, status: 'paid' });
 
+    const message = [];
     for (const order of orders) {
         const triggerDates = getMonthlyTriggerDates(order.createdAt);
         if (order.projects?.length > 1) {
@@ -102,16 +103,17 @@ async function convertUnpaidToExpired(Collection) {
             const pendingDays = (pendingDate - now) / (1000 * 60 * 60 * 24);
             if (pendingDays < -5) {
                 await Collection.updateOne({ _id: order._id }, { $set: { status: 'expired' } });
-                console.log(`Order ${order._id} | ${order.orderNo} in ${project.slug} marked as expired.`);
-                sendTelegramMessage(`Order ${order._id} | ${order.orderNo} in ${project.slug} marked as expired.`);
+                console.log(`Order ${order._id} | ${order.orderNo} in ${project.slug} | Monthly Subscription: ${order.monthlySubscription} | marked as expired.`);
+                message.push(`Order ${order._id} | ${order.orderNo} in ${project.slug} | Monthly Subscription: ${order.monthlySubscription} | marked as expired.`);
             } else {
-                console.log(`Order ${order._id} | ${order.orderNo} in ${project.slug} will expire after ${Math.ceil(pendingDays + 5)} days.`);
-                sendTelegramMessage(`Order ${order._id} | ${order.orderNo} in ${project.slug} will expire after ${Math.ceil(pendingDays + 5)} days.`);
+                console.log(`Order ${order._id} | ${order.orderNo} in ${project.slug} | Monthly Subscription: ${order.monthlySubscription} | will expire after ${Math.ceil(pendingDays + 5)} days.`);
+                message.push(`Order ${order._id} | ${order.orderNo} in ${project.slug} | Monthly Subscription: ${order.monthlySubscription} | will expire after ${Math.ceil(pendingDays + 5)} days.`);
             }
         }
-
-
     };
+
+    const messages = message.join('\n')
+    sendTelegramMessage(messages);
 
 }
 
