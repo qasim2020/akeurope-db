@@ -25,7 +25,9 @@ const Chat = require('../models/Chat');
 const Order = require('../models/Order');
 const User = require('../models/User');
 const Subscription = require('../models/Subscription');
+const Sponsorship = require('../models/Sponsorship');
 const Customer = require('../models/Customer');
+const Entry = require('../models/Entry');
 const Donor = require('../models/Donor');
 const { saveLog } = require('../modules/logAction');
 const { deleteInvoice } = require('../modules/invoice');
@@ -52,6 +54,143 @@ const connectDB = async () => {
     } catch (err) {
         console.error(err);
         process.exit(1);
+    }
+};
+
+const syncSponsorships = async () => {
+    console.log('Starting sponsorship synchronization...');
+    
+    try {
+        const ordersWithEntries = await Order.find({
+            'projects.entries': { $exists: true, $ne: [] }
+        }).lean();
+
+        const operations = [];
+        
+        for (const order of ordersWithEntries) {
+            for (const project of order.projects) {
+                for (const entry of project.entries) {
+                    const sponsorshipData = {
+                        entryId: entry.entryId,
+                        customerId: order.customerId,
+                        orderId: order._id,
+                        projectSlug: project.slug
+                    };
+
+                    if (order.status === 'paid') {
+                        operations.push({
+                            updateOne: {
+                                filter: { entryId: entry.entryId, orderId: order._id },
+                                update: {
+                                    $set: { ...sponsorshipData, startedAt: order.updatedAt },
+                                    $unset: { stoppedAt: '', reasonStopped: '' }
+                                },
+                                upsert: true
+                            }
+                        });
+                    } 
+                    else if (order.status === 'expired' && order.expiresAt) {
+                        operations.push({
+                            updateOne: {
+                                filter: { entryId: entry.entryId, orderId: order._id },
+                                update: {
+                                    $set: {
+                                        ...sponsorshipData,
+                                        stoppedAt: order.expiresAt,
+                                        reasonStopped: order.expiredReason || 'time_expired',
+                                        daysSponsored: Math.floor((order.expiresAt - order.createdAt) / (1000 * 60 * 60 * 24)),
+                                        totalPaid: order.totalCost
+                                    }
+                                },
+                                upsert: true
+                            }
+                        });
+                    }
+                }
+            }
+        }
+
+        if (operations.length > 0) {
+            await Sponsorship.bulkWrite(operations);
+            console.log(`Updated ${operations.length} sponsorship records`);
+        }
+
+    } catch (error) {
+        console.error('Sponsorship sync error:', error);
+    }
+};
+
+const updateEntryVisibility = async () => {
+    console.log('Updating entry visibility...');
+    
+    try {
+        const activeSponsorships = await Sponsorship.find({
+            stoppedAt: { $exists: false }
+        }).distinct('entryId');
+
+        await Entry.updateMany(
+            { entryId: { $nin: activeSponsorships }, isExpired: { $ne: true } },
+            { 
+                $set: { 
+                    isExpired: true, 
+                    reasonExpiry: 'no_active_sponsorship' 
+                } 
+            }
+        );
+
+        await Entry.updateMany(
+            { entryId: { $in: activeSponsorships }, isExpired: true },
+            { 
+                $set: { 
+                    isExpired: false 
+                },
+                $unset: { reasonExpiry: '' }
+            }
+        );
+
+        console.log('Entry visibility updated');
+    } catch (error) {
+        console.error('Entry visibility update error:', error);
+    }
+};
+
+const handleOrderStatusChanges = async () => {
+    console.log('Processing order status changes...');
+    
+    try {
+        const renewedOrders = await Order.find({
+            status: 'paid',
+            updatedAt: { $gte: new Date(Date.now() - 5 * 60 * 1000) }, 
+            expiresAt: { $exists: true }
+        });
+
+        for (const order of renewedOrders) {
+            console.log(`Processing renewed order: ${order.orderNo}`);
+            
+            await Sponsorship.updateMany(
+                { orderId: order._id },
+                { 
+                    $set: { 
+                        startedAt: order.updatedAt 
+                    },
+                    $unset: { 
+                        stoppedAt: '', 
+                        reasonStopped: '' 
+                    }
+                }
+            );
+
+            await Order.updateOne(
+                { _id: order._id },
+                { $unset: { expiresAt: '', expiredReason: '' } }
+            );
+        }
+
+        if (renewedOrders.length > 0) {
+            console.log(`Processed ${renewedOrders.length} renewed orders`);
+        }
+    } catch (error) {
+        console.error('Order status change processing error:', error);
     }
 };
 
@@ -1248,6 +1387,14 @@ async function gazaOrphanSelectionTimeLine() {
 
 };
 
+
+const performFullSync = async () => {
+    await syncSponsorships();
+    await handleOrderStatusChanges();
+    await updateEntryVisibility();
+    console.log('sponsorship sync completed');
+};
+
 mongoose.connection.on('open', async () => {
     await deleteDraftOrders(Order);
     await deleteDraftOrders(Subscription);
@@ -1267,6 +1414,7 @@ mongoose.connection.on('open', async () => {
     // await createDirectDonorLongUpdatesSheet();
     // await sendGazaUpdate();
     // await gazaOrphanSelectionTimeLine();
+    await performFullSync();
 
     setInterval(async () => {
         try {

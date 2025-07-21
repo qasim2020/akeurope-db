@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-
 const Counter = require('../models/Counter');
 
 const EntrySchema = new mongoose.Schema(
@@ -45,12 +44,12 @@ const OrderSchema = new mongoose.Schema(
         },
         status: {
             type: String,
-            enum: ['draft', 'pending payment', 'processing', 'paid'],
+            enum: ['draft', 'pending payment', 'processing', 'paid', 'expired'], 
             default: 'draft',
         },
         currency: {
             type: String,
-            enum: ['USD', 'NOK', 'SEK', 'GBP', 'EUR', 'PKR', 'ILS', 'EGP', 'GBP'],
+            enum: ['USD', 'NOK', 'SEK', 'GBP', 'EUR', 'PKR', 'ILS', 'EGP'],
             default: 'USD',
             required: true,
         },
@@ -65,6 +64,14 @@ const OrderSchema = new mongoose.Schema(
         countryCode: {
             type: String,
         },
+        // Additional fields for tracking expiry
+        expiresAt: {
+            type: Date,
+        },
+        expiredReason: {
+            type: String,
+            enum: ['payment_failed', 'subscription_cancelled', 'time_expired', 'manual_expiry'],
+        },
     },
     {
         timestamps: true,
@@ -72,10 +79,11 @@ const OrderSchema = new mongoose.Schema(
     }
 );
 
+// Pre-save middleware for order numbering
 OrderSchema.pre('save', async function (next) {
     const doc = this;
 
-    if (doc.counterId) return next();
+    if (doc.orderNo) return next();
 
     try {
         const counter = await Counter.findOneAndUpdate(
@@ -89,6 +97,10 @@ OrderSchema.pre('save', async function (next) {
         next(error);
     }
 });
+
+// Index for efficient querying of expired orders
+OrderSchema.index({ customerId: 1, status: 1 });
+OrderSchema.index({ expiresAt: 1, status: 1 });
 
 const Order = mongoose.model('Order', OrderSchema);
 

@@ -448,6 +448,46 @@ const formatNumber = function (num) {
     return num.toLocaleString();
 };
 
+const getPreviousSponsorships = async (customerId) => {
+    try {
+        const expiredOrders = await Order.find({
+            customerId: mongoose.Types.ObjectId(customerId),
+            status: 'expired'
+        }).lean();
+
+        const sponsorships = await Sponsorship.find({
+            customerId: mongoose.Types.ObjectId(customerId)
+        }).lean();
+
+        return await formatPreviousSponsorships(expiredOrders, sponsorships);
+    } catch (error) {
+        console.error('Error fetching previous sponsorships:', error);
+        return [];
+    }
+};
+
+const formatSponsorshipDuration = function (days) {
+    if (!days) return 'Unknown duration';
+    
+    const years = Math.floor(days / 365);
+    const months = Math.floor((days % 365) / 30);
+    const remainingDays = days % 30;
+    
+    let duration = '';
+    if (years > 0) duration += `${years}y `;
+    if (months > 0) duration += `${months}m `;
+    if (remainingDays > 0) duration += `${remainingDays}d`;
+    
+    return duration.trim() || `${days} days`;
+};
+
+const getSponsorshipStatus = function (sponsorship)  {
+    if (sponsorship.type === 'expired_order') {
+        return 'Order Expired';
+    }
+    return sponsorship.reasonStopped || 'Sponsorship Ended';
+};
+
 const hasAny = function (a, b) {
     const isTruthy = val => {
         if (Array.isArray(val)) return val.length > 0;
@@ -514,4 +554,7 @@ module.exports = {
     expiresAfter,
     getAgeInYearsAndMonths,
     endingString,
+    getPreviousSponsorships,
+    formatSponsorshipDuration,
+    getSponsorshipStatus,
 };

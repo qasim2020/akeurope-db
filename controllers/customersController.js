@@ -457,51 +457,126 @@ exports.customer = async (req, res) => {
 
 async function getPreviousSponsorships(customerId) {
     try {
-        const sponsorships = await Sponsorship.find({
+        const stoppedSponsorships = await Sponsorship.find({
             customerId: customerId,
             stoppedAt: { $exists: true } 
-        }).sort({ stoppedAt: -1 }).lean(); 
+        }).sort({ stoppedAt: -1 }).lean();
 
-        if (!sponsorships || sponsorships.length === 0) {
-            return [];
-        }
+        const expiredOrders = await Order.find({
+            customerId: customerId,
+            status: 'expired'
+        }).sort({ updatedAt: -1 }).lean();
 
-        const entryIds = sponsorships.map(s => s.entryId);
-        const projectSlugs = [...new Set(sponsorships.map(s => s.projectSlug))];
+        let allPreviousSponsorships = [];
 
-        const entries = [];
-        for (const slug of projectSlugs) {
-            const model = await createDynamicModel(slug);
-            const projEntries = await model.find({ _id: { $in: entryIds } }).lean();
-            entries.push(projEntries);
-        }
-        
-        const projects = await Project.find({ slug: { $in: projectSlugs } }).lean();
+        if (stoppedSponsorships && stoppedSponsorships.length > 0) {
+            const entryIds = stoppedSponsorships.map(s => s.entryId);
+            const projectSlugs = [...new Set(stoppedSponsorships.map(s => s.projectSlug))];
 
-        const entryMap = entries.reduce((acc, entry) => {
-            acc[entry._id.toString()] = entry;
-            return acc;
-        }, {});
-
-        const projectMap = projects.reduce((acc, project) => {
-            acc[project.slug] = project;
-            return acc;
-        }, {});
-
-        const enrichedSponsorships = sponsorships.map(sponsorship => {
-            const entry = entryMap[sponsorship.entryId.toString()];
-            const project = projectMap[sponsorship.projectSlug];
+            const entries = [];
+            for (const slug of projectSlugs) {
+                const model = await createDynamicModel(slug);
+                const projEntries = await model.find({ _id: { $in: entryIds } }).lean();
+                entries.push(...projEntries);
+            }
             
-            return {
-                ...sponsorship,
-                entry: entry || null,
-                project: project || null,
-                durationInMonths: sponsorship.daysSponsored ? Math.floor(sponsorship.daysSponsored / 30) : 0,
-                formattedTotalPaid: sponsorship.totalPaid ? `$${sponsorship.totalPaid.toFixed(2)}` : 'N/A'
-            };
-        });
+            const projects = await Project.find({ slug: { $in: projectSlugs } }).lean();
 
-        return enrichedSponsorships;
+            const entryMap = entries.reduce((acc, entry) => {
+                acc[entry._id.toString()] = entry;
+                return acc;
+            }, {});
+
+            const projectMap = projects.reduce((acc, project) => {
+                acc[project.slug] = project;
+                return acc;
+            }, {});
+
+            allPreviousSponsorships.push(...stoppedSponsorships.map(sponsorship => ({
+                ...sponsorship,
+                entry: entryMap[sponsorship.entryId.toString()] || null,
+                project: projectMap[sponsorship.projectSlug] || null,
+                durationInMonths: sponsorship.daysSponsored ? Math.floor(sponsorship.daysSponsored / 30) : 0,
+                formattedTotalPaid: sponsorship.totalPaid ? `${sponsorship.totalPaid.toFixed(2)} ${projectMap[sponsorship.projectSlug]?.currency || 'USD'}` : 'N/A',
+                source: 'sponsorship',
+                endDate: sponsorship.stoppedAt,
+                reason: sponsorship.reasonStopped || 'Sponsorship ended'
+            })));
+        }
+
+        if (expiredOrders && expiredOrders.length > 0) {
+            const expiredOrdersData = expiredOrders.map(order => {
+                const orderEntries = [];
+                order.projects?.forEach(project => {
+                    project.entries?.forEach(entry => {
+                        orderEntries.push({
+                            orderId: order._id,
+                            orderNo: order.orderNo,
+                            projectSlug: project.slug,
+                            entryId: entry.entryId,
+                            totalCost: entry.totalCost || 0,
+                            months: project.months || 1,
+                            monthlySubscription: order.monthlySubscription,
+                            currency: order.currency,
+                            createdAt: order.createdAt,
+                            expiredAt: order.updatedAt,
+                            expiredReason: order.expiredReason || 'Order expired'
+                        });
+                    });
+                });
+                return orderEntries;
+            }).flat();
+
+            const expiredProjectSlugs = [...new Set(expiredOrdersData.map(item => item.projectSlug))];
+            const expiredEntryIds = [...new Set(expiredOrdersData.map(item => item.entryId))];
+
+            const expiredEntries = [];
+            for (const slug of expiredProjectSlugs) {
+                const model = await createDynamicModel(slug);
+                const projEntries = await model.find({ _id: { $in: expiredEntryIds } }).lean();
+                expiredEntries.push(...projEntries);
+            }
+
+            const expiredProjects = await Project.find({ slug: { $in: expiredProjectSlugs } }).lean();
+
+            const expiredEntryMap = expiredEntries.reduce((acc, entry) => {
+                acc[entry._id.toString()] = entry;
+                return acc;
+            }, {});
+
+            const expiredProjectMap = expiredProjects.reduce((acc, project) => {
+                acc[project.slug] = project;
+                return acc;
+            }, {});
+
+            allPreviousSponsorships.push(...expiredOrdersData.map(item => {
+                const durationMonths = item.monthlySubscription ? 
+                    Math.floor((new Date(item.expiredAt) - new Date(item.createdAt)) / (1000 * 60 * 60 * 24 * 30)) : 
+                    item.months;
+                
+                return {
+                    entryId: item.entryId,
+                    customerId: customerId,
+                    orderId: item.orderId,
+                    orderNo: item.orderNo,
+                    projectSlug: item.projectSlug,
+                    startedAt: item.createdAt,
+                    stoppedAt: item.expiredAt,
+                    reasonStopped: item.expiredReason,
+                    daysSponsored: Math.floor((new Date(item.expiredAt) - new Date(item.createdAt)) / (1000 * 60 * 60 * 24)),
+                    totalPaid: item.totalCost,
+                    entry: expiredEntryMap[item.entryId.toString()] || null,
+                    project: expiredProjectMap[item.projectSlug] || null,
+                    durationInMonths: durationMonths,
+                    formattedTotalPaid: `${item.totalCost.toFixed(2)} ${item.currency}`,
+                    source: 'expired_order',
+                    endDate: item.expiredAt,
+                    reason: item.expiredReason
+                };
+            }));
+        }
+        return allPreviousSponsorships.sort((a, b) => new Date(b.endDate) - new Date(a.endDate));
+
     } catch (error) {
         console.error('Error fetching previous sponsorships:', error);
         return [];
