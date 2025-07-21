@@ -64,22 +64,12 @@ const OrderSchema = new mongoose.Schema(
         countryCode: {
             type: String,
         },
-        // Additional fields for tracking expiry
-        expiresAt: {
-            type: Date,
-        },
-        expiredReason: {
-            type: String,
-            enum: ['payment_failed', 'subscription_cancelled', 'time_expired', 'manual_expiry'],
-        },
     },
     {
         timestamps: true,
         versionKey: false,
     }
 );
-
-// Pre-save middleware for order numbering
 OrderSchema.pre('save', async function (next) {
     const doc = this;
 
@@ -97,8 +87,6 @@ OrderSchema.pre('save', async function (next) {
         next(error);
     }
 });
-
-// Index for efficient querying of expired orders
 OrderSchema.index({ customerId: 1, status: 1 });
 OrderSchema.index({ expiresAt: 1, status: 1 });
 
