@@ -40,6 +40,7 @@ const nodemailer = require('nodemailer');
 const handlebars = require('handlebars');
 const Project = require('../models/Project.js');
 const Sponsorship = require('../models/Sponsorship.js')
+const { replaceEntryInOrder } = require('../modules/entryModules');
 
 const connectDB = async () => {
     try {
@@ -56,117 +57,91 @@ const connectDB = async () => {
     }
 };
 
+const setSponsorshipsOneTime = async () => {
+    try {
+        console.log('Starting daily sponsorship generation of paid orders ');
 
-const generateDailySponsorships = async () => {
-  try {
-    console.log('Starting daily sponsorship generation of paid orders ');
-    
-    const paidOrders = await Order.find({ status: 'paid' });
-    
-    if (paidOrders.length === 0) {
-      console.log('No paid orders found.');
-      return;
-    }
-    
-    console.log(`Processing ${paidOrders.length} paid orders.`);
-    let createdCount = 0;
-    let skippedCount = 0;
-    let errorCount = 0;
-
-    for (const order of paidOrders) {
-      try {
-        for (const projectEntry of order.projects) {
-          const projectSlug = projectEntry.slug;
-          
-          const [DynamicModel, project] = await Promise.all([
-            createDynamicModel(projectSlug),
-            Project.findOne({ slug: projectSlug })
-          ]);
-
-          if (!project || !project.fields) {
-            console.warn(`Project ${projectSlug} not found or has no fields`);
-            continue;
-          }
-
-          const startField = project.fields.find(f => f.sStart === true);
-
-          const entryIds = projectEntry.entries.map(e => e.entryId);
-          
-          const entryDocs = await DynamicModel.find({ 
-            _id: { $in: entryIds } 
-          });
-          
-          const existingSponsorships = await Sponsorship.find({
-            entryId: { $in: entryIds },
-            orderId: order._id,
-          }).select('entryId');
-          
-          const existingEntryIds = new Set(
-            existingSponsorships.map(s => s.entryId.toString())
-          );
-
-          const sponsorshipsToCreate = [];
-
-          for (const entryInfo of projectEntry.entries) {
-            const entryDoc = entryDocs.find(
-              doc => doc._id.toString() === entryInfo.entryId.toString()
-            );
-            
-            if (!entryDoc) {
-              console.warn(`Entry ${entryInfo.entryId} not found in ${projectSlug}`);
-              continue;
-            }
-
-            if (existingEntryIds.has(entryDoc._id.toString())) {
-              skippedCount++;
-              continue;
-            }
-
-            const startDate = startField ? entryDoc[startField.name] : order.createdAt;
-            const now = new Date();
-            
-            sponsorshipsToCreate.push({
-              entryId: entryDoc._id,
-              customerId: order.customerId,
-              orderId: order._id,
-              projectSlug,
-              startedAt: startDate,
-              totalPaid: entryInfo.totalCost || 0,
-              daysSponsored: Math.floor((now - startDate) / (1000 * 60 * 60 * 24))
-            });
-          }
-
-          if (sponsorshipsToCreate.length > 0) {
-            await Sponsorship.insertMany(sponsorshipsToCreate);
-            createdCount += sponsorshipsToCreate.length;
-            console.log(`Created ${sponsorshipsToCreate.length} sponsorships for project ${projectSlug} in order ${order.orderNo}`);
-          }
+        const paidOrders = await Order.find({ status: 'paid' });
+        const expiredOrders = await Order.find({ status: 'expired' });
+        const combinedOrders = [...paidOrders, ...expiredOrders];
+        if (paidOrders.length === 0) {
+            console.log('No paid orders found.');
+            return;
         }
-      } catch (orderError) {
-        console.error(`Error processing order ${order.orderNo}:`, orderError);
-        errorCount++;
-        continue;
-      }
+
+        let errorCount = 0;
+
+        const sponsorshipsToCreate = [];
+
+        for (const order of combinedOrders) {
+            try {
+                for (const orderProject of order.projects) {
+                    const projectSlug = orderProject.slug;
+
+                    for (const orderEntry of orderProject.entries) {
+
+                        const alreadyAdded = await Sponsorship.countDocuments({ entryId: orderEntry.entryId, orderId: order._id, customerId: order.customerId });
+
+                        if (alreadyAdded > 0) {
+                            console.warn(`Entry in order ${order.orderNo} ${order.status} already recorded`);
+                            continue;
+                        }
+
+                        const startDate = order.createdAt;
+
+                        if (order.status === 'paid') {
+                            sponsorshipsToCreate.push({
+                                entryId: orderEntry.entryId,
+                                customerId: order.customerId,
+                                orderId: order._id,
+                                projectSlug,
+                                startedAt: startDate,
+                                totalPaid: `${orderEntry.totalCost} ${order.currency}`,
+                                daysSponsored: Math.floor((now - startDate) / (1000 * 60 * 60 * 24))
+                            });
+                        } else if (order.status === 'expired') {
+                            const stopDate = new Date(startDate);
+                            stopDate.setMonth(stopDate.getMonth() + orderProject.months);
+                            const totalPaid = orderEntry.totalCost * orderProject.months;
+
+                            sponsorshipsToCreate.push({
+                                entryId: orderEntry.entryId,
+                                customerId: order.customerId,
+                                orderId: order._id,
+                                projectSlug,
+                                startedAt: startDate,
+                                stoppedAt: stopDate,
+                                totalPaid: `${totalPaid} ${order.currency}`,
+                                daysSponsored: Math.floor((stopDate - startDate) / (1000 * 60 * 60 * 24))
+                            });
+                        } else {
+                            throw new Error(`what is this order ${order.orderNo}`);
+                        }
+
+                    }
+
+                }
+            } catch (orderError) {
+                console.error(`Error processing order ${order.orderNo}:`, orderError);
+                errorCount++;
+                continue;
+            }
+        }
+
+        await Sponsorship.insertMany(sponsorshipsToCreate);
+        console.log(`Errors found : ${errorCount}`);
+
+    } catch (error) {
+        console.error('Error in generateDailySponsorships:', error);
+        throw error;
     }
-
-    console.log(`Sponsorship generation completed:`);
-    console.log(`Created: ${createdCount}`);
-    console.log(`Skipped alread exist: ${skippedCount}`);
-    console.log(`Errors found : ${errorCount}`);
-    
-  } catch (error) {
-    console.error('Error in generateDailySponsorships:', error);
-    throw error;
-  }
 }
-
-
 
 const updateSponsorshipsFromOrders = async () => {
     try {
         console.log('Updating sponsorships with expired orderes.');
 
-        const expiredOrders = await Order.find({ 
+        const expiredOrders = await Order.find({
             status: 'expired',
             'projects.entries': { $exists: true, $not: { $size: 0 } }
         }).populate('customerId');
@@ -187,14 +162,14 @@ const updateSponsorshipsFromOrders = async () => {
                 for (const project of order.projects) {
                     const projectDoc = await Project.findOne({ slug: project.slug });
                     const startField = projectDoc?.fields?.find(f => f.sStart === true);
-                    
+
                     const DynamicModel = await createDynamicModel(project.slug);
 
                     for (const entry of project.entries) {
                         try {
                             const entryDoc = await DynamicModel.findById(entry.entryId);
-                            
-                            let startDate = order.createdAt; 
+
+                            let startDate = order.createdAt;
                             if (entryDoc && startField && entryDoc[startField.name]) {
                                 startDate = entryDoc[startField.name];
                             }
@@ -214,7 +189,7 @@ const updateSponsorshipsFromOrders = async () => {
                                     },
                                     $set: {
                                         startedAt: startDate,
-                                        stoppedAt: new Date(), 
+                                        stoppedAt: new Date(),
                                         reasonStopped: 'order_expired',
                                         daysSponsored: Math.floor((new Date() - startDate) / (1000 * 60 * 60 * 24))
                                     }
@@ -243,8 +218,8 @@ const updateSponsorshipsFromOrders = async () => {
                 }
 
                 if (orderProcessedSuccessfully) {
-                    await Order.findByIdAndUpdate(order._id, { 
-                        status: 'recorded' 
+                    await Order.findByIdAndUpdate(order._id, {
+                        status: 'recorded'
                     });
                     recordedOrdersCount++;
                     console.log(`Order ${order.orderNo} status updated to 'recorded'`);
@@ -260,31 +235,35 @@ const updateSponsorshipsFromOrders = async () => {
 
         console.log(`Successfully updated ${updatedCount} sponsorships from expired orders.`);
         console.log(`Successfully recorded ${recordedOrdersCount} orders.`);
-        
+
     } catch (error) {
         console.error('Error in updateSponsorshipsFromOrders:', error);
         throw error;
     }
 };
 
-const createSponsorshipsForPaidOrders = async () => {
+const createSponsorshipsForOrdersPaidToday = async () => {
     try {
-        console.log('Creating sponsorships for paid orders');
+        console.log('Creating sponsorships for orders paid today');
 
-        const paidOrders = await Order.find({ 
+        const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+
+        const paidOrders = await Order.find({
             status: 'paid',
-            'projects.entries': { $exists: true, $not: { $size: 0 } }
-        }).populate('customerId');
+            'projects.entries': { $exists: true, $not: { $size: 0 } },
+            createdAt: { $gt: twentyFourHoursAgo }
+        });
 
         if (paidOrders.length === 0) {
             console.log('No paid orders found.');
             return;
         }
 
-        console.log(`Found ${paidOrders.length} oders paid `);
+        console.log(`Found ${paidOrders.length} oders paid today`);
         let createdCount = 0;
         let skippedCount = 0;
         let errorCount = 0;
+        const errors = [];
 
         for (const order of paidOrders) {
             try {
@@ -299,32 +278,28 @@ const createSponsorshipsForPaidOrders = async () => {
 
                             if (existingSponsorship) {
                                 skippedCount++;
-                                console.log(`Sponsorship already exists for order ${order.orderNo}, entry ${entry.entryId} .`);
+                                errors.push(`Sponsorship already exists for order ${order.orderNo}, entry ${entry.entryId}.`);
                                 continue;
                             }
 
                             const now = new Date();
                             const daysSponsored = Math.floor((now - order.createdAt) / (1000 * 60 * 60 * 24));
 
+                            const totalPaid = entry.totalCost * orderProject.months;
+
                             const newSponsorship = new Sponsorship({
                                 entryId: entry.entryId,
-                                customerId: order.customerId._id,
+                                customerId: order.customerId,
                                 orderId: order._id,
                                 projectSlug: project.slug,
                                 startedAt: order.createdAt,
                                 stoppedAt: null,
                                 reasonStopped: null,
                                 daysSponsored: daysSponsored,
-                                totalPaid: entry.totalCost || 0
+                                totalPaid,
                             });
 
                             await newSponsorship.save();
-                            createdCount++;
-                            
-                            console.log(`Created sponsorship for order ${order.orderNo}, entry ${entry.entryId}, project ${project.slug}`);
-                            console.log(`Start date: ${order.createdAt}`);
-                            console.log(`Days sponsored: ${daysSponsored}`);
-                            console.log(`Total paid: ${entry.totalCost || 0}`);
 
                         } catch (entryError) {
                             console.error(`Error processing entry ${entry.entryId} in order ${order.orderNo}:`, entryError);
@@ -341,11 +316,12 @@ const createSponsorshipsForPaidOrders = async () => {
             }
         }
 
-        console.log(`Sponsorship creation completed:`);
+        console.log(`Paid sponsorships updated for today paid orders:`);
         console.log(`Created: ${createdCount} new sponsorships`);
         console.log(`Skipped (already exists): ${skippedCount}`);
         console.log(`Errors: ${errorCount}`);
-        
+        sendTelegramMessage(errors.join('\n'));
+
     } catch (error) {
         console.error('Error in createSponsorshipsForPaidOrders:', error);
         throw error;
@@ -355,9 +331,10 @@ const createSponsorshipsForPaidOrders = async () => {
 const updateSponsorshipsFromEntries = async () => {
     try {
         console.log('Starting sponsorship updates from expired entries...');
-        
+
         const projects = await Project.find({ status: 'active' });
         let totalUpdatedCount = 0;
+        let stopField = "";
 
         for (const project of projects) {
             try {
@@ -365,26 +342,31 @@ const updateSponsorshipsFromEntries = async () => {
                 const now = new Date();
                 let expiredEntries = [];
 
-                if (project.type === 'orphans') {
+                if (project.type === 'orphan') {
                     const eighteenYearsAgo = new Date();
                     eighteenYearsAgo.setFullYear(eighteenYearsAgo.getFullYear() - 18);
-                    
+
                     expiredEntries = await DynamicModel.find({
                         dateOfBirth: { $lte: eighteenYearsAgo }
                     });
-                    
+
                     console.log(`Found ${expiredEntries.length} orphans who turned 18 in project ${project.slug}`);
-                    
+
+                    stopField = 'dateOfBirth';
+
                 } else if (project.type === 'scholarship') {
-                    const stopField = project.fields.find(field => field.sStop === true);
-                    
+                    stopField = project.fields.find(field => field.sStop === true);
+
                     if (stopField) {
                         const query = {};
                         query[stopField.name] = { $lt: now };
-                        
+
                         expiredEntries = await DynamicModel.find(query);
                         console.log(`Found ${expiredEntries.length} expired scholarships in project ${project.slug}`);
+
+                        stopField = stopField.name;
                     }
+
                 }
 
                 for (const entry of expiredEntries) {
@@ -396,8 +378,18 @@ const updateSponsorshipsFromEntries = async () => {
                         }).populate('customerId');
 
                         console.log(`Found ${paidOrders.length} paid orders for expired entry ${entry._id}`);
+                        // if alkhidmat europe - dont update the order - find if added in another order
+
 
                         for (const order of paidOrders) {
+                            let endDate = new Date();
+                            if (project.type === 'orphan') {
+                                const dob = entry[stopField];
+                                endDate = dob;
+                                endDate.setFullYear(dob.getFullYear() + 18);
+                            } else if (project.type === 'scholarship') {
+                                endDate = new Date(entry[stopField]);
+                            }
                             const sponsorship = await Sponsorship.findOneAndUpdate(
                                 {
                                     entryId: entry._id,
@@ -405,26 +397,25 @@ const updateSponsorshipsFromEntries = async () => {
                                     orderId: order._id
                                 },
                                 {
-                                    $setOnInsert: {
-                                        entryId: entry._id,
-                                        customerId: order.customerId._id,
-                                        orderId: order._id,
-                                        projectSlug: project.slug,
-                                        startedAt: order.createdAt,
-                                        totalPaid: order.totalCost || 0
-                                    },
                                     $set: {
-                                        stoppedAt: now,
-                                        reasonStopped: project.type === 'orphans' ? 'orphan_turned_18' : 'scholarship_completed',
-                                        daysSponsored: Math.floor((now - order.createdAt) / (1000 * 60 * 60 * 24))
+                                        stoppedAt: endDate,
+                                        reasonStopped: project.type === 'orphan' ? 'Child turned 18 years of age' : 'Scholarship date ended',
+                                        daysSponsored: Math.floor((endDate - order.createdAt) / (1000 * 60 * 60 * 24))
                                     }
                                 },
                                 {
-                                    upsert: true,
+                                    upsert: false,
                                     new: true,
                                     setDefaultsOnInsert: true
                                 }
                             );
+
+                            if (order.customerId._id.toString() === '6792d001b5a200b74a21d8be') {
+                                console.log('Dont don anything as it is alkhidmat europe');
+                            } else {
+                                const replacementEntry = await replaceEntryInOrder(order._id, entry._id);
+                                console.log(`Successfully replaced entry ${entryId} with ${replacementEntry._id} in order ${orderId}`);
+                            }
 
                             if (sponsorship) {
                                 totalUpdatedCount++;
@@ -446,13 +437,12 @@ const updateSponsorshipsFromEntries = async () => {
         }
 
         console.log(`Successfully updated ${totalUpdatedCount} sponsorships from expired entries.`);
-        
+
     } catch (error) {
         console.error('Error in updateSponsorshipsFromEntries:', error);
         throw error;
     }
 };
-
 
 async function deleteDraftOrders(Collection) {
 
@@ -502,8 +492,25 @@ async function convertUnpaidToExpired(Collection) {
             const pendingDays = (pendingDate - now) / (1000 * 60 * 60 * 24);
             if (pendingDays < -5) {
                 await Collection.updateOne({ _id: order._id }, { $set: { status: 'expired' } });
+                const startDate = order.createdAt;
+                const stopDate = new Date(startDate);
+                stopDate.setMonth(stopDate.getMonth() + project.months);
+                for (const orderEntry of project.entries) {
+                    const totalPaid = orderEntry.totalCost * project.months;
+                    await Sponsorship.findOneAndUpdate({
+                        entryId: orderEntry.entryId,
+                        customerId: order.customerId,
+                        orderId: order._id,
+                    }, {
+                        $set: {
+                            stoppedAt: stopDate,
+                            totalPaid: `${totalPaid} ${order.currency}`,
+                            daysSponsored: Math.floor((stopDate - startDate) / (1000 * 60 * 60 * 24))
+                        }
+                    });
+                }
                 console.log(`Order ${order._id} | ${order.orderNo} in ${project.slug} | Monthly Subscription: ${order.monthlySubscription} | marked as expired.`);
-                message.push(`Order ${order._id} | ${order.orderNo} in ${project.slug} | Monthly Subscription: ${order.monthlySubscription} | marked as expired.`);
+                message.push(`Order ${order._id} | ${order.orderNo} in ${project.slug} | Monthly Subscription: ${order.monthlySubscription} | marked as expired. Check Sponsorship and Order.`);
             } else {
                 console.log(`Order ${order._id} | ${order.orderNo} in ${project.slug} | Monthly Subscription: ${order.monthlySubscription} | will expire after ${Math.ceil(pendingDays + 5)} days.`);
                 message.push(`Order ${order._id} | ${order.orderNo} in ${project.slug} | Monthly Subscription: ${order.monthlySubscription} | will expire after ${Math.ceil(pendingDays + 5)} days.`);
@@ -1647,8 +1654,6 @@ async function gazaOrphanSelectionTimeLine() {
 
 };
 
-
-
 mongoose.connection.on('open', async () => {
     await deleteDraftOrders(Order);
     await deleteDraftOrders(Subscription);
@@ -1669,8 +1674,8 @@ mongoose.connection.on('open', async () => {
     // await sendGazaUpdate();
     // await gazaOrphanSelectionTimeLine();
     // await createSponsorshipsForPaidOrders()
-    await generateDailySponsorships()
-    await updateSponsorshipsFromOrders();
+    // await setSponsorshipsOneTime();
+    // await updateSponsorshipsFromOrders();
     await updateSponsorshipsFromEntries();
 
     setInterval(async () => {
@@ -1687,6 +1692,8 @@ mongoose.connection.on('open', async () => {
             await createDirectDonorGazaUpdate();
             await createDirectDonorPakistanStudentUpdate();
             await convertUnpaidToExpired(Order);
+            await createSponsorshipsForOrdersPaidToday();
+            await updateSponsorshipsFromEntries();
         } catch (error) {
             console.error('Error running scheduled donor updates:', error);
         }

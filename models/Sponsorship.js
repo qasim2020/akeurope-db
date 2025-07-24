@@ -10,7 +10,7 @@ const SponsorshipSchema = new mongoose.Schema(
         stoppedAt: Date,
         reasonStopped: String,
         daysSponsored: Number,
-        totalPaid: Number,
+        totalPaid: String,
     },
     {
         versionKey: false,
@@ -18,7 +18,7 @@ const SponsorshipSchema = new mongoose.Schema(
     }
 );
 
-SponsorshipSchema.index({ customerId: 1, entryId: 1 });
+SponsorshipSchema.index({ customerId: 1, entryId: 1, orderId: 1 });
 
 const Sponsorship = mongoose.model('Sponsorship', SponsorshipSchema);
 
