@@ -85,6 +85,9 @@ const replaceEntryInOrder = async (orderId, entryId) => {
 
   const oldEntryStartDate = existingSponsorship ? existingSponsorship.startedAt : order.createdAt;
 
+  // TODO: here findOneAndUpdate the current entry stoppedAt: now, and new entry startedAt: now
+  // we do not need a new sponsorship as all entries are now already in sponsorship
+  
   const oldEntrySponsorship = new Sponsorship({
     entryId: entry._id,
     customerId: customer._id,
