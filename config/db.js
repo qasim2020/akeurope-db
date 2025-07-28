@@ -331,42 +331,36 @@ const createSponsorshipsForOrdersPaidToday = async () => {
 const updateSponsorshipsFromEntries = async () => {
     try {
         console.log('Starting sponsorship updates from expired entries...');
-
+        
         const projects = await Project.find({ status: 'active' });
         let totalUpdatedCount = 0;
-        let stopField = "";
 
         for (const project of projects) {
             try {
                 const DynamicModel = await createDynamicModel(project.slug);
                 const now = new Date();
                 let expiredEntries = [];
+                let stopField = "";
 
                 if (project.type === 'orphan') {
                     const eighteenYearsAgo = new Date();
                     eighteenYearsAgo.setFullYear(eighteenYearsAgo.getFullYear() - 18);
-
+                    
                     expiredEntries = await DynamicModel.find({
                         dateOfBirth: { $lte: eighteenYearsAgo }
                     });
-
-                    console.log(`Found ${expiredEntries.length} orphans who turned 18 in project ${project.slug}`);
-
                     stopField = 'dateOfBirth';
-
+                    console.log(`Found ${expiredEntries.length} orphans who turned 18 in project ${project.slug}`);
                 } else if (project.type === 'scholarship') {
-                    stopField = project.fields.find(field => field.sStop === true);
-
-                    if (stopField) {
+                    const stopFieldObj = project.fields.find(field => field.sStop === true);
+                    
+                    if (stopFieldObj) {
                         const query = {};
-                        query[stopField.name] = { $lt: now };
-
+                        query[stopFieldObj.name] = { $lt: now };
                         expiredEntries = await DynamicModel.find(query);
+                        stopField = stopFieldObj.name;
                         console.log(`Found ${expiredEntries.length} expired scholarships in project ${project.slug}`);
-
-                        stopField = stopField.name;
                     }
-
                 }
 
                 for (const entry of expiredEntries) {
@@ -378,19 +372,19 @@ const updateSponsorshipsFromEntries = async () => {
                         }).populate('customerId');
 
                         console.log(`Found ${paidOrders.length} paid orders for expired entry ${entry._id}`);
-                        // if alkhidmat europe - dont update the order - find if added in another order
-
 
                         for (const order of paidOrders) {
                             let endDate = new Date();
                             if (project.type === 'orphan') {
                                 const dob = entry[stopField];
-                                endDate = dob;
+                                endDate = new Date(dob);
                                 endDate.setFullYear(dob.getFullYear() + 18);
                             } else if (project.type === 'scholarship') {
                                 endDate = new Date(entry[stopField]);
                             }
+
                             const reason = project.type === 'orphan' ? 'Child turned 18 years of age' : 'Scholarship date ended';
+                            
                             const sponsorship = await Sponsorship.findOneAndUpdate(
                                 {
                                     entryId: entry._id,
@@ -404,15 +398,25 @@ const updateSponsorshipsFromEntries = async () => {
                                         daysSponsored: Math.floor((endDate - order.createdAt) / (1000 * 60 * 60 * 24))
                                     }
                                 },
-                                {
-                                    upsert: false,
-                                    new: true,
-                                    setDefaultsOnInsert: true
-                                }
+                                { upsert: false, new: true }
                             );
 
-                            if (order.customerId._id.toString() === '6792d001b5a200b74a21d8beQ') {
-                                console.log('Dont don anything as it is alkhidmat europe');
+                            // for  Alkhidmat Europe special case
+                            const isAlkhidmatEurope = order.customerId.name?.includes('Alkhidmat Europe');
+                            
+                            if (isAlkhidmatEurope) {
+                                console.log(`Skipping entry replacement for Alkhidmat Europe customer: ${order.customerId.name}`);
+                                
+                                const otherActiveOrders = await Order.find({
+                                    customerId: order.customerId._id,
+                                    status: 'paid',
+                                    _id: { $ne: order._id },
+                                    'projects.entries.entryId': entry._id
+                                });
+                                
+                                if (otherActiveOrders.length > 0) {
+                                    console.log(`Entry ${entry._id} found in ${otherActiveOrders.length} other active orders for Alkhidmat Europe`);
+                                }
                             } else {
                                 const actor = await Customer.findById(process.env.TEMP_CUSTOMER_ID);
                                 const replacementEntry = await replaceEntryInOrder(order._id, entry._id, project.slug, reason, actor);
@@ -424,14 +428,11 @@ const updateSponsorshipsFromEntries = async () => {
                                 console.log(`Updated sponsorship for entry ${entry._id}, order ${order.orderNo}`);
                             }
                         }
-
-
                     } catch (entryError) {
                         console.error(`Error processing entry ${entry._id}:`, entryError);
                         continue;
                     }
                 }
-
             } catch (projectError) {
                 console.error(`Error processing project ${project.slug}:`, projectError);
                 continue;
@@ -439,7 +440,6 @@ const updateSponsorshipsFromEntries = async () => {
         }
 
         console.log(`Successfully updated ${totalUpdatedCount} sponsorships from expired entries.`);
-
     } catch (error) {
         console.error('Error in updateSponsorshipsFromEntries:', error);
         throw error;
