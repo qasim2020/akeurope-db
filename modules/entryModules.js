@@ -6,7 +6,7 @@ const { saveLog } = require('../modules/logAction');
 const { logTemplates } = require('../modules/logTemplates');
 const Order = require('../models/Order');
 
-const replaceEntryInOrder = async (orderId, entryId) => {
+const replaceEntryInOrder = async (orderId, entryId, slug, reason, actor) => {
 
   const order = await Order.findById(orderId).populate('customerId');
   if (!order) {
@@ -20,13 +20,20 @@ const replaceEntryInOrder = async (orderId, entryId) => {
   const entry = await DynamicModel.findById(entryId).lean();
 
   const orderProject = order.projects.find(p => p.slug === slug);
-  const orderEntry = orderProject?.entries.find(e => e.entryId.toString() === entryId);
+  const orderEntry = orderProject?.entries.find(e => e.entryId.toString() === entryId.toString());
 
   if (!orderProject || !orderEntry) {
     return res.status(404).send('Entry not found in order');
   }
 
-  const startDate = new Date(order.createdAt);
+  const entrySponsorship = await Sponsorship.findOne({ entryId, orderId, customerId: order.customerId }).lean();
+
+  if (!entrySponsorship) {
+    console.log(entryId, orderId, entrySponsorship);
+    throw new Error('entry Sponsorship not found... why');
+  }
+
+  const startDate = entrySponsorship.startedAt;
   const stopDate = new Date();
   const daysSponsored = Math.ceil((stopDate - startDate) / (1000 * 60 * 60 * 24));
 
@@ -74,65 +81,22 @@ const replaceEntryInOrder = async (orderId, entryId) => {
 
   if (!replacementEntry) throw new Error('No replacement entry found');
 
-  console.log(`Replacement entry with cost: ${orderEntry.totalCost}`);
-  console.log(`Unavailable entries count: ${unavailableEntryIds.length}`);
-  console.log(`Replacement entry found: ${replacementEntry ? replacementEntry._id : 'None'}`);
-
-  const existingSponsorship = await Sponsorship.findOne({
-    orderId: order._id,
-    entryId: entry._id
-  }).lean();
-
-  const oldEntryStartDate = existingSponsorship ? existingSponsorship.startedAt : order.createdAt;
-
-  // TODO: here findOneAndUpdate the current entry stoppedAt: now, and new entry startedAt: now
-  // we do not need a new sponsorship as all entries are now already in sponsorship
-  
-  const oldEntrySponsorship = new Sponsorship({
-    entryId: entry._id,
-    customerId: customer._id,
-    orderId: order._id,
-    projectSlug: slug,
-    startedAt: oldEntryStartDate,
-    stoppedAt: stopDate,
-    reasonStopped: reason,
-    daysSponsored: daysSponsored,
-    totalPaid: actualAmountPaid
-  });
-
-  await oldEntrySponsorship.save();
-
-  let newEntryStopDate;
-  const now = new Date();
-
-  if (project.type === 'scholarship') {
-    const sponsorshipEndDateField = project.fields.find(f => f.sStop)?.name;
-    if (sponsorshipEndDateField && replacementEntry[sponsorshipEndDateField]) {
-      newEntryStopDate = new Date(replacementEntry[sponsorshipEndDateField]);
-    } else {
-      newEntryStopDate = new Date(now);
-      newEntryStopDate.setMonth(newEntryStopDate.getMonth() + 2);
+  await Sponsorship.findOneAndUpdate({ _id: entryId }, {
+    $set: {
+      stoppedAt: stopDate,
+      reasonStopped: reason,
+      daysSponsored: daysSponsored,
+      totalPaid: actualAmountPaid
     }
-  } else if (project.type === 'orphan') {
-    if (replacementEntry.dateOfBirth) {
-      newEntryStopDate = new Date(replacementEntry.dateOfBirth);
-      newEntryStopDate.setFullYear(newEntryStopDate.getFullYear() + 18);
-    } else {
-      newEntryStopDate = new Date(now);
-      newEntryStopDate.setMonth(newEntryStopDate.getMonth() + 2);
-    }
-  } else {
-    newEntryStopDate = new Date(now);
-    newEntryStopDate.setMonth(newEntryStopDate.getMonth() + 2);
-  }
+  })
 
   const newEntrySponsorship = new Sponsorship({
     entryId: replacementEntry._id,
     customerId: customer._id,
     orderId: order._id,
     projectSlug: slug,
-    startedAt: now,
-    stoppedAt: newEntryStopDate,
+    startedAt: new Date(),
+    stoppedAt: null,
     reasonStopped: null,
     daysSponsored: null,
     totalPaid: null
@@ -143,16 +107,17 @@ const replaceEntryInOrder = async (orderId, entryId) => {
   await Order.updateOne(
     {
       _id: orderId,
-      'projects.slug': slug,
-      'projects.entries.entryId': new mongoose.Types.ObjectId(entryId)
     },
     {
       $set: {
-        'projects.$.entries.$[entry].entryId': replacementEntry._id
+        'projects.$[project].entries.$[entry].entryId': replacementEntry._id
       }
     },
     {
-      arrayFilters: [{ 'entry.entryId': new mongoose.Types.ObjectId(entryId) }]
+      arrayFilters: [
+        { 'project.slug': slug },
+        { 'entry.entryId': new mongoose.Types.ObjectId(entryId) }
+      ]
     }
   );
 
@@ -160,7 +125,7 @@ const replaceEntryInOrder = async (orderId, entryId) => {
     logTemplates({
       type: 'entrySponsorshipStopped',
       entity: entry,
-      actor: req.session.user,
+      actor,
       project,
       entry,
       changes: [{
@@ -175,7 +140,7 @@ const replaceEntryInOrder = async (orderId, entryId) => {
     logTemplates({
       type: 'customerEntryReplaced',
       entity: customer,
-      actor: req.session.user,
+      actor,
       project,
       order,
       entry,
@@ -195,7 +160,7 @@ const replaceEntryInOrder = async (orderId, entryId) => {
     logTemplates({
       type: 'orderEntryReplaced',
       entity: order,
-      actor: req.session.user,
+      actor,
       project,
       entry,
       changes: [{
@@ -210,23 +175,8 @@ const replaceEntryInOrder = async (orderId, entryId) => {
     })
   );
 
-  await saveLog(
-    logTemplates({
-      type: 'entrySponsorshipStarted',
-      entity: replacementEntry,
-      actor: req.session.user,
-      project,
-      entry: replacementEntry,
-      changes: [{
-        key: 'Sponsorship Started',
-        oldValue: '',
-        newValue: `Replacement for ${entry.name || entry._id}`
-      }],
-    })
-  );
-
   return replacementEntry;
-  
+
 }
 
 module.exports = { replaceEntryInOrder };

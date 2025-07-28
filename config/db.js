@@ -390,6 +390,7 @@ const updateSponsorshipsFromEntries = async () => {
                             } else if (project.type === 'scholarship') {
                                 endDate = new Date(entry[stopField]);
                             }
+                            const reason = project.type === 'orphan' ? 'Child turned 18 years of age' : 'Scholarship date ended';
                             const sponsorship = await Sponsorship.findOneAndUpdate(
                                 {
                                     entryId: entry._id,
@@ -399,7 +400,7 @@ const updateSponsorshipsFromEntries = async () => {
                                 {
                                     $set: {
                                         stoppedAt: endDate,
-                                        reasonStopped: project.type === 'orphan' ? 'Child turned 18 years of age' : 'Scholarship date ended',
+                                        reasonStopped: reason,
                                         daysSponsored: Math.floor((endDate - order.createdAt) / (1000 * 60 * 60 * 24))
                                     }
                                 },
@@ -410,11 +411,12 @@ const updateSponsorshipsFromEntries = async () => {
                                 }
                             );
 
-                            if (order.customerId._id.toString() === '6792d001b5a200b74a21d8be') {
+                            if (order.customerId._id.toString() === '6792d001b5a200b74a21d8beQ') {
                                 console.log('Dont don anything as it is alkhidmat europe');
                             } else {
-                                const replacementEntry = await replaceEntryInOrder(order._id, entry._id);
-                                console.log(`Successfully replaced entry ${entryId} with ${replacementEntry._id} in order ${orderId}`);
+                                const actor = await Customer.findById(process.env.TEMP_CUSTOMER_ID);
+                                const replacementEntry = await replaceEntryInOrder(order._id, entry._id, project.slug, reason, actor);
+                                console.log(`Successfully replaced entry ${entry._id} with ${replacementEntry._id} in order ${order._id}`);
                             }
 
                             if (sponsorship) {
@@ -1674,7 +1676,7 @@ mongoose.connection.on('open', async () => {
     // await sendGazaUpdate();
     // await gazaOrphanSelectionTimeLine();
     // await createSponsorshipsForPaidOrders()
-    // await setSponsorshipsOneTime();
+    await setSponsorshipsOneTime();
     // await updateSponsorshipsFromOrders();
     await updateSponsorshipsFromEntries();
 

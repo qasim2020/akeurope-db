@@ -835,7 +835,8 @@ exports.stopSponsorship = async (req, res) => {
             return res.status(404).send('Order not found');
         }
 
-        const replacementEntry = await replaceEntryInOrder(orderId, entryId);
+        const actor = req.session.user;
+        const replacementEntry = await replaceEntryInOrder(orderId, entryId, slug, reason, actor);
 
         console.log(`Successfully replaced entry ${entryId} with ${replacementEntry._id} in order ${orderId}`);
         console.log(`Created sponsorship records: Old entry stopped, New entry started`);
