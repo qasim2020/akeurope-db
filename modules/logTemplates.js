@@ -456,6 +456,16 @@ const logTemplates = ({ type, entity, actor, project, file, order, entry, color,
             isRead: true,
             isReadByCustomer: false,
         } : null,
+        orderEntryRemoved: project ? {
+            ...commons('order', entity._id),
+            action: `<a href="/order/${entity._id}">Order ${entity.orderNo}</a> updated.`,
+            project,
+            changes,
+            color: 'blue',
+            isNotification: true,
+            isRead: true,
+            isReadByCustomer: false,
+        } : null,
     };
 
     if (templates[type] == null) {

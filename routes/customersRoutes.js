@@ -11,6 +11,7 @@ router.post('/customer/sendInvite', authenticate, authorize("editCustomers"), cu
 router.post("/customer/update/:customerId", authenticate, authorize("createCustomers"), customersController.updateCustomer);
 router.post("/customer/create", authenticate, authorize("createCustomers"), customersController.createCustomer);
 router.get('/get-active-subscriptions/:customerId', authenticate, authorize('viewCustomers'), customersController.activeSubscriptions);
+router.get('/get-previous-sponsorships/:customerId', authenticate, authorize('viewCustomers'), customersController.previousSponsorships);
 
 router.get("/customer/:customerId", authenticate, authorize("viewCustomers"), allProjects, customersController.customer);
 router.get("/getCustomerData/:customerId", authenticate, authorize("viewCustomers"), customersController.getCustomerData);

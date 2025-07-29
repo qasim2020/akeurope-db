@@ -21,8 +21,6 @@ function initSocket(server) {
       console.log('Received new-notification event:', data);
   
       io.emit('new-notification', { message: 'New notification from port 3007' });
-  
-      console.log('Notification emitted');
     });
   });
 

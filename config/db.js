@@ -40,7 +40,7 @@ const nodemailer = require('nodemailer');
 const handlebars = require('handlebars');
 const Project = require('../models/Project.js');
 const Sponsorship = require('../models/Sponsorship.js')
-const { replaceEntryInOrder } = require('../modules/entryModules');
+const { replaceEntryInOrder, removeEntryFromOrder } = require('../modules/entryModules');
 
 const connectDB = async () => {
     try {
@@ -87,6 +87,7 @@ const setSponsorshipsOneTime = async () => {
                             continue;
                         }
 
+                        const now = new Date();
                         const startDate = order.createdAt;
 
                         if (order.status === 'paid') {
@@ -112,7 +113,8 @@ const setSponsorshipsOneTime = async () => {
                                 startedAt: startDate,
                                 stoppedAt: stopDate,
                                 totalPaid: `${totalPaid} ${order.currency}`,
-                                daysSponsored: Math.floor((stopDate - startDate) / (1000 * 60 * 60 * 24))
+                                daysSponsored: Math.floor((stopDate - startDate) / (1000 * 60 * 60 * 24)),
+                                reasonStopped: 'Order has been expired'
                             });
                         } else {
                             throw new Error(`what is this order ${order.orderNo}`);
@@ -190,7 +192,7 @@ const updateSponsorshipsFromOrders = async () => {
                                     $set: {
                                         startedAt: startDate,
                                         stoppedAt: new Date(),
-                                        reasonStopped: 'order_expired',
+                                        reasonStopped: 'Order has been expired',
                                         daysSponsored: Math.floor((new Date() - startDate) / (1000 * 60 * 60 * 24))
                                     }
                                 },
@@ -382,9 +384,7 @@ const updateSponsorshipsFromEntries = async () => {
                             } else if (project.type === 'scholarship') {
                                 endDate = new Date(entry[stopField]);
                             }
-
-                            const reason = project.type === 'orphan' ? 'Child turned 18 years of age' : 'Scholarship date ended';
-                            
+                            const reason = project.type === 'orphan' ? 'Child has turned 18 years of age' : 'Scholarship date has ended';
                             const sponsorship = await Sponsorship.findOneAndUpdate(
                                 {
                                     entryId: entry._id,
@@ -398,27 +398,18 @@ const updateSponsorshipsFromEntries = async () => {
                                         daysSponsored: Math.floor((endDate - order.createdAt) / (1000 * 60 * 60 * 24))
                                     }
                                 },
-                                { upsert: false, new: true }
+                                {
+                                    upsert: false,
+                                    new: true,
+                                    setDefaultsOnInsert: true
+                                }
                             );
 
-                            // for  Alkhidmat Europe special case
-                            const isAlkhidmatEurope = order.customerId.name?.includes('Alkhidmat Europe');
-                            
-                            if (isAlkhidmatEurope) {
-                                console.log(`Skipping entry replacement for Alkhidmat Europe customer: ${order.customerId.name}`);
-                                
-                                const otherActiveOrders = await Order.find({
-                                    customerId: order.customerId._id,
-                                    status: 'paid',
-                                    _id: { $ne: order._id },
-                                    'projects.entries.entryId': entry._id
-                                });
-                                
-                                if (otherActiveOrders.length > 0) {
-                                    console.log(`Entry ${entry._id} found in ${otherActiveOrders.length} other active orders for Alkhidmat Europe`);
-                                }
+                            const actor = await User.findById(process.env.SYS_ADMIN_ID);
+                            if (order.customerId._id.toString() === '6792d001b5a200b74a21d8be') {
+                                await removeEntryFromOrder(order._id, entry._id, project.slug, 'Entry was temporarily placed in Alkhidmat Europe ID. Stopped properly now.', actor); 
+                                console.log(`Successfully removed entry ${entry._id} in order ${order._id}`);
                             } else {
-                                const actor = await Customer.findById(process.env.TEMP_CUSTOMER_ID);
                                 const replacementEntry = await replaceEntryInOrder(order._id, entry._id, project.slug, reason, actor);
                                 console.log(`Successfully replaced entry ${entry._id} with ${replacementEntry._id} in order ${order._id}`);
                             }
@@ -507,7 +498,8 @@ async function convertUnpaidToExpired(Collection) {
                         $set: {
                             stoppedAt: stopDate,
                             totalPaid: `${totalPaid} ${order.currency}`,
-                            daysSponsored: Math.floor((stopDate - startDate) / (1000 * 60 * 60 * 24))
+                            daysSponsored: Math.floor((stopDate - startDate) / (1000 * 60 * 60 * 24)),
+                            reasonStopped: 'Order has been expired'
                         }
                     });
                 }
@@ -1657,9 +1649,6 @@ async function gazaOrphanSelectionTimeLine() {
 };
 
 mongoose.connection.on('open', async () => {
-    await deleteDraftOrders(Order);
-    await deleteDraftOrders(Subscription);
-    await convertUnpaidToExpired(Order);
     // await Customer.deleteMany({email: /[A-Z]/  });
     // await readKontakterSharePoint();
     // await readKontakterSolidus();
@@ -1676,9 +1665,9 @@ mongoose.connection.on('open', async () => {
     // await sendGazaUpdate();
     // await gazaOrphanSelectionTimeLine();
     // await createSponsorshipsForPaidOrders()
-    await setSponsorshipsOneTime();
     // await updateSponsorshipsFromOrders();
-    await updateSponsorshipsFromEntries();
+    // await setSponsorshipsOneTime();
+    // await updateSponsorshipsFromEntries();
 
     setInterval(async () => {
         try {

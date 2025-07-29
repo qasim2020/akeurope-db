@@ -28,7 +28,6 @@ logSchema.post('save', function (doc) {
     if (doc.isNotification) {
         const io = getSocket();
         io.emit('new-notification');
-        console.log('Notification emitted for log:', doc._id);
     }
 });
 

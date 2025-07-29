@@ -2,6 +2,7 @@ const { generateSearchQuery } = require('../modules/generateSearchQuery');
 const { createDynamicModel } = require('../models/createDynamicModel');
 
 const Order = require('../models/Order');
+const Sponsorship = require('../models/Sponsorship');
 const mongoose = require('mongoose');
 const Project = require('../models/Project');
 const { errorMonitor } = require('connect-mongo');
@@ -455,7 +456,7 @@ const getEntriesByCustomerId = async (req, customerId) => {
                             },
                         },
                         unit: 'day',
-                        amount: 2, 
+                        amount: 2,
                     },
                 },
             },
@@ -474,18 +475,18 @@ const getEntriesByCustomerId = async (req, customerId) => {
                 .map((entry) =>
                     entry.totalCost > 0
                         ? {
-                              projectSlug: project.slug,
-                              entryId: entry.entryId,
-                              orderNo: order.orderNo,
-                              createdAt: order.createdAt,
-                              orderId: order._id,
-                              expiry: !order.monthlySubscription
-                                  ? new Date(new Date(order.createdAt).getTime() + project.months * 30 * 24 * 60 * 60 * 1000)
-                                  : null,
-                              renewalDate: order.monthlySubscription
-                                  ? new Date(new Date(order.createdAt).getTime() + project.months * 30 * 24 * 60 * 60 * 1000)
-                                  : null,
-                          }
+                            projectSlug: project.slug,
+                            entryId: entry.entryId,
+                            orderNo: order.orderNo,
+                            createdAt: order.createdAt,
+                            orderId: order._id,
+                            expiry: !order.monthlySubscription
+                                ? new Date(new Date(order.createdAt).getTime() + project.months * 30 * 24 * 60 * 60 * 1000)
+                                : null,
+                            renewalDate: order.monthlySubscription
+                                ? new Date(new Date(order.createdAt).getTime() + project.months * 30 * 24 * 60 * 60 * 1000)
+                                : null,
+                        }
                         : null,
                 )
                 .filter((entry) => entry != null),
@@ -567,6 +568,132 @@ const getEntriesByCustomerId = async (req, customerId) => {
     };
 };
 
+const getPreviousSponsorships = async (req, customerId) => {
+    const now = new Date();
+
+    if (customerId && typeof customerId === 'string' && mongoose.isValidObjectId(customerId)) {
+        customerId = new mongoose.Types.ObjectId(customerId);
+    }
+
+    const validEntriesByProject = await Sponsorship.find({
+        customerId: customerId,
+        stoppedAt: { $exists: true }
+    }).sort({ stoppedAt: -1 }).lean();
+
+    const paginate = (array, page, pageSize) => {
+        const start = (page - 1) * pageSize;
+        return array.slice(start, start + pageSize);
+    };
+
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const total = validEntriesByProject.length;
+
+    const totalPages = Math.ceil(total / limit);
+
+    const paginatedEntriesByProject = paginate(validEntriesByProject, page, limit);
+
+    const mergedEntriesByProject = await paginatedEntriesByProject.reduce(async (accPromise, entry) => {
+        const acc = await accPromise;
+
+        const projectIndex = acc.findIndex((p) => p.projectSlug === entry.projectSlug);
+
+        const projectData = await Project.findOne({ slug: entry.projectSlug }).lean();
+        const model = await createDynamicModel(entry.projectSlug);
+        const entryData = await model.findById(entry.entryId).lean();
+
+        const entryObject = {
+            ...entry,
+            project: projectData,
+            projectSlug: entry.projectSlug,
+            entry: entryData,
+        };
+
+        if (projectIndex === -1) {
+            acc.push({
+                projectSlug: entry.projectSlug,
+                project: projectData,
+                model: model,
+                entries: [entryObject],
+            });
+        } else {
+            acc[projectIndex].entries.push(entryObject);
+        }
+
+        return acc;
+    }, Promise.resolve([]));
+
+    const output = mergedEntriesByProject.map((project) => {
+        const { model, ...cleanProject } = project;
+        return cleanProject;
+    });
+
+    return {
+        subscriptions: output,
+        pagesArray: generatePagination(totalPages, page),
+        currentPage: page,
+        totalPages,
+        totalEntries: total,
+        hasNextPage: page < totalPages,
+        hasPrevPage: page > 1,
+        nextPage: page + 1,
+        prevPage: page - 1,
+    };
+}
+
+const getPreviousssSponsorships = async (req, customerId) => {
+    try {
+        const stoppedSponsorships = await Sponsorship.find({
+            customerId: customerId,
+            stoppedAt: { $exists: true }
+        }).sort({ stoppedAt: -1 }).lean();
+
+        let allPreviousSponsorships = [];
+
+        if (stoppedSponsorships && stoppedSponsorships.length > 0) {
+            const entryIds = stoppedSponsorships.map(s => s.entryId);
+            const projectSlugs = [...new Set(stoppedSponsorships.map(s => s.projectSlug))];
+
+            const entries = [];
+
+            for (const slug of projectSlugs) {
+                const model = await createDynamicModel(slug);
+                const projEntries = await model.find({ _id: { $in: entryIds } }).lean();
+                entries.push(...projEntries);
+            }
+
+            const projects = await Project.find({ slug: { $in: projectSlugs } }).lean();
+
+            const entryMap = entries.reduce((acc, entry) => {
+                acc[entry._id.toString()] = entry;
+                return acc;
+            }, {});
+
+            const projectMap = projects.reduce((acc, project) => {
+                acc[project.slug] = project;
+                return acc;
+            }, {});
+
+            allPreviousSponsorships.push(...stoppedSponsorships.map(sponsorship => ({
+                ...sponsorship,
+                entry: entryMap[sponsorship.entryId.toString()] || null,
+                project: projectMap[sponsorship.projectSlug] || null,
+                durationInMonths: sponsorship.daysSponsored,
+                formattedTotalPaid: sponsorship.totalPaid,
+                source: 'sponsorship',
+                endDate: sponsorship.stoppedAt,
+                reason: sponsorship.reasonStopped
+            })));
+        }
+
+        return allPreviousSponsorships.sort((a, b) => new Date(b.endDate) - new Date(a.endDate));
+
+    } catch (error) {
+        console.error('Error fetching previous sponsorships:', error);
+        return [];
+    }
+}
+
 const makeProjectForOrder = (project, allEntries, months = 12) => {
     return {
         slug: project.slug,
@@ -639,6 +766,7 @@ module.exports = {
     getPreviousOrdersForEntry,
     validateQuery,
     getEntriesByCustomerId,
+    getPreviousSponsorships,
     makeSubscriptionArrayForOrder,
     makeEntriesForWidgetOrder,
 };
