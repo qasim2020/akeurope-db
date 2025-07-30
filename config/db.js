@@ -246,14 +246,14 @@ const updateSponsorshipsFromOrders = async () => {
 
 const createSponsorshipsForOrdersPaidToday = async () => {
     try {
-        console.log('Creating sponsorships for orders paid today');
+        console.log('Update sponsorships for orders paid');
 
-        const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+        const timeAgo = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000);
 
         const paidOrders = await Order.find({
             status: 'paid',
             'projects.entries': { $exists: true, $not: { $size: 0 } },
-            createdAt: { $gt: twentyFourHoursAgo }
+            updatedAt: { $gt: timeAgo }
         });
 
         if (paidOrders.length === 0) {
@@ -261,11 +261,11 @@ const createSponsorshipsForOrdersPaidToday = async () => {
             return;
         }
 
-        console.log(`Found ${paidOrders.length} oders paid today`);
         let createdCount = 0;
         let skippedCount = 0;
         let errorCount = 0;
         const errors = [];
+        errors.push(`Found ${paidOrders.length} orders updated with status paid in last 2 days.`);
 
         for (const order of paidOrders) {
             try {
@@ -275,36 +275,42 @@ const createSponsorshipsForOrdersPaidToday = async () => {
                             const existingSponsorship = await Sponsorship.findOne({
                                 entryId: entry.entryId,
                                 customerId: order.customerId._id,
-                                orderId: order._id
+                                orderId: order._id,
+                                stoppedAt: { $exists: false }
                             });
 
                             if (existingSponsorship) {
                                 skippedCount++;
-                                errors.push(`Sponsorship already exists for order ${order.orderNo}, entry ${entry.entryId}.`);
+                                errors.push(`Sponsorship already exists for order ${order.orderNo} · entry ${entry.entryId} · date ${formatDate(order.createdAt)}.`);
                                 continue;
                             }
 
                             const now = new Date();
                             const daysSponsored = Math.floor((now - order.createdAt) / (1000 * 60 * 60 * 24));
 
-                            const totalPaid = entry.totalCost * orderProject.months;
+                            const totalPaid = entry.totalCost * project.months;
 
-                            const newSponsorship = new Sponsorship({
+                            await Sponsorship.findOneAndUpdate({
                                 entryId: entry.entryId,
                                 customerId: order.customerId,
                                 orderId: order._id,
-                                projectSlug: project.slug,
-                                startedAt: order.createdAt,
-                                stoppedAt: null,
-                                reasonStopped: null,
-                                daysSponsored: daysSponsored,
-                                totalPaid,
+                            }, {
+                                $set: {
+                                    projectSlug: project.slug,
+                                    startedAt: order.createdAt,
+                                    totalPaid: `${totalPaid} ${order.currency}`,
+                                    daysSponsored: daysSponsored,
+                                    stoppedAt: null,
+                                    reasonStopped: null,
+                                }
+                            }, {
+                                upsert: true
                             });
 
-                            await newSponsorship.save();
+                            errors.push(`Sponsorship upserted for order ${order.orderNo} · entry ${entry.entryId} · date ${formatDate(order.createdAt)}.`);
 
                         } catch (entryError) {
-                            console.error(`Error processing entry ${entry.entryId} in order ${order.orderNo}:`, entryError);
+                            errors.push(`Error processing entry ${entry.entryId} in order ${order.orderNo}:`, entryError);
                             errorCount++;
                             continue;
                         }
@@ -312,16 +318,13 @@ const createSponsorshipsForOrdersPaidToday = async () => {
                 }
 
             } catch (orderError) {
-                console.error(`Error processing order ${order.orderNo}:`, orderError);
+                errors.push(`Error processing order ${order.orderNo}:`, orderError);
                 errorCount++;
                 continue;
             }
         }
 
-        console.log(`Paid sponsorships updated for today paid orders:`);
-        console.log(`Created: ${createdCount} new sponsorships`);
-        console.log(`Skipped (already exists): ${skippedCount}`);
-        console.log(`Errors: ${errorCount}`);
+        errors.push(`Skipped (already exists): ${skippedCount}`);
         sendTelegramMessage(errors.join('\n'));
 
     } catch (error) {
@@ -333,7 +336,7 @@ const createSponsorshipsForOrdersPaidToday = async () => {
 const updateSponsorshipsFromEntries = async () => {
     try {
         console.log('Starting sponsorship updates from expired entries...');
-        
+
         const projects = await Project.find({ status: 'active' });
         let totalUpdatedCount = 0;
 
@@ -347,7 +350,7 @@ const updateSponsorshipsFromEntries = async () => {
                 if (project.type === 'orphan') {
                     const eighteenYearsAgo = new Date();
                     eighteenYearsAgo.setFullYear(eighteenYearsAgo.getFullYear() - 18);
-                    
+
                     expiredEntries = await DynamicModel.find({
                         dateOfBirth: { $lte: eighteenYearsAgo }
                     });
@@ -355,7 +358,7 @@ const updateSponsorshipsFromEntries = async () => {
                     console.log(`Found ${expiredEntries.length} orphans who turned 18 in project ${project.slug}`);
                 } else if (project.type === 'scholarship') {
                     const stopFieldObj = project.fields.find(field => field.sStop === true);
-                    
+
                     if (stopFieldObj) {
                         const query = {};
                         query[stopFieldObj.name] = { $lt: now };
@@ -407,7 +410,7 @@ const updateSponsorshipsFromEntries = async () => {
 
                             const actor = await User.findById(process.env.SYS_ADMIN_ID);
                             if (order.customerId._id.toString() === '6792d001b5a200b74a21d8be') {
-                                await removeEntryFromOrder(order._id, entry._id, project.slug, 'Entry was temporarily placed in Alkhidmat Europe ID. Stopped properly now.', actor); 
+                                await removeEntryFromOrder(order._id, entry._id, project.slug, 'Entry was temporarily placed in Alkhidmat Europe ID. Stopped properly now.', actor);
                                 console.log(`Successfully removed entry ${entry._id} in order ${order._id}`);
                             } else {
                                 const replacementEntry = await replaceEntryInOrder(order._id, entry._id, project.slug, reason, actor);
@@ -1668,6 +1671,7 @@ mongoose.connection.on('open', async () => {
     // await updateSponsorshipsFromOrders();
     // await setSponsorshipsOneTime();
     // await updateSponsorshipsFromEntries();
+    await createSponsorshipsForOrdersPaidToday();
 
     setInterval(async () => {
         try {

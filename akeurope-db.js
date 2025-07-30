@@ -3,14 +3,14 @@ const express = require('express');
 const http = require('http');
 const session = require('express-session');
 const flash = require('connect-flash');
-const {connectDB} = require('./config/db');
+const { connectDB } = require('./config/db');
 connectDB();
 
 const exphbs = require('express-handlebars');
 const path = require('path');
 const hbsHelpers = require('./modules/helpers');
 const MongoStore = require('connect-mongo');
-const { initSocket } = require('./sockets'); 
+const { initSocket } = require('./sockets');
 
 const { router } = require('./routes/authRoutes');
 const authRoutes = require('./routes/authRoutes');
@@ -32,7 +32,7 @@ const whatsappRoutes = require('./routes/whatsappRoutes');
 const { sendErrorToTelegram } = require('../akeurope-cp/modules/telegramBot');
 
 const app = express();
-app.engine('handlebars', exphbs.engine({helpers: hbsHelpers}));
+app.engine('handlebars', exphbs.engine({ helpers: hbsHelpers }));
 app.set('view engine', 'handlebars');
 
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
@@ -40,15 +40,15 @@ app.use(express.json({ limit: '50mb' }));
 app.use(
   session({
     name: 'akeurope-db-id',
-    secret: process.env.SESSION_SECRET, 
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
     store: MongoStore.create({
-      mongoUrl: process.env.MONGO_URI, 
-      collectionName: 'sessions',      
+      mongoUrl: process.env.MONGO_URI,
+      collectionName: 'sessions',
     }),
     cookie: {
-      maxAge: 1000 * 60 * 60 * 24, 
+      maxAge: 1000 * 60 * 60 * 24,
     }
   })
 );
@@ -56,34 +56,37 @@ app.use(
 
 app.use((req, res, next) => {
   res.set('Cache-Control', 'no-store');
-  console.log(req.originalUrl);
+  const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+  const timestamp = new Date().toISOString();
+  const country = req.headers['cf-ipcountry'] || 'Unknown';
+  console.log(`${timestamp} | ${ip} | ${country} | ${req.originalUrl} `);
   let oldSend = res.send;
   let oldJson = res.json;
 
   let responseBody;
 
   res.send = function (data) {
-      responseBody = data;
-      return oldSend.apply(res, arguments);
+    responseBody = data;
+    return oldSend.apply(res, arguments);
   };
 
   res.json = function (data) {
-      responseBody = data;
-      return oldJson.apply(res, arguments);
+    responseBody = data;
+    return oldJson.apply(res, arguments);
   };
 
   const forbiddenErrors = ['/overlay/fonts/Karla-regular.woff', '/robots.txt'];
 
   res.on('finish', () => {
-      if (res.statusCode > 399 && !forbiddenErrors.includes(req.originalUrl)) {
-          const errorData = {
-              message: responseBody,
-              status: res.statusCode,
-              url: req.originalUrl,
-          };
+    if (res.statusCode > 399 && !forbiddenErrors.includes(req.originalUrl)) {
+      const errorData = {
+        message: responseBody,
+        status: res.statusCode,
+        url: req.originalUrl,
+      };
 
-          sendErrorToTelegram(errorData);
-      }
+      sendErrorToTelegram(errorData);
+    }
   });
 
   next();
