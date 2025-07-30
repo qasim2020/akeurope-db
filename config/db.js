@@ -1685,6 +1685,7 @@ mongoose.connection.on('open', async () => {
             await convertUnpaidToExpired(Order);
             await createSponsorshipsForOrdersPaidToday();
             await updateSponsorshipsFromEntries();
+            // resumeSponsorshipsFromExpiredToPaidOrdersToday();
         } catch (error) {
             console.error('Error running scheduled donor updates:', error);
         }
