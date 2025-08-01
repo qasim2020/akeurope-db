@@ -41,7 +41,6 @@ const replaceEntryInOrder = async (orderId, entryId, slug, reason, actor) => {
   const actualAmountPaid = (dailyRate * daysSponsored).toFixed(0);
 
   const occupiedEntryIds = await Order.distinct('projects.entries.entryId', {
-    _id: { $ne: orderId },
     'projects.slug': slug,
     status: { $in: ['paid', 'draft', 'aborted', 'pending payment', 'processing'] }
   });
@@ -130,26 +129,6 @@ const replaceEntryInOrder = async (orderId, entryId, slug, reason, actor) => {
       entry,
       changes: [{
         key: 'Sponsorship Ended',
-        oldValue: '',
-        newValue: reason
-      }],
-    })
-  );
-
-  await saveLog(
-    logTemplates({
-      type: 'customerEntryReplaced',
-      entity: customer,
-      actor,
-      project,
-      order,
-      entry,
-      changes: [{
-        key: 'replacement',
-        oldValue: entry.name || entry._id,
-        newValue: replacementEntry.name || replacementEntry._id
-      }, {
-        key: 'replacementReason',
         oldValue: '',
         newValue: reason
       }],
