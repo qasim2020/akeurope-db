@@ -1671,7 +1671,8 @@ mongoose.connection.on('open', async () => {
     // await updateSponsorshipsFromOrders();
     // await setSponsorshipsOneTime();
     // await updateSponsorshipsFromEntries();
-    await createSponsorshipsForOrdersPaidToday();
+    // await createSponsorshipsForOrdersPaidToday();
+    await createDirectDonorPakistanStudentUpdate();
 
     setInterval(async () => {
         try {
