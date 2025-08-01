@@ -428,7 +428,7 @@ const logTemplates = ({ type, entity, actor, project, file, order, entry, color,
         entrySponsorshipStopped: project && entry ? {
             ...commons('entry', entity._id),
             action: `<a href="/entry/${entity._id}/project/${project.slug}">${entity.name || entity.nameOfOrphan || 'Entry'}
-            </a> sponship stopped.`,
+            </a> sponsorship stopped.`,
             project,
             changes,
             color: 'blue',
