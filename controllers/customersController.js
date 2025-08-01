@@ -443,6 +443,15 @@ exports.customer = async (req, res) => {
 
         const previousSponsorships = await getPreviousSponsorships(req, customer._id);
 
+        let showGazaAnnouncement = false;
+
+        for (const order of orders) {
+            for (const project of order.projects) {
+                if (project.slug === 'gaza-orphans') 
+                    showGazaAnnouncement = true;
+            }
+        }
+
         res.render('customer', {
             layout: 'dashboard',
             data: {
@@ -462,6 +471,7 @@ exports.customer = async (req, res) => {
                 activeSubscriptions,
                 subscriptions,
                 previousSponsorships,
+                showGazaAnnouncement,
             },
         });
     } catch (error) {
