@@ -282,13 +282,13 @@ const getPaidOrdersByEntryId = async (req, res, entryId) => {
 
 const getAllOrdersByEntryId = async (req, res) => {
     const orders = await Order.find({
+        status: 'paid',
         'projects.entries': {
             $elemMatch: {
                 entryId: req.params.entryId,
-                totalCost: { $ne: 0 },
             },
         },
-    }).sort({createdAt: -1}).lean();
+    }).sort({ createdAt: -1 }).lean();
 
     for (const order of orders) {
         order.customer = await Customer.findById(order.customerId).lean();

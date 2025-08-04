@@ -404,6 +404,8 @@ exports.entry = async (req, res) => {
 
         const payments = await getAllOrdersByEntryId(req);
         const showStopSponsorshipModal = payments.some((payment) => payment.status === 'paid' );
+        const sponsorships = await getAllSponsorshipsByEntryId(req);
+        const showPayments = payments.length > 0 || sponsorships.length > 0;
 
         res.render('entry', {
             layout: 'dashboard',
@@ -425,7 +427,8 @@ exports.entry = async (req, res) => {
                 entryLogs: await entryLogs(req, res),
                 sidebarCollapsed: req.session.sidebarCollapsed,
                 payments,
-                sponsorships: await getAllSponsorshipsByEntryId(req),
+                sponsorships,
+                showPayments,
                 showStopSponsorshipModal,
                 time: Date.now()
             },
@@ -692,14 +695,21 @@ exports.getPaginatedEntriesForModal = async (req, res) => {
 
 exports.getSingleEntryPayments = async (req, res) => {
     try {
+
+        const payments = await getAllOrdersByEntryId(req);
+        const sponsorships = await getAllSponsorshipsByEntryId(req);
+        const showPayments = payments.length > 0 || sponsorships.length > 0;
+
         res.render('partials/showEntryPayments', {
             layout: false,
             data: {
                 role: req.userPermissions,
-                payments: await getAllOrdersByEntryId(req),
-                sponsorships: await getAllSponsorshipsByEntryId(req),
+                payments,
+                sponsorships,
+                showPayments,
             },
         });
+        
     } catch (error) {
         console.log(error);
         res.status(500).json({

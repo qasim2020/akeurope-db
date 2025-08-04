@@ -21,7 +21,7 @@
     </button>
     {{/if}}
   </div>
-  {{#if data.sponsorships}}
+  {{#if data.showPayments}}
   <div style="overflow-x: auto;">
     <table class="table table-striped mb-0" style="white-space: nowrap; width: 100%;">
       <thead>
@@ -78,7 +78,6 @@
         </tr>
         {{/each}}
         {{#each data.sponsorships}}
-        {{log this}}
         <tr>
           <td>{{orderId.orderNo}}</td>
           <td>{{formatDate orderId.createdAt}}</td>
