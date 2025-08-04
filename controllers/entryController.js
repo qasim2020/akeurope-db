@@ -13,8 +13,9 @@ const {
     fetchEntrySubscriptionsAndPayments,
     getPaidOrdersByEntryId,
     getAllOrdersByEntryId,
+    getAllSponsorshipsByEntryId,
 } = require('../modules/projectEntries');
-const { replaceEntryInOrder } = require('../modules/entryModules');
+const { replaceEntryInOrder, removeEntryFromOrder } = require('../modules/entryModules');
 const { saveLog, visibleLogs, entryLogs, orderLogs } = require('../modules/logAction');
 const { logTemplates } = require('../modules/logTemplates');
 const { getChanges } = require('../modules/getChanges');
@@ -401,6 +402,9 @@ exports.entry = async (req, res) => {
             }
         }
 
+        const payments = await getAllOrdersByEntryId(req);
+        const showStopSponsorshipModal = payments.some((payment) => payment.status === 'paid' );
+
         res.render('entry', {
             layout: 'dashboard',
             data: {
@@ -420,7 +424,9 @@ exports.entry = async (req, res) => {
                 logs: await visibleLogs(req, res),
                 entryLogs: await entryLogs(req, res),
                 sidebarCollapsed: req.session.sidebarCollapsed,
-                payments: await getAllOrdersByEntryId(req),
+                payments,
+                sponsorships: await getAllSponsorshipsByEntryId(req),
+                showStopSponsorshipModal,
                 time: Date.now()
             },
         });
@@ -521,12 +527,16 @@ exports.getSingleEntryData = async (req, res) => {
 
         entry = await fetchEntrySubscriptionsAndPayments(entry);
 
+        const payments = await getAllOrdersByEntryId(req);
+        const showStopSponsorshipModal = payments.some((payment) => payment.status === 'paid' );
+
         res.render('partials/showEntry', {
             layout: false,
             data: {
                 fields: project.fields,
                 project,
                 entry,
+                showStopSponsorshipModal
             },
         });
     } catch (error) {
@@ -685,7 +695,9 @@ exports.getSingleEntryPayments = async (req, res) => {
         res.render('partials/showEntryPayments', {
             layout: false,
             data: {
+                role: req.userPermissions,
                 payments: await getAllOrdersByEntryId(req),
+                sponsorships: await getAllSponsorshipsByEntryId(req),
             },
         });
     } catch (error) {
@@ -821,7 +833,7 @@ exports.getSendUpdateModal = async (req, res) => {
     }
 };
 
-exports.stopSponsorship = async (req, res) => {
+exports.replaceEntryInOrderModal = async (req, res) => {
     try {
         const { orderId, entryId, slug } = req.params;
         const { reason } = req.body;
@@ -842,6 +854,34 @@ exports.stopSponsorship = async (req, res) => {
         console.log(`Created sponsorship records: Old entry stopped, New entry started`);
 
         res.status(200).send(`Successfully replaced entry ${entryId} with ${replacementEntry._id} in order ${orderId}`);
+
+    } catch (error) {
+        console.log('Error in stopSponsorship:', error);
+        res.status(500).send(error.message || 'Error stopping sponsorship');
+    }
+};
+
+exports.removeEntryFromOrderModal = async (req, res) => {
+    try {
+        const { orderId, entryId, slug } = req.params;
+        const { reason } = req.body;
+
+        if (!reason) {
+            return res.status(400).send('Reason is required');
+        }
+
+        const order = await Order.findById(orderId).populate('customerId');
+        if (!order) {
+            return res.status(404).send('Order not found');
+        }
+
+        const actor = req.session.user;
+        
+        await removeEntryFromOrder(orderId, entryId, slug, reason, actor);
+
+        console.log(`Successfully removed entry ${entryId} from order ${orderId}`);
+
+        res.status(200).send(`Successfully removed entry ${entryId} in order ${orderId}`);
 
     } catch (error) {
         console.log('Error in stopSponsorship:', error);

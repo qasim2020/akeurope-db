@@ -3,8 +3,14 @@ const mongoose = require('mongoose');
 const SponsorshipSchema = new mongoose.Schema(
     {
         entryId: mongoose.Schema.Types.ObjectId,
-        customerId: mongoose.Schema.Types.ObjectId,
-        orderId: mongoose.Schema.Types.ObjectId,
+        customerId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Customer',
+        },
+        orderId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Order',
+        },
         projectSlug: String,
         startedAt: Date,
         stoppedAt: Date,

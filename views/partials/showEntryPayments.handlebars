@@ -21,7 +21,7 @@
     </button>
     {{/if}}
   </div>
-  {{#if data.payments}}
+  {{#if data.sponsorships}}
   <div style="overflow-x: auto;">
     <table class="table table-striped mb-0" style="white-space: nowrap; width: 100%;">
       <thead>
@@ -75,6 +75,23 @@
             {{capitalizeFirstLetter status}}
             {{/if}}
           </td>
+        </tr>
+        {{/each}}
+        {{#each data.sponsorships}}
+        {{log this}}
+        <tr>
+          <td>{{orderId.orderNo}}</td>
+          <td>{{formatDate orderId.createdAt}}</td>
+          <td>
+            {{#if (findInArray ../data.role 'viewOrders')}}
+            <a href='/customer/{{customerId._id}}'>{{customerId.name}}</a>
+            {{else}}
+            {{customerId.name}}
+            {{/if}}
+          </td>
+          <td>{{totalPaid}}</td>
+          <td>{{daysSponsored}} days</td>
+          <td>{{reasonStopped}}</td>
         </tr>
         {{/each}}
       </tbody>

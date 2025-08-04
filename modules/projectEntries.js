@@ -9,6 +9,7 @@ const Log = require('../models/Log');
 const { createDynamicModel } = require('../models/createDynamicModel');
 const { generatePagination } = require('../modules/generatePagination');
 const { generateSearchQuery } = require('../modules/generateSearchQuery');
+const Sponsorship = require('../models/Sponsorship');
 
 const fetchEntrySubscriptionsAndPayments = async function (entry) {
     if (!entry) {
@@ -299,6 +300,17 @@ const getAllOrdersByEntryId = async (req, res) => {
     return orders;
 };
 
+const getAllSponsorshipsByEntryId = async (req, res) => {
+
+    const sponsorships = await Sponsorship.find({
+        entryId: req.params.entryId,
+        stoppedAt: { $ne: null },
+    }).populate('customerId orderId').lean();
+
+    return sponsorships;
+
+};
+
 const countPaidEntriesInProject = async (slug) => {
     const result = await Order.aggregate([
         {
@@ -350,6 +362,7 @@ module.exports = {
     fetchEntrySubscriptionsAndPayments,
     getPaidOrdersByEntryId,
     getAllOrdersByEntryId,
+    getAllSponsorshipsByEntryId,
     countPaidEntriesInProject,
     visibleProjectDateFields,
 };

@@ -5,7 +5,7 @@
         <div class="page-pretitle"> Overview </div>
         <h2 class="page-title">
           {{#if data.entry.deleted}}
-          Not Found 
+          Not Found
           {{else}}
           {{#if data.entry.name}}
           {{data.entry.name}}
@@ -292,7 +292,7 @@
     });
   }
 
-  const stopSponsorship = function (elem, orderId, entryId, projectSlug) {
+  const replaceEntryInOrder = function (elem, orderId, entryId, projectSlug) {
     const reason = prompt('Please provide a reason for stopping sponsorship:');
     if (!reason) return;
 
@@ -303,7 +303,33 @@
     `);
 
     $.ajax({
-      url: `/stopSponsorship/${orderId}/${entryId}/${projectSlug}`,
+      url: `/replaceEntryInOrder/${orderId}/${entryId}/${projectSlug}`,
+      type: 'POST',
+      contentType: 'application/json',
+      data: JSON.stringify({ reason }),
+      success: function (response) {
+        $(elem).html('Sponsorship Stopped').removeClass('btn-danger').addClass('btn-success').attr({ 'onclick': '' });
+        refreshContainers();
+      },
+      error: function (xhr, status, error) {
+        event.target.innerHTML = currentBtnHtml;
+        alert(xhr.responseText);
+      }
+    });
+  };
+
+  const removeEntryFromOrder = function (elem, orderId, entryId, projectSlug) {
+    const reason = prompt('Please provide a reason for stopping sponsorship:');
+    if (!reason) return;
+
+    const currentBtnHtml = $(elem).html();
+    $(elem).html(`
+      <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+      Stopping...
+    `);
+
+    $.ajax({
+      url: `/removeEntryFromOrder/${orderId}/${entryId}/${projectSlug}`,
       type: 'POST',
       contentType: 'application/json',
       data: JSON.stringify({ reason }),

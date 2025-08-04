@@ -18,8 +18,11 @@
             <p class="card-text">Status: {{capitalizeFirstLetter this.status}}</p>
             <p class="card-text">Amount: {{this.entry.perMonthCost}} {{this.currency}}</p>
             <p class="card-text">Customer: {{this.customerId.name}}</p>
-            <button class="btn btn-danger" onclick="stopSponsorship(this, '{{this._id}}', '{{../data.entry._id}}', '{{../data.project.slug}}')">
-              Stop Sponsorship
+            <button class="btn btn-danger" onclick="replaceEntryInOrder(this, '{{this._id}}', '{{../data.entry._id}}', '{{../data.project.slug}}')">
+              Replace entry in order
+            </button>
+            <button class="btn btn-danger" onclick="removeEntryFromOrder(this, '{{this._id}}', '{{../data.entry._id}}', '{{../data.project.slug}}')">
+              Remove entry from order
             </button>
           </div>
         {{/each}}
