@@ -120,7 +120,7 @@ exports.project = async (req, res) => {
     const countries = await Country.find({}).sort({ name: 1 }).lean();
 
     const newEntryId = new mongoose.Types.ObjectId();
-    res.render('project', {
+    res.render('project', { 
       layout: "dashboard",
       data: {
         userId: req.session.user._id,
@@ -133,7 +133,7 @@ exports.project = async (req, res) => {
         layout: req.session.layout,
         newEntryId,
         projects: req.allProjects,
-        activeMenu: project.slug,
+        activeMenu: project.slug, 
         role: req.userPermissions,
         pagination,
         logs: await visibleLogs(req, res),

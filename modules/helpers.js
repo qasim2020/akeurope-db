@@ -5,6 +5,7 @@ const getOrderIcon = require('../modules/iconOrder');
 const cheerio = require('cheerio');
 const roles = require('../modules/roles');
 const maskList = require('../../akeurope-cp/static/maskList');
+const { get } = require('mongoose');
 
 const or = function (a,b) {
     return a || b;
@@ -119,6 +120,30 @@ const lowerCaseFirstLetter = function (str) {
     if (typeof str !== 'string') return '';
     return str.charAt(0).toLowerCase() + str.slice(1);
 };
+
+const getUniqueCustomers = function (entries) {
+    if (!entries || !Array.isArray(entries)) return [];
+    
+    const customerMap = new Map();
+    
+    entries.forEach(entry => {
+        if (entry.customer && entry.customer._id) {
+            customerMap.set(entry.customer._id.toString(), {
+                _id: entry.customer._id,
+                name: entry.customer.name
+            });
+        }
+    });
+    
+    return Array.from(customerMap.values());
+}
+
+const isInHideList = function (customerId, hideCustomersString) {
+    if (!hideCustomersString || !customerId) return false;
+    
+    const hideList = hideCustomersString.split(',').map(id => id.trim());
+    return hideList.includes(customerId.toString())
+}
 
 const checkInputType = function (input) {
     if (input == 'file') {
@@ -251,11 +276,27 @@ const camelCaseWithCommaToNormalString = function (string) {
         .join(', ');
 };
 
+const startsWith = function (str, prefix) {
+    if (!str || !prefix) return false;
+    return str.toString().startsWith(prefix.toString());
+}
+
+const includes = function(str, substring) {
+    if (!str || !substring) return false;
+    return str.toString().includes(substring.toString());
+};
+
 const getSvgForFirstLetter = function (str) {
     if (!str || typeof str !== 'string') return '<svg></svg>';
     const firstLetter = str.trim().charAt(0).toLowerCase();
     return getLetterIcon(firstLetter);
 };
+
+const lte = function(a, b) {
+    return a <= b;
+};
+
+
 
 const regexMatch = function (value, pattern) {
     let regex = new RegExp(pattern);
@@ -263,15 +304,12 @@ const regexMatch = function (value, pattern) {
 };
 
 const stringifyDate = function (query) {
-    // Check for date operators in the query
     const operators = ['$gt', '$gte', '$lt', '$lte', '$eq'];
 
-    // Iterate over the operators to find the matching operator
     for (let operator of operators) {
         if (query[operator]) {
             const dateValue = query[operator];
 
-            // Ensure that the dateValue is a valid Date object
             if (dateValue instanceof Date || !isNaN(Date.parse(dateValue))) {
                 const date = new Date(dateValue);
                 const formattedDate = date.toLocaleString('en-GB', {
@@ -280,7 +318,6 @@ const stringifyDate = function (query) {
                     year: 'numeric',
                 });
 
-                // Convert the operator to the string equivalent
                 let operatorString = '';
                 switch (operator) {
                     case '$gt':
@@ -302,7 +339,6 @@ const stringifyDate = function (query) {
                         break;
                 }
 
-                // Return the formatted string
                 return operatorString + formattedDate;
             } else {
                 console.error('Invalid date in query:', dateValue);
@@ -311,7 +347,6 @@ const stringifyDate = function (query) {
         }
     }
 
-    // If no valid date operator is found, return null
     return null;
 };
 
@@ -377,6 +412,11 @@ const shortenCustomerName = function(string) {
     }
     const start = string.slice(0, 27); 
     return `${start}...`;    
+}
+
+const inArray = function(array, value) {
+    if (!Array.isArray(array)) return false;
+    return array.includes(value.toString());
 }
 
 const endingString = function(string, length) {
@@ -575,5 +615,11 @@ module.exports = {
     getPreviousSponsorships,
     formatSponsorshipDuration,
     getSponsorshipStatus,
-    convertDaysToMonths
+    convertDaysToMonths,
+    getUniqueCustomers,
+    isInHideList,
+    inArray,
+    startsWith,
+    lte,
+    includes,
 };

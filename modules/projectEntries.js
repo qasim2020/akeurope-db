@@ -10,6 +10,7 @@ const { createDynamicModel } = require('../models/createDynamicModel');
 const { generatePagination } = require('../modules/generatePagination');
 const { generateSearchQuery } = require('../modules/generateSearchQuery');
 const Sponsorship = require('../models/Sponsorship');
+const File = require('../models/File');
 
 const fetchEntrySubscriptionsAndPayments = async function (entry) {
     if (!entry) {
@@ -72,6 +73,13 @@ const projectEntries = async function (req, res) {
 
     const { searchQuery, fieldFilters } = generateSearchQuery(req, project);
 
+    const hiddenCustomers = req.query.hideCustomers ? 
+        req.query.hideCustomers.split(',').map(id => id.trim()).filter(id => id.length > 0) : 
+        [];
+
+    console.log('🔍 Final search query:', JSON.stringify(searchQuery, null, 2));
+    console.log('👥 Hidden customers:', hiddenCustomers);
+
     const serializedFilters = Object.fromEntries(
         Object.entries(fieldFilters).map(([key, value]) => [key, typeof value === 'string' ? value : JSON.stringify(value)]),
     );
@@ -122,10 +130,9 @@ const projectEntries = async function (req, res) {
             }
 
             const paginatedEntries = orderedEntries.slice(skip, skip + paidLimit);
-
             entries.push(...paginatedEntries);
 
-            const remainingLimit = limit - paidCount.length;
+            const remainingLimit = limit - paginatedEntries.length;
 
             if (remainingLimit > 0) {
                 const unPaidEntries = await DynamicModel.find({
@@ -139,7 +146,6 @@ const projectEntries = async function (req, res) {
                 entries.push(...unPaidEntries);
             }
         } else {
-
             const unpaidSkip = skip - paidCount;
 
             const unPaidEntries = await DynamicModel.find({
@@ -153,22 +159,95 @@ const projectEntries = async function (req, res) {
 
             entries = unPaidEntries;
         }
-
     } else {
         entries = await DynamicModel.find(searchQuery).sort(sortOptions).skip(skip).limit(limit).lean();
     }
 
+    const entryIds = entries.map(entry => entry._id);
+    
+    const allFiles = await File.find({ 
+        "links.entityId": { $in: entryIds } 
+    }).sort({ createdAt: -1 }).lean();
+    
+    const allLogs = await Log.find({ 
+        entityId: { $in: entryIds }, 
+        entityType: 'entry',
+        changes: { $exists: true }
+    }).sort({ timestamp: -1 }).lean();
+
+    const filesMap = new Map();
+    allFiles.forEach(file => {
+        file.links.forEach(link => {
+            const entryId = link.entityId.toString();
+            if (!filesMap.has(entryId)) {
+                filesMap.set(entryId, []);
+            }
+            filesMap.get(entryId).push(file);
+        });
+    });
+
+    const logsMap = new Map();
+    allLogs.forEach(log => {
+        const entryId = log.entityId.toString();
+        if (!logsMap.has(entryId)) {
+            logsMap.set(entryId, []);
+        }
+        logsMap.get(entryId).push(log);
+    });
+
     for (const entry of entries) {
-        const lastLog = await Log.findOne({ entityId: entry._id, entityType: 'entry' }).sort({ timestamp: -1 }).lean();
+        const entryId = entry._id.toString();
+        
+        const entryFiles = filesMap.get(entryId) || [];
+        if (entryFiles.length > 0) {
+            const latestFile = entryFiles[0];
+            const daysSinceUpload = Math.ceil((new Date() - new Date(latestFile.createdAt)) / (1000 * 60 * 60 * 24));
+            
+            entry.latestFile = {
+                name: latestFile.name,
+                uploadedAt: latestFile.createdAt,
+                daysSince: daysSinceUpload,
+                path: latestFile.path,
+                size: latestFile.size,
+                mimeType: latestFile.mimeType
+            };
+        } else {
+            entry.latestFile = null;
+        }
+        
+        const entryLogs = logsMap.get(entryId) || [];
+        const statusLogs = entryLogs.filter(log => 
+            log.changes && log.changes.some(change => change.key === 'status')
+        );
+        
+        if (statusLogs.length > 0) {
+            const latestStatusLog = statusLogs[0]; 
+            const statusChange = latestStatusLog.changes.find(change => change.key === 'status');
+            const daysSinceUpdate = Math.ceil((new Date() - new Date(latestStatusLog.timestamp)) / (1000 * 60 * 60 * 24));
+            
+            entry.latestStatusUpdate = {
+                oldValue: statusChange.oldValue,
+                newValue: statusChange.newValue,
+                updatedAt: latestStatusLog.timestamp,
+                daysSince: daysSinceUpdate,
+                action: latestStatusLog.action
+            };
+        } else {
+            entry.latestStatusUpdate = null;
+        }
+
+        const lastLog = entryLogs.length > 0 ? entryLogs[0] : null;
         entry.lastLog = lastLog?.timestamp;
 
         const order = await Order.findOne({
             'projects.entries.entryId': entry._id,
             status: 'paid',
         }).lean();
+        
 
         if (!order) {
             entry.isPaid = 0;
+            entry.isExpired = 1;
             continue;
         }
 
@@ -192,7 +271,7 @@ const projectEntries = async function (req, res) {
             }
         } else {
             if (customer.tel) {
-                const tel = customer.tel?.replace(/\s+/g, '');  // Clean the telephone number
+                const tel = customer.tel?.replace(/\s+/g, '');
                 const prefix = tel.substring(0, 4);
                 const regex = `^\\+${prefix}`;
 
@@ -205,8 +284,7 @@ const projectEntries = async function (req, res) {
                 if (!country) {
                     console.log('No country found for this telephone number - falling back to order.currency');
                     country = await Country.findOne({ 'currency.code': order.currency }).lean();
-                };
-
+                }
             } else {
                 country = await Country.findOne({ 'currency.code': order.currency }).lean();
             }
@@ -216,10 +294,13 @@ const projectEntries = async function (req, res) {
         entry.customer = customer;
         entry.country = country;
         entry.isPaid = 1;
+        entry.isExpired = 0;
     }
 
     totalEntries = await DynamicModel.countDocuments(searchQuery);
     totalPages = Math.ceil(totalEntries / limit);
+
+    console.log(`📊 Total entries after filtering: ${totalEntries} (hidden: ${hiddenCustomers.length})`);
 
     return {
         entries,
@@ -241,6 +322,7 @@ const projectEntries = async function (req, res) {
             fieldFilters: fieldFilters == {} ? undefined : fieldFilters,
             showSearchBar: req.query.showSearchBar,
             showFilters: req.query.showFilters,
+            hiddenCustomers: hiddenCustomers,
         },
     };
 };

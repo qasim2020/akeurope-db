@@ -1,30 +1,23 @@
 const parseDateQuery = function (queryValue) {
     try {
-        // Try to parse the query value as JSON (it could be a JSON string for date conditions)
         const parsedQuery = JSON.parse(queryValue);
 
-        // Check for the date condition keys: $gt, $lt, $gte, $lte, $eq
         if (parsedQuery) {
             let dateOperator = null;
             let dateValue = null;
 
-            // Loop through possible operators and check if they exist in the parsed query
             for (let operator of ['$gt', '$gte', '$lt', '$lte', '$eq']) {
                 if (parsedQuery[operator]) {
-                    // Found a valid operator, assign the operator and value
                     dateOperator = operator;
                     dateValue = parsedQuery[operator];
                     break;
                 }
             }
 
-            // If a valid operator and value were found, parse the date
             if (dateOperator && dateValue) {
                 const parsedDate = new Date(dateValue);
 
-                // Check if the date is valid
                 if (!isNaN(parsedDate)) {
-                    // Return the MongoDB query with the operator and parsed date
                     return { [dateOperator]: parsedDate };
                 } else {
                     console.error('Invalid date in query: ', dateValue);
@@ -33,12 +26,10 @@ const parseDateQuery = function (queryValue) {
             }
         }
     } catch (error) {
-        // Handle cases where the query is not valid JSON
         console.error('Error parsing query:', error);
         return null;
     }
 
-    // Return null if no valid date operator was found
     return null;
 };
 
@@ -80,6 +71,29 @@ const generateSearchQuery = function (req, project) {
         Object.assign(searchQuery, fieldFilters);
     }
 
+    if (req.query.hideCustomers) {
+        const hiddenCustomerIds = req.query.hideCustomers
+            .split(',')
+            .map(id => id.trim())
+            .filter(id => id.length > 0);
+
+        if (hiddenCustomerIds.length > 0) {
+            console.log('🔒 Hiding customers with IDs:', hiddenCustomerIds);
+            
+            const { ObjectId } = require('mongoose').Types;
+            const objectIds = hiddenCustomerIds.map(id => {
+                try {
+                    return new ObjectId(id);
+                } catch (error) {
+                    console.warn(`Invalid ObjectId: ${id}`);
+                    return id; 
+                }
+            });
+
+            searchQuery._id = { $nin: objectIds };
+        }
+    }
+
     if (search) {
         const searchConditions = [];
 
@@ -106,7 +120,16 @@ const generateSearchQuery = function (req, project) {
         }
 
         if (searchConditions.length > 0) {
-            searchQuery.$or = searchConditions;
+            if (searchQuery.$or) {
+                searchQuery = {
+                    $and: [
+                        { $or: searchConditions },
+                        searchQuery
+                    ]
+                };
+            } else {
+                searchQuery.$or = searchConditions;
+            }
         }
     }
 
