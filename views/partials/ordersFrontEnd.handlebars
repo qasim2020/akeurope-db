@@ -1,3 +1,4 @@
+<script>
 const getModalData = function (modal) {
     const select = $(modal).find('[name=randomBeneficiaries]').val();
     const search = $(modal).find('[name=specificBeneficiaries]').val();
@@ -939,3 +940,4 @@ const drawOrderEntries = async function (modal) {
         alert('Could not fetch entries to render on your window. Refresh your window.');
     }
 }
+</script>

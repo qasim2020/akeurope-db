@@ -78,6 +78,7 @@
         </tr>
         {{/each}}
         {{#each data.sponsorships}}
+        {{log this}}
         <tr>
           <td>{{orderId.orderNo}}</td>
           <td>{{formatDate orderId.createdAt}}</td>

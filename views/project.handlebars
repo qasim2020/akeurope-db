@@ -1,4 +1,3 @@
-
 <div class="page-header d-print-none">
   <div class="container-xl">
     <div class="row g-2 align-items-center">
@@ -115,6 +114,7 @@
 {{> projectsFrontEnd}}
 {{> entryFrontEnd}}
 
+<script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
 <script>
 
 
@@ -174,22 +174,21 @@
   const showData = function () {
     const href = $('.page-item.active a').attr('my-href') || $("input[my-key='search']").attr("my-href") || "";
     $.ajax({
-        url: `/getEntryData/{{data.project.slug}}${href}`,
-        method: 'GET',
-        success: function (response) {
-            newLayout = newLayout == 'grid' ? 'table' : 'grid';
-            $("#data-container").html(response);
-            window.history.pushState(null, '', `/project/{{data.project.slug}}${href}`);
-            refreshImages();
-            
-            setTimeout(initializeTomSelect, 100);
-        },
-        error: function (error) {
-            alert(error.responseText);
-        }
-    });
-}
+      url: `/getEntryData/{{data.project.slug}}${href}`,
+      method: 'GET',
+      success: function (response) {
+        newLayout = newLayout == 'grid' ? 'table' : 'grid';
+        $("#data-container").html(response);
+        window.history.pushState(null, '', `/project/{{data.project.slug}}${href}`);
+        refreshImages();
 
+        setTimeout(initializeTomSelect, 100);
+      },
+      error: function (error) {
+        alert(error.responseText);
+      }
+    });
+  }
 
   $(document).on("click", ".filters .dropdown-menu .dropdown-item", function (e) {
     e.preventDefault();
@@ -233,10 +232,10 @@
 
     if (conditionPattern.test(inputValue)) {
 
-      console.log("Valid date detected: ", inputValue); 
+      console.log("Valid date detected: ", inputValue);
       const query = parseDateCondition(inputValue, conditionPattern);
       if (query) {
-        console.log("MongoDB query: ", query.date); 
+        console.log("MongoDB query: ", query.date);
         $(this).attr('query', JSON.stringify(query.date));
         $(this).attr('stop-search', false);
         $(this).attr('stop-search-msg', "Valid date format");
@@ -247,7 +246,7 @@
 
     }
     else {
-      console.log("Invalid input");  
+      console.log("Invalid input");
     }
   })
 
@@ -256,30 +255,30 @@
 
     if (match) {
 
-      const operator = match[1] || "=";  
+      const operator = match[1] || "=";
       const dateStr = match[2].trim();
       let date;
 
-      if (/^\d{4}$/.test(dateStr)) {  
-        date = new Date(`${dateStr}-01-01T00:00:00.000Z`);  
+      if (/^\d{4}$/.test(dateStr)) {
+        date = new Date(`${dateStr}-01-01T00:00:00.000Z`);
       }
-      else if (/^\d{1,2}\s+[A-Za-z]{3,9}\s+\d{4}$/.test(dateStr)) { 
+      else if (/^\d{1,2}\s+[A-Za-z]{3,9}\s+\d{4}$/.test(dateStr)) {
         const [day, month, year] = dateStr.split(" ");
         const months = {
           Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5,
           Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11
         };
         const monthIndex = months[month];
-        date = new Date(Date.UTC(year, monthIndex, day)); 
+        date = new Date(Date.UTC(year, monthIndex, day));
       }
-      else if (/^[A-Za-z]{3,9}\s+\d{4}$/.test(dateStr)) {  
+      else if (/^[A-Za-z]{3,9}\s+\d{4}$/.test(dateStr)) {
         const [month, year] = dateStr.split(" ");
         const months = {
           Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5,
           Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11
         };
         const monthIndex = months[month];
-        date = new Date(Date.UTC(year, monthIndex, 1));  
+        date = new Date(Date.UTC(year, monthIndex, 1));
       }
 
       if (date == "Invalid Date") {
@@ -334,44 +333,44 @@
 
   }
 
- const doSearch = function (elem, href) {
+  const doSearch = function (elem, href) {
     if (!href) {
-        href = elem ? $(elem).attr("my-href") : '';
+      href = elem ? $(elem).attr("my-href") : '';
     }
-    
+
     console.log('🔍 Searching with URL:', `/getEntryData/{{data.project.slug}}${href}`);
-    
+
     const container = document.getElementById('data-container');
     if (container) {
-        container.style.opacity = '0.5';
+      container.style.opacity = '0.5';
     }
-    
+
     $.ajax({
-        url: `/getEntryData/{{data.project.slug}}${href}`,
-        method: 'GET',
-        success: function (response) {
-            console.log('✅ Search successful, updating DOM...');
-            $("#data-container").html(response);
-            window.history.pushState(null, '', `/project/{{data.project.slug}}${href}`);
-            refreshImages();
-            refreshFsLightbox();
-            
-            if (container) {
-                container.style.opacity = '1';
-            }
-            
-            setTimeout(initializeTomSelect, 100);
-        },
-        error: function (error) {
-            console.error('❌ Search failed:', error);
-            alert('Search failed: ' + (error.responseText || 'Unknown error'));
-            
-            if (container) {
-                container.style.opacity = '1';
-            }
+      url: `/getEntryData/{{data.project.slug}}${href}`,
+      method: 'GET',
+      success: function (response) {
+        console.log('✅ Search successful, updating DOM...');
+        $("#data-container").html(response);
+        window.history.pushState(null, '', `/project/{{data.project.slug}}${href}`);
+        refreshImages();
+        refreshFsLightbox();
+
+        if (container) {
+          container.style.opacity = '1';
         }
+
+        setTimeout(initializeTomSelect, 100);
+      },
+      error: function (error) {
+        console.error('❌ Search failed:', error);
+        alert('Search failed: ' + (error.responseText || 'Unknown error'));
+
+        if (container) {
+          container.style.opacity = '1';
+        }
+      }
     });
-}
+  }
 
   $(document).on('keypress', '[my-href]', function (e) {
     if (e.which === 13 || e.keyCode === 13) {
@@ -393,164 +392,160 @@
     $('.page-item.active > a').click();
   }
 
-</script>
- <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/tom-select/2.3.1/js/tom-select.complete.min.js"></script>
-    <script>
-let tomSelectInstance = null;
+  let tomSelectInstance = null;
 
-function initializeTomSelect() {
+  function initializeTomSelect() {
     console.log('🔄 Initializing Tom Select...');
-    
+
     if (tomSelectInstance) {
-        console.log('🗑️ Destroying existing Tom Select instance');
-        try {
-            tomSelectInstance.destroy();
-        } catch (e) {
-            console.warn('Error destroying Tom Select:', e);
-        }
-        tomSelectInstance = null;
+      console.log('🗑️ Destroying existing Tom Select instance');
+      try {
+        tomSelectInstance.destroy();
+      } catch (e) {
+        console.warn('Error destroying Tom Select:', e);
+      }
+      tomSelectInstance = null;
     }
-    
+
     const selectElement = document.getElementById('customer-filter');
     console.log('🔍 Customer filter element:', selectElement);
-    
-    if (selectElement && typeof TomSelect !== 'undefined') {
-        try {
-            const preSelectedValues = [];
-            selectElement.querySelectorAll('option[selected]').forEach(option => {
-                preSelectedValues.push(option.value);
-            });
-            
-            const urlParams = new URLSearchParams(window.location.search);
-            const urlHiddenCustomers = urlParams.get('hideCustomers');
-            if (urlHiddenCustomers) {
-                const urlValues = urlHiddenCustomers.split(',').filter(id => id.trim());
-                urlValues.forEach(value => {
-                    if (!preSelectedValues.includes(value)) {
-                        preSelectedValues.push(value);
-                    }
-                });
-            }
-            
-            tomSelectInstance = new TomSelect(selectElement, {
-                maxItems: 10,
-                plugins: ['remove_button'],
-                placeholder: 'Select customers to hide...',
-                searchField: ['text'],
-                items: preSelectedValues,
-                onItemAdd: function(value, item) {
-                    console.log('➕ Customer added to hide list:', value);
-             
-                    const currentItems = tomSelectInstance.getValue();
-                    updateHiddenCustomersDisplay(currentItems.length);
-                },
-                onItemRemove: function(value) {
-                    console.log('➖ Customer removed from hide list:', value);
-            
-                    const currentItems = tomSelectInstance.getValue();
-                    updateHiddenCustomersDisplay(currentItems.length);
-                }
-            });
-            
-            console.log('✅ Tom Select initialized successfully with pre-selected values:', preSelectedValues);
-            
-            updateHiddenCustomersDisplay(preSelectedValues.length);
-            
-        } catch (error) {
-            console.error('❌ Tom Select initialization failed:', error);
-        }
-    } else {
-        console.warn('⚠️ Tom Select element not found or TomSelect library not loaded');
-    }
-}
 
-function updateHiddenCustomersDisplay(count) {
+    if (selectElement && typeof TomSelect !== 'undefined') {
+      try {
+        const preSelectedValues = [];
+        selectElement.querySelectorAll('option[selected]').forEach(option => {
+          preSelectedValues.push(option.value);
+        });
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlHiddenCustomers = urlParams.get('hideCustomers');
+        if (urlHiddenCustomers) {
+          const urlValues = urlHiddenCustomers.split(',').filter(id => id.trim());
+          urlValues.forEach(value => {
+            if (!preSelectedValues.includes(value)) {
+              preSelectedValues.push(value);
+            }
+          });
+        }
+
+        tomSelectInstance = new TomSelect(selectElement, {
+          maxItems: 10,
+          plugins: ['remove_button'],
+          placeholder: 'Select customers to hide...',
+          searchField: ['text'],
+          items: preSelectedValues,
+          onItemAdd: function (value, item) {
+            console.log('➕ Customer added to hide list:', value);
+
+            const currentItems = tomSelectInstance.getValue();
+            updateHiddenCustomersDisplay(currentItems.length);
+          },
+          onItemRemove: function (value) {
+            console.log('➖ Customer removed from hide list:', value);
+
+            const currentItems = tomSelectInstance.getValue();
+            updateHiddenCustomersDisplay(currentItems.length);
+          }
+        });
+
+        console.log('✅ Tom Select initialized successfully with pre-selected values:', preSelectedValues);
+
+        updateHiddenCustomersDisplay(preSelectedValues.length);
+
+      } catch (error) {
+        console.error('❌ Tom Select initialization failed:', error);
+      }
+    } else {
+      console.warn('⚠️ Tom Select element not found or TomSelect library not loaded');
+    }
+  }
+
+  function updateHiddenCustomersDisplay(count) {
     const filterButton = document.querySelector('#heading-1 .accordion-button');
     if (filterButton) {
-        const existingBadge = filterButton.querySelector('.badge');
-        if (existingBadge) {
-            existingBadge.remove();
-        }
-        
-        if (count > 0) {
-            const badge = document.createElement('span');
-            badge.className = 'badge bg-orange ms-2';
-            badge.textContent = `${count} hidden`;
-            filterButton.appendChild(badge);
-        }
-    }
-}
+      const existingBadge = filterButton.querySelector('.badge');
+      if (existingBadge) {
+        existingBadge.remove();
+      }
 
-function applyAllFilters() {
+      if (count > 0) {
+        const badge = document.createElement('span');
+        badge.className = 'badge bg-orange ms-2';
+        badge.textContent = `${count} hidden`;
+        filterButton.appendChild(badge);
+      }
+    }
+  }
+
+  function applyAllFilters() {
     console.log('🎯 Applying all filters...');
-    
+
     const parentElem = document.querySelector(".filters");
-    
+
     const searchField = parentElem.querySelector(".dropdown-toggle").getAttribute('my-name') || '';
     const valueElem = parentElem.querySelector(".input-group input, .input-group select");
     let searchValue = '';
-    
+
     if (valueElem) {
-        if (valueElem.getAttribute('stop-search') === 'true') {
-            alert(valueElem.getAttribute('stop-search-msg'));
-            return;
-        }
-        searchValue = valueElem.classList.contains('dateInput') ? 
-            valueElem.getAttribute('query') || '' : 
-            valueElem.value.trim();
+      if (valueElem.getAttribute('stop-search') === 'true') {
+        alert(valueElem.getAttribute('stop-search-msg'));
+        return;
+      }
+      searchValue = valueElem.classList.contains('dateInput') ?
+        valueElem.getAttribute('query') || '' :
+        valueElem.value.trim();
     }
-    
+
     const sortBy = parentElem.querySelector(".sortBy .form-select").value;
     const orderBy = parentElem.querySelector("input[name='btn-radio-basic']:checked").id === "btn-radio-basic-1" ? "asc" : "desc";
-    
+
     const hiddenCustomers = tomSelectInstance ? tomSelectInstance.getValue() : [];
     console.log('👥 Hidden customers from Tom Select:', hiddenCustomers);
-    
+
     const urlParams = new URLSearchParams();
-    
+
     urlParams.set('page', '1');
     urlParams.set('limit', '{{data.pagination.limit}}');
     urlParams.set('search', '{{data.pagination.search}}');
     urlParams.set('showSearchBar', 'true');
     urlParams.set('showFilters', 'true');
-    
+
     urlParams.set('sortBy', sortBy);
     urlParams.set('orderBy', orderBy);
-    
+
     if (searchField && searchValue) {
-        urlParams.set(searchField, searchValue);
+      urlParams.set(searchField, searchValue);
     }
-    
+
     if (hiddenCustomers.length > 0) {
-        urlParams.set('hideCustomers', hiddenCustomers.join(','));
-        console.log('🔒 Adding hideCustomers parameter:', hiddenCustomers.join(','));
+      urlParams.set('hideCustomers', hiddenCustomers.join(','));
+      console.log('🔒 Adding hideCustomers parameter:', hiddenCustomers.join(','));
     } else {
-        console.log('👍 No customers to hide');
+      console.log('👍 No customers to hide');
     }
-    
+
     const href = '?' + urlParams.toString();
     console.log('🔗 Final request URL:', href);
-    
-    updateHiddenCustomersDisplay(hiddenCustomers.length);
-    
-    doSearch('', href);
-}
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('📄 Page loaded, initializing Tom Select...');
-    setTimeout(initializeTomSelect, 500); 
-});
 
-$(document).ready(function() {
+    updateHiddenCustomersDisplay(hiddenCustomers.length);
+
+    doSearch('', href);
+  }
+  document.addEventListener('DOMContentLoaded', function () {
+    console.log('📄 Page loaded, initializing Tom Select...');
+    setTimeout(initializeTomSelect, 500);
+  });
+
+  $(document).ready(function () {
     console.log('📄 jQuery ready, initializing Tom Select...');
     setTimeout(initializeTomSelect, 600);
-});
+  });
 
-$(document).ready(function() {
+  $(document).ready(function () {
     const urlParams = new URLSearchParams(window.location.search);
     const hideCustomers = urlParams.get('hideCustomers');
     if (hideCustomers) {
-        console.log('🔍 URL contains hideCustomers parameter:', hideCustomers);
+      console.log('🔍 URL contains hideCustomers parameter:', hideCustomers);
     }
-});
+  });
 </script>

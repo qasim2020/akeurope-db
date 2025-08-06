@@ -252,9 +252,11 @@ const sendThanksToCustomer = async (order, customer) => {
         inviteLink = `${process.env.CUSTOMER_PORTAL_URL}/login`;
     }
 
+    const toEmail = process.env.ENV === 'test' ? 'qasimali24@gmail.com' : customer.email;
+
     const mailOptions = {
         from: `"Alkhidmat Europe" <${process.env.EMAIL_USER}>`,
-        to: customer.email,
+        to: toEmail,
         subject: `Thank you for your order`,
         html: compiledTemplate({ order, customer, project, inviteLink }),
     };

@@ -644,7 +644,8 @@
   <script src="https://cdn.socket.io/4.6.0/socket.io.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/fslightbox/index.js"></script>
 
-  <script src="/static/files.js"></script>
+  {{> filesFrontEnd}}
+  
   <script>
 
     {{#if (findInArray data.role 'viewNotifications') }}
