@@ -224,7 +224,8 @@
         const language = $(modal).find(".project-language").val();
         const type = $(modal).find(".project-type").val();
         const status = $(modal).find(".project-status").find("input:checked").val();
-        const currency = $(modal).find(".project-sub-cost-currency").val();
+        const currency = $(modal).find(".project-currency").val();
+        const description = $(modal).find(".project-description").val();
 
         const fields = $(modal).find(".accordion-item").map((key, val) => {
             let options = [];
@@ -252,7 +253,7 @@
         }).get();
 
         return {
-            name, status, type, location, language, slug, currency, fields,
+            name, status, type, location, language, slug, currency, description, fields,
         }
     }
 
