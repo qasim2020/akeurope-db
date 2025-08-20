@@ -96,6 +96,7 @@ app.use(flash());
 
 app.use('/tabler', express.static(path.join(__dirname, 'node_modules', '@tabler', 'core', 'dist')));
 app.use('/static', express.static(path.join(__dirname, 'static')));
+app.use('/robots.txt', express.static(path.join(__dirname, 'static/robots.txt')));
 
 app.use(authRoutes);
 app.use(adminRoutes);

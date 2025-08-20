@@ -1,0 +1,29 @@
+# robots.txt for akeurope-cp repository
+
+User-agent: *
+Disallow: /.git/
+Disallow: /.github/
+Disallow: /docs/
+Disallow: /scripts/
+Disallow: /tests/
+Disallow: /test/
+Disallow: /__pycache__/
+Disallow: /node_modules/
+Disallow: /build/
+Disallow: /dist/
+Disallow: /tmp/
+Disallow: /env/
+Disallow: /venv/
+Disallow: /package-lock.json
+Disallow: /yarn.lock
+Disallow: /Dockerfile
+Disallow: /docker-compose.yml
+Disallow: /*.env
+Disallow: /*.log
+Disallow: /*.md$
+
+# Allow everything else
+Allow: /
+
+# Optional: Sitemap location (uncomment if you generate a sitemap)
+# Sitemap: https://partner.akeurope.org/robots.txt
