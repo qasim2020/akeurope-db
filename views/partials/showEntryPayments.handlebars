@@ -80,7 +80,14 @@
         {{#each data.sponsorships}}
         {{log this}}
         <tr>
-          <td>{{orderId.orderNo}}</td>
+          <td>
+            {{#if (findInArray ../data.role 'viewOrders')}}
+            <a href="/order/{{orderId.orderNo}}">{{orderId.orderNo}}</a>
+            {{else}}
+            {{orderId.orderNo}}
+            {{/if}}
+            {{#if orderId.monthlySubscription}} <i class="ti ti-refresh ms-1"></i> {{/if}}
+          </td>
           <td>{{formatDate orderId.createdAt}}</td>
           <td>
             {{#if (findInArray ../data.role 'viewOrders')}}
@@ -89,7 +96,7 @@
             {{customerId.name}}
             {{/if}}
           </td>
-          <td>{{totalPaid}}</td>
+          <td>{{totalPaid}} Paid</td>
           <td>{{daysSponsored}} days</td>
           <td>{{reasonStopped}}</td>
         </tr>
