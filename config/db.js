@@ -30,7 +30,7 @@ const Donor = require('../models/Donor');
 const { saveLog } = require('../modules/logAction');
 const { deleteInvoice } = require('../modules/invoice');
 const { sendTelegramMessage, sendErrorToTelegram } = require('../../akeurope-cp/modules/telegramBot')
-const { formatDate, getAgeInYearsAndMonths, slugToString } = require('../modules/helpers');
+const { formatDate, getAgeInYearsAndMonths, slugToString, getMonth, capitalizeFirstLetter } = require('../modules/helpers');
 const { getCurrencyRates } = require('../modules/getCurrencyRates');
 const { logTemplates } = require('../modules/logTemplates');
 const { getMonthlyTriggerDates } = require('../modules/orders');
@@ -1066,16 +1066,17 @@ async function getOrderType(orderId) {
     const order = await Order.findById(orderId).lean() || await Subscription.findById(orderId).lean();
     const customer = await Customer.findById(order.customerId).lean();
     const donor = await Donor.findOne({ email: customer.email }).lean();
+    const months = order.projects[0].months;
 
     if (!donor) {
 
-        const months = order.projects[0].months;
         return {
             type: 'manual one time',
             amount: `${order.total || order.totalCost} ${order.currency}`,
             date: formatDate(order.createdAt),
             payments: months,
         }
+
     }
 
     const allPayments = [
@@ -1147,19 +1148,23 @@ async function getOrderType(orderId) {
         };
     }
 
+    let output = {};
+
     if (paymentsOnOrder.length === 0) {
-        return {
+        output = {
             type: 'manual one time',
             amount: `${order.total || order.totalCost} ${order.currency}`,
             date: formatDate(order.createdAt),
-            payments: order.projects[0].months,
+            payments: months,
         }
     } else {
-        return {
+        output = {
             ...type,
-            payments: paymentsOnOrder,
+            payments: months,
         };
     }
+
+    return output;
 };
 
 async function calculateRevenueFromDonor() {
@@ -1628,12 +1633,14 @@ async function gazaOrphanSelectionTimeLine() {
             entries.push({
                 createdAt: formatDate(order.createdAt),
                 orderNo: order.orderNo,
-                donor: customer.name,
-                type: type.type,
-                status: order.status,
-                months: type.type === 'manual one time' ? type.payments : type.payments.length,
                 beneficiary: doc.name,
                 cluster: doc.cluster,
+                type: type.type,
+                month: getMonth(order.createdAt),
+                months: type.payments,
+                status: capitalizeFirstLetter(order.status),
+                donor: customer.name,
+                total: 600 * Number(type.payments),
             });
         }
     }
