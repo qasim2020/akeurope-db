@@ -1068,11 +1068,13 @@ async function getOrderType(orderId) {
     const donor = await Donor.findOne({ email: customer.email }).lean();
 
     if (!donor) {
+
+        const months = order.projects[0].months;
         return {
             type: 'manual one time',
             amount: `${order.total || order.totalCost} ${order.currency}`,
             date: formatDate(order.createdAt),
-            payments: '1',
+            payments: months,
         }
     }
 
@@ -1143,15 +1145,6 @@ async function getOrderType(orderId) {
                 date: formatDate(payment.date),
             });
         };
-        // if (customer.name === 'Ismail Oucheni') {
-        //     console.log(order._id);
-        //     console.log(payment.orderId);
-        //     console.log(payment);
-        //     console.log(type);
-        //     console.log(paymentsOnOrder);
-        //     console.log('---------------------------------');
-        //     throw new Error('Debugging Ismail Oucheni');
-        // };
     }
 
     if (paymentsOnOrder.length === 0) {
@@ -1159,7 +1152,7 @@ async function getOrderType(orderId) {
             type: 'manual one time',
             amount: `${order.total || order.totalCost} ${order.currency}`,
             date: formatDate(order.createdAt),
-            payments: '1',
+            payments: order.projects[0].months,
         }
     } else {
         return {
@@ -1638,7 +1631,7 @@ async function gazaOrphanSelectionTimeLine() {
                 donor: customer.name,
                 type: type.type,
                 status: order.status,
-                payments: type.payments.length,
+                months: type.type === 'manual one time' ? type.payments : type.payments.length,
                 beneficiary: doc.name,
                 cluster: doc.cluster,
             });
@@ -1663,10 +1656,10 @@ mongoose.connection.on('open', async () => {
     // await resetGazaOrphanPricesTo600();
     // await sendWhatsappMessageWithFormLink();
     // await calculateRevenueFromOrders();
-    // await calculateRevenueFromDonor();
+    await calculateRevenueFromDonor();
     // await createDirectDonorLongUpdatesSheet();
     // await sendGazaUpdate();
-    // await gazaOrphanSelectionTimeLine();
+    await gazaOrphanSelectionTimeLine();
     // await createSponsorshipsForPaidOrders()
     // await updateSponsorshipsFromOrders();
     // await setSponsorshipsOneTime();
