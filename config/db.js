@@ -35,12 +35,15 @@ const { getCurrencyRates } = require('../modules/getCurrencyRates');
 const { logTemplates } = require('../modules/logTemplates');
 const { getMonthlyTriggerDates } = require('../modules/orders');
 const emailConfig = require('../config/emailConfig.js');
-const { getPortalUrl } = require('../modules/emails');
+const { getPortalUrl, beneficiariesPaid } = require('../modules/emails');
 const nodemailer = require('nodemailer');
 const handlebars = require('handlebars');
 const Project = require('../models/Project.js');
 const Sponsorship = require('../models/Sponsorship.js')
 const { replaceEntryInOrder, removeEntryFromOrder } = require('../modules/entryModules');
+const { getChildrenFromExcel,
+    attachPaymentsToChildren,
+    attachChildrenToDonors } = require('../modules/beneficiariesPaid');
 
 const connectDB = async () => {
     try {
@@ -1253,7 +1256,7 @@ async function calculateRevenueFromDonor() {
             }
 
             let tel = donor.tel;
-            tel = tel.replace(/(\d{4})(?=\d)/g, "$1 "); 
+            tel = tel.replace(/(\d{4})(?=\d)/g, "$1 ");
 
             array.push({
                 date: order.createdAt,
@@ -1656,6 +1659,21 @@ async function gazaOrphanSelectionTimeLine() {
 
 };
 
+async function paymentDoneGazaChildren() {
+    try {
+        const names = await getChildrenFromExcel();
+        const children = await attachPaymentsToChildren(names);
+        const donorChildren = await attachChildrenToDonors(children);
+        for (const donor of donorChildren) {
+            console.log(`Sending email to ${donor.customer} for ${donor.children.length} children`);
+            await beneficiariesPaid(donor);
+            delay(2000);
+        }
+    } catch (error) {
+        console.log(error);
+    }
+}
+
 mongoose.connection.on('open', async () => {
     // await Customer.deleteMany({email: /[A-Z]/  });
     // await readKontakterSharePoint();
@@ -1668,16 +1686,18 @@ mongoose.connection.on('open', async () => {
     // await resetGazaOrphanPricesTo600();
     // await sendWhatsappMessageWithFormLink();
     // await calculateRevenueFromOrders();
-    await calculateRevenueFromDonor();
     // await createDirectDonorLongUpdatesSheet();
     // await sendGazaUpdate();
-    await gazaOrphanSelectionTimeLine();
     // await createSponsorshipsForPaidOrders()
     // await updateSponsorshipsFromOrders();
     // await setSponsorshipsOneTime();
     // await updateSponsorshipsFromEntries();
     // await createSponsorshipsForOrdersPaidToday();
     // await createDirectDonorPakistanStudentUpdate();
+
+    // await calculateRevenueFromDonor();
+    // await gazaOrphanSelectionTimeLine();
+    await paymentDoneGazaChildren()
 
     setInterval(async () => {
         try {
@@ -1702,5 +1722,6 @@ mongoose.connection.on('open', async () => {
 });
 
 module.exports = {
-    connectDB
+    connectDB,
+    paymentDoneGazaChildren,
 };

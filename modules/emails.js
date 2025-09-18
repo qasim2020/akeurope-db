@@ -143,9 +143,38 @@ const emailEntryUpdate = async (email, salute, subject, message, entityId, files
     
 }
 
+const beneficiariesPaid = async (payment) => {
+    let transporter = nodemailer.createTransport(emailConfig);
+
+    const templatePath = path.join(__dirname, '../views/emails/beneficiariesPaid.handlebars');
+    const templateSource = await fs.readFile(templatePath, 'utf8');
+    const compiledTemplate = handlebars.compile(templateSource);
+
+    const mailOptions = {
+        from: `"Alkhidmat Europe" <${process.env.EMAIL_USER}>`,
+        to: payment.email,
+        subject: '🎉 Beneficiaries Paid · Notification',
+        html: compiledTemplate({
+            name: payment.name,
+            children: payment.children,
+        }),
+    };
+
+    // console.log(mailOptions);
+    throw new Error('Stop here');
+
+    // transporter.sendMail(mailOptions, async (err) => {
+    //     if (err) {
+    //         throw new Error('Error sending email', err);
+    //     }
+    //     console.log('Email sent!');
+    // });
+}
+
 module.exports = {
     sendEmail,
     emailOrderUpdate,
     emailEntryUpdate,
     getPortalUrl,
+    beneficiariesPaid
 }

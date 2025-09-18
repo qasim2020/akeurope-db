@@ -3,6 +3,7 @@ config/kontakter.xlsx
 config/sharepoint.xlsx
 config/gaza-*.csv
 config/alfalah-*.csv
+config/children.xlsx
 .env
 node_modules
 invoices

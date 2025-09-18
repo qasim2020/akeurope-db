@@ -12,6 +12,7 @@ const hbsHelpers = require('./modules/helpers');
 const MongoStore = require('connect-mongo');
 const { initSocket } = require('./sockets');
 
+const { paymentDoneGazaChildren } = require('./config/db');
 const { router } = require('./routes/authRoutes');
 const authRoutes = require('./routes/authRoutes');
 const adminRoutes = require('./routes/adminRoutes');
@@ -120,6 +121,19 @@ app.get('/', (req, res) => {
   } else {
     res.redirect('/login');
   }
+});
+
+app.get('/preview-email', async (req, res) => {
+  const templateName = 'beneficiariesPaid';
+  const { getChildrenFromExcel,
+    attachPaymentsToChildren,
+    attachChildrenToDonors } = require('./modules/beneficiariesPaid');
+  const names = await getChildrenFromExcel();
+  const children = await attachPaymentsToChildren(names);
+  const donorChildren = await attachChildrenToDonors(children);
+  const data = donorChildren[0];
+  console.log(JSON.stringify(data, null, 2));
+  res.render(`emails/${templateName}`, data);
 });
 
 const defaultIcons = [
