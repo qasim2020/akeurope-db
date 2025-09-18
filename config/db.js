@@ -1252,12 +1252,17 @@ async function calculateRevenueFromDonor() {
                 throw new Error('no date found')
             }
 
+            let tel = donor.tel;
+            tel = tel.replace(/(\d{4})(?=\d)/g, "$1 "); 
+
             array.push({
                 date: order.createdAt,
                 month: new Date(date).getMonth() + 1,
                 project,
                 orderNo: Number(order.orderNo),
                 email: donor.email,
+                tel,
+                currency: order.currency,
                 method,
                 originalPaid: `${amount} ${currency}`,
                 convertedNOK: `${(amount * currencyRate).toFixed(2)}`,
