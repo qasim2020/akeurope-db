@@ -1263,7 +1263,8 @@ async function calculateRevenueFromDonor() {
                 month: new Date(date).getMonth() + 1,
                 project,
                 orderNo: Number(order.orderNo),
-                name: `${donor.firstName} ${donor.lastName}`,
+                firstName: donor.firstName,
+                lastName: donor.lastName,
                 email: donor.email,
                 tel,
                 currency: order.currency,
@@ -1699,7 +1700,7 @@ mongoose.connection.on('open', async () => {
     // await createSponsorshipsForOrdersPaidToday();
     // await createDirectDonorPakistanStudentUpdate();
 
-    // await calculateRevenueFromDonor();
+    await calculateRevenueFromDonor();
     // await gazaOrphanSelectionTimeLine();
     await paymentDoneGazaChildren();
 
