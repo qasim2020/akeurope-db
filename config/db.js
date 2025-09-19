@@ -1701,8 +1701,8 @@ mongoose.connection.on('open', async () => {
     // await createDirectDonorPakistanStudentUpdate();
 
     await calculateRevenueFromDonor();
-    // await gazaOrphanSelectionTimeLine();
-    await paymentDoneGazaChildren();
+    await gazaOrphanSelectionTimeLine();
+    // await paymentDoneGazaChildren();
 
     setInterval(async () => {
         try {
