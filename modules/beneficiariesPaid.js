@@ -63,7 +63,7 @@ const attachPaymentsToChildren = async (names) => {
         const trimmedName = name.replace(/,+$/, "");
 
         const entry = await model.findOne({
-            name: { $regex: new RegExp(trimmedName, "i") } // case-insensitive
+            name: { $regex: new RegExp(trimmedName, "i") } 
         }).lean();
 
         const orders = await Order.find({ 'projects.entries.entryId': entry._id, status: 'paid' }).lean();
@@ -73,14 +73,18 @@ const attachPaymentsToChildren = async (names) => {
             const customer = await Customer.findById(order.customerId).lean();
             for (const project of order.projects) {
                 if (project.slug !== 'gaza-orphans') continue;
-                const months = calculateMonths(order);
+                const history = calculateMonths(order);
+                const months = Math.min(history, 6);
+                const entryInOrder = project.entries.find(e => e.entryId.toString() === entry._id.toString());
+                const donorMonthlyCommitment = entryInOrder.totalCostAllSubscriptions;
+                const total = donorMonthlyCommitment * months;
                 payment = {
                     orderNo: order.orderNo,
                     date: formatDate(order.createdAt),
                     status: capitalizeFirstLetter(order.status),
                     months,
-                    totalCostSingleMonth: order.totalCostSingleMonth,
-                    total: order.totalCostSingleMonth * months,
+                    donorMonthlyCommitment,
+                    total,
                     currency: order.currency,
                     customerEmail: customer.email,
                     customerName: customer.name,
@@ -100,28 +104,11 @@ const attachPaymentsToChildren = async (names) => {
     return children;
 };
 
-const caclulateDonorTotalAmount = (donors) => {
-    for (const donor of donors) {
-        let totalAmount = 0;
-        let iteration = 1;
-        for (const child of donor.children) {
-            for (const payment of child.payments) {
-                if (iteration > 6) continue;
-                totalAmount += payment.totalCostSingleMonth;
-                iteration++;
-            }
-        }
-        console.log(donor.name, totalAmount);
-        donor.totalAmount = totalAmount;
-    }
-    return donors;
-}
-
 const attachChildrenToDonors = async (children) => {
     let donorChildren = [];
     for (const child of children) {
         for (const payment of child.payments) {
-            let donor = donorChildren.find(d => d.customer === payment.customerEmail);
+            let donor = donorChildren.find(d => d.email === payment.customerEmail);
 
             if (!donor) {
                 donor = {
@@ -135,10 +122,25 @@ const attachChildrenToDonors = async (children) => {
             donor.children.push(child);
         }
     }
-
     donorChildren = caclulateDonorTotalAmount(donorChildren);
     return donorChildren;
 };
+
+const caclulateDonorTotalAmount = (donors) => {
+    for (const donor of donors) {
+        let totalAmount = 0;
+        let iteration = 1;
+        for (const child of donor.children) {
+            for (const payment of child.payments) {
+                if (iteration > 6) continue;
+                totalAmount += payment.total;
+                iteration++;
+            }
+        }
+        donor.totalAmount = totalAmount;
+    }
+    return donors;
+}
 
 module.exports = {
     getChildrenFromExcel,

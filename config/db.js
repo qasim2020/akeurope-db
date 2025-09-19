@@ -1263,6 +1263,7 @@ async function calculateRevenueFromDonor() {
                 month: new Date(date).getMonth() + 1,
                 project,
                 orderNo: Number(order.orderNo),
+                name: `${donor.firstName} ${donor.lastName}`,
                 email: donor.email,
                 tel,
                 currency: order.currency,
@@ -1697,7 +1698,7 @@ mongoose.connection.on('open', async () => {
 
     // await calculateRevenueFromDonor();
     // await gazaOrphanSelectionTimeLine();
-    await paymentDoneGazaChildren()
+    // await paymentDoneGazaChildren();
 
     setInterval(async () => {
         try {

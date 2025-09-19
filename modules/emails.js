@@ -150,9 +150,11 @@ const beneficiariesPaid = async (payment) => {
     const templateSource = await fs.readFile(templatePath, 'utf8');
     const compiledTemplate = handlebars.compile(templateSource);
 
+    const toEmail = process.env.ENV === 'test' ? 'qasimali24@gmail.com' : payment.email;
+
     const mailOptions = {
         from: `"Alkhidmat Europe" <${process.env.EMAIL_USER}>`,
-        to: payment.email,
+        to: toEmail,
         subject: '🎉 Beneficiaries Paid · Notification',
         html: compiledTemplate({
             name: payment.name,
@@ -160,15 +162,14 @@ const beneficiariesPaid = async (payment) => {
         }),
     };
 
-    // console.log(mailOptions);
-    throw new Error('Stop here');
+    transporter.sendMail(mailOptions, async (err) => {
+        if (err) {
+            throw new Error('Error sending email', err);
+        }
+        console.log('Email sent!');
+    });
 
-    // transporter.sendMail(mailOptions, async (err) => {
-    //     if (err) {
-    //         throw new Error('Error sending email', err);
-    //     }
-    //     console.log('Email sent!');
-    // });
+    throw new Error('Stop here');
 }
 
 module.exports = {
