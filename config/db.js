@@ -1661,14 +1661,17 @@ async function gazaOrphanSelectionTimeLine() {
 };
 
 async function paymentDoneGazaChildren() {
+    function delay(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
     try {
         const names = await getChildrenFromExcel();
         const children = await attachPaymentsToChildren(names);
         const donorChildren = await attachChildrenToDonors(children);
         for (const donor of donorChildren) {
-            console.log(`Sending email to ${donor.customer} for ${donor.children.length} children`);
+            console.log(`Sending email to ${donor.email} for ${donor.children.length} children`);
             await beneficiariesPaid(donor);
-            delay(2000);
+            await delay(2000);
         }
     } catch (error) {
         console.log(error);
@@ -1698,7 +1701,7 @@ mongoose.connection.on('open', async () => {
 
     // await calculateRevenueFromDonor();
     // await gazaOrphanSelectionTimeLine();
-    // await paymentDoneGazaChildren();
+    await paymentDoneGazaChildren();
 
     setInterval(async () => {
         try {

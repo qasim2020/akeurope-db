@@ -123,18 +123,18 @@ app.get('/', (req, res) => {
   }
 });
 
-app.get('/preview-email', async (req, res) => {
-  const templateName = 'beneficiariesPaid';
-  const { getChildrenFromExcel,
-    attachPaymentsToChildren,
-    attachChildrenToDonors } = require('./modules/beneficiariesPaid');
-  const names = await getChildrenFromExcel();
-  const children = await attachPaymentsToChildren(names);
-  const donorChildren = await attachChildrenToDonors(children);
-  const data = donorChildren[0];
-  console.log(JSON.stringify(data, null, 2));
-  res.render(`emails/${templateName}`, data);
-});
+// app.get('/preview-email', async (req, res) => {
+//   const templateName = 'beneficiariesPaid';
+//   const { getChildrenFromExcel,
+//     attachPaymentsToChildren,
+//     attachChildrenToDonors } = require('./modules/beneficiariesPaid');
+//   const names = await getChildrenFromExcel();
+//   const children = await attachPaymentsToChildren(names);
+//   const donorChildren = await attachChildrenToDonors(children);
+//   const data = donorChildren[0];
+//   console.log(JSON.stringify(data, null, 2));
+//   res.render(`emails/${templateName}`, data);
+// });
 
 const defaultIcons = [
   'favicon.ico',

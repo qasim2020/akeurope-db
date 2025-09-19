@@ -169,7 +169,6 @@ const beneficiariesPaid = async (payment) => {
         console.log('Email sent!');
     });
 
-    throw new Error('Stop here');
 }
 
 module.exports = {

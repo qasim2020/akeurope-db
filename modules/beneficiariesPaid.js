@@ -44,15 +44,12 @@ const calculateMonths = (order) => {
 
     let months = yearsDiff * 12 + monthsDiff;
 
-    // If day of month hasn’t passed yet, subtract 1
     if (today.getDate() < createdAt.getDate()) {
         months -= 1;
     }
 
-    // Ceiling → if there is any partial month, count it as a full month
     months = Math.max(0, months + 1);
 
-    console.log(months);
     return months;
 }
 
